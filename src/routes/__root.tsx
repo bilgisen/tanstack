@@ -1,6 +1,7 @@
-import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router"
+import { HeadContent, Scripts, createRootRoute, Outlet } from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
+import { AppLayout } from "../components/layout/AppLayout"
 
 import appCss from "../styles.css?url"
 
@@ -15,7 +16,7 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "TanStack Start Starter",
+        title: "SumoTerminal | Pro Finansal Analiz",
       },
     ],
     links: [
@@ -26,25 +27,29 @@ export const Route = createRootRoute({
     ],
   }),
   notFoundComponent: () => (
-    <main className="container mx-auto p-4 pt-16">
-      <h1>404</h1>
-      <p>The requested page could not be found.</p>
-    </main>
+    <AppLayout>
+      <main className="container mx-auto p-4 pt-16 flex flex-col items-center justify-center h-full">
+        <h1 className="text-4xl font-bold text-zinc-300">404</h1>
+        <p className="text-zinc-500">Sayfa bulunamadı.</p>
+      </main>
+    </AppLayout>
   ),
-  shellComponent: RootDocument,
+  component: RootDocument,
 })
 
-function RootDocument({ children }: { children: React.ReactNode }) {
+function RootDocument() {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <HeadContent />
       </head>
       <body>
-        {children}
+        <AppLayout>
+          <Outlet />
+        </AppLayout>
         <TanStackDevtools
           config={{
-            position: "bottom-right",
+            position: "bottom-left",
           }}
           plugins={[
             {

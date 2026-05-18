@@ -8,43 +8,111 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root"
-import { Route as IndexRouteImport } from "./routes/index"
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as KriptoRouteImport } from './routes/kripto'
+import { Route as ForexRouteImport } from './routes/forex'
+import { Route as EmtiaRouteImport } from './routes/emtia'
+import { Route as BorsaRouteImport } from './routes/borsa'
+import { Route as IndexRouteImport } from './routes/index'
 
+const KriptoRoute = KriptoRouteImport.update({
+  id: '/kripto',
+  path: '/kripto',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForexRoute = ForexRouteImport.update({
+  id: '/forex',
+  path: '/forex',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmtiaRoute = EmtiaRouteImport.update({
+  id: '/emtia',
+  path: '/emtia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BorsaRoute = BorsaRouteImport.update({
+  id: '/borsa',
+  path: '/borsa',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute
+  '/': typeof IndexRoute
+  '/borsa': typeof BorsaRoute
+  '/emtia': typeof EmtiaRoute
+  '/forex': typeof ForexRoute
+  '/kripto': typeof KriptoRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute
+  '/': typeof IndexRoute
+  '/borsa': typeof BorsaRoute
+  '/emtia': typeof EmtiaRoute
+  '/forex': typeof ForexRoute
+  '/kripto': typeof KriptoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  "/": typeof IndexRoute
+  '/': typeof IndexRoute
+  '/borsa': typeof BorsaRoute
+  '/emtia': typeof EmtiaRoute
+  '/forex': typeof ForexRoute
+  '/kripto': typeof KriptoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: "/"
+  fullPaths: '/' | '/borsa' | '/emtia' | '/forex' | '/kripto'
   fileRoutesByTo: FileRoutesByTo
-  to: "/"
-  id: "__root__" | "/"
+  to: '/' | '/borsa' | '/emtia' | '/forex' | '/kripto'
+  id: '__root__' | '/' | '/borsa' | '/emtia' | '/forex' | '/kripto'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BorsaRoute: typeof BorsaRoute
+  EmtiaRoute: typeof EmtiaRoute
+  ForexRoute: typeof ForexRoute
+  KriptoRoute: typeof KriptoRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/": {
-      id: "/"
-      path: "/"
-      fullPath: "/"
+    '/kripto': {
+      id: '/kripto'
+      path: '/kripto'
+      fullPath: '/kripto'
+      preLoaderRoute: typeof KriptoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forex': {
+      id: '/forex'
+      path: '/forex'
+      fullPath: '/forex'
+      preLoaderRoute: typeof ForexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/emtia': {
+      id: '/emtia'
+      path: '/emtia'
+      fullPath: '/emtia'
+      preLoaderRoute: typeof EmtiaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/borsa': {
+      id: '/borsa'
+      path: '/borsa'
+      fullPath: '/borsa'
+      preLoaderRoute: typeof BorsaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -53,14 +121,18 @@ declare module "@tanstack/react-router" {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BorsaRoute: BorsaRoute,
+  EmtiaRoute: EmtiaRoute,
+  ForexRoute: ForexRoute,
+  KriptoRoute: KriptoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
 
-import type { getRouter } from "./router.tsx"
-import type { createStart } from "@tanstack/react-start"
-declare module "@tanstack/react-start" {
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
     router: Awaited<ReturnType<typeof getRouter>>
