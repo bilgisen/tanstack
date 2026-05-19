@@ -21,7 +21,8 @@ type TAResponse = {
   indicators: {
     rsi?: number;
     macd?: {
-      macd: number;
+      macd?: number;
+      value?: number;
       signal: number;
       histogram: number;
     };
@@ -175,6 +176,7 @@ function ForexDetailPage() {
 
   const isUp = (liveData.diff_percent ?? 0) >= 0
   const rsiVal = taData?.indicators?.rsi
+  const macdVal = taData?.indicators?.macd?.macd ?? taData?.indicators?.macd?.value
   
   // Basit Karar Algoritması
   let decision = "NÖTR"
@@ -288,10 +290,10 @@ function ForexDetailPage() {
               </div>
               <div className="text-right">
                 <div className="text-lg font-bold text-zinc-200">
-                  {taData?.indicators?.macd ? taData.indicators.macd.macd.toFixed(3) : "-"}
+                  {macdVal !== undefined ? macdVal.toFixed(3) : "-"}
                 </div>
                 <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400">
-                  {taData?.indicators?.macd && taData.indicators.macd.macd > taData.indicators.macd.signal ? "Boğa Sinyali" : "Ayı Sinyali"}
+                  {macdVal !== undefined && taData?.indicators?.macd?.signal !== undefined && macdVal > taData.indicators.macd.signal ? "Boğa Sinyali" : "Ayı Sinyali"}
                 </span>
               </div>
             </div>
