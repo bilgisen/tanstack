@@ -140,7 +140,8 @@ function ForexDetailPage() {
 
     // Veriyi yükle (Lightweight Charts formatı: { time, open, high, low, close })
     const seenTimes = new Set<string>()
-    const formattedData = historyData
+    const formattedData = [...historyData]
+      .sort((a, b) => a.time - b.time) // Sayısal timestamp bazında sırala
       .map(item => ({
         time: new Date(item.time).toISOString().split('T')[0] as any, // YYYY-MM-DD formatı
         open: item.open,
@@ -153,9 +154,9 @@ function ForexDetailPage() {
         seenTimes.add(item.time)
         return true
       })
-      .sort((a, b) => a.time - b.time)
 
     candlestickSeries.setData(formattedData)
+
 
     // ResizeObserver ile responsive boyut takibi
     const resizeObserver = new ResizeObserver(entries => {
