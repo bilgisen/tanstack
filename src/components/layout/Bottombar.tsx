@@ -46,35 +46,13 @@ export function Bottombar() {
   ];
 
   return (
-    <footer className="h-8 border-t dark:border-zinc-900 border-zinc-200 dark:bg-zinc-950 bg-white flex items-center justify-between shrink-0 overflow-hidden select-none transition-colors z-10">
-      <div className="flex-1 overflow-hidden relative h-full flex items-center">
-        <div className="flex animate-marquee whitespace-nowrap px-4 text-xs">
-          <div className="flex gap-8 items-center min-w-full justify-around pr-8">
-            {displayTickers.map((t, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <span className="font-medium dark:text-zinc-550 text-zinc-500">{t.display_name}</span>
-                <span className="dark:text-zinc-200 text-zinc-800 font-semibold">{t.last_price?.toFixed(2)}</span>
-                <span className={(t.diff_percent ?? 0) >= 0 ? "text-emerald-500 font-semibold" : "text-rose-500 font-semibold"}>
-                  {(t.diff_percent ?? 0) >= 0 ? "+" : ""}{(t.diff_percent ?? 0).toFixed(2)}%
-                </span>
-              </div>
-            ))}
-          </div>
-          <div className="flex gap-8 items-center min-w-full justify-around pr-8">
-            {displayTickers.map((t, i) => (
-              <div key={`dup-${i}`} className="flex items-center gap-2">
-                <span className="font-medium dark:text-zinc-550 text-zinc-500">{t.display_name}</span>
-                <span className="dark:text-zinc-200 text-zinc-800 font-semibold">{t.last_price?.toFixed(2)}</span>
-                <span className={(t.diff_percent ?? 0) >= 0 ? "text-emerald-500 font-semibold" : "text-rose-500 font-semibold"}>
-                  {(t.diff_percent ?? 0) >= 0 ? "+" : ""}{(t.diff_percent ?? 0).toFixed(2)}%
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
+    <footer className="h-8 border-t dark:border-zinc-900 border-zinc-200 dark:bg-zinc-950 bg-white flex items-center justify-between px-4 shrink-0 select-none transition-colors z-10">
+      <div className="flex items-center text-xs dark:text-zinc-500 text-zinc-400">
+        <span className="font-semibold text-zinc-500 dark:text-zinc-400 mr-1.5">SumoTerminal</span>
+        <span>© 2026 | Yapay Zekayla Güçlendirilmiş Finans Platformu</span>
       </div>
 
-      <div className="flex items-center gap-1 border-l dark:border-zinc-900 border-zinc-200 px-2 h-full dark:bg-zinc-950 bg-white z-15 relative shrink-0">
+      <div className="flex items-center gap-1 h-full dark:bg-zinc-950 bg-white relative shrink-0">
         {themeOptions.map((opt) => {
           const Icon = opt.icon;
           const isActive = theme === opt.value;

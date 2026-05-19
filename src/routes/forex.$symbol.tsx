@@ -141,20 +141,35 @@ function ForexDetailPage() {
     // Veriyi yükle (Lightweight Charts formatı: { time, open, high, low, close })
     const seenTimes = new Set<string>()
     const formattedData = [...historyData]
-      .sort((a, b) => a.time - b.time) // Sayısal timestamp bazında sırala
-      .map(item => ({
-        time: new Date(item.time).toISOString().split('T')[0] as any, // YYYY-MM-DD formatı
-        open: item.open,
-        high: item.high,
-        low: item.low,
-        close: item.close,
-      }))
-      .filter(item => {
-        if (seenTimes.has(item.time)) return false
-        seenTimes.add(item.time)
-        return true
+      .map(item => {
+        try {
+          const timestamp = typeof item.time === 'string' ? parseInt(item.time, 10) : item.time;
+          if (isNaN(timestamp)) return null;
+          
+          // Handle seconds vs milliseconds (e.g. 10 digits vs 13 digits)
+          const date = new Date(timestamp < 10000000000 ? timestamp * 1000 : timestamp);
+          
+          return {
+            time: date.toISOString().split('T')[0] as any,
+            open: item.open,
+            high: item.high,
+            low: item.low,
+            close: item.close,
+          };
+        } catch (e) {
+          console.error("Error parsing history time:", item, e);
+          return null;
+        }
       })
+      .filter((item): item is NonNullable<typeof item> => {
+        if (!item) return false;
+        if (seenTimes.has(item.time)) return false;
+        seenTimes.add(item.time);
+        return true;
+      })
+      .sort((a, b) => a.time.localeCompare(b.time));
 
+    console.log("Chart initialized with data items count:", formattedData.length);
     candlestickSeries.setData(formattedData)
 
 
@@ -225,7 +240,7 @@ function ForexDetailPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-6 max-w-[1550px] w-full mx-auto">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="space-y-2">
