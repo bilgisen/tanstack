@@ -1,11 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { Menu, Search, User, Activity, LogOut } from "lucide-react";
+import { Menu, Search, User, Activity, LogOut, BotMessageSquare } from "lucide-react";
 import { useUIStore } from "../../store/ui";
 import { useAuth } from "../../hooks/useAuth";
 import { supabase } from "../../lib/supabase";
 
 export function Topbar() {
-  const toggleMobileMenu = useUIStore((s) => s.toggleMobileMenu);
+  const { toggleMobileMenu, toggleRightSidebar, isRightSidebarOpen } = useUIStore();
   const { user } = useAuth();
 
   const handleLogin = async () => {
@@ -46,8 +46,18 @@ export function Topbar() {
       </div>
 
       <div className="flex items-center gap-3">
+        {!isRightSidebarOpen && (
+          <button 
+            onClick={toggleRightSidebar} 
+            className="hidden md:flex items-center justify-center w-8 h-8 rounded-full text-emerald-500 bg-emerald-500/10 hover:bg-emerald-500/20 hover:text-emerald-400 transition-colors" 
+            title="AI Asistanı Aç"
+          >
+            <BotMessageSquare size={18} />
+          </button>
+        )}
+        
         {user ? (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 ml-2 border-l border-zinc-800 pl-4">
             <div className="flex items-center gap-2">
               <img src={user.user_metadata?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} alt="Avatar" className="w-8 h-8 rounded-full border border-zinc-700" />
               <span className="hidden sm:inline text-sm text-zinc-300 font-medium">{user.user_metadata?.full_name || user.email}</span>

@@ -1,10 +1,46 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { useAuth } from '../hooks/useAuth'
+import { supabase } from '../lib/supabase'
 
 export const Route = createFileRoute('/')({
-  component: DashboardPage,
+  component: IndexPage,
 })
 
-function DashboardPage() {
+function IndexPage() {
+  const { user, loading } = useAuth()
+
+  const handleLogin = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin }
+    })
+  }
+
+  if (loading) {
+    return <div className="flex h-[70vh] items-center justify-center text-zinc-500">Yükleniyor...</div>
+  }
+
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[70vh] text-center space-y-8 px-4 animate-in fade-in duration-500">
+        <div className="space-y-4 max-w-3xl">
+          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-white drop-shadow-sm">
+            Finansal Analizde <span className="text-emerald-500">Yeni Nesil</span> Dönem
+          </h1>
+          <p className="text-xl md:text-2xl text-zinc-400 max-w-2xl mx-auto font-light leading-relaxed">
+            Yapay zeka destekli analizler, canlı veriler ve profesyonel araçlarla piyasaların nabzını tutun.
+          </p>
+        </div>
+        <button 
+          onClick={handleLogin}
+          className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-full font-semibold transition-all duration-300 text-lg shadow-lg shadow-emerald-900/30 hover:shadow-emerald-900/50 hover:scale-105 active:scale-95"
+        >
+          Google ile Bağlan ve Keşfet
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <div>
