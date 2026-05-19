@@ -14,6 +14,8 @@ import { Route as ForexRouteImport } from './routes/forex'
 import { Route as EmtiaRouteImport } from './routes/emtia'
 import { Route as BorsaRouteImport } from './routes/borsa'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ForexIndexRouteImport } from './routes/forex.index'
+import { Route as ForexSymbolRouteImport } from './routes/forex.$symbol'
 
 const KriptoRoute = KriptoRouteImport.update({
   id: '/kripto',
@@ -40,42 +42,72 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForexIndexRoute = ForexIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ForexRoute,
+} as any)
+const ForexSymbolRoute = ForexSymbolRouteImport.update({
+  id: '/$symbol',
+  path: '/$symbol',
+  getParentRoute: () => ForexRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/borsa': typeof BorsaRoute
   '/emtia': typeof EmtiaRoute
-  '/forex': typeof ForexRoute
+  '/forex': typeof ForexRouteWithChildren
   '/kripto': typeof KriptoRoute
+  '/forex/$symbol': typeof ForexSymbolRoute
+  '/forex/': typeof ForexIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/borsa': typeof BorsaRoute
   '/emtia': typeof EmtiaRoute
-  '/forex': typeof ForexRoute
   '/kripto': typeof KriptoRoute
+  '/forex/$symbol': typeof ForexSymbolRoute
+  '/forex': typeof ForexIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/borsa': typeof BorsaRoute
   '/emtia': typeof EmtiaRoute
-  '/forex': typeof ForexRoute
+  '/forex': typeof ForexRouteWithChildren
   '/kripto': typeof KriptoRoute
+  '/forex/$symbol': typeof ForexSymbolRoute
+  '/forex/': typeof ForexIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/borsa' | '/emtia' | '/forex' | '/kripto'
+  fullPaths:
+    | '/'
+    | '/borsa'
+    | '/emtia'
+    | '/forex'
+    | '/kripto'
+    | '/forex/$symbol'
+    | '/forex/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/borsa' | '/emtia' | '/forex' | '/kripto'
-  id: '__root__' | '/' | '/borsa' | '/emtia' | '/forex' | '/kripto'
+  to: '/' | '/borsa' | '/emtia' | '/kripto' | '/forex/$symbol' | '/forex'
+  id:
+    | '__root__'
+    | '/'
+    | '/borsa'
+    | '/emtia'
+    | '/forex'
+    | '/kripto'
+    | '/forex/$symbol'
+    | '/forex/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BorsaRoute: typeof BorsaRoute
   EmtiaRoute: typeof EmtiaRoute
-  ForexRoute: typeof ForexRoute
+  ForexRoute: typeof ForexRouteWithChildren
   KriptoRoute: typeof KriptoRoute
 }
 
@@ -116,14 +148,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forex/': {
+      id: '/forex/'
+      path: '/'
+      fullPath: '/forex/'
+      preLoaderRoute: typeof ForexIndexRouteImport
+      parentRoute: typeof ForexRoute
+    }
+    '/forex/$symbol': {
+      id: '/forex/$symbol'
+      path: '/$symbol'
+      fullPath: '/forex/$symbol'
+      preLoaderRoute: typeof ForexSymbolRouteImport
+      parentRoute: typeof ForexRoute
+    }
   }
 }
+
+interface ForexRouteChildren {
+  ForexSymbolRoute: typeof ForexSymbolRoute
+  ForexIndexRoute: typeof ForexIndexRoute
+}
+
+const ForexRouteChildren: ForexRouteChildren = {
+  ForexSymbolRoute: ForexSymbolRoute,
+  ForexIndexRoute: ForexIndexRoute,
+}
+
+const ForexRouteWithChildren = ForexRoute._addFileChildren(ForexRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BorsaRoute: BorsaRoute,
   EmtiaRoute: EmtiaRoute,
-  ForexRoute: ForexRoute,
+  ForexRoute: ForexRouteWithChildren,
   KriptoRoute: KriptoRoute,
 }
 export const routeTree = rootRouteImport

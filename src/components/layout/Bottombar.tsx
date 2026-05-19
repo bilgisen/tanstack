@@ -9,7 +9,6 @@ type SummaryItem = {
 
 export function Bottombar() {
   const [tickers, setTickers] = useState<SummaryItem[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchSummary() {
@@ -21,8 +20,6 @@ export function Bottombar() {
         if (json.data) setTickers(json.data);
       } catch (err) {
         console.error("Failed to load market summary", err);
-      } finally {
-        setLoading(false);
       }
     }
     fetchSummary();
