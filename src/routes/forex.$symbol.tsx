@@ -246,7 +246,7 @@ function ForexDetailPage() {
       <div className="bg-zinc-950 border border-zinc-800/80 rounded-2xl p-5 shadow-lg space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-zinc-300">İnteraktif Grafik (Günlük Mumlar)</h2>
-          <span className="text-xs text-zinc-500 font-medium">KlineCharts v10.0</span>
+          <span className="text-xs text-zinc-500 font-medium">TradingView Lightweight Charts</span>
         </div>
         <div className="h-[450px] w-full rounded-xl overflow-hidden relative border border-zinc-900 bg-zinc-950">
           <div ref={chartContainerRef} className="w-full h-full" />
