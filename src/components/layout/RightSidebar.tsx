@@ -35,7 +35,8 @@ export function RightSidebar() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://127.0.0.1:8787/api/ai/chat", {
+      const apiUrl = import.meta.env.VITE_HONO_API_URL || "http://127.0.0.1:8787";
+      const response = await fetch(`${apiUrl}/api/ai/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

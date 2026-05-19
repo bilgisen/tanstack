@@ -3,7 +3,8 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter";
 
-@custom-variant dark (&:is(.dark *));
+@variant dark (&:where(.dark, .dark *));
+@custom-variant custom-dark (&:is(.dark *));
 
 @theme inline {
     --font-heading: var(--font-sans);
@@ -125,8 +126,8 @@
     @apply bg-background text-foreground;
     }
   html {
-    @apply font-sans dark; /* Default dark mode for the terminal */
-    }
+    @apply font-sans;
+  }
 }
 
 @layer utilities {
