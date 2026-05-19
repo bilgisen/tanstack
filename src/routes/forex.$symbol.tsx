@@ -2,6 +2,9 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState, useRef } from 'react'
 import { createChart, ColorType, CandlestickSeries } from 'lightweight-charts'
 import { ArrowLeft, ArrowUpRight, ArrowDownRight, Loader2, ShieldAlert, Cpu } from 'lucide-react'
+import { useUIStore } from '../store/ui'
+
+
 
 export const Route = createFileRoute('/forex/$symbol')({
   component: ForexDetailPage,
@@ -39,8 +42,10 @@ function ForexDetailPage() {
   const [taData, setTaData] = useState<TAResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { theme } = useUIStore()
   
   const chartContainerRef = useRef<HTMLDivElement>(null)
+
   const chartInstanceRef = useRef<any>(null)
 
   useEffect(() => {
@@ -96,25 +101,32 @@ function ForexDetailPage() {
       }
     }
 
+    // Grafik renklerini temaya göre belirle
+    const isDark = document.documentElement.classList.contains('dark')
+    const chartBg = isDark ? '#09090b' : '#ffffff'
+    const chartText = isDark ? '#a1a1aa' : '#3f3f46'
+    const gridColor = isDark ? 'rgba(24, 24, 27, 0.5)' : 'rgba(228, 228, 231, 0.5)'
+    const borderColor = isDark ? '#27272a' : '#e4e4e7'
+
     // Grafik nesnesini oluştur
     const chart = createChart(chartContainerRef.current, {
       layout: {
-        background: { type: ColorType.Solid, color: '#09090b' }, // bg-zinc-950
-        textColor: '#a1a1aa', // text-zinc-400
+        background: { type: ColorType.Solid, color: chartBg },
+        textColor: chartText,
       },
       grid: {
-        vertLines: { color: '#18181b' }, // border-zinc-900/50
-        horzLines: { color: '#18181b' },
+        vertLines: { color: gridColor },
+        horzLines: { color: gridColor },
       },
       width: chartContainerRef.current.clientWidth || 600,
       height: 450,
       timeScale: {
-        borderColor: '#27272a',
+        borderColor: borderColor,
         timeVisible: true,
         secondsVisible: false,
       },
       rightPriceScale: {
-        borderColor: '#27272a',
+        borderColor: borderColor,
       }
     })
 
@@ -127,10 +139,10 @@ function ForexDetailPage() {
     })
 
     // Veriyi yükle (Lightweight Charts formatı: { time, open, high, low, close })
-    const seenTimes = new Set<number>()
+    const seenTimes = new Set<string>()
     const formattedData = historyData
       .map(item => ({
-        time: Math.floor(item.time / 1000) as any, // saniye bazlı Unix timestamp
+        time: new Date(item.time).toISOString().split('T')[0] as any, // YYYY-MM-DD formatı
         open: item.open,
         high: item.high,
         low: item.low,
@@ -164,7 +176,7 @@ function ForexDetailPage() {
       }
       chartInstanceRef.current = null
     }
-  }, [historyData])
+  }, [historyData, theme])
 
   if (loading) {
     return (

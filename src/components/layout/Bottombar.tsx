@@ -1,4 +1,8 @@
 import { useEffect, useState } from "react";
+import { Sun, Moon, Monitor } from "lucide-react";
+import { useUIStore } from "../../store/ui";
+import type { Theme } from "../../store/ui";
+
 
 type SummaryItem = {
   code: string;
@@ -9,6 +13,8 @@ type SummaryItem = {
 
 export function Bottombar() {
   const [tickers, setTickers] = useState<SummaryItem[]>([]);
+  const theme = useUIStore((s) => s.theme);
+  const setTheme = useUIStore((s) => s.setTheme);
 
   useEffect(() => {
     async function fetchSummary() {
@@ -33,32 +39,62 @@ export function Bottombar() {
     { code: "XAUUSD", display_name: "XAU/USD", last_price: 2450.1, diff_percent: -0.3 },
   ];
 
+  const themeOptions: { value: Theme; icon: typeof Sun; label: string }[] = [
+    { value: "light", icon: Sun, label: "Açık" },
+    { value: "dark", icon: Moon, label: "Koyu" },
+    { value: "system", icon: Monitor, label: "Sistem" },
+  ];
+
   return (
-    <footer className="h-8 border-t border-zinc-800 bg-zinc-950 overflow-hidden flex items-center shrink-0">
-      <div className="flex animate-marquee whitespace-nowrap px-4 text-xs">
-        <div className="flex gap-8 items-center min-w-full justify-around pr-8">
-          {displayTickers.map((t, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <span className="font-medium text-zinc-400">{t.display_name}</span>
-              <span className="text-zinc-200">{t.last_price?.toFixed(2)}</span>
-              <span className={(t.diff_percent ?? 0) >= 0 ? "text-emerald-500" : "text-rose-500"}>
-                {(t.diff_percent ?? 0) >= 0 ? "+" : ""}{(t.diff_percent ?? 0).toFixed(2)}%
-              </span>
-            </div>
-          ))}
+    <footer className="h-8 border-t dark:border-zinc-900 border-zinc-200 dark:bg-zinc-950 bg-white flex items-center justify-between shrink-0 overflow-hidden select-none transition-colors z-10">
+      <div className="flex-1 overflow-hidden relative h-full flex items-center">
+        <div className="flex animate-marquee whitespace-nowrap px-4 text-xs">
+          <div className="flex gap-8 items-center min-w-full justify-around pr-8">
+            {displayTickers.map((t, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <span className="font-medium dark:text-zinc-550 text-zinc-500">{t.display_name}</span>
+                <span className="dark:text-zinc-200 text-zinc-800 font-semibold">{t.last_price?.toFixed(2)}</span>
+                <span className={(t.diff_percent ?? 0) >= 0 ? "text-emerald-500 font-semibold" : "text-rose-500 font-semibold"}>
+                  {(t.diff_percent ?? 0) >= 0 ? "+" : ""}{(t.diff_percent ?? 0).toFixed(2)}%
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-8 items-center min-w-full justify-around pr-8">
+            {displayTickers.map((t, i) => (
+              <div key={`dup-${i}`} className="flex items-center gap-2">
+                <span className="font-medium dark:text-zinc-550 text-zinc-500">{t.display_name}</span>
+                <span className="dark:text-zinc-200 text-zinc-800 font-semibold">{t.last_price?.toFixed(2)}</span>
+                <span className={(t.diff_percent ?? 0) >= 0 ? "text-emerald-500 font-semibold" : "text-rose-500 font-semibold"}>
+                  {(t.diff_percent ?? 0) >= 0 ? "+" : ""}{(t.diff_percent ?? 0).toFixed(2)}%
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="flex gap-8 items-center min-w-full justify-around pr-8">
-          {displayTickers.map((t, i) => (
-            <div key={`dup-${i}`} className="flex items-center gap-2">
-              <span className="font-medium text-zinc-400">{t.display_name}</span>
-              <span className="text-zinc-200">{t.last_price?.toFixed(2)}</span>
-              <span className={(t.diff_percent ?? 0) >= 0 ? "text-emerald-500" : "text-rose-500"}>
-                {(t.diff_percent ?? 0) >= 0 ? "+" : ""}{(t.diff_percent ?? 0).toFixed(2)}%
-              </span>
-            </div>
-          ))}
-        </div>
+      </div>
+
+      <div className="flex items-center gap-1 border-l dark:border-zinc-900 border-zinc-200 px-2 h-full dark:bg-zinc-950 bg-white z-15 relative shrink-0">
+        {themeOptions.map((opt) => {
+          const Icon = opt.icon;
+          const isActive = theme === opt.value;
+          return (
+            <button
+              key={opt.value}
+              onClick={() => setTheme(opt.value)}
+              title={opt.label}
+              className={`w-6 h-6 flex items-center justify-center rounded transition-all ${
+                isActive
+                  ? "dark:bg-zinc-900 bg-zinc-100 text-emerald-500 shadow-sm"
+                  : "dark:text-zinc-500 text-zinc-400 dark:hover:text-zinc-350 hover:text-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-900/50"
+              }`}
+            >
+              <Icon size={12} className={isActive ? "stroke-[2.5]" : "stroke-[2]"} />
+            </button>
+          );
+        })}
       </div>
     </footer>
   );
 }
+

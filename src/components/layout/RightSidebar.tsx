@@ -80,31 +80,37 @@ export function RightSidebar() {
 
   const chatContent = (
     <>
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 dark:bg-zinc-950/20 bg-zinc-50/20">
         {messages.map((msg, idx) => (
           <div key={idx} className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === "user" ? "bg-emerald-600" : "bg-zinc-800"}`}>
-              {msg.role === "user" ? <UserIcon size={16} /> : <Bot size={16} className="text-emerald-400" />}
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border dark:border-zinc-800 border-zinc-200 ${
+              msg.role === "user" ? "dark:bg-zinc-900 bg-zinc-100 text-zinc-600 dark:text-zinc-350" : "dark:bg-zinc-900 bg-zinc-100 text-emerald-500"
+            }`}>
+              {msg.role === "user" ? <UserIcon size={14} /> : <Bot size={14} />}
             </div>
-            <div className={`rounded-2xl px-4 py-2 text-sm max-w-[80%] ${msg.role === "user" ? "bg-emerald-600 text-white rounded-tr-sm" : "bg-zinc-800 text-zinc-300 rounded-tl-sm border border-zinc-700 whitespace-pre-wrap"}`}>
+            <div className={`rounded-2xl px-4 py-2.5 text-sm max-w-[80%] whitespace-pre-wrap transition-colors ${
+              msg.role === "user" 
+                ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border border-zinc-250 dark:border-zinc-700/60 rounded-tr-sm" 
+                : "bg-white dark:bg-zinc-900/30 text-zinc-800 dark:text-zinc-300 rounded-tl-sm border border-zinc-200 dark:border-zinc-900"
+            }`}>
               {msg.text}
             </div>
           </div>
         ))}
         {isLoading && (
-          <div className="flex gap-3">
-            <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center shrink-0">
-              <Bot size={16} className="text-emerald-400" />
+          <div className="flex gap-3 animate-pulse">
+            <div className="w-8 h-8 rounded-full dark:bg-zinc-900 bg-zinc-100 border dark:border-zinc-800 border-zinc-200 flex items-center justify-center shrink-0 text-emerald-500">
+              <Bot size={14} />
             </div>
-            <div className="rounded-2xl px-4 py-2 text-sm bg-zinc-800 text-zinc-300 rounded-tl-sm border border-zinc-700 flex items-center gap-2">
-              <Loader2 size={14} className="animate-spin" /> Analiz ediliyor...
+            <div className="rounded-2xl px-4 py-2.5 text-sm bg-white dark:bg-zinc-900/30 text-zinc-500 dark:text-zinc-400 rounded-tl-sm border border-zinc-200 dark:border-zinc-900 flex items-center gap-2">
+              <Loader2 size={12} className="animate-spin text-emerald-500" /> Analiz ediliyor...
             </div>
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-4 border-t border-zinc-800 bg-zinc-950">
+      <div className="p-4 border-t dark:border-zinc-900 border-zinc-200 bg-white dark:bg-zinc-950">
         <div className="relative">
           <input 
             type="text" 
@@ -113,14 +119,14 @@ export function RightSidebar() {
             onKeyDown={handleKeyDown}
             disabled={isLoading}
             placeholder="Sorunuzu yazın..." 
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-lg py-3 pl-3 pr-12 text-sm text-zinc-200 focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+            className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-900 rounded-xl py-3 pl-4 pr-12 text-sm dark:text-zinc-200 text-zinc-800 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-500 disabled:opacity-50 transition-colors"
           />
           <button 
             onClick={handleSend}
             disabled={isLoading || !input.trim()}
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-md disabled:opacity-50 disabled:hover:bg-transparent"
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-emerald-500 hover:text-emerald-400 dark:hover:bg-emerald-500/10 hover:bg-emerald-500/5 rounded-lg disabled:opacity-30 disabled:hover:bg-transparent transition-all"
           >
-            <Send size={16} />
+            <Send size={15} />
           </button>
         </div>
       </div>
@@ -131,16 +137,16 @@ export function RightSidebar() {
     <>
       {/* Desktop Sidebar */}
       <aside className={`
-        hidden md:flex flex-col border-l border-zinc-800 bg-zinc-950/80 backdrop-blur-md transition-all duration-300
-        ${isRightSidebarOpen ? "w-[360px]" : "w-0 overflow-hidden border-none"}
+        hidden md:flex flex-col border-l dark:border-zinc-900 border-zinc-200 dark:bg-zinc-950 bg-white transition-all duration-300
+        ${isRightSidebarOpen ? "w-[380px]" : "w-0 overflow-hidden border-none"}
       `}>
-        <div className="h-14 border-b border-zinc-800 flex items-center justify-between px-4 shrink-0">
+        <div className="h-14 border-b dark:border-zinc-900 border-zinc-200 flex items-center justify-between px-4 shrink-0 bg-white dark:bg-zinc-950">
           <div className="flex items-center gap-2 text-emerald-500 font-medium">
-            <Bot size={20} />
-            <span className="font-semibold tracking-tight">Terminal AI</span>
+            <Bot size={18} />
+            <span className="font-semibold tracking-tight dark:text-zinc-200 text-zinc-800">Terminal AI</span>
           </div>
-          <button onClick={toggleRightSidebar} className="text-zinc-500 hover:text-zinc-300 transition-colors">
-            <X size={18} />
+          <button onClick={toggleRightSidebar} className="text-zinc-400 dark:hover:text-zinc-250 hover:text-zinc-700 transition-colors p-1 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900">
+            <X size={16} />
           </button>
         </div>
         
@@ -149,24 +155,24 @@ export function RightSidebar() {
 
       {/* Mobile FAB */}
       <button 
-        className="md:hidden fixed bottom-16 right-4 w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center shadow-lg shadow-emerald-900/50 z-50 text-white transition-transform hover:scale-105 active:scale-95"
+        className="md:hidden fixed bottom-16 right-4 w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center shadow-lg shadow-emerald-900/40 z-50 text-white transition-transform hover:scale-105 active:scale-95"
         onClick={toggleRightSidebar}
       >
-        <MessageSquare size={20} />
+        <MessageSquare size={18} />
       </button>
 
       {/* Mobile Chat Bottom Sheet */}
       {isRightSidebarOpen && (
         <>
-          <div className="md:hidden fixed inset-0 bg-black/60 z-40" onClick={toggleRightSidebar} />
-          <div className="md:hidden fixed inset-x-0 bottom-0 h-[85vh] bg-zinc-950 border-t border-zinc-800 z-50 flex flex-col rounded-t-3xl shadow-2xl animate-in slide-in-from-bottom duration-300">
-            <div className="h-14 border-b border-zinc-800 flex items-center justify-between px-6 shrink-0">
+          <div className="md:hidden fixed inset-0 bg-black/50 z-40" onClick={toggleRightSidebar} />
+          <div className="md:hidden fixed inset-x-0 bottom-0 h-[85vh] bg-white dark:bg-zinc-950 border-t dark:border-zinc-900 border-zinc-200 z-50 flex flex-col rounded-t-3xl shadow-2xl animate-in slide-in-from-bottom duration-300">
+            <div className="h-14 border-b dark:border-zinc-900 border-zinc-200 flex items-center justify-between px-6 shrink-0">
               <div className="flex items-center gap-2 text-emerald-500 font-medium">
-                <Bot size={20} />
-                <span className="font-semibold tracking-tight">Terminal AI</span>
+                <Bot size={18} />
+                <span className="font-semibold tracking-tight dark:text-zinc-200 text-zinc-800">Terminal AI</span>
               </div>
-              <button onClick={toggleRightSidebar} className="text-zinc-500 hover:text-zinc-300 transition-colors bg-zinc-900 p-1.5 rounded-full">
-                <X size={16} />
+              <button onClick={toggleRightSidebar} className="text-zinc-400 dark:hover:text-zinc-200 hover:text-zinc-700 transition-colors bg-zinc-100 dark:bg-zinc-900 p-1.5 rounded-full">
+                <X size={15} />
               </button>
             </div>
             
