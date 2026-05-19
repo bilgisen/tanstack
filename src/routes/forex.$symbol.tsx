@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState, useRef } from 'react'
-import { init, dispose, CandleType, LineType } from 'klinecharts'
+import { createChart, ColorType, CandlestickSeries } from 'lightweight-charts'
 import { ArrowLeft, ArrowUpRight, ArrowDownRight, Loader2, ShieldAlert, Cpu } from 'lucide-react'
 
 export const Route = createFileRoute('/forex/$symbol')({
@@ -83,73 +83,86 @@ function ForexDetailPage() {
     fetchAllData()
   }, [symbol])
 
-  // KlineChart Kurulumu ve Veri Yükleme
+  // Lightweight Charts Kurulumu ve Veri Yükleme
   useEffect(() => {
     if (!chartContainerRef.current || historyData.length === 0) return
 
     // Varsa eski grafiği yok et
     if (chartInstanceRef.current) {
-      dispose(chartContainerRef.current)
+      try {
+        chartInstanceRef.current.remove()
+      } catch (e) {
+        console.error("Eski grafik yok edilirken hata:", e)
+      }
     }
 
     // Grafik nesnesini oluştur
-    const chart = init(chartContainerRef.current)
-    if (!chart) return
-    chartInstanceRef.current = chart
-
-    // Bloomberg Dark Teması
-    chart.setStyles({
+    const chart = createChart(chartContainerRef.current, {
+      layout: {
+        background: { type: ColorType.Solid, color: '#09090b' }, // bg-zinc-950
+        textColor: '#a1a1aa', // text-zinc-400
+      },
       grid: {
-        show: true,
-        horizontal: {
-          style: LineType.Dashed,
-          color: '#1f2937' // border-zinc-800
-        },
-        vertical: {
-          show: false
-        }
+        vertLines: { color: '#18181b' }, // border-zinc-900/50
+        horzLines: { color: '#18181b' },
       },
-      candle: {
-        type: CandleType.CandleSolid,
-        bar: {
-          upColor: '#10b981', // emerald-500
-          downColor: '#f43f5e', // rose-500
-          noChangeColor: '#71717a'
-        },
-        tooltip: {
-          text: {
-            color: '#d4d4d8'
-          }
-        }
+      width: chartContainerRef.current.clientWidth || 600,
+      height: 450,
+      timeScale: {
+        borderColor: '#27272a',
+        timeVisible: true,
+        secondsVisible: false,
       },
-      xAxis: {
-        axisLine: { color: '#27272a' },
-        tickLine: { color: '#27272a' },
-        tickText: { color: '#a1a1aa' }
-      },
-      yAxis: {
-        axisLine: { color: '#27272a' },
-        tickLine: { color: '#27272a' },
-        tickText: { color: '#a1a1aa' }
+      rightPriceScale: {
+        borderColor: '#27272a',
       }
     })
 
-    // Veriyi yükle (KlineCharts formatı: { timestamp, open, high, low, close, volume })
-    const formattedData = historyData.map(item => ({
-      timestamp: item.time,
-      open: item.open,
-      high: item.high,
-      low: item.low,
-      close: item.close,
-      volume: item.volume
-    }))
+    const candlestickSeries = chart.addSeries(CandlestickSeries, {
+      upColor: '#10b981', // emerald-500
+      downColor: '#f43f5e', // rose-500
+      borderVisible: false,
+      wickUpColor: '#10b981',
+      wickDownColor: '#f43f5e',
+    })
 
-    chart.applyNewData(formattedData)
+    // Veriyi yükle (Lightweight Charts formatı: { time, open, high, low, close })
+    const seenTimes = new Set<number>()
+    const formattedData = historyData
+      .map(item => ({
+        time: Math.floor(item.time / 1000) as any, // saniye bazlı Unix timestamp
+        open: item.open,
+        high: item.high,
+        low: item.low,
+        close: item.close,
+      }))
+      .filter(item => {
+        if (seenTimes.has(item.time)) return false
+        seenTimes.add(item.time)
+        return true
+      })
+      .sort((a, b) => a.time - b.time)
+
+    candlestickSeries.setData(formattedData)
+
+    // ResizeObserver ile responsive boyut takibi
+    const resizeObserver = new ResizeObserver(entries => {
+      if (entries.length === 0) return
+      const { width } = entries[0].contentRect
+      chart.resize(width, 450)
+    })
+    resizeObserver.observe(chartContainerRef.current)
+
+    chartInstanceRef.current = chart
 
     return () => {
-      if (chartContainerRef.current) {
-        dispose(chartContainerRef.current)
+      resizeObserver.disconnect()
+      try {
+        chart.remove()
+      } catch (e) {
+        console.error("Temizleme sırasında grafik kaldırılırken hata:", e)
       }
+      chartInstanceRef.current = null
     }
   }, [historyData])
 
