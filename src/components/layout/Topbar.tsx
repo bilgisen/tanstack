@@ -70,19 +70,6 @@ export function Topbar() {
 
       {/* Right: Controls */}
       <div className="flex items-center gap-3 min-w-[200px] justify-end">
-        {/* Toggle Mode (Klasik / Beta) */}
-        <div className="hidden lg:flex items-center bg-zinc-100 dark:bg-[#1a1c23] rounded-full p-0.5 border border-zinc-200 dark:border-zinc-800/50">
-          <button className="px-4 py-1.5 text-xs font-medium rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
-            Klasik
-          </button>
-          <button className="px-4 py-1.5 text-xs font-medium rounded-full bg-white dark:bg-[#2a2d36] text-emerald-600 dark:text-emerald-400 shadow-sm transition-colors flex items-center gap-1.5">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            Beta
-          </button>
-        </div>
-
-        <div className="w-px h-6 bg-zinc-200 dark:bg-zinc-800 mx-1 hidden sm:block" />
-
         <button className="p-2 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-[#1a1c23] rounded-full transition-colors" title="Ayarlar">
           <Settings size={20} />
         </button>
