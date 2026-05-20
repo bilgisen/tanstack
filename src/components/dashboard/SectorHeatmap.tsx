@@ -34,12 +34,12 @@ export function SectorHeatmap() {
             key={idx}
             className={`flex flex-col justify-between p-3 rounded-xl transition-all cursor-pointer hover:brightness-110 ${getColor(sector.change)}`}
             style={{ 
-              flexBasis: \`calc(\${sector.weight}% - 8px)\`, 
+              flexBasis: `calc(${sector.weight}% - 8px)`, 
               flexGrow: 1,
               minWidth: '100px',
-              minHeight: \`\${Math.max(80, sector.weight * 3)}px\` 
+              minHeight: `${Math.max(80, sector.weight * 3)}px` 
             }}
-            title={\`\${sector.name}: \${sector.change > 0 ? '+' : ''}\${sector.change}%\`}
+            title={`${sector.name}: ${sector.change > 0 ? '+' : ''}${sector.change}%`}
           >
             <span className="font-medium text-sm truncate">{sector.name}</span>
             <span className="font-bold text-lg">
