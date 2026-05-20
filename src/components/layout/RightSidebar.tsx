@@ -9,7 +9,7 @@ type Message = {
 };
 
 export function RightSidebar() {
-  const { isRightSidebarOpen, toggleRightSidebar } = useUIStore();
+  const { isRightSidebarOpen, toggleRightSidebar, globalPrompt, setGlobalPrompt } = useUIStore();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -23,6 +23,13 @@ export function RightSidebar() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    if (globalPrompt) {
+      handleSend(globalPrompt);
+      setGlobalPrompt(null);
+    }
+  }, [globalPrompt]);
 
   const handleSend = async (forcedMessage?: string) => {
     const textToSend = forcedMessage || input.trim();

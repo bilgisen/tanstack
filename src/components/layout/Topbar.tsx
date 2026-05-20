@@ -1,10 +1,14 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { User, LogOut, Search, Settings, MessageSquareWarning } from "lucide-react";
+import { useUIStore } from "../../store/ui";
 import { useAuth } from "../../hooks/useAuth";
 import { supabase } from "../../lib/supabase";
 
 export function Topbar() {
   const { user } = useAuth();
+  const { setGlobalPrompt, openRightSidebar } = useUIStore();
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleLogin = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
@@ -18,6 +22,14 @@ export function Topbar() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+  };
+
+  const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && searchQuery.trim()) {
+      setGlobalPrompt(searchQuery.trim());
+      openRightSidebar();
+      setSearchQuery(""); // Temizle
+    }
   };
 
   return (
@@ -42,7 +54,10 @@ export function Topbar() {
           </div>
           <input 
             type="text" 
-            placeholder="Hisse senedi, ETF ve daha fazlasını arayın" 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleSearchSubmit}
+            placeholder="Hisse senedi, ETF ve daha fazlasını arayın veya yapay zekaya sorun..." 
             className="w-full h-full bg-transparent border-none outline-none text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-500 dark:placeholder-zinc-400"
           />
         </div>

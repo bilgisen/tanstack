@@ -5,10 +5,13 @@ export type Theme = 'dark' | 'light' | 'system';
 interface UIState {
   isRightSidebarOpen: boolean;
   toggleRightSidebar: () => void;
+  openRightSidebar: () => void;
   isMobileMenuOpen: boolean;
   toggleMobileMenu: () => void;
   theme: Theme;
   setTheme: (theme: Theme) => void;
+  globalPrompt: string | null;
+  setGlobalPrompt: (prompt: string | null) => void;
 }
 
 const getInitialTheme = (): Theme => {
@@ -34,6 +37,7 @@ export const applyTheme = (theme: Theme) => {
 export const useUIStore = create<UIState>((set) => ({
   isRightSidebarOpen: true,
   toggleRightSidebar: () => set((state) => ({ isRightSidebarOpen: !state.isRightSidebarOpen })),
+  openRightSidebar: () => set(() => ({ isRightSidebarOpen: true })),
   isMobileMenuOpen: false,
   toggleMobileMenu: () => set((state) => ({ isMobileMenuOpen: !state.isMobileMenuOpen })),
   theme: getInitialTheme(),
@@ -42,5 +46,7 @@ export const useUIStore = create<UIState>((set) => ({
     applyTheme(theme);
     return { theme };
   }),
+  globalPrompt: null,
+  setGlobalPrompt: (prompt) => set({ globalPrompt: prompt }),
 }));
 
