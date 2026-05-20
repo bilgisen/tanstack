@@ -28,13 +28,13 @@ export function ContextBar({ label, min, max, current, formatValue = (v) => v.to
         {/* Fill line up to current (optional: depends on style preference) */}
         <div 
           className="absolute top-0 left-0 h-full bg-zinc-600 rounded-l-full" 
-          style={{ width: \`\${percentage}%\` }}
+          style={{ width: `${percentage}%` }}
         />
         
         {/* The dot marker */}
         <div 
           className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white dark:bg-zinc-200 border-2 border-zinc-900 rounded-full shadow-sm z-10 transition-all duration-500"
-          style={{ left: \`calc(\${percentage}% - 6px)\` }}
+          style={{ left: `calc(${percentage}% - 6px)` }}
         />
       </div>
       
