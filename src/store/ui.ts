@@ -6,6 +6,8 @@ interface UIState {
   isRightSidebarOpen: boolean;
   toggleRightSidebar: () => void;
   openRightSidebar: () => void;
+  isRightSidebarExpanded: boolean;
+  toggleRightSidebarExpanded: () => void;
   isMobileMenuOpen: boolean;
   toggleMobileMenu: () => void;
   theme: Theme;
@@ -38,6 +40,8 @@ export const useUIStore = create<UIState>((set) => ({
   isRightSidebarOpen: true,
   toggleRightSidebar: () => set((state) => ({ isRightSidebarOpen: !state.isRightSidebarOpen })),
   openRightSidebar: () => set(() => ({ isRightSidebarOpen: true })),
+  isRightSidebarExpanded: false,
+  toggleRightSidebarExpanded: () => set((state) => ({ isRightSidebarExpanded: !state.isRightSidebarExpanded })),
   isMobileMenuOpen: false,
   toggleMobileMenu: () => set((state) => ({ isMobileMenuOpen: !state.isMobileMenuOpen })),
   theme: getInitialTheme(),

@@ -9,7 +9,7 @@ type Message = {
 };
 
 export function RightSidebar() {
-  const { isRightSidebarOpen, toggleRightSidebar, globalPrompt, setGlobalPrompt } = useUIStore();
+  const { isRightSidebarOpen, toggleRightSidebar, globalPrompt, setGlobalPrompt, isRightSidebarExpanded, toggleRightSidebarExpanded } = useUIStore();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -191,7 +191,7 @@ export function RightSidebar() {
     <>
       <aside className={`
         hidden md:flex flex-col border-l dark:border-zinc-900 border-zinc-200 bg-white dark:bg-[#0f1115] transition-all duration-300
-        ${isRightSidebarOpen ? "w-[380px] lg:w-[420px]" : "w-0 overflow-hidden border-none"}
+        ${isRightSidebarOpen ? (isRightSidebarExpanded ? "flex-1" : "w-[380px] lg:w-[420px]") : "w-0 overflow-hidden border-none"}
       `}>
         <div className="h-16 flex items-center justify-between px-5 shrink-0">
           <h2 className="text-lg font-semibold tracking-tight dark:text-zinc-100 text-zinc-900">
@@ -204,7 +204,7 @@ export function RightSidebar() {
             <button className="w-8 h-8 flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-[#1a1c23] rounded-full transition-colors" title="Geçmiş">
               <History size={18} />
             </button>
-            <button onClick={toggleRightSidebar} className="w-8 h-8 flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-[#1a1c23] rounded-full transition-colors" title="Kapat/Genişlet">
+            <button onClick={toggleRightSidebarExpanded} className="w-8 h-8 flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-[#1a1c23] rounded-full transition-colors" title="Genişlet/Daralt">
               <Maximize size={18} />
             </button>
           </div>
