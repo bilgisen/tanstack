@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from 'react'
 import { createChart, ColorType, CandlestickSeries } from 'lightweight-charts'
 import { ArrowLeft, ArrowUpRight, ArrowDownRight, Loader2, ShieldAlert, Cpu } from 'lucide-react'
 import { useUIStore } from '../store/ui'
+import { ContextBar } from '../components/ui/ContextBar'
 
 
 
@@ -172,6 +173,33 @@ function ForexDetailPage() {
     console.log("Chart initialized with data items count:", formattedData.length);
     candlestickSeries.setData(formattedData)
 
+    // Add mock AI Annotation Markers
+    if (formattedData.length > 20) {
+      const markers = [
+        {
+          time: formattedData[formattedData.length - 20].time,
+          position: 'aboveBar' as const,
+          color: '#f43f5e',
+          shape: 'arrowDown' as const,
+          text: 'AI: Death Cross (50GMA < 200GMA)',
+        },
+        {
+          time: formattedData[formattedData.length - 10].time,
+          position: 'belowBar' as const,
+          color: '#3b82f6',
+          shape: 'circle' as const,
+          text: 'AI: RSI Aşırı Satım (<30)',
+        },
+        {
+          time: formattedData[formattedData.length - 2].time,
+          position: 'belowBar' as const,
+          color: '#10b981',
+          shape: 'arrowUp' as const,
+          text: 'AI: Hacim Patlaması & Alım',
+        }
+      ];
+      candlestickSeries.setMarkers(markers);
+    }
 
     // ResizeObserver ile responsive boyut takibi
     const resizeObserver = new ResizeObserver(entries => {
@@ -253,19 +281,32 @@ function ForexDetailPage() {
           </div>
         </div>
 
-        {/* Live Prices */}
-        <div className="flex items-center gap-6 bg-zinc-950 border border-zinc-800/80 rounded-2xl p-4 shadow-sm shrink-0">
-          <div>
-            <div className="text-xs text-zinc-500 font-medium">Son Fiyat</div>
-            <div className="text-2xl font-bold text-zinc-100">{liveData.last_price?.toFixed(4) || liveData.last}</div>
-          </div>
-          <div className="w-px h-8 bg-zinc-800" />
-          <div>
-            <div className="text-xs text-zinc-500 font-medium">Günlük Değişim</div>
-            <div className={`text-lg font-bold flex items-center gap-0.5 ${isUp ? "text-emerald-500" : "text-rose-500"}`}>
-              {isUp ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
-              {isUp ? "+" : ""}{liveData.diff_percent?.toFixed(2) || "0.00"}%
+        {/* Live Prices & Context */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-6 bg-zinc-950 border border-zinc-800/80 rounded-2xl p-4 shadow-sm shrink-0">
+          <div className="flex items-center gap-6">
+            <div>
+              <div className="text-xs text-zinc-500 font-medium">Son Fiyat</div>
+              <div className="text-2xl font-bold text-zinc-100">{liveData.last_price?.toFixed(4) || liveData.last}</div>
             </div>
+            <div className="w-px h-8 bg-zinc-800 hidden sm:block" />
+            <div>
+              <div className="text-xs text-zinc-500 font-medium">Günlük Değişim</div>
+              <div className={`text-lg font-bold flex items-center gap-0.5 ${isUp ? "text-emerald-500" : "text-rose-500"}`}>
+                {isUp ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
+                {isUp ? "+" : ""}{liveData.diff_percent?.toFixed(2) || "0.00"}%
+              </div>
+            </div>
+          </div>
+          <div className="w-full sm:w-px h-px sm:h-8 bg-zinc-800" />
+          <div className="w-full sm:w-48">
+            {/* Mock Min Max for Daily Range Context */}
+            <ContextBar 
+              label="Günlük Aralık"
+              min={(liveData.last_price || liveData.last) * 0.985}
+              max={(liveData.last_price || liveData.last) * 1.015}
+              current={liveData.last_price || liveData.last}
+              formatValue={(v) => v.toFixed(4)}
+            />
           </div>
         </div>
       </div>
