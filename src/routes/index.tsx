@@ -3,11 +3,15 @@ import { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { ArrowUp, ArrowDown } from 'lucide-react'
+import { PriorityFeed } from '../components/dashboard/PriorityFeed'
+import { SectorHeatmap } from '../components/dashboard/SectorHeatmap'
+import { NewsImpact } from '../components/dashboard/NewsImpact'
 
 export const Route = createFileRoute('/')({
   component: IndexPage,
 })
 
+// ... (keep tabs and marketData as is)
 const tabs = ['Borsa', 'Forex', 'Emtia', 'Kripto']
 
 const marketData = {
@@ -104,10 +108,10 @@ function IndexPage() {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-6 animate-in fade-in duration-500 flex flex-col h-full">
       
       {/* Horizontal Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide shrink-0">
         {tabs.map(tab => (
           <button
             key={tab}
@@ -124,7 +128,7 @@ function IndexPage() {
       </div>
 
       {/* 4 Market Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 shrink-0">
         {marketData[activeTab].map((stat, i) => (
           <div key={i} className="bg-[#1a1c23] hover:bg-[#22252d] border border-transparent hover:border-zinc-800 transition-colors rounded-2xl p-4 flex flex-col justify-between shadow-sm cursor-pointer group h-32 relative overflow-hidden">
             <div className="relative z-10 flex flex-col h-full">
@@ -142,7 +146,6 @@ function IndexPage() {
               </div>
             </div>
             
-            {/* Sparkline anchored to bottom */}
             <div className="absolute bottom-0 left-0 right-0 h-16 opacity-80 group-hover:opacity-100 transition-opacity">
               <Sparkline up={stat.up} />
             </div>
@@ -150,16 +153,20 @@ function IndexPage() {
         ))}
       </div>
 
-      {/* Main Content Area Below Cards */}
-      <div>
-        <h2 className="text-lg font-bold tracking-tight text-zinc-100 mb-4 mt-8">{activeTab} piyasası özeti</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 h-[400px] bg-[#1a1c23] rounded-2xl flex items-center justify-center shadow-sm relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/5 to-transparent opacity-50"></div>
-            <span className="text-zinc-500 font-medium z-10">TradingView Chart (Yakında)</span>
+      {/* Bento Box Layout */}
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-[400px]">
+        {/* Priority Feed (Span 12 on mobile, 5 on desktop) */}
+        <div className="lg:col-span-5 flex flex-col">
+          <PriorityFeed />
+        </div>
+        
+        {/* Right side stack (Span 12 on mobile, 7 on desktop) */}
+        <div className="lg:col-span-7 flex flex-col gap-4">
+          <div className="flex-1 min-h-[200px]">
+            <SectorHeatmap />
           </div>
-          <div className="h-[400px] bg-[#1a1c23] rounded-2xl flex items-center justify-center shadow-sm relative overflow-hidden">
-            <span className="text-zinc-500 font-medium z-10">Son Haberler (Yakında)</span>
+          <div className="flex-1 min-h-[200px]">
+            <NewsImpact />
           </div>
         </div>
       </div>
