@@ -8,6 +8,11 @@ interface UIState {
   openRightSidebar: () => void;
   isRightSidebarExpanded: boolean;
   toggleRightSidebarExpanded: () => void;
+  isLeftSidebarExpanded: boolean;
+  toggleLeftSidebarExpanded: () => void;
+  isCommandPaletteOpen: boolean;
+  openCommandPalette: () => void;
+  closeCommandPalette: () => void;
   isMobileMenuOpen: boolean;
   toggleMobileMenu: () => void;
   theme: Theme;
@@ -42,6 +47,11 @@ export const useUIStore = create<UIState>((set) => ({
   openRightSidebar: () => set(() => ({ isRightSidebarOpen: true })),
   isRightSidebarExpanded: false,
   toggleRightSidebarExpanded: () => set((state) => ({ isRightSidebarExpanded: !state.isRightSidebarExpanded })),
+  isLeftSidebarExpanded: false,
+  toggleLeftSidebarExpanded: () => set((state) => ({ isLeftSidebarExpanded: !state.isLeftSidebarExpanded })),
+  isCommandPaletteOpen: false,
+  openCommandPalette: () => set({ isCommandPaletteOpen: true }),
+  closeCommandPalette: () => set({ isCommandPaletteOpen: false }),
   isMobileMenuOpen: false,
   toggleMobileMenu: () => set((state) => ({ isMobileMenuOpen: !state.isMobileMenuOpen })),
   theme: getInitialTheme(),

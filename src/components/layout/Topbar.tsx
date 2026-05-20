@@ -48,19 +48,24 @@ export function Topbar() {
 
       {/* Center: Search Bar */}
       <div className="flex-1 max-w-[720px] mx-4 hidden md:block">
-        <div className="relative flex items-center w-full h-12 bg-zinc-100 dark:bg-[#1a1c23] hover:bg-zinc-200 dark:hover:bg-[#22252d] transition-colors rounded-full overflow-hidden border border-transparent focus-within:border-zinc-300 dark:focus-within:border-zinc-700 focus-within:bg-white dark:focus-within:bg-[#1a1c23]">
-          <div className="pl-5 pr-3 text-zinc-500 dark:text-zinc-400">
-            <Search size={18} className="stroke-[2.5]" />
+        <button 
+          onClick={useUIStore.getState().openCommandPalette}
+          className="relative flex items-center justify-between w-full h-12 bg-zinc-100 dark:bg-[#1a1c23] hover:bg-zinc-200 dark:hover:bg-[#22252d] transition-colors rounded-full overflow-hidden border border-transparent focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+        >
+          <div className="flex items-center">
+            <div className="pl-5 pr-3 text-zinc-500 dark:text-zinc-400">
+              <Search size={18} className="stroke-[2.5]" />
+            </div>
+            <span className="text-sm text-zinc-500 dark:text-zinc-400">
+              Hisse senedi, ETF ve daha fazlasını arayın...
+            </span>
           </div>
-          <input 
-            type="text" 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={handleSearchSubmit}
-            placeholder="Hisse senedi, ETF ve daha fazlasını arayın veya yapay zekaya sorun..." 
-            className="w-full h-full bg-transparent border-none outline-none text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-500 dark:placeholder-zinc-400"
-          />
-        </div>
+          <div className="pr-4">
+            <kbd className="hidden sm:inline-flex h-6 items-center gap-1 rounded bg-white dark:bg-zinc-800 px-2 text-[11px] font-medium text-zinc-500 border border-zinc-200 dark:border-zinc-700 font-sans shadow-sm">
+              <span className="text-xs">⌘</span>K
+            </kbd>
+          </div>
+        </button>
       </div>
 
       {/* Right: Controls */}
