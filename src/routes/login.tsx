@@ -7,10 +7,20 @@ export const Route = createFileRoute('/login')({
 
 function Login() {
   const handleGoogleLogin = async () => {
-    await signIn.social({
-      provider: "google",
-      callbackURL: "/",
-    });
+    alert("Butona tıklandı! Google Login başlatılıyor...");
+    try {
+      if (!signIn) {
+        alert("Hata: Better Auth 'signIn' nesnesi yüklenemedi!");
+        return;
+      }
+      await signIn.social({
+        provider: "google",
+        callbackURL: "/",
+      });
+    } catch (err: any) {
+      console.error("Google Login Error:", err);
+      alert("Google Login Hatası: " + (err?.message || err?.statusText || JSON.stringify(err)));
+    }
   }
 
   return (
