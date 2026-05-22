@@ -39,6 +39,7 @@ export const Route = createRootRoute({
 
 import { useEffect } from "react"
 import { useUIStore, applyTheme } from "../store/ui"
+import { ToastContainer } from "../components/ui/ToastContainer"
 
 function RootDocument() {
   const theme = useUIStore((s) => s.theme)
@@ -63,6 +64,7 @@ function RootDocument() {
         <AppLayout>
           <Outlet />
         </AppLayout>
+        <ToastContainer />
         <TanStackDevtools
           config={{
             position: "bottom-left",

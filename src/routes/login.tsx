@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { signIn } from '../lib/auth-client'
+import { toast } from '../store/toast'
 
 export const Route = createFileRoute('/login')({
   component: Login,
@@ -7,10 +8,10 @@ export const Route = createFileRoute('/login')({
 
 function Login() {
   const handleGoogleLogin = async () => {
-    alert("Butona tıklandı! Google Login başlatılıyor...");
+    toast.info("Google ile giriş işlemi başlatılıyor...", 2000);
     try {
       if (!signIn) {
-        alert("Hata: Better Auth 'signIn' nesnesi yüklenemedi!");
+        toast.error("Hata: Giriş modülü yüklenemedi.");
         return;
       }
       await signIn.social({
@@ -19,7 +20,7 @@ function Login() {
       });
     } catch (err: any) {
       console.error("Google Login Error:", err);
-      alert("Google Login Hatası: " + (err?.message || err?.statusText || JSON.stringify(err)));
+      toast.error("Giriş başarısız: " + (err?.message || "Bağlantı hatası"));
     }
   }
 
