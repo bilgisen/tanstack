@@ -1,4 +1,4 @@
-import { useToastStore, ToastMessage } from "../../store/toast";
+import { useToastStore, type ToastMessage } from "../../store/toast";
 import { CheckCircle2, AlertCircle, Info, AlertTriangle, X } from "lucide-react";
 
 export function ToastContainer() {
