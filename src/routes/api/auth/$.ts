@@ -1,6 +1,23 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { auth } from '../../../lib/auth'
 
+const getDebugErrorResponse = (error: any) => {
+  return new Response(JSON.stringify({
+    error: error?.message || String(error),
+    stack: error?.stack,
+    env_checklist: {
+      has_DATABASE_URL: !!process.env.DATABASE_URL,
+      has_BETTER_AUTH_SECRET: !!process.env.BETTER_AUTH_SECRET,
+      has_GOOGLE_CLIENT_ID: !!process.env.GOOGLE_CLIENT_ID,
+      has_GOOGLE_CLIENT_SECRET: !!process.env.GOOGLE_CLIENT_SECRET,
+      BETTER_AUTH_URL: process.env.BETTER_AUTH_URL || "undefined",
+    }
+  }), {
+    status: 500,
+    headers: { 'Content-Type': 'application/json' }
+  });
+};
+
 export const Route = createFileRoute('/api/auth/$')({
   server: {
     handlers: {
@@ -12,7 +29,7 @@ export const Route = createFileRoute('/api/auth/$')({
           return res
         } catch (error) {
           console.error('[Auth API GET Error]', error)
-          throw error
+          return getDebugErrorResponse(error)
         }
       },
       POST: async ({ request }) => {
@@ -23,7 +40,7 @@ export const Route = createFileRoute('/api/auth/$')({
           return res
         } catch (error) {
           console.error('[Auth API POST Error]', error)
-          throw error
+          return getDebugErrorResponse(error)
         }
       },
     },
