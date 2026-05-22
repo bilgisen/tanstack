@@ -2,15 +2,16 @@ import { createFileRoute } from '@tanstack/react-router'
 import { auth } from '../../../lib/auth'
 
 const getDebugErrorResponse = (error: any) => {
+  const env = typeof process !== 'undefined' ? process.env : {};
   return new Response(JSON.stringify({
     error: error?.message || String(error),
     stack: error?.stack,
     env_checklist: {
-      has_DATABASE_URL: !!process.env.DATABASE_URL,
-      has_BETTER_AUTH_SECRET: !!process.env.BETTER_AUTH_SECRET,
-      has_GOOGLE_CLIENT_ID: !!process.env.GOOGLE_CLIENT_ID,
-      has_GOOGLE_CLIENT_SECRET: !!process.env.GOOGLE_CLIENT_SECRET,
-      BETTER_AUTH_URL: process.env.BETTER_AUTH_URL || "undefined",
+      has_DATABASE_URL: !!env?.DATABASE_URL,
+      has_BETTER_AUTH_SECRET: !!env?.BETTER_AUTH_SECRET,
+      has_GOOGLE_CLIENT_ID: !!env?.GOOGLE_CLIENT_ID,
+      has_GOOGLE_CLIENT_SECRET: !!env?.GOOGLE_CLIENT_SECRET,
+      BETTER_AUTH_URL: env?.BETTER_AUTH_URL || "undefined",
     }
   }), {
     status: 500,
