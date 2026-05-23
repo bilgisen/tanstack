@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, useNavigate, useLocation } from '@tanstack/react-router'
 import { useAuth } from '../hooks/useAuth'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { LeftSidebar } from '../components/layout/LeftSidebar'
 import { useUIStore } from '../store/ui'
 import { PanelLeft } from 'lucide-react'

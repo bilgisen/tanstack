@@ -125,10 +125,15 @@ export function ChatPane({
         </div>
       )}
 
-      {/* Textarea Input Container (Floating Solid Rounded Box matching the screenshot) */}
+      {/* Textarea Input Container (Ultra-Simple Solid Single-Line Bar) */}
       <div className="p-3 bg-transparent shrink-0">
-        <div className="flex flex-col bg-muted/40 border border-border/85 rounded-2xl p-2.5 focus-within:border-border transition-all select-none">
-          {/* Top text area */}
+        <div className="flex items-center gap-2 bg-muted/40 border border-border/85 rounded-xl px-2.5 py-1.5 focus-within:border-border transition-all select-none">
+          {/* Plus Button */}
+          <button className="w-8 h-8 flex items-center justify-center text-muted-foreground/75 hover:text-foreground hover:bg-muted/60 rounded-lg transition-colors cursor-pointer shrink-0">
+            <Plus size={16} />
+          </button>
+
+          {/* Textarea Input */}
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -136,43 +141,23 @@ export function ChatPane({
             disabled={isLoading}
             placeholder={placeholder}
             rows={1}
-            className="w-full bg-transparent border-none outline-none resize-none px-2.5 py-1 text-xs md:text-sm text-foreground placeholder-muted-foreground/60 disabled:opacity-50 min-h-[36px] max-h-[80px] font-sans"
+            className="flex-1 bg-transparent border-none outline-none resize-none px-1.5 py-1 text-xs md:text-sm text-foreground placeholder-muted-foreground/60 disabled:opacity-50 min-h-[32px] max-h-[80px] font-sans"
           />
-          
-          {/* Bottom Action Controls Bar */}
-          <div className="flex items-center justify-between mt-2 pt-1 border-t border-border/20">
-            {/* Left Controls: Plus + Model Dropdown */}
-            <div className="flex items-center gap-2.5 pl-1">
-              {/* Plus Button */}
-              <button className="w-6 h-6 flex items-center justify-center text-muted-foreground/75 hover:text-foreground hover:bg-muted/60 rounded-md transition-colors cursor-pointer">
-                <Plus size={15} />
-              </button>
-              
-              {/* Model Dropdown */}
-              <div className="flex items-center gap-1 text-[10px] text-muted-foreground/80 hover:text-foreground bg-muted/60 hover:bg-muted/95 px-2 py-0.5 rounded-md cursor-pointer transition-colors border border-border/40 font-semibold font-mono">
-                <span>Sonnet 4.6</span>
-                <ChevronDown size={9} />
-              </div>
-            </div>
-            
-            {/* Right Controls: Mic + Send Button */}
-            <div className="flex items-center gap-2 pr-1">
-              {/* Mic Icon */}
-              <button className="w-6 h-6 flex items-center justify-center text-muted-foreground/75 hover:text-foreground hover:bg-muted/60 rounded-md transition-colors cursor-pointer">
-                <Mic size={14} />
-              </button>
-              
-              {/* Premium Coral-Orange Send Button */}
-              <button
-                onClick={() => handleSend()}
-                disabled={isLoading || !input.trim()}
-                className="w-6 h-6 flex items-center justify-center rounded-lg bg-[#d95438] hover:bg-[#c4472c] text-white disabled:opacity-30 transition-all cursor-pointer shadow-xs shrink-0"
-                title="Gönder"
-              >
-                <ArrowUp size={13} strokeWidth={3} />
-              </button>
-            </div>
-          </div>
+
+          {/* Mic Button */}
+          <button className="w-8 h-8 flex items-center justify-center text-muted-foreground/75 hover:text-foreground hover:bg-muted/60 rounded-lg transition-colors cursor-pointer shrink-0">
+            <Mic size={15} />
+          </button>
+
+          {/* Antigravity Blue Send Button */}
+          <button
+            onClick={() => handleSend()}
+            disabled={isLoading || !input.trim()}
+            className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#0e75ec] hover:bg-[#0c62bd] text-white disabled:opacity-30 transition-all cursor-pointer shadow-xs shrink-0"
+            title="Gönder"
+          >
+            <ArrowUp size={15} strokeWidth={2.5} />
+          </button>
         </div>
       </div>
     </div>
