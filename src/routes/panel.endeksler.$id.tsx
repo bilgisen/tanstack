@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Globe, BarChart3, HelpCircle } from 'lucide-react'
+import { ArrowLeft, ArrowUpRight, ArrowDownRight, Globe, BarChart3 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 export const Route = createFileRoute('/panel/endeksler/$id')({
@@ -84,7 +84,6 @@ function EndeksDetailPage() {
   const [indexData, setIndexData] = useState<IndexMeta | null>(null)
   const [liveValue, setLiveValue] = useState("")
   const [liveDiff, setLiveDiff] = useState(0)
-  const [loading, setLoading] = useState(true)
 
   const rawId = id.toLowerCase();
   const currentMeta = indexMetadata[rawId] || indexMetadata.bist100;
@@ -111,8 +110,6 @@ function EndeksDetailPage() {
         console.error("Failed to load live index point detail", err);
         setLiveValue(currentMeta.fallbackValue);
         setLiveDiff(currentMeta.fallbackDiff);
-      } finally {
-        setLoading(false);
       }
     }
 

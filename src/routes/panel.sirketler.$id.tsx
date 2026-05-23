@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowLeft, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Award, Compass, Calculator, Activity } from 'lucide-react'
+import { ArrowLeft, ArrowUpRight, ArrowDownRight, Award, Calculator, Activity } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 export const Route = createFileRoute('/panel/sirketler/$id')({
@@ -132,7 +132,6 @@ const companyFallbacks: Record<string, CompanyStats> = {
 function SirketDetailPage() {
   const { id } = Route.useParams()
   const [data, setData] = useState<CompanyStats | null>(null)
-  const [loading, setLoading] = useState(true)
 
   const rawId = id.toLowerCase();
   const fallback = companyFallbacks[rawId] || {
@@ -215,8 +214,6 @@ function SirketDetailPage() {
       } catch (err) {
         console.error("Failed to fetch full company details, using mock fallbacks", err);
         setData(fallback);
-      } finally {
-        setLoading(false);
       }
     }
 

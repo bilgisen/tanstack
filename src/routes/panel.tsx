@@ -72,14 +72,6 @@ function PanelLayout() {
     }
   }
 
-  // Dynamic title based on active path
-  const getPageTitle = () => {
-    if (pathname === '/panel' || pathname === '/panel/') return 'Genel Bakış'
-    if (pathname.includes('/endeksler/')) return 'Endeks Analizi'
-    if (pathname.includes('/sirketler/')) return 'Şirket Analizi'
-    if (pathname.includes('/borsa')) return 'Borsa'
-    return 'Panel'
-  }
 
   return (
     <div className="flex-1 flex flex-row overflow-hidden relative bg-background font-sans h-full">
