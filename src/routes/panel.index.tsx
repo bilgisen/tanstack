@@ -70,12 +70,12 @@ function PanelIndexPage() {
   return (
     <div className="space-y-4 animate-in fade-in duration-500 flex flex-col h-full">
       {/* 📈 Index Cards Container (Horizontal Snap-Scroll on Mobile, Grid on Desktop) */}
-      <div className="flex flex-row overflow-x-auto snap-x snap-mandatory gap-3 w-full pb-3 scrollbar-hide md:grid md:grid-cols-4 md:overflow-x-visible md:pb-0">
+      <div className="flex flex-row overflow-x-auto snap-x snap-mandatory gap-3 w-full pb-3 scrollbar-hide md:grid md:grid-cols-4 md:gap-4 md:overflow-x-visible md:pb-0">
         {indices.map((ind) => (
           <Link
             key={ind.id}
             to={`/panel/endeksler/${ind.id}` as any}
-            className="bg-card hover:bg-muted/30 border border-border/60 hover:border-border transition-all rounded-xl p-4 flex flex-col justify-between shadow-2xs cursor-pointer group relative active:scale-[0.99] snap-align-start shrink-0 w-[70vw] md:w-auto md:shrink-1 select-none"
+            className="bg-card hover:bg-muted/30 border border-border/60 hover:border-border transition-all rounded-xl p-4 flex flex-col justify-between shadow-2xs cursor-pointer group relative active:scale-[0.99] snap-align-start shrink-0 w-[75vw] md:w-full md:shrink-0 md:snap-align-none select-none"
           >
             <div className="flex flex-col h-full justify-between w-full">
               {/* Top Row: Symbol + Pct Change */}

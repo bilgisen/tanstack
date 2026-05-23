@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { ArrowUp, Sparkles, Loader2, User as UserIcon, HelpCircle } from "lucide-react";
+import { ArrowUp, Sparkles, Loader2, User as UserIcon, Plus, Mic, ChevronDown } from "lucide-react";
 
 type Message = {
   role: "user" | "assistant";
@@ -8,14 +8,14 @@ type Message = {
 
 interface ChatPaneProps {
   context?: string;
-  preseededWelcomeMessage?: string;
+  onMessagesChange?: (hasMessages: boolean) => void;
   placeholder?: string;
   className?: string;
 }
 
 export function ChatPane({
   context = "global",
-  preseededWelcomeMessage,
+  onMessagesChange,
   placeholder = "HissePro asistanına borsa veya finans hakkında soru sorun...",
   className = "",
 }: ChatPaneProps) {
@@ -30,15 +30,10 @@ export function ChatPane({
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
-
-  // Welcome message
-  const welcomeText = preseededWelcomeMessage || 
-    (context.startsWith("sirket:") 
-      ? `Merhaba! ${context.split(":")[1].toUpperCase()} hissesinin güncel rasyolarını, bilançosunu ve teknik seviyelerini analiz ettim. Hisse hakkında merak ettiğiniz her şeyi sorabilirsiniz.`
-      : context.startsWith("endeks:")
-      ? `Merhaba! ${context.split(":")[1].toUpperCase()} endeksi, bileşenlerin ağırlığı ve teknik momentum seviyeleri hakkında sorularınızı yanıtlayabilirim.`
-      : "Merhaba! Ben HissePro finansal yapay zeka asistanıyım. BIST hisseleri, temel ve teknik analizler, rasyolar veya piyasa gidişatı hakkında sorularınızı cevaplamaya hazırım. Nasıl yardımcı olabilirim?");
+    if (onMessagesChange) {
+      onMessagesChange(messages.length > 0);
+    }
+  }, [messages, onMessagesChange]);
 
   const handleSend = async (forcedMessage?: string) => {
     const textToSend = forcedMessage || input.trim();
@@ -66,7 +61,7 @@ export function ChatPane({
       const data = await response.json();
       let replyText = data.reply || "Bir hata oluştu.";
 
-      // Strip potential navigate matches if any (handled gracefully)
+      // Strip potential navigate matches
       const navigateMatch = replyText.match(/\[NAVIGATE:(.*?)\]/);
       if (navigateMatch) {
         replyText = replyText.replace(navigateMatch[0], "").trim();
@@ -91,104 +86,49 @@ export function ChatPane({
     }
   };
 
-  // Preseeded suggestions based on context
-  const getSuggestions = () => {
-    if (context.startsWith("sirket:")) {
-      const ticker = context.split(":")[1].toUpperCase();
-      return [
-        `📊 ${ticker} hissesinin F/K ve PD/DD analizini yap`,
-        `📈 ${ticker} için kısa vadeli teknik destek/direnç seviyeleri neler?`,
-        `🏢 ${ticker} sektörel rakiplerine göre ucuz mu pahalı mı?`,
-      ];
-    }
-    if (context.startsWith("endeks:")) {
-      const idx = context.split(":")[1].toUpperCase();
-      return [
-        `📊 ${idx} endeksinin teknik momentumu nasıl?`,
-        `⚖️ ${idx} endeksinde en yüksek ağırlığa sahip hisseler hangileri?`,
-        `🎯 ${idx} için direnç seviyeleri ve olası geri çekilme noktaları nedir?`,
-      ];
-    }
-    return [
-      "🔥 Bugün BIST'te öne çıkan sektörler ve hareketli hisseler neler?",
-      "📈 Enflasyonist ortamda hangi finansal rasyoları incelemeliyim?",
-      "🧐 Teknik analizde RSI ve Bollinger bantlarını nasıl okumalıyım?",
-    ];
-  };
-
   return (
-    <div className={`flex flex-col bg-card/45 border border-border/80 rounded-2xl overflow-hidden shadow-sm h-full max-h-[600px] min-h-[350px] ${className}`}>
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-5 space-y-4 bg-transparent">
-        {/* Welcome Message */}
-        <div className="flex gap-3">
-          <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-            <Sparkles size={14} />
-          </div>
-          <div className="bg-muted/30 text-foreground text-sm rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%] leading-relaxed border border-border/40">
-            {welcomeText}
-          </div>
-        </div>
+    <div className={`flex flex-col bg-transparent h-full min-h-0 ${className}`}>
+      {/* Messages (Displays only if there are any active user messages) */}
+      {messages.length > 0 && (
+        <div className="flex-1 overflow-y-auto p-4 md:p-5 space-y-4 bg-transparent custom-scrollbar max-h-[110px] min-h-0">
+          {messages.map((msg, idx) => (
+            <div key={idx} className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                msg.role === "user" 
+                  ? "bg-secondary text-secondary-foreground" 
+                  : "bg-primary/10 text-primary"
+              }`}>
+                {msg.role === "user" ? <UserIcon size={14} /> : <Sparkles size={14} />}
+              </div>
+              <div className={`rounded-2xl px-4 py-3 text-sm max-w-[85%] whitespace-pre-wrap leading-relaxed border ${
+                msg.role === "user"
+                  ? "bg-primary text-primary-foreground border-primary rounded-tr-sm"
+                  : "bg-muted/30 text-foreground border-border/40 rounded-tl-sm"
+              }`}>
+                {msg.text}
+              </div>
+            </div>
+          ))}
 
-        {/* Conversation */}
-        {messages.map((msg, idx) => (
-          <div key={idx} className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-              msg.role === "user" 
-                ? "bg-secondary text-secondary-foreground" 
-                : "bg-primary/10 text-primary"
-            }`}>
-              {msg.role === "user" ? <UserIcon size={14} /> : <Sparkles size={14} />}
+          {isLoading && (
+            <div className="flex gap-3 animate-pulse">
+              <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <Sparkles size={14} />
+              </div>
+              <div className="bg-muted/20 text-muted-foreground text-sm rounded-2xl rounded-tl-sm px-4 py-3 border border-border/30 flex items-center gap-2">
+                <Loader2 size={14} className="animate-spin text-primary" />
+                Yapay zeka analiz ediyor...
+              </div>
             </div>
-            <div className={`rounded-2xl px-4 py-3 text-sm max-w-[85%] whitespace-pre-wrap leading-relaxed border ${
-              msg.role === "user"
-                ? "bg-primary text-primary-foreground border-primary rounded-tr-sm"
-                : "bg-muted/30 text-foreground border-border/40 rounded-tl-sm"
-            }`}>
-              {msg.text}
-            </div>
-          </div>
-        ))}
-
-        {isLoading && (
-          <div className="flex gap-3 animate-pulse">
-            <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-              <Sparkles size={14} />
-            </div>
-            <div className="bg-muted/20 text-muted-foreground text-sm rounded-2xl rounded-tl-sm px-4 py-3 border border-border/30 flex items-center gap-2">
-              <Loader2 size={14} className="animate-spin text-primary" />
-              Yapay zeka analiz ediyor...
-            </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Quick Suggestions (only if less than 2 messages sent) */}
-      {messages.length < 2 && (
-        <div className="px-5 pb-3 pt-1 shrink-0">
-          <div className="flex flex-col gap-1.5">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-              <HelpCircle size={10} /> Hızlı Sorular
-            </span>
-            <div className="flex flex-wrap gap-1.5">
-              {getSuggestions().map((suggestion, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleSend(suggestion.substring(2))}
-                  className="text-left text-xs bg-muted/40 hover:bg-muted/80 text-muted-foreground hover:text-foreground border border-border/40 px-3 py-1.5 rounded-full transition-all cursor-pointer whitespace-normal truncate-multiline max-w-full"
-                >
-                  {suggestion}
-                </button>
-              ))}
-            </div>
-          </div>
+          )}
+          <div ref={messagesEndRef} />
         </div>
       )}
 
-      {/* Textarea Input Container */}
-      <div className="p-3 border-t border-border/60 bg-muted/10 shrink-0">
-        <div className="relative flex items-center bg-card border border-border rounded-xl focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+      {/* Textarea Input Container (Floating Solid Rounded Box matching the screenshot) */}
+      <div className="p-3 bg-transparent shrink-0">
+        <div className="flex flex-col bg-muted/40 border border-border/85 rounded-2xl p-2.5 focus-within:border-border transition-all select-none">
+          {/* Top text area */}
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -196,15 +136,43 @@ export function ChatPane({
             disabled={isLoading}
             placeholder={placeholder}
             rows={1}
-            className="w-full bg-transparent border-none outline-none resize-none pl-4 pr-12 py-3 text-xs md:text-sm text-foreground placeholder-muted-foreground disabled:opacity-50 min-h-[44px] max-h-[100px] font-sans"
+            className="w-full bg-transparent border-none outline-none resize-none px-2.5 py-1 text-xs md:text-sm text-foreground placeholder-muted-foreground/60 disabled:opacity-50 min-h-[36px] max-h-[80px] font-sans"
           />
-          <button
-            onClick={() => handleSend()}
-            disabled={isLoading || !input.trim()}
-            className="absolute right-2 w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-30 transition-all cursor-pointer shadow-sm"
-          >
-            <ArrowUp size={16} strokeWidth={2.5} />
-          </button>
+          
+          {/* Bottom Action Controls Bar */}
+          <div className="flex items-center justify-between mt-2 pt-1 border-t border-border/20">
+            {/* Left Controls: Plus + Model Dropdown */}
+            <div className="flex items-center gap-2.5 pl-1">
+              {/* Plus Button */}
+              <button className="w-6 h-6 flex items-center justify-center text-muted-foreground/75 hover:text-foreground hover:bg-muted/60 rounded-md transition-colors cursor-pointer">
+                <Plus size={15} />
+              </button>
+              
+              {/* Model Dropdown */}
+              <div className="flex items-center gap-1 text-[10px] text-muted-foreground/80 hover:text-foreground bg-muted/60 hover:bg-muted/95 px-2 py-0.5 rounded-md cursor-pointer transition-colors border border-border/40 font-semibold font-mono">
+                <span>Sonnet 4.6</span>
+                <ChevronDown size={9} />
+              </div>
+            </div>
+            
+            {/* Right Controls: Mic + Send Button */}
+            <div className="flex items-center gap-2 pr-1">
+              {/* Mic Icon */}
+              <button className="w-6 h-6 flex items-center justify-center text-muted-foreground/75 hover:text-foreground hover:bg-muted/60 rounded-md transition-colors cursor-pointer">
+                <Mic size={14} />
+              </button>
+              
+              {/* Premium Coral-Orange Send Button */}
+              <button
+                onClick={() => handleSend()}
+                disabled={isLoading || !input.trim()}
+                className="w-6 h-6 flex items-center justify-center rounded-lg bg-[#d95438] hover:bg-[#c4472c] text-white disabled:opacity-30 transition-all cursor-pointer shadow-xs shrink-0"
+                title="Gönder"
+              >
+                <ArrowUp size={13} strokeWidth={3} />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

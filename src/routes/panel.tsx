@@ -34,10 +34,11 @@ function PanelLayout() {
     return null
   }
 
+  const [hasMessages, setHasMessages] = useState(false)
+
   // Dynamic context for chatbot based on current path
   let context = 'global'
   let placeholder = 'HissePro asistanına borsa veya finans hakkında soru sorun...'
-  let preseededWelcomeMessage = undefined
 
   const pathname = location.pathname.toLowerCase()
   if (pathname.includes('/endeksler/')) {
@@ -47,7 +48,6 @@ function PanelLayout() {
       context = `endeks:${endeksId}`
       const indexName = endeksId === 'bist30' ? 'BIST 30' : endeksId === 'bist100' ? 'BIST 100' : endeksId === 'bistbanka' ? 'BIST Bankacılık' : endeksId.toUpperCase()
       placeholder = `${indexName} endeks analiz asistanına soru sorun...`
-      preseededWelcomeMessage = `Merhaba! **${indexName} Endeksi** bileşenlerini, hacim hareketlerini ve teknik trend gücünü analiz ettim. Bu endeks veya hisseleri hakkında sormak istediğiniz her şeyi cevaplayabilirim.`
     }
   } else if (pathname.includes('/sirketler/')) {
     const parts = pathname.split('/sirketler/')
@@ -55,7 +55,6 @@ function PanelLayout() {
       const ticker = parts[1].toUpperCase()
       context = `sirket:${ticker.toLowerCase()}`
       placeholder = `${ticker} hisse analiz asistanına soru sorun...`
-      preseededWelcomeMessage = `Merhaba! **${ticker}** hissesinin bilançosunu, İş Yatırım rasyolarını ve teknik analiz indikatörlerini taradım. Hissenin çarpan değerleri, destek/direnç noktaları veya gelecek beklentileri hakkında her türlü soruyu yanıtlayabilirim.`
     }
   }
 
@@ -70,11 +69,11 @@ function PanelLayout() {
 
   return (
     <div className="flex-1 flex flex-row overflow-hidden relative bg-background font-sans h-full">
-      {/* Mobile Sidebar Backdrop Overlay */}
+      {/* Mobile Sidebar Backdrop Overlay - Elevated z-index to z-45 */}
       {isLeftSidebarExpanded && (
         <div 
           onClick={toggleLeftSidebarExpanded}
-          className="fixed inset-0 bg-background/80 backdrop-blur-xs z-30 lg:hidden cursor-pointer animate-in fade-in duration-200"
+          className="fixed inset-0 bg-background/80 backdrop-blur-xs z-45 lg:hidden cursor-pointer animate-in fade-in duration-200"
         />
       )}
 
@@ -110,17 +109,21 @@ function PanelLayout() {
           </div>
         </header>
 
-        {/* Scrollable Sub-Page area (Outlet) */}
-        <main className="flex-1 overflow-y-auto bg-background p-4 md:p-6 pb-[300px] custom-scrollbar min-w-0 relative z-10">
+        {/* Scrollable Sub-Page area (Outlet) - Dynamic padding-bottom to match chatbot height */}
+        <main className={`flex-1 overflow-y-auto bg-background p-4 md:p-6 custom-scrollbar min-w-0 relative z-10 transition-all duration-300 ${
+          hasMessages ? "pb-[260px]" : "pb-[135px]"
+        }`}>
           <Outlet />
         </main>
 
-        {/* Fixed Chatbot at the absolute bottom */}
-        <div className="absolute bottom-0 left-0 right-0 h-[260px] border-t border-border bg-card/95 backdrop-blur-md z-40 flex flex-col shadow-lg animate-in slide-in-from-bottom duration-300">
+        {/* Fixed Chatbot at the absolute bottom - Dynamic height and Solid Background (No glass blur) */}
+        <div className={`absolute bottom-0 left-0 right-0 border-t border-border/80 bg-card z-40 flex flex-col shadow-lg transition-all duration-300 ${
+          hasMessages ? "h-[240px]" : "h-[115px]"
+        }`}>
           <ChatPane
             context={context}
             placeholder={placeholder}
-            preseededWelcomeMessage={preseededWelcomeMessage}
+            onMessagesChange={setHasMessages}
             className="h-full border-none shadow-none bg-transparent min-h-0 max-h-none rounded-none"
           />
         </div>

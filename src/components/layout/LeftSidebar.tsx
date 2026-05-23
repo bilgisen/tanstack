@@ -80,7 +80,7 @@ export function LeftSidebar() {
   return (
     <aside className={`
       flex flex-col border-r border-border bg-card text-card-foreground shrink-0 transition-all duration-300 h-full overflow-hidden select-none
-      fixed inset-y-0 left-0 z-40 lg:static
+      fixed inset-y-0 left-0 z-50 lg:static
       ${isLeftSidebarExpanded 
         ? "w-[260px] translate-x-0" 
         : "w-0 -translate-x-full lg:translate-x-0 border-r-0"
