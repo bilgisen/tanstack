@@ -33,7 +33,11 @@ type StockFolder = {
 };
 
 export function LeftSidebar() {
-  const { isLeftSidebarExpanded, toggleLeftSidebarExpanded, openCommandPalette } = useUIStore();
+  const { 
+    isLeftSidebarExpanded, 
+    toggleLeftSidebarExpanded, 
+    openCommandPalette
+  } = useUIStore();
   const { logout: handleLogout } = useAuth();
   
   // Local state to toggle stock folders in explorer view
@@ -110,7 +114,7 @@ export function LeftSidebar() {
               </button>
               
               {/* Arrow Navs */}
-              <div className="flex items-center gap-0.5 opacity-60">
+              <div className="flex items-center gap-0.5 opacity-60 ml-1">
                 <div className="w-6 h-6 flex items-center justify-center text-muted-foreground/50 rounded-md">
                   <span className="text-xs">←</span>
                 </div>

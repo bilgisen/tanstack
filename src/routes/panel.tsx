@@ -96,40 +96,29 @@ function PanelLayout() {
 
       {/* Ana Kolon */}
       <div className="flex-1 flex flex-col min-w-0 h-full relative overflow-hidden bg-background">
-        {/* Top Header inside main column (Sleeker h-12 height) */}
-        <header className="h-12 border-b border-border/60 bg-card/45 backdrop-blur-xs flex items-center px-4 md:px-6 shrink-0 justify-between z-20 select-none">
-          <div className="flex items-center gap-3">
-            {/* Toggle button using PanelLeft icon */}
+        
+        {/* Floating Mobile/Desktop Toggle Controls (Glassmorphic design, only appears when panels are closed/hidden) */}
+        <div className="absolute top-4 left-4 flex items-center gap-2 z-35">
+          {!isLeftSidebarExpanded && (
             <button
               onClick={toggleLeftSidebarExpanded}
-              className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-all duration-200 cursor-pointer flex items-center justify-center border border-border/50 bg-card/50 shadow-2xs"
-              title={isLeftSidebarExpanded ? "Paneli Gizle" : "Paneli Göster"}
+              className="lg:hidden p-2 rounded-xl bg-card/80 backdrop-blur-md border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 hover:bg-card transition-all cursor-pointer shadow-md flex items-center justify-center"
+              title="Menüyü Göster"
             >
-              <PanelLeft size={14} />
+              <PanelLeft size={16} />
             </button>
-            
-            {/* Section Breadcrumb */}
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-              <span>HissePro</span>
-              <span>/</span>
-              <span className="text-foreground font-bold">{getPageTitle()}</span>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <span className="text-[9px] bg-primary/10 text-primary border border-primary/20 px-2.5 py-0.5 rounded-full font-bold tracking-wider uppercase hidden sm:inline-block">
-              Asistan Aktif
-            </span>
-            {/* Symmetrical Right Sidebar Toggle Button using PanelRight */}
-            <button
-              onClick={toggleRightSidebar}
-              className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-all duration-200 cursor-pointer flex items-center justify-center border border-border/50 bg-card/50 shadow-2xs"
-              title={isRightSidebarOpen ? "Pazar Analizini Gizle" : "Pazar Analizini Göster"}
-            >
-              <PanelRight size={14} />
-            </button>
-          </div>
-        </header>
+          )}
+        </div>
+
+        {!isRightSidebarOpen && (
+          <button
+            onClick={toggleRightSidebar}
+            className="absolute top-4 right-4 p-2 rounded-xl bg-card/80 backdrop-blur-md border border-border text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-card transition-all z-35 cursor-pointer shadow-md flex items-center justify-center hover:scale-105"
+            title="Sağ Paneli Göster"
+          >
+            <PanelRight size={16} />
+          </button>
+        )}
 
         {/* Scrollable Sub-Page area (Outlet) OR Active Chat Stream Messages */}
         <main 
