@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Newspaper, X, ChevronRight, Zap } from "lucide-react";
+import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Newspaper, PanelRight, ChevronRight, Zap } from "lucide-react";
 import { useUIStore } from "../../store/ui";
 
 type StockItem = {
@@ -151,7 +151,7 @@ export function RightSidebar() {
           className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
           title="Paneli Kapat"
         >
-          <X size={14} />
+          <PanelRight size={14} />
         </button>
       </div>
 
