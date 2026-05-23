@@ -140,11 +140,9 @@ function LandingPage() {
         </div>
 
         {/* Headline (Styled with Geist font weight: font-bold for bold premium elegance) */}
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-6">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-6 text-foreground">
           BIST Uzmanı <br className="hidden md:inline" />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-fuchsia-500 to-primary/80 animate-pulse-slow">
-            Tek Yapay Zeka
-          </span>
+          Tek Yapay Zeka
         </h1>
 
         {/* Subtitle */}

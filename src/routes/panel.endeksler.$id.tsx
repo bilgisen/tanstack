@@ -46,6 +46,21 @@ const indexMetadata: Record<string, IndexMeta> = {
       { code: "BIMAS", name: "Bim Mağazalar", price: 385.50, diff: -0.52, volume: "2.1M" },
     ]
   },
+  bist500: {
+    name: "BIST 500 Endeksi",
+    code: "XU500",
+    description: "Borsa İstanbul'da işlem gören en geniş kapsamlı endekstir. Piyasa değeri ve işlem hacmi kriterlerini karşılayan 500 şirketin ortak performansını ölçer.",
+    fallbackValue: "12.808,40",
+    fallbackDiff: 1.45,
+    components: [
+      { code: "THYAO", name: "Türk Hava Yolları", price: 312.50, diff: 4.82, volume: "12.4M" },
+      { code: "TUPRS", name: "Tüpraş", price: 185.40, diff: 3.12, volume: "8.1M" },
+      { code: "ASELS", name: "Aselsan", price: 64.20, diff: 5.12, volume: "11.1M" },
+      { code: "KCHOL", name: "Koç Holding", price: 242.10, diff: 2.85, volume: "5.4M" },
+      { code: "SAHOL", name: "Sabancı Holding", price: 98.70, diff: -1.25, volume: "4.8M" },
+      { code: "EREGL", name: "Ereğli Demir Çelik", price: 48.12, diff: -2.85, volume: "9.2M" },
+    ]
+  },
   bistbanka: {
     name: "BIST Bankacılık Endeksi",
     code: "XBANK",

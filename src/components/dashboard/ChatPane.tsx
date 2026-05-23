@@ -118,15 +118,6 @@ export function ChatPane({
 
   return (
     <div className={`flex flex-col bg-card/45 border border-border/80 rounded-2xl overflow-hidden shadow-sm h-full max-h-[600px] min-h-[350px] ${className}`}>
-      {/* Header */}
-      <div className="flex items-center gap-2 px-5 py-3.5 border-b border-border/60 bg-muted/20 shrink-0">
-        <Sparkles size={16} className="text-primary" />
-        <span className="text-sm font-bold text-foreground tracking-tight">HissePro AI Finans Asistanı</span>
-        <span className="ml-auto text-[10px] font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase tracking-wider">
-          {context.includes(":") ? context.replace(":", " | ") : "Global"}
-        </span>
-      </div>
-
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 md:p-5 space-y-4 bg-transparent">
         {/* Welcome Message */}

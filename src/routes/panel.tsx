@@ -70,21 +70,29 @@ function PanelLayout() {
 
   return (
     <div className="flex-1 flex flex-row overflow-hidden relative bg-background font-sans h-full">
-      {/* Sol Collapsible Sidebar (1/4 Column) */}
+      {/* Mobile Sidebar Backdrop Overlay */}
+      {isLeftSidebarExpanded && (
+        <div 
+          onClick={toggleLeftSidebarExpanded}
+          className="fixed inset-0 bg-background/80 backdrop-blur-xs z-30 lg:hidden cursor-pointer animate-in fade-in duration-200"
+        />
+      )}
+
+      {/* Sol Collapsible Sidebar */}
       <LeftSidebar />
 
-      {/* Ana Kolon (3/4 Column) */}
+      {/* Ana Kolon */}
       <div className="flex-1 flex flex-col min-w-0 h-full relative overflow-hidden bg-background">
-        {/* Top Header inside main column */}
-        <header className="h-14 border-b border-border/85 bg-card/40 backdrop-blur-xs flex items-center px-4 md:px-6 shrink-0 justify-between z-30 select-none">
+        {/* Top Header inside main column (Sleeker h-12 height) */}
+        <header className="h-12 border-b border-border/60 bg-card/45 backdrop-blur-xs flex items-center px-4 md:px-6 shrink-0 justify-between z-20 select-none">
           <div className="flex items-center gap-3">
             {/* Toggle button using PanelLeft icon */}
             <button
               onClick={toggleLeftSidebarExpanded}
-              className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-all duration-200 cursor-pointer flex items-center justify-center border border-border/50 bg-card/50 shadow-2xs"
-              title={isLeftSidebarExpanded ? "İzleme Listesini Gizle" : "İzleme Listesini Göster"}
+              className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-all duration-200 cursor-pointer flex items-center justify-center border border-border/50 bg-card/50 shadow-2xs"
+              title={isLeftSidebarExpanded ? "Paneli Gizle" : "Paneli Göster"}
             >
-              <PanelLeft size={16} />
+              <PanelLeft size={14} />
             </button>
             
             {/* Section Breadcrumb */}
@@ -96,7 +104,7 @@ function PanelLayout() {
           </div>
           
           <div className="flex items-center gap-2">
-            <span className="text-[10px] bg-primary/10 text-primary border border-primary/20 px-2.5 py-0.5 rounded-full font-bold tracking-wider uppercase">
+            <span className="text-[9px] bg-primary/10 text-primary border border-primary/20 px-2.5 py-0.5 rounded-full font-bold tracking-wider uppercase">
               Asistan Aktif
             </span>
           </div>
