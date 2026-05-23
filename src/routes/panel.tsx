@@ -15,6 +15,7 @@ function PanelLayout() {
   const navigate = useNavigate()
   const location = useLocation()
   const { isLeftSidebarExpanded, toggleLeftSidebarExpanded } = useUIStore()
+  const [hasMessages, setHasMessages] = useState(false)
 
   useEffect(() => {
     if (!loading && !user) {
@@ -33,8 +34,6 @@ function PanelLayout() {
   if (!user) {
     return null
   }
-
-  const [hasMessages, setHasMessages] = useState(false)
 
   // Dynamic context for chatbot based on current path
   let context = 'global'
