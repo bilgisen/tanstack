@@ -7,7 +7,7 @@ export function useAuth() {
     try {
       await signIn.social({
         provider: "google",
-        callbackURL: window.location.origin,
+        callbackURL: `${window.location.origin}/panel`,
       });
     } catch (err) {
       console.error("Login failed:", err);

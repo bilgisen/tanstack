@@ -1,41 +1,21 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
-import { PriorityFeed } from '../components/dashboard/PriorityFeed'
-import { SectorHeatmap } from '../components/dashboard/SectorHeatmap'
-import { NewsImpact } from '../components/dashboard/NewsImpact'
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { useState, useEffect } from 'react'
+import { ChatPane } from '../components/dashboard/ChatPane'
+import { ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown, Activity } from 'lucide-react'
 
 export const Route = createFileRoute('/panel/')({
   component: PanelIndexPage,
 })
 
-const tabs = ['Borsa', 'Forex', 'Emtia', 'Kripto']
-
-const marketData = {
-  Borsa: [
-    { title: "BIST 30", value: "11.245,50", absChange: "+124,20", pctChange: "+1,20%", up: true },
-    { title: "BIST 100", value: "10.245,50", absChange: "+112,50", pctChange: "+1,10%", up: true },
-    { title: "BIST 500", value: "12.450,00", absChange: "+95,20", pctChange: "+0,80%", up: true },
-    { title: "Banka", value: "14.320,10", absChange: "-45,30", pctChange: "-0,30%", up: false },
-  ],
-  Forex: [
-    { title: "USD / TRY", value: "34,5210", absChange: "+0,0120", pctChange: "+0,03%", up: true },
-    { title: "EUR / TRY", value: "37,4520", absChange: "+0,0240", pctChange: "+0,05%", up: true },
-    { title: "EUR / USD", value: "1,0850", absChange: "-0,0012", pctChange: "-0,11%", up: false },
-    { title: "DXY", value: "104,20", absChange: "+0,15", pctChange: "+0,14%", up: true },
-  ],
-  Emtia: [
-    { title: "Ons Altın", value: "2.450,10", absChange: "+12,50", pctChange: "+0,51%", up: true },
-    { title: "Brent Petrol", value: "82,40", absChange: "-1,20", pctChange: "-1,45%", up: false },
-    { title: "Gümüş", value: "31,20", absChange: "+0,45", pctChange: "+1,45%", up: true },
-    { title: "Paladyum", value: "980,50", absChange: "-5,20", pctChange: "-0,50%", up: false },
-  ],
-  Kripto: [
-    { title: "Bitcoin", value: "$64.500", absChange: "+1.200", pctChange: "+1,90%", up: true },
-    { title: "Ethereum", value: "$3.450", absChange: "+85", pctChange: "+2,50%", up: true },
-    { title: "Ripple", value: "$0,52", absChange: "-0,01", pctChange: "-1,90%", up: false },
-    { title: "Dogecoin", value: "$0,12", absChange: "+0,005", pctChange: "+4,10%", up: true },
-  ]
-}
+type IndexData = {
+  id: string;
+  title: string;
+  code: string;
+  value: string;
+  absChange: string;
+  pctChange: string;
+  up: boolean;
+};
 
 const Sparkline = ({ up }: { up: boolean }) => {
   const color = up ? "oklch(0.65 0.13 145)" : "oklch(0.5248 0.1368 20.8317)" 
@@ -47,7 +27,7 @@ const Sparkline = ({ up }: { up: boolean }) => {
     <svg className="w-full h-10 mt-1" viewBox="0 0 60 30" preserveAspectRatio="none">
       <defs>
         <linearGradient id={`gradient-${up ? 'up' : 'down'}`} x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.2" />
+          <stop offset="0%" stopColor={color} stopOpacity="0.15" />
           <stop offset="100%" stopColor={color} stopOpacity="0" />
         </linearGradient>
       </defs>
@@ -68,70 +48,119 @@ const Sparkline = ({ up }: { up: boolean }) => {
 }
 
 function PanelIndexPage() {
-  const [activeTab, setActiveTab] = useState<'Borsa'|'Forex'|'Emtia'|'Kripto'>('Borsa')
+  const [indices, setIndices] = useState<IndexData[]>([
+    { id: "bist30", title: "BIST 30", code: "XU030", value: "11.245,50", absChange: "+124,20", pctChange: "+1,20%", up: true },
+    { id: "bist100", title: "BIST 100", code: "XU100", value: "10.245,50", absChange: "+112,50", pctChange: "+1,10%", up: true },
+    { id: "bistbanka", title: "BIST Banka", code: "XBANK", value: "14.320,10", absChange: "-45,30", pctChange: "-0,30%", up: false },
+  ]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchIndexData() {
+      try {
+        const apiUrl = import.meta.env.VITE_HONO_API_URL || "http://127.0.0.1:8787";
+        const res = await fetch(`${apiUrl}/api/market/summary`);
+        if (!res.ok) throw new Error("API error");
+        const json = await res.json();
+        
+        if (json.data && Array.isArray(json.data)) {
+          const updated = indices.map(index => {
+            const apiItem = json.data.find((item: any) => item.code.toUpperCase() === index.code);
+            if (apiItem) {
+              const last_price = apiItem.last_price || 0;
+              const diff_percent = apiItem.diff_percent || 0;
+              const up = diff_percent >= 0;
+              const absChange = (last_price * (diff_percent / 100)).toFixed(2);
+              
+              return {
+                ...index,
+                value: last_price.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                absChange: `${up ? "+" : ""}${Number(absChange).toLocaleString("tr-TR")}`,
+                pctChange: `${up ? "+" : ""}${diff_percent.toFixed(2)}%`,
+                up,
+              };
+            }
+            return index;
+          });
+          setIndices(updated);
+        }
+      } catch (err) {
+        console.error("Failed to load real-time index summary", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchIndexData();
+    // Poll index data every 30 seconds
+    const interval = setInterval(fetchIndexData, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 flex flex-col h-full">
       
-      {/* Horizontal Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide shrink-0">
-        {tabs.map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab as any)}
-            className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
-              activeTab === tab 
-                ? "bg-primary text-primary-foreground border border-primary shadow-2xs" 
-                : "text-muted-foreground hover:text-foreground hover:bg-muted border border-border bg-card/50"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
+      {/* Upper Section: Welcome Header & Status Indicator */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shrink-0">
+        <div>
+          <h1 className="text-xl md:text-2xl font-black text-foreground tracking-tight">Üye Paneli</h1>
+          <p className="text-xs md:text-sm text-muted-foreground font-medium">BIST verilerini yapay zeka entegrasyonuyla takip edin</p>
+        </div>
+        <div className="flex items-center gap-2 self-start sm:self-center bg-card border border-border px-3 py-1.5 rounded-full shadow-2xs">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider flex items-center gap-1">
+            <Activity size={10} /> BIST Canlı Veri Akışı
+          </span>
+        </div>
       </div>
 
-      {/* 4 Market Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 shrink-0">
-        {marketData[activeTab].map((stat, i) => (
-          <div key={i} className="bg-card hover:bg-muted/35 border border-border transition-colors rounded-2xl p-4 flex flex-col justify-between shadow-sm cursor-pointer group h-32 relative overflow-hidden">
+      {/* Index Cards (BIST 30, BIST 100, BIST Banka) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
+        {indices.map((ind) => (
+          <Link
+            key={ind.id}
+            to={`/panel/endeksler/${ind.id}` as any}
+            className="bg-card hover:bg-muted/40 border border-border transition-all rounded-2xl p-4 flex flex-col justify-between shadow-xs cursor-pointer group h-32 relative overflow-hidden active:scale-[0.99]"
+          >
             <div className="relative z-10 flex flex-col h-full">
-              <span className="text-muted-foreground text-xs font-semibold">{stat.title}</span>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground text-xs font-bold uppercase tracking-wider">{ind.title}</span>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5 ${
+                  ind.up ? "bg-emerald-500/10 text-emerald-500" : "bg-destructive/10 text-destructive"
+                }`}>
+                  {ind.up ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+                  {ind.pctChange}
+                </span>
+              </div>
+              
               <div className="mt-auto">
-                <span className="text-lg font-bold text-foreground tracking-tight block leading-none mb-1.5">{stat.value}</span>
-                <div className="flex items-center gap-1.5">
-                  <span className={`text-[11px] font-bold ${stat.up ? "text-teal-600 dark:text-teal-400" : "text-destructive"}`}>
-                    ({stat.absChange})
-                  </span>
-                  <span className={`flex items-center text-[11px] font-bold ${stat.up ? "text-teal-600 dark:text-teal-400" : "text-destructive"}`}>
-                    {stat.pctChange}
-                  </span>
-                </div>
+                <span className="text-xl font-black text-foreground tracking-tight block leading-none mb-1 group-hover:text-primary transition-colors">
+                  {ind.value}
+                </span>
+                <span className="text-[10px] font-semibold text-muted-foreground block">
+                  Değişim: {ind.absChange}
+                </span>
               </div>
             </div>
             
-            <div className="absolute bottom-0 left-0 right-0 h-16 opacity-80 group-hover:opacity-100 transition-opacity">
-              <Sparkline up={stat.up} />
+            {/* Background mini sparkline graph */}
+            <div className="absolute bottom-0 left-0 right-0 h-14 opacity-60 group-hover:opacity-100 transition-opacity">
+              <Sparkline up={ind.up} />
             </div>
-          </div>
+          </Link>
         ))}
       </div>
 
-      {/* Bento Box Layout */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-[400px]">
-        {/* Priority Feed */}
-        <div className="lg:col-span-5 flex flex-col">
-          <PriorityFeed />
-        </div>
-        
-        {/* Right side stack */}
-        <div className="lg:col-span-7 flex flex-col gap-4">
-          <div className="flex-1 min-h-[200px]">
-            <SectorHeatmap />
-          </div>
-          <div className="flex-1 min-h-[200px]">
-            <NewsImpact />
-          </div>
-        </div>
+      {/* Main Focus: AI Chat Asistanı */}
+      <div className="flex-1 flex flex-col min-h-[450px]">
+        <ChatPane 
+          context="global" 
+          placeholder="BIST 100 endeksi, teknik seviyeler veya şirket rasyoları hakkında sorularınızı bana yöneltin..."
+          className="flex-1 shadow-md bg-card/60 backdrop-blur-xs border-border"
+        />
       </div>
 
     </div>

@@ -1,240 +1,243 @@
-import { useState, useRef, useEffect } from "react";
-import { MessageSquare, X, ArrowUp, Plus, Edit, History, Maximize, Sparkles, Globe, LineChart, Loader2, User as UserIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Newspaper, X, ChevronRight, Zap } from "lucide-react";
 import { useUIStore } from "../../store/ui";
-import { useNavigate } from "@tanstack/react-router";
 
-type Message = {
-  role: "user" | "assistant";
-  text: string;
+type StockItem = {
+  code: string;
+  name: string;
+  display_name?: string;
+  last_price: number;
+  diff_percent: number;
+  volume?: number;
+};
+
+type NewsItem = {
+  id: number;
+  time: string;
+  title: string;
+  source: string;
+  impact: "positive" | "negative" | "neutral";
 };
 
 export function RightSidebar() {
-  const { isRightSidebarOpen, toggleRightSidebar, globalPrompt, setGlobalPrompt, isRightSidebarExpanded, toggleRightSidebarExpanded } = useUIStore();
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { isRightSidebarOpen, toggleRightSidebar } = useUIStore();
+  const [stocks, setStocks] = useState<StockItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  useEffect(() => {
-    if (globalPrompt) {
-      handleSend(globalPrompt);
-      setGlobalPrompt(null);
-    }
-  }, [globalPrompt]);
-
-  const handleSend = async (forcedMessage?: string) => {
-    const textToSend = forcedMessage || input.trim();
-    if (!textToSend || isLoading) return;
-
-    if (!forcedMessage) setInput("");
-    setMessages((prev) => [...prev, { role: "user", text: textToSend }]);
-    setIsLoading(true);
-
-    try {
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || "http://127.0.0.1:8787";
-      const response = await fetch(`${apiUrl}/api/ai/chat`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: textToSend,
-          context: window.location.pathname,
-        }),
-      });
-
-      if (!response.ok) throw new Error("API yanıt vermedi");
-      
-      const data = await response.json();
-      let replyText = data.reply || "Bir hata oluştu.";
-
-      const navigateMatch = replyText.match(/\[NAVIGATE:(.*?)\]/);
-      if (navigateMatch) {
-        const path = navigateMatch[1];
-        replyText = replyText.replace(navigateMatch[0], "").trim();
-        navigate({ to: path as any });
+    async function fetchMarketData() {
+      try {
+        const apiUrl = import.meta.env.VITE_HONO_API_URL || "http://127.0.0.1:8787";
+        const res = await fetch(`${apiUrl}/api/market/stocks`);
+        if (!res.ok) throw new Error("Network error");
+        const json = await res.json();
+        if (json.data && Array.isArray(json.data)) {
+          setStocks(json.data);
+        }
+      } catch (err) {
+        console.error("Failed to load market stocks for side panel", err);
+      } finally {
+        setLoading(false);
       }
-
-      if (replyText.trim()) {
-         setMessages((prev) => [...prev, { role: "assistant", text: replyText }]);
-      }
-    } catch (error) {
-      console.error(error);
-      setMessages((prev) => [...prev, { role: "assistant", text: "Üzgünüm, şu an sunucuya bağlanamıyorum." }]);
-    } finally {
-      setIsLoading(false);
     }
-  };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+    if (isRightSidebarOpen) {
+      fetchMarketData();
     }
+  }, [isRightSidebarOpen]);
+
+  // Robust fallback data if server is cold starting or API fails
+  const fallbackStocks: StockItem[] = [
+    { code: "THYAO", name: "TÜRK HAVA YOLLARI", last_price: 312.50, diff_percent: 4.82, volume: 85000000 },
+    { code: "TUPRS", name: "TÜPRAŞ", last_price: 185.40, diff_percent: 3.12, volume: 42000000 },
+    { code: "KCHOL", name: "KOÇ HOLDİNG", last_price: 242.10, diff_percent: 2.85, volume: 38000000 },
+    { code: "AKBNK", name: "AKBANK", last_price: 58.40, diff_percent: -3.42, volume: 55000000 },
+    { code: "EREGL", name: "EREĞLİ DEMİR ÇELİK", last_price: 48.12, diff_percent: -2.85, volume: 29000000 },
+    { code: "YKBNK", name: "YAPI KREDİ BANKASI", last_price: 32.10, diff_percent: -4.15, volume: 48000000 },
+    { code: "ASELS", name: "ASELSAN ELEKTRONİK", last_price: 64.20, diff_percent: 5.12, volume: 31000000 },
+    { code: "SAHOL", name: "SABANCI HOLDİNG", last_price: 98.70, diff_percent: -1.25, volume: 21000000 },
+    { code: "PGSUS", name: "PEGASUS HAVA YOLLARI", last_price: 985.00, diff_percent: 6.45, volume: 15000000 },
+    { code: "BIMAS", name: "BİM BİRLEŞİK MAĞAZALAR", last_price: 385.50, diff_percent: -0.52, volume: 12000000 },
+  ];
+
+  const listStocks = stocks.length > 0 ? stocks : fallbackStocks;
+
+  // Compute Gainers & Losers
+  const gainers = [...listStocks]
+    .filter((s) => s.diff_percent > 0)
+    .sort((a, b) => b.diff_percent - a.diff_percent)
+    .slice(0, 5);
+
+  const losers = [...listStocks]
+    .filter((s) => s.diff_percent < 0)
+    .sort((a, b) => a.diff_percent - b.diff_percent)
+    .slice(0, 5);
+
+  // Mock Premium Financial News/KAP Feed
+  const newsFeed: NewsItem[] = [
+    { id: 1, time: "16:45", title: "THYAO, yeni uçak alım finansmanı için uluslararası bankalarla anlaştı.", source: "KAP", impact: "positive" },
+    { id: 2, time: "15:20", title: "BIST Gıda Endeksi, küresel emtia fiyatlarındaki gerilemeyle düşüşte.", source: "Foreks", impact: "negative" },
+    { id: 3, time: "14:10", title: "Ereğli Demir Çelik (EREGL) yüksek fırın modernizasyon çalışmasını tamamladı.", source: "KAP", impact: "positive" },
+    { id: 4, time: "11:30", title: "Hazine ve Maliye Bakanlığı, yeni tahvil ihracı detaylarını paylaştı.", source: "Bloomberg", impact: "neutral" },
+  ];
+
+  const handleStockClick = (code: string) => {
+    navigate({ to: `/panel/sirketler/${code.toLowerCase()}` as any });
   };
-
-  const isEmpty = messages.length === 0;
-
-  const chatContent = (
-    <>
-      <div className="flex-1 overflow-y-auto p-5 space-y-6 bg-white dark:bg-[#0f1115]">
-        {isEmpty ? (
-          <div className="space-y-8 pt-2 animate-in fade-in duration-500">
-            <div>
-              <h2 className="text-[22px] font-bold text-zinc-900 dark:text-zinc-100 mb-5 tracking-tight">
-                Aklınızda ne var?
-              </h2>
-              <button 
-                onClick={() => handleSend("Bugün piyasalarda neler oluyor?")}
-                className="w-full bg-zinc-50 hover:bg-zinc-100 dark:bg-[#1a1c23] dark:hover:bg-[#22252d] border border-transparent hover:border-zinc-200 dark:hover:border-zinc-800 rounded-2xl p-4 flex items-center justify-between transition-all group text-left"
-              >
-                <span className="text-[15px] text-zinc-700 dark:text-zinc-200 font-medium">Bugün piyasalarda neler oluyor?</span>
-                <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center text-zinc-500 dark:text-zinc-400 group-hover:text-emerald-500 transition-colors">
-                  <Sparkles size={16} />
-                </div>
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="text-[15px] font-semibold text-zinc-600 dark:text-zinc-300">Neler yapabileceğinizi keşfedin</h3>
-              
-              <div className="flex flex-col gap-2.5 items-start">
-                <button 
-                  onClick={() => handleSend("Derin analiz yap (Deep Search)")}
-                  className="flex items-center gap-2.5 bg-zinc-100 hover:bg-zinc-200 dark:bg-[#1a1c23] dark:hover:bg-[#22252d] text-zinc-700 dark:text-zinc-200 px-5 py-2.5 rounded-full text-[15px] font-medium transition-colors"
-                >
-                  <Globe size={18} className="text-emerald-600 dark:text-emerald-400" />
-                  Deep Search
-                </button>
-
-                <button 
-                  onClick={() => handleSend("İzleme listemi analiz et")}
-                  className="flex items-center gap-2.5 bg-zinc-100 hover:bg-zinc-200 dark:bg-[#1a1c23] dark:hover:bg-[#22252d] text-zinc-700 dark:text-zinc-200 px-5 py-2.5 rounded-full text-[15px] font-medium transition-colors"
-                >
-                  <LineChart size={18} className="text-emerald-600 dark:text-emerald-400" />
-                  İzleme listemi analiz et
-                </button>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-5 pb-4">
-            {messages.map((msg, idx) => (
-              <div key={idx} className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                  msg.role === "user" ? "bg-zinc-200 dark:bg-[#1a1c23] text-zinc-600 dark:text-zinc-400" : "bg-emerald-100 dark:bg-[#1a1c23] text-emerald-600 dark:text-emerald-500"
-                }`}>
-                  {msg.role === "user" ? <UserIcon size={14} /> : <Sparkles size={14} />}
-                </div>
-                <div className={`rounded-2xl px-4 py-3 text-[15px] max-w-[85%] whitespace-pre-wrap leading-relaxed ${
-                  msg.role === "user" 
-                    ? "bg-zinc-100 dark:bg-[#1a1c23] text-zinc-900 dark:text-zinc-100 rounded-tr-sm" 
-                    : "bg-transparent text-zinc-800 dark:text-zinc-200"
-                }`}>
-                  {msg.text}
-                </div>
-              </div>
-            ))}
-            {isLoading && (
-              <div className="flex gap-3 animate-pulse">
-                <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-[#1a1c23] text-emerald-600 dark:text-emerald-500 flex items-center justify-center shrink-0">
-                  <Sparkles size={14} />
-                </div>
-                <div className="py-3 text-[15px] text-zinc-500 dark:text-zinc-400 flex items-center gap-2">
-                  <Loader2 size={16} className="animate-spin text-emerald-500" /> Analiz ediliyor...
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-        )}
-      </div>
-
-      <div className="p-4 pt-0 bg-white dark:bg-[#0f1115] shrink-0">
-        <div className="relative flex flex-col bg-zinc-100 dark:bg-[#1a1c23] rounded-[24px] border border-transparent focus-within:border-zinc-300 dark:focus-within:border-zinc-700 transition-colors">
-          <textarea 
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={isLoading}
-            placeholder="Soru sorun" 
-            rows={isEmpty ? 3 : 1}
-            className="w-full bg-transparent border-none outline-none resize-none px-5 pt-4 pb-2 text-[15px] text-zinc-900 dark:text-zinc-100 placeholder-zinc-500 dark:placeholder-zinc-400 disabled:opacity-50 min-h-[56px] max-h-[150px]"
-          />
-          <div className="flex items-center justify-between px-3 pb-3">
-            <button className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-[#2a2d36] rounded-full transition-colors">
-              <Plus size={20} />
-            </button>
-            <button 
-              onClick={() => handleSend()}
-              disabled={isLoading || !input.trim()}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-900 text-white dark:bg-[#2a2d36] dark:text-zinc-300 hover:bg-zinc-800 dark:hover:text-white dark:hover:bg-zinc-700 disabled:opacity-30 disabled:hover:bg-zinc-900 dark:disabled:hover:bg-[#2a2d36] transition-colors"
-            >
-              <ArrowUp size={18} strokeWidth={2.5} />
-            </button>
-          </div>
-        </div>
-      </div>
-    </>
-  );
 
   return (
-    <>
-      <aside className={`
-        hidden md:flex flex-col border-l dark:border-zinc-900 border-zinc-200 bg-white dark:bg-[#0f1115] transition-all duration-300
-        ${isRightSidebarOpen ? (isRightSidebarExpanded ? "flex-1" : "w-[380px] lg:w-[420px]") : "w-0 overflow-hidden border-none"}
-      `}>
-        <div className="h-16 flex items-center justify-between px-5 shrink-0">
-          <h2 className="text-lg font-semibold tracking-tight dark:text-zinc-100 text-zinc-900">
-            Araştırma
-          </h2>
-          <div className="flex items-center gap-1.5">
-            <button className="w-8 h-8 flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-[#1a1c23] rounded-full transition-colors" title="Yeni Sohbet">
-              <Edit size={18} />
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-[#1a1c23] rounded-full transition-colors" title="Geçmiş">
-              <History size={18} />
-            </button>
-            <button onClick={toggleRightSidebarExpanded} className="w-8 h-8 flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-[#1a1c23] rounded-full transition-colors" title="Genişlet/Daralt">
-              <Maximize size={18} />
-            </button>
+    <aside 
+      className={`
+        hidden lg:flex flex-col border-l border-border bg-card text-card-foreground shrink-0 z-30 transition-all duration-300 relative h-full overflow-hidden
+        ${isRightSidebarOpen ? "w-[320px] xl:w-[350px]" : "w-0 border-none"}
+      `}
+    >
+      {/* Header */}
+      <div className="h-16 flex items-center justify-between px-5 border-b border-border/80 sticky top-0 bg-card z-10">
+        <h2 className="text-sm font-bold tracking-tight text-foreground uppercase flex items-center gap-2">
+          <Zap size={14} className="text-primary animate-pulse" /> Pazar Analizi
+        </h2>
+        <button 
+          onClick={toggleRightSidebar}
+          className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
+          title="Paneli Kapat"
+        >
+          <X size={14} />
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+        
+        {/* Top Gainers */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-1.5 text-emerald-500 font-bold text-xs uppercase tracking-wider">
+            <TrendingUp size={14} />
+            <span>En Çok Yükselenler</span>
+          </div>
+          <div className="space-y-1.5">
+            {loading ? (
+              <div className="h-24 bg-muted/30 rounded-xl animate-pulse" />
+            ) : (
+              gainers.map((s, idx) => (
+                <div 
+                  key={idx}
+                  onClick={() => handleStockClick(s.code)}
+                  className="flex items-center justify-between p-2.5 rounded-xl hover:bg-muted/50 border border-transparent hover:border-border/40 transition-all cursor-pointer group"
+                >
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-bold text-xs text-foreground group-hover:text-primary transition-colors">
+                      {s.code}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground truncate max-w-[130px] xl:max-w-[160px]">
+                      {s.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-xs font-semibold text-foreground">
+                      {s.last_price.toFixed(2)}
+                    </span>
+                    <span className="text-[10px] font-bold bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                      <ArrowUpRight size={10} />
+                      {s.diff_percent.toFixed(2)}%
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
-        
-        {isRightSidebarOpen && chatContent}
-      </aside>
 
-      {/* Mobile FAB and Bottom Sheet */}
-      <button 
-        className="md:hidden fixed bottom-16 right-4 w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center shadow-lg shadow-emerald-900/40 z-50 text-white transition-transform hover:scale-105 active:scale-95"
-        onClick={toggleRightSidebar}
-      >
-        <MessageSquare size={18} />
-      </button>
-
-      {isRightSidebarOpen && (
-        <>
-          <div className="md:hidden fixed inset-0 bg-black/50 z-40" onClick={toggleRightSidebar} />
-          <div className="md:hidden fixed inset-x-0 bottom-0 h-[85vh] bg-white dark:bg-[#0f1115] border-t dark:border-zinc-900 border-zinc-200 z-50 flex flex-col rounded-t-[32px] shadow-2xl animate-in slide-in-from-bottom duration-300">
-            <div className="h-16 flex items-center justify-between px-6 shrink-0 mt-2">
-              <h2 className="text-lg font-semibold tracking-tight dark:text-zinc-100 text-zinc-900">Araştırma</h2>
-              <button onClick={toggleRightSidebar} className="text-zinc-400 dark:hover:text-zinc-200 hover:text-zinc-700 bg-zinc-100 dark:bg-zinc-900 p-2 rounded-full">
-                <X size={18} />
-              </button>
-            </div>
-            {chatContent}
+        {/* Top Losers */}
+        <div className="space-y-3 border-t border-border/40 pt-5">
+          <div className="flex items-center gap-1.5 text-destructive font-bold text-xs uppercase tracking-wider">
+            <TrendingDown size={14} />
+            <span>En Çok Düşenler</span>
           </div>
-        </>
-      )}
-    </>
+          <div className="space-y-1.5">
+            {loading ? (
+              <div className="h-24 bg-muted/30 rounded-xl animate-pulse" />
+            ) : (
+              losers.map((s, idx) => (
+                <div 
+                  key={idx}
+                  onClick={() => handleStockClick(s.code)}
+                  className="flex items-center justify-between p-2.5 rounded-xl hover:bg-muted/50 border border-transparent hover:border-border/40 transition-all cursor-pointer group"
+                >
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-bold text-xs text-foreground group-hover:text-primary transition-colors">
+                      {s.code}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground truncate max-w-[130px] xl:max-w-[160px]">
+                      {s.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-xs font-semibold text-foreground">
+                      {s.last_price.toFixed(2)}
+                    </span>
+                    <span className="text-[10px] font-bold bg-destructive/10 text-destructive px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                      <ArrowDownRight size={10} />
+                      {Math.abs(s.diff_percent).toFixed(2)}%
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* KAP & News Feed */}
+        <div className="space-y-3 border-t border-border/40 pt-5">
+          <div className="flex items-center gap-1.5 text-foreground font-bold text-xs uppercase tracking-wider">
+            <Newspaper size={14} className="text-primary" />
+            <span>KAP & Gündem</span>
+          </div>
+          <div className="space-y-2">
+            {newsFeed.map((news) => {
+              const impactColor = 
+                news.impact === "positive" 
+                  ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" 
+                  : news.impact === "negative" 
+                  ? "bg-destructive/10 text-destructive border-destructive/20" 
+                  : "bg-muted text-muted-foreground border-border";
+
+              const impactLabel = 
+                news.impact === "positive" 
+                  ? "Pozitif" 
+                  : news.impact === "negative" 
+                  ? "Negatif" 
+                  : "Nötr";
+
+              return (
+                <div 
+                  key={news.id}
+                  className="p-3 bg-muted/20 border border-border/40 rounded-xl hover:bg-muted/40 transition-colors flex flex-col gap-2 relative overflow-hidden"
+                >
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="font-semibold text-primary">{news.source}</span>
+                    <span className="text-muted-foreground font-medium">{news.time}</span>
+                  </div>
+                  <p className="text-xs font-medium text-foreground leading-snug">
+                    {news.title}
+                  </p>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border ${impactColor}`}>
+                      Etki: {impactLabel}
+                    </span>
+                    <button className="text-[10px] font-semibold text-muted-foreground hover:text-primary flex items-center gap-0.5 transition-colors">
+                      Oku <ChevronRight size={10} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+      </div>
+    </aside>
   );
 }

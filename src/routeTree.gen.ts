@@ -14,6 +14,8 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PanelIndexRouteImport } from './routes/panel.index'
 import { Route as PanelBorsaRouteImport } from './routes/panel.borsa'
+import { Route as PanelSirketlerIdRouteImport } from './routes/panel.sirketler.$id'
+import { Route as PanelEndekslerIdRouteImport } from './routes/panel.endeksler.$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const PanelRoute = PanelRouteImport.update({
@@ -41,6 +43,16 @@ const PanelBorsaRoute = PanelBorsaRouteImport.update({
   path: '/borsa',
   getParentRoute: () => PanelRoute,
 } as any)
+const PanelSirketlerIdRoute = PanelSirketlerIdRouteImport.update({
+  id: '/sirketler/$id',
+  path: '/sirketler/$id',
+  getParentRoute: () => PanelRoute,
+} as any)
+const PanelEndekslerIdRoute = PanelEndekslerIdRouteImport.update({
+  id: '/endeksler/$id',
+  path: '/endeksler/$id',
+  getParentRoute: () => PanelRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -54,6 +66,8 @@ export interface FileRoutesByFullPath {
   '/panel/borsa': typeof PanelBorsaRoute
   '/panel/': typeof PanelIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/panel/endeksler/$id': typeof PanelEndekslerIdRoute
+  '/panel/sirketler/$id': typeof PanelSirketlerIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -61,6 +75,8 @@ export interface FileRoutesByTo {
   '/panel/borsa': typeof PanelBorsaRoute
   '/panel': typeof PanelIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/panel/endeksler/$id': typeof PanelEndekslerIdRoute
+  '/panel/sirketler/$id': typeof PanelSirketlerIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -70,6 +86,8 @@ export interface FileRoutesById {
   '/panel/borsa': typeof PanelBorsaRoute
   '/panel/': typeof PanelIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/panel/endeksler/$id': typeof PanelEndekslerIdRoute
+  '/panel/sirketler/$id': typeof PanelSirketlerIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -80,8 +98,17 @@ export interface FileRouteTypes {
     | '/panel/borsa'
     | '/panel/'
     | '/api/auth/$'
+    | '/panel/endeksler/$id'
+    | '/panel/sirketler/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/panel/borsa' | '/panel' | '/api/auth/$'
+  to:
+    | '/'
+    | '/login'
+    | '/panel/borsa'
+    | '/panel'
+    | '/api/auth/$'
+    | '/panel/endeksler/$id'
+    | '/panel/sirketler/$id'
   id:
     | '__root__'
     | '/'
@@ -90,6 +117,8 @@ export interface FileRouteTypes {
     | '/panel/borsa'
     | '/panel/'
     | '/api/auth/$'
+    | '/panel/endeksler/$id'
+    | '/panel/sirketler/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -136,6 +165,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PanelBorsaRouteImport
       parentRoute: typeof PanelRoute
     }
+    '/panel/sirketler/$id': {
+      id: '/panel/sirketler/$id'
+      path: '/sirketler/$id'
+      fullPath: '/panel/sirketler/$id'
+      preLoaderRoute: typeof PanelSirketlerIdRouteImport
+      parentRoute: typeof PanelRoute
+    }
+    '/panel/endeksler/$id': {
+      id: '/panel/endeksler/$id'
+      path: '/endeksler/$id'
+      fullPath: '/panel/endeksler/$id'
+      preLoaderRoute: typeof PanelEndekslerIdRouteImport
+      parentRoute: typeof PanelRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -149,11 +192,15 @@ declare module '@tanstack/react-router' {
 interface PanelRouteChildren {
   PanelBorsaRoute: typeof PanelBorsaRoute
   PanelIndexRoute: typeof PanelIndexRoute
+  PanelEndekslerIdRoute: typeof PanelEndekslerIdRoute
+  PanelSirketlerIdRoute: typeof PanelSirketlerIdRoute
 }
 
 const PanelRouteChildren: PanelRouteChildren = {
   PanelBorsaRoute: PanelBorsaRoute,
   PanelIndexRoute: PanelIndexRoute,
+  PanelEndekslerIdRoute: PanelEndekslerIdRoute,
+  PanelSirketlerIdRoute: PanelSirketlerIdRoute,
 }
 
 const PanelRouteWithChildren = PanelRoute._addFileChildren(PanelRouteChildren)
