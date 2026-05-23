@@ -1,9 +1,11 @@
 import { createFileRoute, Outlet, useNavigate, useLocation } from '@tanstack/react-router'
 import { useAuth } from '../hooks/useAuth'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { LeftSidebar } from '../components/layout/LeftSidebar'
+import { RightSidebar } from '../components/layout/RightSidebar'
 import { useUIStore } from '../store/ui'
-import { PanelLeft } from 'lucide-react'
+import { useChatStore } from '../store/chat'
+import { PanelLeft, PanelRight, Sparkles, User as UserIcon, Loader2 } from 'lucide-react'
 import { ChatPane } from '../components/dashboard/ChatPane'
 
 export const Route = createFileRoute('/panel')({
@@ -14,14 +16,27 @@ function PanelLayout() {
   const { user, loading } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const { isLeftSidebarExpanded, toggleLeftSidebarExpanded } = useUIStore()
-  const [hasMessages, setHasMessages] = useState(false)
+  const { 
+    isLeftSidebarExpanded, 
+    toggleLeftSidebarExpanded,
+    isRightSidebarOpen,
+    toggleRightSidebar 
+  } = useUIStore()
+  const { messages, isLoading } = useChatStore()
+  const mainScrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!loading && !user) {
       navigate({ to: '/' })
     }
   }, [user, loading, navigate])
+
+  // Scroll to bottom whenever messages or loading state change
+  useEffect(() => {
+    if (mainScrollRef.current) {
+      mainScrollRef.current.scrollTop = mainScrollRef.current.scrollHeight
+    }
+  }, [messages, isLoading])
 
   if (loading) {
     return (
@@ -101,33 +116,79 @@ function PanelLayout() {
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
-            <span className="text-[9px] bg-primary/10 text-primary border border-primary/20 px-2.5 py-0.5 rounded-full font-bold tracking-wider uppercase">
+          <div className="flex items-center gap-3">
+            <span className="text-[9px] bg-primary/10 text-primary border border-primary/20 px-2.5 py-0.5 rounded-full font-bold tracking-wider uppercase hidden sm:inline-block">
               Asistan Aktif
             </span>
+            {/* Symmetrical Right Sidebar Toggle Button using PanelRight */}
+            <button
+              onClick={toggleRightSidebar}
+              className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-all duration-200 cursor-pointer flex items-center justify-center border border-border/50 bg-card/50 shadow-2xs"
+              title={isRightSidebarOpen ? "Pazar Analizini Gizle" : "Pazar Analizini Göster"}
+            >
+              <PanelRight size={14} />
+            </button>
           </div>
         </header>
 
-        {/* Scrollable Sub-Page area (Outlet) - Dynamic padding-bottom to match chatbot height */}
-        <main className={`flex-1 overflow-y-auto bg-background p-4 md:p-6 custom-scrollbar min-w-0 relative z-10 transition-all duration-300 ${
-          hasMessages ? "pb-[260px]" : "pb-[135px]"
-        }`}>
-          <Outlet />
+        {/* Scrollable Sub-Page area (Outlet) OR Active Chat Stream Messages */}
+        <main 
+          ref={mainScrollRef}
+          className="flex-1 overflow-y-auto bg-background p-4 md:p-6 custom-scrollbar min-w-0 relative z-10 pb-20 scroll-smooth"
+        >
+          {messages.length > 0 ? (
+            <div className="max-w-3xl mx-auto space-y-6 py-4 animate-in fade-in duration-300">
+              {messages.map((msg, idx) => (
+                <div key={idx} className={`flex gap-4 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                  {msg.role !== "user" && (
+                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20 shadow-2xs">
+                      <Sparkles size={14} />
+                    </div>
+                  )}
+                  <div className={`rounded-2xl px-4 py-3 text-sm max-w-[85%] sm:max-w-[75%] whitespace-pre-wrap leading-relaxed ${
+                    msg.role === "user"
+                      ? "bg-primary text-primary-foreground font-medium rounded-tr-sm shadow-sm"
+                      : "bg-muted/40 text-foreground border border-border/40 rounded-tl-sm"
+                  }`}>
+                    {msg.text}
+                  </div>
+                  {msg.role === "user" && (
+                    <div className="w-8 h-8 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center shrink-0 border border-border/50 shadow-2xs">
+                      <UserIcon size={14} />
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {isLoading && (
+                <div className="flex gap-4 animate-pulse justify-start">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20 shadow-2xs">
+                    <Sparkles size={14} />
+                  </div>
+                  <div className="bg-muted/25 text-muted-foreground text-sm rounded-2xl rounded-tl-sm px-4 py-3 border border-border/30 flex items-center gap-2">
+                    <Loader2 size={14} className="animate-spin text-primary" />
+                    Yapay zeka analiz ediyor...
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Outlet />
+          )}
         </main>
 
-        {/* Fixed Chatbot at the absolute bottom - Dynamic height and Solid Background (No glass blur) */}
-        <div className={`absolute bottom-0 left-0 right-0 border-t border-border/80 bg-card z-40 flex flex-col shadow-lg transition-all duration-300 ${
-          hasMessages ? "h-[240px]" : "h-[115px]"
-        }`}>
+        {/* Fixed Chatbot at the absolute bottom - Compact, Elegant Solid Background Single-Row Container */}
+        <div className="absolute bottom-0 left-0 right-0 border-t border-border/80 bg-card z-40 h-[72px] flex flex-col shadow-lg">
           <ChatPane
             context={context}
             placeholder={placeholder}
-            onMessagesChange={setHasMessages}
-            className="h-full border-none shadow-none bg-transparent min-h-0 max-h-none rounded-none"
+            className="h-full border-none shadow-none bg-transparent min-h-0"
           />
         </div>
       </div>
+
+      {/* Sağ Collapsible Sidebar */}
+      <RightSidebar />
     </div>
   )
 }
-

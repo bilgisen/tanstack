@@ -20,9 +20,25 @@ type NewsItem = {
   impact: "positive" | "negative" | "neutral";
 };
 
+type IndexData = {
+  id: string;
+  title: string;
+  code: string;
+  value: string;
+  absChange: string;
+  pctChange: string;
+  up: boolean;
+};
+
 export function RightSidebar() {
   const { isRightSidebarOpen, toggleRightSidebar } = useUIStore();
   const [stocks, setStocks] = useState<StockItem[]>([]);
+  const [indices, setIndices] = useState<IndexData[]>([
+    { id: "bist30", title: "BIST 30", code: "XU030", value: "11.245,50", absChange: "+124,20", pctChange: "+1,20%", up: true },
+    { id: "bist100", title: "BIST 100", code: "XU100", value: "10.245,50", absChange: "+112,50", pctChange: "+1,10%", up: true },
+    { id: "bist500", title: "BIST 500", code: "XU500", value: "12.808,40", absChange: "+182,50", pctChange: "+1,45%", up: true },
+    { id: "bistbanka", title: "BIST Banka", code: "XBANK", value: "14.320,10", absChange: "-45,30", pctChange: "-0,30%", up: false },
+  ]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -30,14 +46,43 @@ export function RightSidebar() {
     async function fetchMarketData() {
       try {
         const apiUrl = import.meta.env.VITE_HONO_API_URL || "http://127.0.0.1:8787";
-        const res = await fetch(`${apiUrl}/api/market/stocks`);
-        if (!res.ok) throw new Error("Network error");
-        const json = await res.json();
-        if (json.data && Array.isArray(json.data)) {
-          setStocks(json.data);
+        
+        // Fetch Stocks
+        const resStocks = await fetch(`${apiUrl}/api/market/stocks`);
+        if (resStocks.ok) {
+          const json = await resStocks.json();
+          if (json.data && Array.isArray(json.data)) {
+            setStocks(json.data);
+          }
+        }
+
+        // Fetch Indices
+        const resIndices = await fetch(`${apiUrl}/api/market/summary`);
+        if (resIndices.ok) {
+          const json = await resIndices.json();
+          if (json.data && Array.isArray(json.data)) {
+            setIndices(prev => prev.map(index => {
+              const apiItem = json.data.find((item: any) => item.code.toUpperCase() === index.code);
+              if (apiItem) {
+                const last_price = apiItem.last_price || 0;
+                const diff_percent = apiItem.diff_percent || 0;
+                const up = diff_percent >= 0;
+                const absChange = (last_price * (diff_percent / 100)).toFixed(2);
+                
+                return {
+                  ...index,
+                  value: last_price.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                  absChange: `${up ? "+" : ""}${Number(absChange).toLocaleString("tr-TR")}`,
+                  pctChange: `${up ? "+" : ""}${diff_percent.toFixed(2)}%`,
+                  up,
+                };
+              }
+              return index;
+            }));
+          }
         }
       } catch (err) {
-        console.error("Failed to load market stocks for side panel", err);
+        console.error("Failed to load market data for side panel", err);
       } finally {
         setLoading(false);
       }
@@ -45,6 +90,8 @@ export function RightSidebar() {
 
     if (isRightSidebarOpen) {
       fetchMarketData();
+      const interval = setInterval(fetchMarketData, 30000);
+      return () => clearInterval(interval);
     }
   }, [isRightSidebarOpen]);
 
@@ -111,6 +158,31 @@ export function RightSidebar() {
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         
+        {/* 📊 BIST Indices Grid */}
+        <div className="grid grid-cols-2 gap-2 pb-1.5">
+          {indices.map((ind) => (
+            <Link
+              key={ind.id}
+              to={`/panel/endeksler/${ind.id}` as any}
+              className="bg-muted/20 hover:bg-muted/50 border border-border/40 hover:border-border/80 transition-all rounded-xl p-3 flex flex-col justify-between cursor-pointer group active:scale-[0.99] select-none"
+            >
+              <div className="flex flex-col gap-1 w-full">
+                <span className="text-muted-foreground text-[9px] font-extrabold uppercase tracking-wider group-hover:text-[#0e75ec] transition-colors">
+                  {ind.title}
+                </span>
+                <span className="text-xs font-black text-foreground tracking-tight block leading-none font-mono">
+                  ₺{ind.value}
+                </span>
+                <span className={`text-[9px] font-bold font-mono mt-0.5 ${
+                  ind.up ? "text-emerald-500" : "text-destructive"
+                }`}>
+                  {ind.pctChange}
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+
         {/* Top Gainers */}
         <div className="space-y-3">
           <div className="flex items-center gap-1.5 text-emerald-500 font-bold text-xs uppercase tracking-wider">

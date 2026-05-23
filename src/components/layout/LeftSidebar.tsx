@@ -11,6 +11,7 @@ import {
   CornerDownRight 
 } from "lucide-react";
 import { useUIStore } from "../../store/ui";
+import { useChatStore } from "../../store/chat";
 
 type SubItem = {
   name: string;
@@ -116,7 +117,7 @@ export function LeftSidebar() {
         {/* 1. New Conversation Button */}
         <button
           onClick={() => {
-            // New conversation placeholder
+            useChatStore.getState().clearChat();
             if (window.innerWidth < 1024) toggleLeftSidebarExpanded();
           }}
           className="w-full flex items-center justify-start gap-2.5 bg-muted/40 hover:bg-muted/80 text-foreground border border-border/80 hover:border-border rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer shadow-2xs active:scale-[0.98] shrink-0"
