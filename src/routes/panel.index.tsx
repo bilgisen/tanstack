@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
-import { ChatPane } from '../components/dashboard/ChatPane'
 import { ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown, Activity } from 'lucide-react'
 
 export const Route = createFileRoute('/panel/')({
@@ -152,15 +151,6 @@ function PanelIndexPage() {
             </div>
           </Link>
         ))}
-      </div>
-
-      {/* Main Focus: AI Chat Asistanı */}
-      <div className="flex-1 flex flex-col min-h-[450px]">
-        <ChatPane 
-          context="global" 
-          placeholder="BIST 100 endeksi, teknik seviyeler veya şirket rasyoları hakkında sorularınızı bana yöneltin..."
-          className="flex-1 shadow-md bg-card/60 backdrop-blur-xs border-border"
-        />
       </div>
 
     </div>

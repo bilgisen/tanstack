@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowDownRight, ArrowUpRight, TrendingUp, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, TrendingUp, PanelLeft } from "lucide-react";
 import { useUIStore } from "../../store/ui";
 
 type SummaryItem = {
@@ -57,25 +57,23 @@ export function LeftSidebar() {
   return (
     <aside className={`
       hidden lg:flex flex-col border-r border-border bg-card text-card-foreground shrink-0 z-30 transition-all duration-300 relative h-full overflow-hidden
-      ${isLeftSidebarExpanded ? "w-[280px]" : "w-[68px]"}
+      ${isLeftSidebarExpanded ? "w-[280px]" : "w-0 border-r-0"}
     `}>
       {/* Header */}
-      <div className={`h-16 flex items-center border-b border-border/80 sticky top-0 bg-card z-20 px-4 ${isLeftSidebarExpanded ? "justify-between" : "justify-center"}`}>
-        {isLeftSidebarExpanded ? (
-          <h2 className="text-xs font-bold tracking-wider text-muted-foreground uppercase flex items-center gap-2">
+      <div className={`h-14 flex items-center border-b border-border/80 sticky top-0 bg-card z-20 px-4 ${isLeftSidebarExpanded ? "justify-between" : "justify-center overflow-hidden"}`}>
+        {isLeftSidebarExpanded && (
+          <h2 className="text-xs font-bold tracking-wider text-muted-foreground uppercase flex items-center gap-2 animate-in fade-in duration-200">
             <TrendingUp size={14} className="text-primary" /> İzleme Listesi
           </h2>
-        ) : (
-          <TrendingUp size={16} className="text-primary" />
         )}
         <button 
           onClick={toggleLeftSidebarExpanded}
           className={`w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer ${
             isLeftSidebarExpanded ? "relative" : "absolute -right-0.5 top-4.5 bg-card border border-border rounded-l-md shadow-2xs"
           }`}
-          title={isLeftSidebarExpanded ? "Daralt" : "Genişlet"}
+          title={isLeftSidebarExpanded ? "Kapat" : "Aç"}
         >
-          {isLeftSidebarExpanded ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+          <PanelLeft size={14} className="text-muted-foreground hover:text-foreground" />
         </button>
       </div>
       

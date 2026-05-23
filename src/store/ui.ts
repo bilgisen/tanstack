@@ -47,7 +47,7 @@ export const useUIStore = create<UIState>((set) => ({
   openRightSidebar: () => set(() => ({ isRightSidebarOpen: true })),
   isRightSidebarExpanded: false,
   toggleRightSidebarExpanded: () => set((state) => ({ isRightSidebarExpanded: !state.isRightSidebarExpanded })),
-  isLeftSidebarExpanded: false,
+  isLeftSidebarExpanded: true,
   toggleLeftSidebarExpanded: () => set((state) => ({ isLeftSidebarExpanded: !state.isLeftSidebarExpanded })),
   isCommandPaletteOpen: false,
   openCommandPalette: () => set({ isCommandPaletteOpen: true }),

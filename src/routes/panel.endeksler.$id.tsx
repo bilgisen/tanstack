@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { ArrowLeft, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Globe, BarChart3, HelpCircle } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { ChatPane } from '../components/dashboard/ChatPane'
 
 export const Route = createFileRoute('/panel/endeksler/$id')({
   component: EndeksDetailPage,
@@ -206,11 +205,11 @@ function EndeksDetailPage() {
 
       </div>
 
-      {/* Constituent Stocks Table & Contextual AI Chat Split Layout */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 flex-1 min-h-[400px]">
+      {/* Constituent Stocks Table Layout */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 flex-1">
         
         {/* Table of Constituent Stocks */}
-        <div className="xl:col-span-6 bg-card border border-border rounded-2xl p-5 shadow-xs flex flex-col h-full">
+        <div className="xl:col-span-12 bg-card border border-border rounded-2xl p-5 shadow-xs flex flex-col h-full">
           <div className="flex items-center gap-1.5 text-xs font-bold text-foreground uppercase tracking-wider mb-4 shrink-0">
             <Globe size={14} className="text-primary" />
             <span>Endeks Bileşenleri ve Ağırlıkları</span>
@@ -257,16 +256,6 @@ function EndeksDetailPage() {
               </tbody>
             </table>
           </div>
-        </div>
-
-        {/* Dynamic Contextual AI Chatbot */}
-        <div className="xl:col-span-6 flex flex-col h-full min-h-[350px]">
-          <ChatPane 
-            context={`endeks:${rawId}`}
-            preseededWelcomeMessage={`Merhaba! **${indexData.name}** bileşenlerini, hacim hareketlerini ve teknik trend gücünü analiz ettim. Bu endeks veya hisseleri hakkında sormak istediğiniz her şeyi cevaplayabilirim.`}
-            placeholder={`${indexData.code} endeks analiz asistanına soru sorun...`}
-            className="flex-1 bg-card/50 backdrop-blur-xs border-border"
-          />
         </div>
 
       </div>

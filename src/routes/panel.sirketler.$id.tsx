@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowLeft, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Award, Compass, Calculator, Activity } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { ChatPane } from '../components/dashboard/ChatPane'
 
 export const Route = createFileRoute('/panel/sirketler/$id')({
   component: SirketDetailPage,
@@ -391,16 +390,6 @@ function SirketDetailPage() {
           </div>
         </div>
 
-      </div>
-
-      {/* Context-aware Chatbox Area as Bottom Centerpiece */}
-      <div className="flex-1 flex flex-col min-h-[400px]">
-        <ChatPane 
-          context={`sirket:${rawId}`}
-          preseededWelcomeMessage={`Merhaba! **${data.name}** (${data.code}) bilançosunu, İş Yatırım rasyolarını ve teknik analiz indikatörlerini taradım. Hissenin çarpan değerleri, destek/direnç noktaları veya gelecek beklentileri hakkında her türlü soruyu yanıtlayabilirim.`}
-          placeholder={`${data.code} hisse analiz asistanına soru sorun...`}
-          className="flex-1 bg-card/60 backdrop-blur-xs border-border"
-        />
       </div>
 
     </div>
