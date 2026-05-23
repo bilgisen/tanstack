@@ -1,26 +1,44 @@
-import { useEffect, useState } from 'react';
-import type { User, Session } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
+import { useSession, signIn, signOut } from '../lib/auth-client';
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data, isPending } = useSession();
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+  const handleLogin = async () => {
+    try {
+      await signIn.social({
+        provider: "google",
+        callbackURL: window.location.origin,
+      });
+    } catch (err) {
+      console.error("Login failed:", err);
+    }
+  };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-    });
+  const handleLogout = async () => {
+    try {
+      await signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            window.location.reload();
+          }
+        }
+      });
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  };
 
-    return () => subscription.unsubscribe();
-  }, []);
-
-  return { user, session, loading };
+  return {
+    user: data?.user ? {
+      ...data.user,
+      user_metadata: {
+        avatar_url: data.user.image,
+        full_name: data.user.name,
+      }
+    } : null,
+    session: data?.session,
+    loading: isPending,
+    login: handleLogin,
+    logout: handleLogout,
+  };
 }

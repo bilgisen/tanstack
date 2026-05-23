@@ -2,22 +2,49 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./db";
 import * as schema from "./auth-schema";
+import { ensureEnv } from "./env";
+import { tanstackStartCookies } from "better-auth/tanstack-start";
 
 let _auth: any = null;
 
 function getAuth() {
+  ensureEnv();
   if (!_auth) {
     _auth = betterAuth({
       database: drizzleAdapter(db, {
         provider: "pg",
         schema,
       }),
+      baseURL: process.env.BETTER_AUTH_URL || "https://tanstack.paraanaliz.workers.dev",
       socialProviders: {
         google: {
           clientId: process.env.GOOGLE_CLIENT_ID as string,
           clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
         },
       },
+      account: {
+        storeStateStrategy: "cookie", // OAuth durumunu veritabanı yerine güvenli çerezde saklar
+      },
+      session: {
+        cookieCache: {
+          enabled: true,
+          maxAge: 5 * 60, // Her istekte DB'ye gitmemek için 5 dakikalık session cache
+        },
+      },
+      trustedOrigins: [
+        "https://tanstack.paraanaliz.workers.dev",
+        "http://localhost:3000",
+      ],
+      advanced: {
+        defaultCookieAttributes: {
+          sameSite: "lax",
+          httpOnly: true,
+          secure: true, // Workers.dev üzerinde HTTPS zorunlu olduğu için
+        },
+      },
+      plugins: [
+        tanstackStartCookies()
+      ],
     });
   }
   return _auth;

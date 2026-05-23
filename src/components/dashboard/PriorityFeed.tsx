@@ -39,30 +39,30 @@ const mockFeed: FeedItem[] = [
 export function PriorityFeed() {
   const getIcon = (type: FeedItem['type']) => {
     switch(type) {
-      case 'danger': return <TrendingDown className="w-5 h-5 text-rose-500" />;
-      case 'success': return <TrendingUp className="w-5 h-5 text-emerald-500" />;
+      case 'danger': return <TrendingDown className="w-5 h-5 text-destructive" />;
+      case 'success': return <TrendingUp className="w-5 h-5 text-teal-600 dark:text-teal-400" />;
       case 'warning': return <AlertTriangle className="w-5 h-5 text-amber-500" />;
-      case 'info': return <Zap className="w-5 h-5 text-blue-500" />;
+      case 'info': return <Zap className="w-5 h-5 text-indigo-500" />;
     }
   };
 
   const getBorderColor = (type: FeedItem['type']) => {
     switch(type) {
-      case 'danger': return "border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.15)]";
-      case 'success': return "border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.15)]";
-      case 'warning': return "border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.15)]";
-      case 'info': return "border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.15)]";
+      case 'danger': return "border-destructive/30 hover:border-destructive/50 shadow-2xs";
+      case 'success': return "border-teal-500/30 hover:border-teal-500/50 shadow-2xs";
+      case 'warning': return "border-amber-500/30 hover:border-amber-500/50 shadow-2xs";
+      case 'info': return "border-indigo-500/30 hover:border-indigo-500/50 shadow-2xs";
     }
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#1a1c23] rounded-2xl border border-zinc-800/50 overflow-hidden">
-      <div className="p-4 border-b border-zinc-800/50 bg-[#1a1c23] sticky top-0 z-10 flex items-center justify-between">
-        <h3 className="font-semibold text-zinc-100 flex items-center gap-2">
-          <Zap className="w-4 h-4 text-emerald-500" fill="currentColor" />
+    <div className="flex flex-col h-full bg-card rounded-2xl border border-border overflow-hidden">
+      <div className="p-4 border-b border-border bg-card sticky top-0 z-10 flex items-center justify-between">
+        <h3 className="font-semibold text-foreground flex items-center gap-2">
+          <Zap className="w-4 h-4 text-primary" fill="currentColor" />
           AI Sinyalleri (Priority Feed)
         </h3>
-        <span className="text-xs font-medium text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-full animate-pulse">
+        <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full animate-pulse">
           Canlı
         </span>
       </div>
@@ -71,17 +71,17 @@ export function PriorityFeed() {
         {mockFeed.map(item => (
           <div 
             key={item.id} 
-            className={`p-4 rounded-xl bg-[#22252d] border ${getBorderColor(item.type)} transition-all hover:-translate-y-0.5 cursor-pointer`}
+            className={`p-4 rounded-xl bg-muted/30 border ${getBorderColor(item.type)} transition-all hover:-translate-y-0.5 cursor-pointer`}
           >
             <div className="flex items-start justify-between mb-2">
               <div className="flex items-center gap-2">
-                <span className="font-bold text-zinc-100">{item.ticker}</span>
-                <span className="text-xs text-zinc-500">• {item.time}</span>
+                <span className="font-bold text-foreground">{item.ticker}</span>
+                <span className="text-xs text-muted-foreground">• {item.time}</span>
               </div>
               {getIcon(item.type)}
             </div>
-            <h4 className="font-medium text-sm text-zinc-200 mb-1">{item.title}</h4>
-            <p className="text-sm text-zinc-400 leading-relaxed">
+            <h4 className="font-semibold text-sm text-foreground mb-1">{item.title}</h4>
+            <p className="text-sm text-muted-foreground leading-relaxed">
               {item.description}
             </p>
           </div>

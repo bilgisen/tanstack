@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { MessageSquare, X, ArrowUp, Plus, Edit, History, Maximize, Sparkles, Globe, LineChart, Loader2, Bot, User as UserIcon } from "lucide-react";
+import { MessageSquare, X, ArrowUp, Plus, Edit, History, Maximize, Sparkles, Globe, LineChart, Loader2, User as UserIcon } from "lucide-react";
 import { useUIStore } from "../../store/ui";
 import { useNavigate } from "@tanstack/react-router";
 

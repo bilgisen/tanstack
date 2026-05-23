@@ -82,7 +82,7 @@ export function CommandPalette() {
           
           {query.trim().length > 0 && (
             <div className="p-2">
-              <h3 className="px-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Sumo AI'a Sor</h3>
+              <h3 className="px-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">HissePro AI'a Sor</h3>
               <button 
                 onClick={handleAskAI}
                 className="w-full flex items-center gap-3 px-3 py-3 text-left rounded-xl bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 transition-colors group"
@@ -106,11 +106,11 @@ export function CommandPalette() {
                   <Clock className="w-3 h-3" /> Son Aramalar
                 </h3>
                 <div className="space-y-1">
-                  <button onClick={() => handleNavigate('/borsa')} className="w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 transition-colors">
+                  <button onClick={() => handleNavigate('/panel/borsa')} className="w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 transition-colors">
                     <FileText className="w-4 h-4 text-zinc-400" />
                     <span>BIST 100 Teknik Analizi</span>
                   </button>
-                  <button onClick={() => handleNavigate('/forex')} className="w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 transition-colors">
+                  <button onClick={() => handleNavigate('/panel/forex')} className="w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 transition-colors">
                     <FileText className="w-4 h-4 text-zinc-400" />
                     <span>USD/TRY Destek Seviyeleri</span>
                   </button>
@@ -123,7 +123,7 @@ export function CommandPalette() {
                 </h3>
                 <div className="grid grid-cols-2 gap-1">
                   {['THYAO', 'TUPRS', 'XAUUSD', 'BTCUSD'].map(ticker => (
-                    <button key={ticker} onClick={() => handleNavigate(ticker.includes('USD') ? '/kripto' : '/borsa')} className="flex items-center gap-3 px-3 py-2 text-left rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 transition-colors">
+                    <button key={ticker} onClick={() => handleNavigate(ticker.includes('USD') ? '/panel/kripto' : '/panel/borsa')} className="flex items-center gap-3 px-3 py-2 text-left rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 transition-colors">
                       <TrendingUp className="w-4 h-4 text-emerald-500" />
                       <span className="font-medium">{ticker}</span>
                     </button>
@@ -142,7 +142,7 @@ export function CommandPalette() {
             <span className="flex items-center gap-1"><kbd className="bg-zinc-200 dark:bg-zinc-800 px-1 rounded">↑↓</kbd> gezin</span>
           </div>
           <div className="flex items-center gap-1 font-medium">
-            <Command className="w-3 h-3" /> SumoTerminal AI
+            <Command className="w-3 h-3" /> HissePro AI
           </div>
         </div>
 

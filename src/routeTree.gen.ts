@@ -9,25 +9,37 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PanelRouteImport } from './routes/panel'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as BorsaRouteImport } from './routes/borsa'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PanelIndexRouteImport } from './routes/panel.index'
+import { Route as PanelBorsaRouteImport } from './routes/panel.borsa'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
+const PanelRoute = PanelRouteImport.update({
+  id: '/panel',
+  path: '/panel',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BorsaRoute = BorsaRouteImport.update({
-  id: '/borsa',
-  path: '/borsa',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PanelIndexRoute = PanelIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PanelRoute,
+} as any)
+const PanelBorsaRoute = PanelBorsaRouteImport.update({
+  id: '/borsa',
+  path: '/borsa',
+  getParentRoute: () => PanelRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
@@ -37,52 +49,70 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/borsa': typeof BorsaRoute
   '/login': typeof LoginRoute
+  '/panel': typeof PanelRouteWithChildren
+  '/panel/borsa': typeof PanelBorsaRoute
+  '/panel/': typeof PanelIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/borsa': typeof BorsaRoute
   '/login': typeof LoginRoute
+  '/panel/borsa': typeof PanelBorsaRoute
+  '/panel': typeof PanelIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/borsa': typeof BorsaRoute
   '/login': typeof LoginRoute
+  '/panel': typeof PanelRouteWithChildren
+  '/panel/borsa': typeof PanelBorsaRoute
+  '/panel/': typeof PanelIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/borsa' | '/login' | '/api/auth/$'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/panel'
+    | '/panel/borsa'
+    | '/panel/'
+    | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/borsa' | '/login' | '/api/auth/$'
-  id: '__root__' | '/' | '/borsa' | '/login' | '/api/auth/$'
+  to: '/' | '/login' | '/panel/borsa' | '/panel' | '/api/auth/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/panel'
+    | '/panel/borsa'
+    | '/panel/'
+    | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  BorsaRoute: typeof BorsaRoute
   LoginRoute: typeof LoginRoute
+  PanelRoute: typeof PanelRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/panel': {
+      id: '/panel'
+      path: '/panel'
+      fullPath: '/panel'
+      preLoaderRoute: typeof PanelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/borsa': {
-      id: '/borsa'
-      path: '/borsa'
-      fullPath: '/borsa'
-      preLoaderRoute: typeof BorsaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -91,6 +121,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/panel/': {
+      id: '/panel/'
+      path: '/'
+      fullPath: '/panel/'
+      preLoaderRoute: typeof PanelIndexRouteImport
+      parentRoute: typeof PanelRoute
+    }
+    '/panel/borsa': {
+      id: '/panel/borsa'
+      path: '/borsa'
+      fullPath: '/panel/borsa'
+      preLoaderRoute: typeof PanelBorsaRouteImport
+      parentRoute: typeof PanelRoute
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -102,10 +146,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface PanelRouteChildren {
+  PanelBorsaRoute: typeof PanelBorsaRoute
+  PanelIndexRoute: typeof PanelIndexRoute
+}
+
+const PanelRouteChildren: PanelRouteChildren = {
+  PanelBorsaRoute: PanelBorsaRoute,
+  PanelIndexRoute: PanelIndexRoute,
+}
+
+const PanelRouteWithChildren = PanelRoute._addFileChildren(PanelRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  BorsaRoute: BorsaRoute,
   LoginRoute: LoginRoute,
+  PanelRoute: PanelRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

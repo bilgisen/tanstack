@@ -16,10 +16,22 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "Hissekar.com | Yapay Zeka Destekli Borsa Analizi",
+        title: "hissepro | BIST Uzmanı Tek Yapay Zeka",
       },
     ],
     links: [
+      {
+        rel: "preconnect",
+        href: "https://fonts.googleapis.com",
+      },
+      {
+        rel: "preconnect",
+        href: "https://fonts.gstatic.com",
+      },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap",
+      },
       {
         rel: "stylesheet",
         href: appCss,
