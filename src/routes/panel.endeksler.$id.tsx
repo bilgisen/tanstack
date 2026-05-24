@@ -143,7 +143,7 @@ function EndeksDetailPage() {
               <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider">AI ÖZET ANALİZ</h3>
             </div>
             
-            <div className="text-sm md:text-[15px] text-foreground/80 leading-relaxed font-medium">
+            <div className="text-[15px] md:text-[17px] text-foreground/85 leading-relaxed font-medium">
               {indexSummary.map((p, idx) => (
                 <p key={idx} dangerouslySetInnerHTML={{ __html: p.replace(/\*\*(.*?)\*\*/g, '<strong class="text-foreground font-semibold">$1</strong>') }} />
               ))}

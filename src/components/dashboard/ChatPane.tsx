@@ -32,7 +32,7 @@ export function ChatPane({
   };
 
   return (
-    <div className={`flex items-center gap-3.5 bg-transparent px-4 py-3 md:py-3.5 w-full select-none ${className}`}>
+    <div className={`flex items-center gap-3 bg-transparent px-5 py-2.5 w-full select-none ${className}`}>
       {/* Textarea Input */}
       <textarea
         value={input}
@@ -41,17 +41,17 @@ export function ChatPane({
         disabled={isLoading}
         placeholder={placeholder}
         rows={1}
-        className="flex-1 bg-transparent border-none outline-none resize-none py-2.5 text-sm md:text-base text-foreground placeholder-muted-foreground/60 disabled:opacity-50 min-h-[44px] max-h-[120px] font-sans leading-relaxed"
+        className="flex-1 bg-transparent border-none outline-none resize-none py-3 text-base md:text-[17px] text-foreground placeholder-muted-foreground/60 disabled:opacity-50 min-h-[46px] max-h-[140px] font-sans leading-relaxed"
       />
 
       {/* Antigravity Blue Send Button */}
       <button
         onClick={handleSend}
         disabled={isLoading || !input.trim()}
-        className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#0e75ec] hover:bg-[#0c62bd] text-white disabled:opacity-30 transition-all cursor-pointer shadow-xs shrink-0 self-end mb-1"
+        className="w-10 h-10 flex items-center justify-center rounded-full bg-[#0e75ec] hover:bg-[#0c62bd] text-white disabled:opacity-30 transition-all cursor-pointer shadow-xs shrink-0 self-center"
         title="Gönder"
       >
-        <ArrowUp size={16} strokeWidth={2.5} />
+        <ArrowUp size={18} strokeWidth={2.5} />
       </button>
     </div>
   );

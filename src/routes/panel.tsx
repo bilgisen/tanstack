@@ -179,7 +179,7 @@ function PanelLayout() {
 
         {/* Floating Glassmorphic Chatbot Container at the Bottom */}
         <div className="absolute bottom-4 left-4 right-4 md:left-6 md:right-6 z-40 flex justify-center pointer-events-none">
-          <div className="w-full max-w-3xl bg-card/65 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl pointer-events-auto overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+          <div className="w-full max-w-3xl bg-card/75 backdrop-blur-xl border border-border/50 rounded-full shadow-2xl pointer-events-auto overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
             <ChatPane
               context={context}
               placeholder={placeholder}
