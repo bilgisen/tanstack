@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { ArrowUp } from "lucide-react";
 import { useChatStore } from "../../store/chat";
 
@@ -10,17 +10,21 @@ interface ChatPaneProps {
 
 export function ChatPane({
   context = "global",
-  placeholder = "HissePro asistanına borsa veya finans hakkında soru sorun...",
+  placeholder = "Bir soru sorun...",
   className = "",
 }: ChatPaneProps) {
   const [input, setInput] = useState("");
   const { isLoading, sendMessage } = useChatStore();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSend = async () => {
     const textToSend = input.trim();
     if (!textToSend || isLoading) return;
 
     setInput("");
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
     await sendMessage(textToSend, context);
   };
 
@@ -31,17 +35,27 @@ export function ChatPane({
     }
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const textarea = e.target;
+    setInput(textarea.value);
+    
+    // Auto-grow height logic
+    textarea.style.height = "auto";
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 140)}px`;
+  };
+
   return (
-    <div className={`flex items-center gap-3 bg-transparent px-5 py-2.5 w-full select-none ${className}`}>
+    <div className={`flex items-center gap-3 bg-transparent px-4 py-1.5 w-full select-none ${className}`}>
       {/* Textarea Input */}
       <textarea
+        ref={textareaRef}
         value={input}
-        onChange={(e) => setInput(e.target.value)}
+        onChange={handleChange}
         onKeyDown={handleKeyDown}
         disabled={isLoading}
         placeholder={placeholder}
         rows={1}
-        className="flex-1 bg-transparent border-none outline-none resize-none py-3 text-base md:text-[17px] text-foreground placeholder-muted-foreground/60 disabled:opacity-50 min-h-[46px] max-h-[140px] font-sans leading-relaxed"
+        className="flex-1 bg-transparent border-none outline-none resize-none py-2 text-base md:text-[17px] text-foreground placeholder-muted-foreground/60 disabled:opacity-50 min-h-[38px] max-h-[140px] font-sans leading-relaxed custom-scrollbar"
       />
 
       {/* Antigravity Blue Send Button */}

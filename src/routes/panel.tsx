@@ -52,7 +52,7 @@ function PanelLayout() {
 
   // Dynamic context for chatbot based on current path
   let context = 'global'
-  let placeholder = 'HissePro asistanına borsa veya finans hakkında soru sorun...'
+  let placeholder = 'Bir soru sorun...'
 
   const pathname = location.pathname.toLowerCase()
   if (pathname.includes('/endeksler/')) {
@@ -61,14 +61,14 @@ function PanelLayout() {
       const endeksId = parts[1]
       context = `endeks:${endeksId}`
       const indexName = endeksId === 'bist30' ? 'BIST 30' : endeksId === 'bist100' ? 'BIST 100' : endeksId === 'bistbanka' ? 'BIST Bankacılık' : endeksId.toUpperCase()
-      placeholder = `${indexName} endeks analiz asistanına soru sorun...`
+      placeholder = `${indexName} hakkında bir soru sorun...`
     }
   } else if (pathname.includes('/sirketler/')) {
     const parts = pathname.split('/sirketler/')
     if (parts[1]) {
       const ticker = parts[1].toUpperCase()
       context = `sirket:${ticker.toLowerCase()}`
-      placeholder = `${ticker} hisse analiz asistanına soru sorun...`
+      placeholder = `${ticker} hakkında bir soru sorun...`
     }
   }
 
