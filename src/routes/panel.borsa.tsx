@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { 
   ArrowUpRight, 
@@ -63,8 +63,24 @@ type HistoryItem = {
   volume: number;
 }
 
+type IndexData = {
+  id: string;
+  title: string;
+  code: string;
+  value: string;
+  absChange: string;
+  pctChange: string;
+  up: boolean;
+};
+
 function BorsaPage() {
   const [stocks, setStocks] = useState<Stock[]>([])
+  const [indices, setIndices] = useState<IndexData[]>([
+    { id: "bist30", title: "BIST 30", code: "XU030", value: "11.245,50", absChange: "+124,20", pctChange: "+1,20%", up: true },
+    { id: "bist100", title: "BIST 100", code: "XU100", value: "10.245,50", absChange: "+112,50", pctChange: "+1,10%", up: true },
+    { id: "bist500", title: "BIST 500", code: "XU500", value: "12.808,40", absChange: "+182,50", pctChange: "+1,45%", up: true },
+    { id: "bistbanka", title: "BIST Banka", code: "XBANK", value: "14.320,10", absChange: "-45,30", pctChange: "-0,30%", up: false },
+  ])
   const [searchQuery, setSearchQuery] = useState("")
   const [loading, setLoading] = useState(true)
   const [selectedTicker, setSelectedTicker] = useState<string | null>(null)
@@ -81,9 +97,11 @@ function BorsaPage() {
   const { setGlobalPrompt, openRightSidebar } = useUIStore()
 
   useEffect(() => {
-    async function fetchStocks() {
+    async function fetchMarketData() {
+      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev"
+      
+      // Fetch Stocks
       try {
-        const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev"
         const res = await fetch(`${apiUrl}/api/market/stocks`)
         if (res.ok) {
           const json = await res.json()
@@ -94,8 +112,41 @@ function BorsaPage() {
       } finally {
         setLoading(false)
       }
+
+      // Fetch Indices
+      try {
+        const resIndices = await fetch(`${apiUrl}/api/market/summary`);
+        if (resIndices.ok) {
+          const json = await resIndices.json();
+          if (json.data && Array.isArray(json.data)) {
+            setIndices(prev => prev.map(index => {
+              const apiItem = json.data.find((item: any) => item.code.toUpperCase() === index.code);
+              if (apiItem) {
+                const last_price = apiItem.last_price || 0;
+                const diff_percent = apiItem.diff_percent || 0;
+                const up = diff_percent >= 0;
+                const absChange = (last_price * (diff_percent / 100)).toFixed(2);
+                
+                return {
+                  ...index,
+                  value: last_price.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                  absChange: `${up ? "+" : ""}${Number(absChange).toLocaleString("tr-TR")}`,
+                  pctChange: `${up ? "+" : ""}${diff_percent.toFixed(2)}%`,
+                  up,
+                };
+              }
+              return index;
+            }));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load indices", err)
+      }
     }
-    fetchStocks()
+
+    fetchMarketData()
+    const interval = setInterval(fetchMarketData, 30000)
+    return () => clearInterval(interval)
   }, [])
 
   // Fetch detailed information for selected ticker
@@ -208,6 +259,33 @@ function BorsaPage() {
           />
         </div>
       </div>
+
+      {/* 📊 BIST Indices Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 shrink-0">
+        {indices.map((ind) => (
+          <Link
+            key={ind.id}
+            to={`/panel/endeksler/${ind.id}` as any}
+            className="bg-card hover:bg-muted/30 border border-border/80 hover:border-border transition-all rounded-2xl p-4 flex flex-col justify-between cursor-pointer group active:scale-[0.99] select-none shadow-xs"
+          >
+            <div className="flex flex-col gap-1 w-full">
+              <span className="text-muted-foreground text-[10px] font-extrabold uppercase tracking-wider group-hover:text-primary transition-colors">
+                {ind.title}
+              </span>
+              <span className="text-lg font-black text-foreground tracking-tight block leading-none font-mono mt-1">
+                ₺{ind.value}
+              </span>
+              <span className={`text-xs font-bold font-mono mt-1.5 flex items-center gap-1 ${
+                ind.up ? "text-emerald-500" : "text-destructive"
+              }`}>
+                {ind.up ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+                {ind.pctChange}
+              </span>
+            </div>
+          </Link>
+        ))}
+      </div>
+
       
       {/* Split Layout: Stocks Table and Details Panel */}
       <div className="flex-1 grid grid-cols-1 xl:grid-cols-12 gap-6 min-h-0 overflow-hidden">
