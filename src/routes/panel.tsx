@@ -115,7 +115,7 @@ function PanelLayout() {
         {/* Scrollable Sub-Page area (Outlet) OR Active Chat Stream Messages */}
         <main 
           ref={mainScrollRef}
-          className="flex-1 overflow-y-auto bg-background p-4 md:p-6 custom-scrollbar min-w-0 relative z-10 pb-20 scroll-smooth"
+          className="flex-1 overflow-y-auto bg-background p-4 md:p-6 custom-scrollbar min-w-0 relative z-10 pb-28 scroll-smooth"
         >
           {messages.length > 0 ? (
             <div className="max-w-3xl mx-auto space-y-6 py-4 animate-in fade-in duration-300">
@@ -158,13 +158,15 @@ function PanelLayout() {
           )}
         </main>
 
-        {/* Fixed Chatbot at the absolute bottom - Compact, Elegant Solid Background Single-Row Container */}
-        <div className="absolute bottom-0 left-0 right-0 border-t border-border/80 bg-card z-40 h-[72px] flex flex-col shadow-lg">
-          <ChatPane
-            context={context}
-            placeholder={placeholder}
-            className="h-full border-none shadow-none bg-transparent min-h-0"
-          />
+        {/* Floating Glassmorphic Chatbot Container at the Bottom */}
+        <div className="absolute bottom-4 left-4 right-4 md:left-6 md:right-6 z-40 flex justify-center pointer-events-none">
+          <div className="w-full max-w-3xl bg-card/65 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl pointer-events-auto overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+            <ChatPane
+              context={context}
+              placeholder={placeholder}
+              className="w-full border-none shadow-none bg-transparent"
+            />
+          </div>
         </div>
       </div>
 

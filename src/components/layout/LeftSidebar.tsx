@@ -12,7 +12,8 @@ import {
   PanelLeft,
   Search,
   LayoutGrid,
-  LogOut
+  LogOut,
+  User
 } from "lucide-react";
 import { useUIStore } from "../../store/ui";
 import { useChatStore } from "../../store/chat";
@@ -38,7 +39,7 @@ export function LeftSidebar() {
     toggleLeftSidebarExpanded, 
     openCommandPalette
   } = useUIStore();
-  const { logout: handleLogout } = useAuth();
+  const { user, login: handleLogin, logout: handleLogout } = useAuth();
   
   // Local state to toggle stock folders in explorer view
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({
@@ -99,33 +100,29 @@ export function LeftSidebar() {
     `}>
       {isLeftSidebarExpanded ? (
         /* Full Expanded Sidebar Content */
-        <div className="flex-1 flex flex-col h-full p-4 space-y-5 overflow-y-auto custom-scrollbar animate-in fade-in duration-300">
+        <div className="flex-1 flex flex-col h-full overflow-hidden">
           
-          {/* Top Controls */}
-          <div className="flex items-center justify-between pb-1 shrink-0">
-            <div className="flex items-center gap-1.5">
-              {/* Collapse Button using PanelLeft per user request */}
-              <button 
-                onClick={toggleLeftSidebarExpanded}
-                className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
-                title="Paneli Kapat"
-              >
-                <PanelLeft size={14} />
-              </button>
-              
-              {/* Arrow Navs */}
-              <div className="flex items-center gap-0.5 opacity-60 ml-1">
-                <div className="w-6 h-6 flex items-center justify-center text-muted-foreground/50 rounded-md">
-                  <span className="text-xs">←</span>
-                </div>
-                <div className="w-6 h-6 flex items-center justify-center text-muted-foreground/50 rounded-md">
-                  <span className="text-xs">→</span>
-                </div>
-              </div>
-            </div>
+          {/* Top Branding & Collapse Control */}
+          <div className="flex items-center justify-between p-4 pb-3 border-b border-border/40 shrink-0">
+            <Link 
+              to="/panel" 
+              className="flex items-center gap-1.5 text-foreground hover:opacity-90 transition-opacity text-base font-bold tracking-tight"
+            >
+              <span>hissepro</span>
+            </Link>
+            
+            <button 
+              onClick={toggleLeftSidebarExpanded}
+              className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer"
+              title="Paneli Kapat"
+            >
+              <PanelLeft size={14} />
+            </button>
           </div>
 
-          {/* 1. New Conversation Button */}
+          {/* Scrollable Navigation Items */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-5 custom-scrollbar min-h-0">
+            {/* 1. New Conversation Button */}
           <button
             onClick={() => {
               useChatStore.getState().clearChat();
@@ -216,6 +213,46 @@ export function LeftSidebar() {
               })}
             </div>
           </div>
+        </div>
+
+        {/* Fixed Footer Profile */}
+          <div className="p-4 border-t border-border/40 shrink-0">
+            {user ? (
+              <div className="flex items-center justify-between gap-3 group">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <img 
+                    src={user.user_metadata?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} 
+                    alt="Avatar" 
+                    className="w-8 h-8 rounded-full border border-border bg-card shadow-2xs transition-all duration-300 shrink-0" 
+                  />
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-xs font-semibold text-foreground truncate">
+                      {user.email?.split("@")[0]}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground truncate">
+                      {user.email}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-all duration-200 cursor-pointer shrink-0"
+                  title="Çıkış Yap"
+                >
+                  <LogOut size={13} />
+                </button>
+              </div>
+            ) : (
+              <button 
+                onClick={handleLogin} 
+                className="w-full flex items-center justify-center px-3 py-2 text-[11px] font-bold rounded-xl bg-primary text-primary-foreground hover:bg-primary/95 transition-colors shadow-sm cursor-pointer" 
+                title="Giriş Yap"
+              >
+                <User size={12} className="mr-1" />
+                Giriş Yap
+              </button>
+            )}
+          </div>
 
         </div>
       ) : (
@@ -279,15 +316,29 @@ export function LeftSidebar() {
             </Link>
           </div>
 
-          {/* Bottom Logout Button */}
-          <div className="w-full px-2">
-            <button
-              onClick={handleLogout}
-              className="w-10 h-10 mx-auto flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl transition-all duration-200 cursor-pointer"
-              title="Çıkış Yap"
-            >
-              <LogOut size={16} />
-            </button>
+          {/* Bottom profile/logout area for collapsed state */}
+          <div className="w-full px-2 flex flex-col items-center gap-2 shrink-0">
+            {user ? (
+              <button
+                onClick={handleLogout}
+                className="group w-10 h-10 flex items-center justify-center relative rounded-xl hover:bg-muted/40 transition-all duration-200 cursor-pointer"
+                title="Çıkış Yap"
+              >
+                <img 
+                  src={user.user_metadata?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} 
+                  alt="Avatar" 
+                  className="w-7 h-7 rounded-full border border-border bg-card shadow-2xs group-hover:border-destructive transition-all duration-300" 
+                />
+              </button>
+            ) : (
+              <button
+                onClick={handleLogin}
+                className="w-10 h-10 flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-muted/40 rounded-xl transition-all duration-200 cursor-pointer"
+                title="Giriş Yap"
+              >
+                <User size={16} />
+              </button>
+            )}
           </div>
         </div>
       )}
