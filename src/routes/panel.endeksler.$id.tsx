@@ -91,7 +91,7 @@ function EndeksDetailPage() {
   useEffect(() => {
     async function fetchIndexDetail() {
       try {
-        const apiUrl = import.meta.env.VITE_HONO_API_URL || "http://127.0.0.1:8787";
+        const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev";
         const res = await fetch(`${apiUrl}/api/market/summary`);
         if (!res.ok) throw new Error("API error");
         const json = await res.json();

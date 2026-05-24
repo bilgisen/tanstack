@@ -45,7 +45,7 @@ export function RightSidebar() {
   useEffect(() => {
     async function fetchMarketData() {
       try {
-        const apiUrl = import.meta.env.VITE_HONO_API_URL || "http://127.0.0.1:8787";
+        const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev";
         
         // Fetch Stocks
         const resStocks = await fetch(`${apiUrl}/api/market/stocks`);

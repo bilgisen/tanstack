@@ -83,7 +83,7 @@ function BorsaPage() {
   useEffect(() => {
     async function fetchStocks() {
       try {
-        const apiUrl = import.meta.env.VITE_HONO_API_URL || "http://127.0.0.1:8787"
+        const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev"
         const res = await fetch(`${apiUrl}/api/market/stocks`)
         if (res.ok) {
           const json = await res.json()
@@ -110,7 +110,7 @@ function BorsaPage() {
 
     async function fetchAllDetails() {
       setLoadingDetails(true)
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || "http://127.0.0.1:8787"
+      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev"
       
       try {
         // Fetch in parallel to save time

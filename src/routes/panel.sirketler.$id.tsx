@@ -155,7 +155,7 @@ function SirketDetailPage() {
   useEffect(() => {
     async function fetchSirketDetails() {
       try {
-        const apiUrl = import.meta.env.VITE_HONO_API_URL || "http://127.0.0.1:8787";
+        const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev";
         // Fetch basic info
         const symbolRes = await fetch(`${apiUrl}/api/market/symbol/${rawId.toUpperCase()}`);
         if (!symbolRes.ok) throw new Error("Basic api failed");

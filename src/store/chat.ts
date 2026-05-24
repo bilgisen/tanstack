@@ -27,7 +27,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }));
 
     try {
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || "http://127.0.0.1:8787";
+      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev";
       const response = await fetch(`${apiUrl}/api/ai/chat`, {
         method: "POST",
         headers: {
