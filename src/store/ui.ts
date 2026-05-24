@@ -41,14 +41,58 @@ export const applyTheme = (theme: Theme) => {
   }
 };
 
+const getInitialLeftSidebar = (): boolean => {
+  if (typeof window !== 'undefined') {
+    const isMobile = window.innerWidth < 1024;
+    const stored = localStorage.getItem(isMobile ? 'left_sidebar_expanded_mobile' : 'left_sidebar_expanded_desktop');
+    if (stored !== null) {
+      return stored === 'true';
+    }
+    return isMobile ? false : true;
+  }
+  return true;
+};
+
+const getInitialRightSidebar = (): boolean => {
+  if (typeof window !== 'undefined') {
+    const isMobile = window.innerWidth < 1024;
+    const stored = localStorage.getItem(isMobile ? 'right_sidebar_open_mobile' : 'right_sidebar_open_desktop');
+    if (stored !== null) {
+      return stored === 'true';
+    }
+    return isMobile ? false : true;
+  }
+  return true;
+};
+
 export const useUIStore = create<UIState>((set) => ({
-  isRightSidebarOpen: true,
-  toggleRightSidebar: () => set((state) => ({ isRightSidebarOpen: !state.isRightSidebarOpen })),
-  openRightSidebar: () => set(() => ({ isRightSidebarOpen: true })),
+  isRightSidebarOpen: getInitialRightSidebar(),
+  toggleRightSidebar: () => set((state) => {
+    const newVal = !state.isRightSidebarOpen;
+    if (typeof window !== 'undefined') {
+      const isMobile = window.innerWidth < 1024;
+      localStorage.setItem(isMobile ? 'right_sidebar_open_mobile' : 'right_sidebar_open_desktop', String(newVal));
+    }
+    return { isRightSidebarOpen: newVal };
+  }),
+  openRightSidebar: () => set(() => {
+    if (typeof window !== 'undefined') {
+      const isMobile = window.innerWidth < 1024;
+      localStorage.setItem(isMobile ? 'right_sidebar_open_mobile' : 'right_sidebar_open_desktop', 'true');
+    }
+    return { isRightSidebarOpen: true };
+  }),
   isRightSidebarExpanded: false,
   toggleRightSidebarExpanded: () => set((state) => ({ isRightSidebarExpanded: !state.isRightSidebarExpanded })),
-  isLeftSidebarExpanded: true,
-  toggleLeftSidebarExpanded: () => set((state) => ({ isLeftSidebarExpanded: !state.isLeftSidebarExpanded })),
+  isLeftSidebarExpanded: getInitialLeftSidebar(),
+  toggleLeftSidebarExpanded: () => set((state) => {
+    const newVal = !state.isLeftSidebarExpanded;
+    if (typeof window !== 'undefined') {
+      const isMobile = window.innerWidth < 1024;
+      localStorage.setItem(isMobile ? 'left_sidebar_expanded_mobile' : 'left_sidebar_expanded_desktop', String(newVal));
+    }
+    return { isLeftSidebarExpanded: newVal };
+  }),
   isCommandPaletteOpen: false,
   openCommandPalette: () => set({ isCommandPaletteOpen: true }),
   closeCommandPalette: () => set({ isCommandPaletteOpen: false }),
