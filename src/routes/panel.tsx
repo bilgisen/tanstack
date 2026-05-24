@@ -32,10 +32,34 @@ function PanelLayout() {
     }
   }, [user, loading, navigate])
 
+  // Handle seamless cross-asset / panel navigation triggered by chatbot
+  useEffect(() => {
+    const handleNavigate = (e: Event) => {
+      const customEvent = e as CustomEvent<{ path: string }>
+      if (customEvent.detail?.path) {
+        navigate({ to: customEvent.detail.path })
+      }
+    }
+    window.addEventListener('app-navigate', handleNavigate)
+    return () => {
+      window.removeEventListener('app-navigate', handleNavigate)
+    }
+  }, [navigate])
+
   // Scroll to bottom whenever messages or loading state change
   useEffect(() => {
     if (mainScrollRef.current) {
-      mainScrollRef.current.scrollTop = mainScrollRef.current.scrollHeight
+      // Immediate scroll
+      mainScrollRef.current.scrollTop = mainScrollRef.current.scrollHeight;
+      
+      // Delayed scroll to account for async markdown HTML rendering & layout reflows
+      const timer = setTimeout(() => {
+        if (mainScrollRef.current) {
+          mainScrollRef.current.scrollTop = mainScrollRef.current.scrollHeight;
+        }
+      }, 100);
+      
+      return () => clearTimeout(timer);
     }
   }, [messages, isLoading])
 
@@ -135,7 +159,7 @@ function PanelLayout() {
         {/* Scrollable Sub-Page area (Outlet) OR Active Chat Stream Messages */}
         <main 
           ref={mainScrollRef}
-          className="flex-1 overflow-y-auto bg-background p-4 md:p-6 custom-scrollbar min-w-0 relative z-10 pb-28 scroll-smooth"
+          className="flex-1 overflow-y-auto bg-background p-4 md:p-6 custom-scrollbar min-w-0 relative z-10 pb-36 scroll-smooth"
         >
           {messages.length > 0 ? (
             <div className="max-w-3xl mx-auto space-y-6 py-4 animate-in fade-in duration-300">
@@ -151,7 +175,7 @@ function PanelLayout() {
                       ? "bg-primary text-primary-foreground font-medium rounded-tr-sm shadow-sm"
                       : "bg-muted/40 text-foreground border border-border/40 rounded-tl-sm w-full"
                   }`}>
-                    <MarkdownRenderer text={msg.text} isAssistant={msg.role === "assistant"} />
+                    <MarkdownRenderer text={msg.text} isAssistant={msg.role === "assistant"} context={msg.context || context} />
                   </div>
                   {msg.role === "user" && (
                     <img 

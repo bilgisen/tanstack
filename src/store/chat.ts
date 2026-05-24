@@ -3,6 +3,7 @@ import { create } from 'zustand';
 export type Message = {
   role: "user" | "assistant";
   text: string;
+  context?: string;
 };
 
 interface ChatState {
@@ -20,9 +21,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
     const trimmedText = text.trim();
     if (!trimmedText || get().isLoading) return;
 
-    // Add user message
+    // Add user message with current context
     set((state) => ({
-      messages: [...state.messages, { role: "user", text: trimmedText }],
+      messages: [...state.messages, { role: "user", text: trimmedText, context }],
       isLoading: true,
     }));
 
@@ -48,17 +49,21 @@ export const useChatStore = create<ChatState>((set, get) => ({
       const navigateMatch = replyText.match(/\[NAVIGATE:(.*?)\]/);
       if (navigateMatch) {
         replyText = replyText.replace(navigateMatch[0], "").trim();
+        // Dispatch custom navigation event for smooth frontend routing
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent('app-navigate', { detail: { path: navigateMatch[1] } }));
+        }
       }
 
       set((state) => ({
-        messages: [...state.messages, { role: "assistant", text: replyText }],
+        messages: [...state.messages, { role: "assistant", text: replyText, context }],
       }));
     } catch (error) {
       console.error(error);
       set((state) => ({
         messages: [
           ...state.messages,
-          { role: "assistant", text: "Özür dilerim, şu an yanıt üretemiyorum. Lütfen internet bağlantınızı kontrol edip tekrar deneyin." },
+          { role: "assistant", text: "Özür dilerim, şu an yanıt üretemiyorum. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.", context },
         ],
       }));
     } finally {

@@ -16,6 +16,7 @@ import {
 interface MarkdownRendererProps {
   text: string;
   isAssistant: boolean;
+  context?: string;
 }
 
 export interface ExtractedMetrics {
@@ -130,7 +131,7 @@ export function extractMetricsFromText(text: string): ExtractedMetrics | null {
   return null;
 }
 
-export function MarkdownRenderer({ text, isAssistant }: MarkdownRendererProps) {
+export function MarkdownRenderer({ text, isAssistant, context = "global" }: MarkdownRendererProps) {
   const { sendMessage, isLoading } = useChatStore();
   const { openRightSidebar } = useUIStore();
   
@@ -159,7 +160,7 @@ export function MarkdownRenderer({ text, isAssistant }: MarkdownRendererProps) {
   const handleQuestionClick = async (q: string) => {
     if (isLoading) return;
     openRightSidebar();
-    await sendMessage(q, "global");
+    await sendMessage(q, context);
   };
 
   if (!isAssistant) {
