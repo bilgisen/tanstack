@@ -5,8 +5,9 @@ import { LeftSidebar } from '../components/layout/LeftSidebar'
 import { RightSidebar } from '../components/layout/RightSidebar'
 import { useUIStore } from '../store/ui'
 import { useChatStore } from '../store/chat'
-import { PanelLeft, PanelRight, Sparkles, User as UserIcon, Loader2 } from 'lucide-react'
+import { PanelLeft, PanelRight, Sparkles, Loader2 } from 'lucide-react'
 import { ChatPane } from '../components/dashboard/ChatPane'
+import { MarkdownRenderer } from '../components/dashboard/MarkdownRenderer'
 
 export const Route = createFileRoute('/panel')({
   component: PanelLayout,
@@ -145,17 +146,19 @@ function PanelLayout() {
                       <Sparkles size={14} />
                     </div>
                   )}
-                  <div className={`rounded-2xl px-4 py-3 text-sm max-w-[85%] sm:max-w-[75%] whitespace-pre-wrap leading-relaxed ${
+                  <div className={`rounded-2xl px-4 py-3 text-sm max-w-[85%] sm:max-w-[75%] leading-relaxed ${
                     msg.role === "user"
                       ? "bg-primary text-primary-foreground font-medium rounded-tr-sm shadow-sm"
-                      : "bg-muted/40 text-foreground border border-border/40 rounded-tl-sm"
+                      : "bg-muted/40 text-foreground border border-border/40 rounded-tl-sm w-full"
                   }`}>
-                    {msg.text}
+                    <MarkdownRenderer text={msg.text} isAssistant={msg.role === "assistant"} />
                   </div>
                   {msg.role === "user" && (
-                    <div className="w-8 h-8 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center shrink-0 border border-border/50 shadow-2xs">
-                      <UserIcon size={14} />
-                    </div>
+                    <img 
+                      src={user?.user_metadata?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} 
+                      alt="User Avatar" 
+                      className="w-8 h-8 rounded-full border border-border bg-card shadow-2xs shrink-0" 
+                    />
                   )}
                 </div>
               ))}
