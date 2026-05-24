@@ -254,8 +254,12 @@ export function RightSidebar() {
   return (
     <aside 
       className={`
-        hidden lg:flex flex-col border-l border-border bg-background text-foreground shrink-0 z-30 transition-all duration-300 relative h-full overflow-hidden
-        ${isRightSidebarOpen ? "w-[330px] xl:w-[360px]" : "w-0 border-none"}
+        flex flex-col border-l border-border bg-background text-foreground shrink-0 transition-all duration-300 h-full overflow-hidden
+        fixed inset-y-0 right-0 z-50 lg:static
+        ${isRightSidebarOpen 
+          ? "w-[290px] sm:w-[330px] xl:w-[360px] translate-x-0 border-l border-border/80" 
+          : "w-0 translate-x-full lg:w-0 lg:translate-x-0 lg:border-none"
+        }
       `}
     >
       {/* Dynamic Header */}

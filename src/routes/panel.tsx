@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, useNavigate, useLocation } from '@tanstack/react-router'
+import { createFileRoute, Outlet, useNavigate, useLocation, Link } from '@tanstack/react-router'
 import { useAuth } from '../hooks/useAuth'
 import { useEffect, useRef } from 'react'
 import { LeftSidebar } from '../components/layout/LeftSidebar'
@@ -83,29 +83,48 @@ function PanelLayout() {
         />
       )}
 
+      {/* Mobile Right Sidebar Backdrop Overlay */}
+      {isRightSidebarOpen && (
+        <div 
+          onClick={toggleRightSidebar}
+          className="fixed inset-0 bg-background/80 backdrop-blur-xs z-45 lg:hidden cursor-pointer animate-in fade-in duration-200"
+        />
+      )}
+
       {/* Sol Collapsible Sidebar */}
       <LeftSidebar />
 
       {/* Ana Kolon */}
       <div className="flex-1 flex flex-col min-w-0 h-full relative overflow-hidden bg-background">
         
-        {/* Floating Mobile/Desktop Toggle Controls (Glassmorphic design, only appears when panels are closed/hidden) */}
-        <div className="absolute top-4 left-4 flex items-center gap-2 z-35">
-          {!isLeftSidebarExpanded && (
-            <button
-              onClick={toggleLeftSidebarExpanded}
-              className="lg:hidden p-2 rounded-xl bg-card/80 backdrop-blur-md border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 hover:bg-card transition-all cursor-pointer shadow-md flex items-center justify-center"
-              title="Menüyü Göster"
-            >
-              <PanelLeft size={16} />
-            </button>
-          )}
-        </div>
+        {/* Seamless Mobile Header / Topbar */}
+        <header className="lg:hidden h-14 border-b border-border/40 bg-background/95 backdrop-blur-md flex items-center justify-between px-4 shrink-0 z-35 select-none">
+          <button
+            onClick={toggleLeftSidebarExpanded}
+            className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-foreground rounded-xl hover:bg-muted/50 transition-all cursor-pointer"
+            title="Menüyü Göster"
+          >
+            <PanelLeft size={18} />
+          </button>
+          
+          <Link to="/panel" className="text-foreground text-sm font-bold tracking-tight">
+            hissepro
+          </Link>
+          
+          <button
+            onClick={toggleRightSidebar}
+            className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-foreground rounded-xl hover:bg-muted/50 transition-all cursor-pointer"
+            title="Sağ Paneli Göster"
+          >
+            <PanelRight size={18} />
+          </button>
+        </header>
 
+        {/* Floating Mobile/Desktop Toggle Controls (Desktop Only) */}
         {!isRightSidebarOpen && (
           <button
             onClick={toggleRightSidebar}
-            className="absolute top-4 right-4 p-2 rounded-xl bg-card/80 backdrop-blur-md border border-border text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-card transition-all z-35 cursor-pointer shadow-md flex items-center justify-center hover:scale-105"
+            className="hidden lg:flex absolute top-4 right-4 p-2 rounded-xl bg-card/80 backdrop-blur-md border border-border text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-card transition-all z-35 cursor-pointer shadow-md items-center justify-center hover:scale-105"
             title="Sağ Paneli Göster"
           >
             <PanelRight size={16} />
