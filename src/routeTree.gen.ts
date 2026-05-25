@@ -13,6 +13,7 @@ import { Route as PanelRouteImport } from './routes/panel'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PanelIndexRouteImport } from './routes/panel.index'
+import { Route as PanelTakipListesiRouteImport } from './routes/panel.takip-listesi'
 import { Route as PanelBorsaRouteImport } from './routes/panel.borsa'
 import { Route as PanelSirketlerIdRouteImport } from './routes/panel.sirketler.$id'
 import { Route as PanelEndekslerIdRouteImport } from './routes/panel.endeksler.$id'
@@ -36,6 +37,11 @@ const IndexRoute = IndexRouteImport.update({
 const PanelIndexRoute = PanelIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => PanelRoute,
+} as any)
+const PanelTakipListesiRoute = PanelTakipListesiRouteImport.update({
+  id: '/takip-listesi',
+  path: '/takip-listesi',
   getParentRoute: () => PanelRoute,
 } as any)
 const PanelBorsaRoute = PanelBorsaRouteImport.update({
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/panel': typeof PanelRouteWithChildren
   '/panel/borsa': typeof PanelBorsaRoute
+  '/panel/takip-listesi': typeof PanelTakipListesiRoute
   '/panel/': typeof PanelIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/panel/endeksler/$id': typeof PanelEndekslerIdRoute
@@ -73,6 +80,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/panel/borsa': typeof PanelBorsaRoute
+  '/panel/takip-listesi': typeof PanelTakipListesiRoute
   '/panel': typeof PanelIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/panel/endeksler/$id': typeof PanelEndekslerIdRoute
@@ -84,6 +92,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/panel': typeof PanelRouteWithChildren
   '/panel/borsa': typeof PanelBorsaRoute
+  '/panel/takip-listesi': typeof PanelTakipListesiRoute
   '/panel/': typeof PanelIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/panel/endeksler/$id': typeof PanelEndekslerIdRoute
@@ -96,6 +105,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/panel'
     | '/panel/borsa'
+    | '/panel/takip-listesi'
     | '/panel/'
     | '/api/auth/$'
     | '/panel/endeksler/$id'
@@ -105,6 +115,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/panel/borsa'
+    | '/panel/takip-listesi'
     | '/panel'
     | '/api/auth/$'
     | '/panel/endeksler/$id'
@@ -115,6 +126,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/panel'
     | '/panel/borsa'
+    | '/panel/takip-listesi'
     | '/panel/'
     | '/api/auth/$'
     | '/panel/endeksler/$id'
@@ -158,6 +170,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PanelIndexRouteImport
       parentRoute: typeof PanelRoute
     }
+    '/panel/takip-listesi': {
+      id: '/panel/takip-listesi'
+      path: '/takip-listesi'
+      fullPath: '/panel/takip-listesi'
+      preLoaderRoute: typeof PanelTakipListesiRouteImport
+      parentRoute: typeof PanelRoute
+    }
     '/panel/borsa': {
       id: '/panel/borsa'
       path: '/borsa'
@@ -191,6 +210,7 @@ declare module '@tanstack/react-router' {
 
 interface PanelRouteChildren {
   PanelBorsaRoute: typeof PanelBorsaRoute
+  PanelTakipListesiRoute: typeof PanelTakipListesiRoute
   PanelIndexRoute: typeof PanelIndexRoute
   PanelEndekslerIdRoute: typeof PanelEndekslerIdRoute
   PanelSirketlerIdRoute: typeof PanelSirketlerIdRoute
@@ -198,6 +218,7 @@ interface PanelRouteChildren {
 
 const PanelRouteChildren: PanelRouteChildren = {
   PanelBorsaRoute: PanelBorsaRoute,
+  PanelTakipListesiRoute: PanelTakipListesiRoute,
   PanelIndexRoute: PanelIndexRoute,
   PanelEndekslerIdRoute: PanelEndekslerIdRoute,
   PanelSirketlerIdRoute: PanelSirketlerIdRoute,
