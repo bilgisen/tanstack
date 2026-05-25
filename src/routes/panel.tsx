@@ -95,6 +95,9 @@ function PanelLayout() {
       context = `sirket:${ticker.toLowerCase()}`
       placeholder = `${ticker} hakkında bir soru sorun...`
     }
+  } else if (pathname.includes('/takip-listesi')) {
+    context = 'takip-listesi'
+    placeholder = 'Takip listeniz hakkında bir soru sorun...'
   }
 
 

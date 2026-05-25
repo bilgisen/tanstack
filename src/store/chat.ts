@@ -135,17 +135,59 @@ export const useChatStore = create<ChatState>((set, get) => ({
     });
     saveSessionsToStorage(currentSessions);
 
-    // Enrich context with active watchlists to feed Gemini AI
+    // Fetch latest prices for all stocks and indices to enrich context dynamically
+    const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev";
+    let marketItemsMap: Record<string, { price: number; change: number }> = {};
+    
+    try {
+      const [stocksRes, summaryRes] = await Promise.allSettled([
+        fetch(`${apiUrl}/api/market/stocks`),
+        fetch(`${apiUrl}/api/market/summary`)
+      ]);
+      
+      if (stocksRes.status === 'fulfilled' && stocksRes.value.ok) {
+        const json = await stocksRes.value.json();
+        if (json.data && Array.isArray(json.data)) {
+          json.data.forEach((stock: any) => {
+            marketItemsMap[stock.code.toUpperCase()] = {
+              price: stock.last_price || 0,
+              change: stock.diff_percent || 0
+            };
+          });
+        }
+      }
+      if (summaryRes.status === 'fulfilled' && summaryRes.value.ok) {
+        const json = await summaryRes.value.json();
+        if (json.data && Array.isArray(json.data)) {
+          json.data.forEach((index: any) => {
+            marketItemsMap[index.code.toUpperCase()] = {
+              price: index.last_price || 0,
+              change: index.diff_percent || 0
+            };
+          });
+        }
+      }
+    } catch (e) {
+      console.error("Failed to fetch current market prices for chatbot context:", e);
+    }
+
+    // Enrich context with active watchlists to feed Gemini AI with real-time price & performance data
     const watchlists = useWatchlistStore.getState().watchlists;
     const activeWatchlistId = useWatchlistStore.getState().activeWatchlistId;
     const activeWatchlist = watchlists.find(w => w.id === activeWatchlistId) || watchlists[0];
     
     const watchlistsContext = watchlists.map(w => {
-      const itemsStr = w.items.map(i => `${i.symbol} (${i.type === 'index' ? 'Endeks' : 'Hisse'})`).join(', ');
+      const itemsStr = w.items.map(i => {
+        const live = marketItemsMap[i.symbol.toUpperCase()];
+        const priceStr = live 
+          ? `son fiyat: ${live.price} TRY, günlük değişim: ${live.change >= 0 ? '+' : ''}${live.change.toFixed(2)}%` 
+          : 'fiyat bilgisi alınamadı';
+        return `${i.symbol} (${i.type === 'index' ? 'Endeks' : 'Hisse'} - ${priceStr})`;
+      }).join(', ');
       return `"${w.name}" listesi: [${itemsStr || 'Boş'}]`;
     }).join('; ');
 
-    const enrichedContext = `${context} | Aktif Liste: "${activeWatchlist?.name || 'Yok'}" | Tüm Takip Listeleri: ${watchlistsContext} | Desteklenen AI komutları: Bir hisseyi/endeksi takip listesine eklemek için cevabın sonuna [WATCHLIST_ADD:SEMBOL:hisse|endeks] veya çıkarmak için [WATCHLIST_REMOVE:SEMBOL] ekleyebilirsin. Örneğin: [WATCHLIST_ADD:THYAO:stock] veya [WATCHLIST_REMOVE:THYAO] veya [WATCHLIST_ADD:XU100:index].`;
+    const enrichedContext = `${context} | Aktif Liste: "${activeWatchlist?.name || 'Yok'}" | Tüm Takip Listeleri ve Güncel Fiyat/Değişim Verileri: ${watchlistsContext} | Desteklenen AI komutları: Bir hisseyi/endeksi takip listesine eklemek için cevabın sonuna [WATCHLIST_ADD:SEMBOL:hisse|endeks] veya çıkarmak için [WATCHLIST_REMOVE:SEMBOL] ekleyebilirsin. Örneğin: [WATCHLIST_ADD:THYAO:stock] veya [WATCHLIST_REMOVE:THYAO] veya [WATCHLIST_ADD:XU100:index].`;
 
     try {
       const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev";

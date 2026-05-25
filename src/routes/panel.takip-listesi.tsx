@@ -5,13 +5,10 @@ import {
   ArrowDownRight, 
   Loader2, 
   Trash2, 
-  Plus, 
   FolderPlus,
-  AlertCircle, 
   Search, 
   Star,
-  Sparkles,
-  MessageSquare
+  Sparkles
 } from 'lucide-react'
 import { useUIStore } from '../store/ui'
 import { useWatchlistStore } from '../store/watchlist'
