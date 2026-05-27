@@ -21,6 +21,8 @@ interface ChatState {
   isLoading: boolean;
   sessions: ChatSession[];
   activeSessionId: string | null;
+  selectedModelId: string;
+  setSelectedModelId: (modelId: string) => void;
   sendMessage: (text: string, context: string) => Promise<void>;
   clearChat: () => void;
   loadSession: (id: string) => void;
@@ -69,6 +71,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
   isLoading: false,
   sessions: loadSessionsFromStorage(),
   activeSessionId: null,
+  selectedModelId: "gemini-2.5-flash",
+
+  setSelectedModelId: (modelId: string) => set({ selectedModelId: modelId }),
 
   clearChat: () => set({ messages: [], activeSessionId: null }),
 
@@ -134,6 +139,52 @@ export const useChatStore = create<ChatState>((set, get) => ({
       isLoading: true
     });
     saveSessionsToStorage(currentSessions);
+
+    // Monetization: Pre-Check balance and tier access
+    const selectedModelId = get().selectedModelId || 'gemini-2.5-flash';
+    try {
+      const preCheckRes = await fetch("/api/ai/pre-check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          modelId: selectedModelId,
+          estimatedInputTokens: Math.ceil(trimmedText.length / 4) + 1500,
+          estimatedOutputTokens: 500
+        })
+      });
+
+      if (preCheckRes.ok) {
+        const preCheckData = await preCheckRes.json();
+        if (!preCheckData.ok) {
+          let errorMsg = "";
+          if (preCheckData.error === 'MODEL_NOT_ALLOWED') {
+            errorMsg = `Seçtiğiniz model olan **${selectedModelId.toUpperCase()}** bu abonelik paketinde kullanılamamaktadır. Lütfen [Profil ve Abonelik Paneli](/panel/profil) sayfasından paketinizi yükseltin.`;
+          } else if (preCheckData.error === 'INSUFFICIENT_HT') {
+            const availableHT = preCheckData.availableHT || 0;
+            errorMsg = `Yetersiz HToken bakiyesi! Mevcut bakiyeniz: **${availableHT.toLocaleString()} HT**. Chatbot'u kullanmaya devam edebilmek için lütfen [Profil ve Abonelik Paneli](/panel/profil) sayfasından paketinizi yükseltin veya ek kredi satın alın.`;
+          } else {
+            errorMsg = "Sorgunuz bakiye yetersizliği veya yetkilendirme hatası nedeniyle işlenemedi. Lütfen profilinizden bakiye durumunuzu kontrol edin.";
+          }
+
+          const errorAssistantMessage: Message = {
+            role: "assistant",
+            text: errorMsg,
+            context
+          };
+
+          currentSession.messages = [...currentSession.messages, errorAssistantMessage];
+          set({
+            sessions: currentSessions.map(s => s.id === currentSessionId ? { ...s, messages: currentSession.messages } : s),
+            messages: [...get().messages, errorAssistantMessage],
+            isLoading: false
+          });
+          saveSessionsToStorage(currentSessions);
+          return;
+        }
+      }
+    } catch (e) {
+      console.error("Monetization precheck failed:", e);
+    }
 
     // Fetch latest prices for all stocks and indices to enrich context dynamically
     const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev";
@@ -206,6 +257,28 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
       const data = await response.json();
       let replyText = data.reply || "Bir hata oluştu.";
+
+      // Monetization: Charge HT
+      try {
+        await fetch("/api/ai/charge", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            modelId: selectedModelId,
+            inputTokens: data.usage?.inputTokens || (Math.ceil(trimmedText.length / 4) + 1000),
+            outputTokens: data.usage?.outputTokens || (replyText ? Math.ceil(replyText.length / 4) : 250),
+            sessionId: currentSessionId,
+            featureType: "chat"
+          })
+        });
+
+        // Fire custom event to update credits display in UI instantly
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("ht-balance-updated"));
+        }
+      } catch (e) {
+        console.error("Monetization charge failed:", e);
+      }
 
       // Strip potential navigate matches
       const navigateMatch = replyText.match(/\[NAVIGATE:(.*?)\]/);

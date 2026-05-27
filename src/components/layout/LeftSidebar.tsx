@@ -13,6 +13,7 @@ import { useUIStore } from "../../store/ui";
 import { useChatStore } from "../../store/chat";
 import { useWatchlistStore } from "../../store/watchlist";
 import { useAuth } from "../../hooks/useAuth";
+import { HTDashboard } from "../dashboard/HTDashboard";
 
 export function LeftSidebar() {
   const { 
@@ -167,7 +168,8 @@ export function LeftSidebar() {
           </div>
 
           {/* Fixed Footer Profile */}
-          <div className="p-4 border-t border-border/40 shrink-0">
+          <div className="p-4 border-t border-border/40 shrink-0 flex flex-col gap-4">
+            {user && <HTDashboard />}
             {user ? (
               <div className="flex items-center justify-between gap-3 group">
                 <div className="flex items-center gap-2.5 min-w-0">
@@ -253,6 +255,7 @@ export function LeftSidebar() {
 
           {/* Bottom profile/logout area for collapsed state */}
           <div className="w-full px-2 flex flex-col items-center gap-2 shrink-0">
+            {user && <HTDashboard collapsed={true} />}
             {user ? (
               <button
                 onClick={handleLogout}

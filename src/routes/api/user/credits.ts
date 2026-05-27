@@ -1,0 +1,72 @@
+import { createFileRoute } from '@tanstack/react-router'
+import { auth } from '../../../lib/auth'
+import { db } from '../../../lib/db'
+import { userCredits } from '../../../lib/schema'
+import { eq } from 'drizzle-orm'
+import { TIER_CONFIG } from '../../../lib/tiers'
+
+export const Route = createFileRoute('/api/user/credits')({
+  server: {
+    handlers: {
+      GET: async ({ request }) => {
+        const session = await auth.api.getSession({
+          headers: request.headers,
+        });
+
+        if (!session) {
+          return new Response(JSON.stringify({ error: "Unauthorized" }), { 
+            status: 401, 
+            headers: { 'Content-Type': 'application/json' } 
+          });
+        }
+
+        const userId = session.user.id;
+
+        // Fetch or auto-provision credits
+        let credits = await db
+          .select()
+          .from(userCredits)
+          .where(eq(userCredits.userId, userId))
+          .then((res: any[]) => res[0]);
+
+        if (!credits) {
+          try {
+            credits = await db
+              .insert(userCredits)
+              .values({
+                userId,
+                tier: 'free',
+                monthlyHt: 5000,
+                usedHt: 0,
+                extraHt: 0,
+                resetAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+              })
+              .returning()
+              .then((res: any[]) => res[0]);
+          } catch (err) {
+            console.error("Auto-provision error in GET /api/user/credits:", err);
+          }
+        }
+
+        const monthlyHT = credits?.monthlyHt ?? 5000;
+        const usedHT = credits?.usedHt ?? 0;
+        const extraHT = credits?.extraHt ?? 0;
+        const availableHT = (monthlyHT - usedHT) + extraHT;
+        const usagePercent = Math.min(100, Math.round((usedHT / Math.max(1, monthlyHT)) * 100));
+
+        return new Response(JSON.stringify({
+          tier: credits?.tier ?? 'free',
+          tierDisplayName: TIER_CONFIG[(credits?.tier || 'free') as keyof typeof TIER_CONFIG]?.displayName || credits?.tier,
+          monthlyHT,
+          usedHT,
+          extraHT,
+          availableHT,
+          usagePercent,
+          resetAt: credits?.resetAt || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        }), {
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+    }
+  }
+})

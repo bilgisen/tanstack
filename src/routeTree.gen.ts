@@ -14,10 +14,17 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PanelIndexRouteImport } from './routes/panel.index'
 import { Route as PanelTakipListesiRouteImport } from './routes/panel.takip-listesi'
+import { Route as PanelProfilRouteImport } from './routes/panel.profil'
 import { Route as PanelBorsaRouteImport } from './routes/panel.borsa'
+import { Route as ApiCheckoutRouteImport } from './routes/api/checkout'
 import { Route as PanelSirketlerIdRouteImport } from './routes/panel.sirketler.$id'
 import { Route as PanelEndekslerIdRouteImport } from './routes/panel.endeksler.$id'
+import { Route as ApiWebhooksPolarRouteImport } from './routes/api/webhooks/polar'
+import { Route as ApiUserCreditsRouteImport } from './routes/api/user/credits'
+import { Route as ApiModelsAvailableRouteImport } from './routes/api/models/available'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiAiPreCheckRouteImport } from './routes/api/ai/pre-check'
+import { Route as ApiAiChargeRouteImport } from './routes/api/ai/charge'
 
 const PanelRoute = PanelRouteImport.update({
   id: '/panel',
@@ -44,10 +51,20 @@ const PanelTakipListesiRoute = PanelTakipListesiRouteImport.update({
   path: '/takip-listesi',
   getParentRoute: () => PanelRoute,
 } as any)
+const PanelProfilRoute = PanelProfilRouteImport.update({
+  id: '/profil',
+  path: '/profil',
+  getParentRoute: () => PanelRoute,
+} as any)
 const PanelBorsaRoute = PanelBorsaRouteImport.update({
   id: '/borsa',
   path: '/borsa',
   getParentRoute: () => PanelRoute,
+} as any)
+const ApiCheckoutRoute = ApiCheckoutRouteImport.update({
+  id: '/api/checkout',
+  path: '/api/checkout',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PanelSirketlerIdRoute = PanelSirketlerIdRouteImport.update({
   id: '/sirketler/$id',
@@ -59,9 +76,34 @@ const PanelEndekslerIdRoute = PanelEndekslerIdRouteImport.update({
   path: '/endeksler/$id',
   getParentRoute: () => PanelRoute,
 } as any)
+const ApiWebhooksPolarRoute = ApiWebhooksPolarRouteImport.update({
+  id: '/api/webhooks/polar',
+  path: '/api/webhooks/polar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUserCreditsRoute = ApiUserCreditsRouteImport.update({
+  id: '/api/user/credits',
+  path: '/api/user/credits',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiModelsAvailableRoute = ApiModelsAvailableRouteImport.update({
+  id: '/api/models/available',
+  path: '/api/models/available',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAiPreCheckRoute = ApiAiPreCheckRouteImport.update({
+  id: '/api/ai/pre-check',
+  path: '/api/ai/pre-check',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAiChargeRoute = ApiAiChargeRouteImport.update({
+  id: '/api/ai/charge',
+  path: '/api/ai/charge',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -69,20 +111,34 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/panel': typeof PanelRouteWithChildren
+  '/api/checkout': typeof ApiCheckoutRoute
   '/panel/borsa': typeof PanelBorsaRoute
+  '/panel/profil': typeof PanelProfilRoute
   '/panel/takip-listesi': typeof PanelTakipListesiRoute
   '/panel/': typeof PanelIndexRoute
+  '/api/ai/charge': typeof ApiAiChargeRoute
+  '/api/ai/pre-check': typeof ApiAiPreCheckRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/models/available': typeof ApiModelsAvailableRoute
+  '/api/user/credits': typeof ApiUserCreditsRoute
+  '/api/webhooks/polar': typeof ApiWebhooksPolarRoute
   '/panel/endeksler/$id': typeof PanelEndekslerIdRoute
   '/panel/sirketler/$id': typeof PanelSirketlerIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/api/checkout': typeof ApiCheckoutRoute
   '/panel/borsa': typeof PanelBorsaRoute
+  '/panel/profil': typeof PanelProfilRoute
   '/panel/takip-listesi': typeof PanelTakipListesiRoute
   '/panel': typeof PanelIndexRoute
+  '/api/ai/charge': typeof ApiAiChargeRoute
+  '/api/ai/pre-check': typeof ApiAiPreCheckRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/models/available': typeof ApiModelsAvailableRoute
+  '/api/user/credits': typeof ApiUserCreditsRoute
+  '/api/webhooks/polar': typeof ApiWebhooksPolarRoute
   '/panel/endeksler/$id': typeof PanelEndekslerIdRoute
   '/panel/sirketler/$id': typeof PanelSirketlerIdRoute
 }
@@ -91,10 +147,17 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/panel': typeof PanelRouteWithChildren
+  '/api/checkout': typeof ApiCheckoutRoute
   '/panel/borsa': typeof PanelBorsaRoute
+  '/panel/profil': typeof PanelProfilRoute
   '/panel/takip-listesi': typeof PanelTakipListesiRoute
   '/panel/': typeof PanelIndexRoute
+  '/api/ai/charge': typeof ApiAiChargeRoute
+  '/api/ai/pre-check': typeof ApiAiPreCheckRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/models/available': typeof ApiModelsAvailableRoute
+  '/api/user/credits': typeof ApiUserCreditsRoute
+  '/api/webhooks/polar': typeof ApiWebhooksPolarRoute
   '/panel/endeksler/$id': typeof PanelEndekslerIdRoute
   '/panel/sirketler/$id': typeof PanelSirketlerIdRoute
 }
@@ -104,20 +167,34 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/panel'
+    | '/api/checkout'
     | '/panel/borsa'
+    | '/panel/profil'
     | '/panel/takip-listesi'
     | '/panel/'
+    | '/api/ai/charge'
+    | '/api/ai/pre-check'
     | '/api/auth/$'
+    | '/api/models/available'
+    | '/api/user/credits'
+    | '/api/webhooks/polar'
     | '/panel/endeksler/$id'
     | '/panel/sirketler/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
+    | '/api/checkout'
     | '/panel/borsa'
+    | '/panel/profil'
     | '/panel/takip-listesi'
     | '/panel'
+    | '/api/ai/charge'
+    | '/api/ai/pre-check'
     | '/api/auth/$'
+    | '/api/models/available'
+    | '/api/user/credits'
+    | '/api/webhooks/polar'
     | '/panel/endeksler/$id'
     | '/panel/sirketler/$id'
   id:
@@ -125,10 +202,17 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/panel'
+    | '/api/checkout'
     | '/panel/borsa'
+    | '/panel/profil'
     | '/panel/takip-listesi'
     | '/panel/'
+    | '/api/ai/charge'
+    | '/api/ai/pre-check'
     | '/api/auth/$'
+    | '/api/models/available'
+    | '/api/user/credits'
+    | '/api/webhooks/polar'
     | '/panel/endeksler/$id'
     | '/panel/sirketler/$id'
   fileRoutesById: FileRoutesById
@@ -137,7 +221,13 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   PanelRoute: typeof PanelRouteWithChildren
+  ApiCheckoutRoute: typeof ApiCheckoutRoute
+  ApiAiChargeRoute: typeof ApiAiChargeRoute
+  ApiAiPreCheckRoute: typeof ApiAiPreCheckRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiModelsAvailableRoute: typeof ApiModelsAvailableRoute
+  ApiUserCreditsRoute: typeof ApiUserCreditsRoute
+  ApiWebhooksPolarRoute: typeof ApiWebhooksPolarRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -177,12 +267,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PanelTakipListesiRouteImport
       parentRoute: typeof PanelRoute
     }
+    '/panel/profil': {
+      id: '/panel/profil'
+      path: '/profil'
+      fullPath: '/panel/profil'
+      preLoaderRoute: typeof PanelProfilRouteImport
+      parentRoute: typeof PanelRoute
+    }
     '/panel/borsa': {
       id: '/panel/borsa'
       path: '/borsa'
       fullPath: '/panel/borsa'
       preLoaderRoute: typeof PanelBorsaRouteImport
       parentRoute: typeof PanelRoute
+    }
+    '/api/checkout': {
+      id: '/api/checkout'
+      path: '/api/checkout'
+      fullPath: '/api/checkout'
+      preLoaderRoute: typeof ApiCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/panel/sirketler/$id': {
       id: '/panel/sirketler/$id'
@@ -198,6 +302,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PanelEndekslerIdRouteImport
       parentRoute: typeof PanelRoute
     }
+    '/api/webhooks/polar': {
+      id: '/api/webhooks/polar'
+      path: '/api/webhooks/polar'
+      fullPath: '/api/webhooks/polar'
+      preLoaderRoute: typeof ApiWebhooksPolarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/user/credits': {
+      id: '/api/user/credits'
+      path: '/api/user/credits'
+      fullPath: '/api/user/credits'
+      preLoaderRoute: typeof ApiUserCreditsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/models/available': {
+      id: '/api/models/available'
+      path: '/api/models/available'
+      fullPath: '/api/models/available'
+      preLoaderRoute: typeof ApiModelsAvailableRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -205,11 +330,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/ai/pre-check': {
+      id: '/api/ai/pre-check'
+      path: '/api/ai/pre-check'
+      fullPath: '/api/ai/pre-check'
+      preLoaderRoute: typeof ApiAiPreCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ai/charge': {
+      id: '/api/ai/charge'
+      path: '/api/ai/charge'
+      fullPath: '/api/ai/charge'
+      preLoaderRoute: typeof ApiAiChargeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 interface PanelRouteChildren {
   PanelBorsaRoute: typeof PanelBorsaRoute
+  PanelProfilRoute: typeof PanelProfilRoute
   PanelTakipListesiRoute: typeof PanelTakipListesiRoute
   PanelIndexRoute: typeof PanelIndexRoute
   PanelEndekslerIdRoute: typeof PanelEndekslerIdRoute
@@ -218,6 +358,7 @@ interface PanelRouteChildren {
 
 const PanelRouteChildren: PanelRouteChildren = {
   PanelBorsaRoute: PanelBorsaRoute,
+  PanelProfilRoute: PanelProfilRoute,
   PanelTakipListesiRoute: PanelTakipListesiRoute,
   PanelIndexRoute: PanelIndexRoute,
   PanelEndekslerIdRoute: PanelEndekslerIdRoute,
@@ -230,7 +371,13 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   PanelRoute: PanelRouteWithChildren,
+  ApiCheckoutRoute: ApiCheckoutRoute,
+  ApiAiChargeRoute: ApiAiChargeRoute,
+  ApiAiPreCheckRoute: ApiAiPreCheckRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiModelsAvailableRoute: ApiModelsAvailableRoute,
+  ApiUserCreditsRoute: ApiUserCreditsRoute,
+  ApiWebhooksPolarRoute: ApiWebhooksPolarRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

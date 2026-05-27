@@ -15,6 +15,14 @@ function getAuth() {
         provider: "pg",
         schema,
       }),
+      user: {
+        additionalFields: {
+          role: {
+            type: "string",
+            defaultValue: "user",
+          },
+        },
+      },
       baseURL: process.env.BETTER_AUTH_URL || "https://tanstack.paraanaliz.workers.dev",
       socialProviders: {
         google: {
