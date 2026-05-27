@@ -14,6 +14,7 @@ import { useChatStore } from "../../store/chat";
 import { useWatchlistStore } from "../../store/watchlist";
 import { useAuth } from "../../hooks/useAuth";
 import { HTDashboard } from "../dashboard/HTDashboard";
+import { Logo } from "./Logo";
 
 export function LeftSidebar() {
   const { 
@@ -41,8 +42,9 @@ export function LeftSidebar() {
           <div className="flex items-center justify-between p-4 pb-3 border-b border-border/40 shrink-0">
             <Link 
               to="/panel" 
-              className="flex items-center gap-1.5 text-foreground hover:opacity-90 transition-opacity text-base font-bold tracking-tight"
+              className="flex items-center gap-2.5 text-foreground hover:opacity-90 transition-opacity text-base font-bold tracking-tight"
             >
+              <Logo size={18} className="text-primary shrink-0" />
               <span>hissepro</span>
             </Link>
             
@@ -213,6 +215,11 @@ export function LeftSidebar() {
         <div className="flex-1 flex flex-col h-full py-3 items-center justify-between overflow-y-auto overflow-x-hidden scrollbar-none animate-in fade-in duration-300 select-none">
           <div className="flex flex-col items-center gap-4 w-full px-2">
             
+            {/* Logo in Collapsed State */}
+            <Link to="/panel" className="hover:opacity-80 transition-opacity mb-1 shrink-0">
+              <Logo size={20} className="text-primary" />
+            </Link>
+
             {/* 1. Toggle Button */}
             <button
               onClick={toggleLeftSidebarExpanded}
