@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { Sparkles, Star, Trash2, TrendingUp, TrendingDown, ChevronRight, ArrowUpRight, Activity, Calendar, Loader2 } from 'lucide-react'
+import { Sparkles, Star, Trash2, TrendingUp, TrendingDown, ChevronRight, ArrowUpRight, Activity, Calendar, Loader2, ArrowUpCircle, ArrowDownCircle } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useWatchlistStore } from '../store/watchlist'
 import { useChatStore } from '../store/chat'
@@ -26,6 +26,24 @@ type WatchlistRow = {
   diffPercent: number;
 };
 
+// High-fidelity fallback stocks for Gainers if API data is offline
+const MOCK_GAINERS_FALLBACK: WatchlistRow[] = [
+  { symbol: "THYAO", name: "Türk Hava Yolları", type: "stock", price: 312.50, diffPercent: 4.82 },
+  { symbol: "ASELS", name: "Aselsan", type: "stock", price: 64.20, diffPercent: 4.15 },
+  { symbol: "TUPRS", name: "Tüpraş", type: "stock", price: 185.40, diffPercent: 3.12 },
+  { symbol: "SAHOL", name: "Sabancı Holding", type: "stock", price: 98.70, diffPercent: 2.85 },
+  { symbol: "KCHOL", name: "Koç Holding", type: "stock", price: 242.10, diffPercent: 2.10 }
+];
+
+// High-fidelity fallback stocks for Losers if API data is offline
+const MOCK_LOSERS_FALLBACK: WatchlistRow[] = [
+  { symbol: "AKBNK", name: "Akbank", type: "stock", price: 58.40, diffPercent: -4.42 },
+  { symbol: "YKBNK", name: "Yapı Kredi", type: "stock", price: 32.10, diffPercent: -3.85 },
+  { symbol: "EREGL", name: "Ereğli Demir Çelik", type: "stock", price: 48.12, diffPercent: -2.85 },
+  { symbol: "GARAN", name: "Garanti BBVA", type: "stock", price: 82.50, diffPercent: -2.10 },
+  { symbol: "ISCTR", name: "İş Bankası C", type: "stock", price: 15.20, diffPercent: -1.80 }
+];
+
 function PanelIndexPage() {
   const navigate = useNavigate()
   const { watchlists, removeItem } = useWatchlistStore()
@@ -38,6 +56,8 @@ function PanelIndexPage() {
     { id: 'bist500', name: "BIST 500", code: "XU500", price: 12540.80, diffPercent: 0.95, sparkline: [12420, 12450, 12410, 12480, 12510, 12500, 12540.80] },
   ])
   const [watchlistRows, setWatchlistRows] = useState<WatchlistRow[]>([])
+  const [topGainers, setTopGainers] = useState<WatchlistRow[]>([])
+  const [topLosers, setTopLosers] = useState<WatchlistRow[]>([])
 
   const defaultWatchlist = watchlists.find(w => w.id === "default-list") || watchlists[0]
   const watchlistItems = defaultWatchlist?.items || []
@@ -152,6 +172,36 @@ function PanelIndexPage() {
       })
 
       setWatchlistRows(resolvedRows)
+
+      // 3. Resolve Gainers and Losers
+      if (liveStocks.length > 0) {
+        const sortedStocks = liveStocks
+          .filter((st: any) => st.code && st.last_price !== undefined)
+          .map((st: any) => ({
+            symbol: st.code.toUpperCase(),
+            name: (companyNames as Record<string, string>)[st.code.toUpperCase()] || `${st.code.toUpperCase()} Sanayi A.Ş.`,
+            type: 'stock' as const,
+            price: st.last_price,
+            diffPercent: st.diff_percent || 0.0,
+          }));
+
+        // Sort for Top Gainers
+        const gainers = [...sortedStocks]
+          .sort((a, b) => b.diffPercent - a.diffPercent)
+          .slice(0, 5);
+
+        // Sort for Top Losers
+        const losers = [...sortedStocks]
+          .sort((a, b) => a.diffPercent - b.diffPercent)
+          .slice(0, 5);
+
+        setTopGainers(gainers)
+        setTopLosers(losers)
+      } else {
+        setTopGainers(MOCK_GAINERS_FALLBACK)
+        setTopLosers(MOCK_LOSERS_FALLBACK)
+      }
+
       setLoading(false)
     }
 
@@ -365,7 +415,130 @@ function PanelIndexPage() {
         )}
       </div>
 
-      {/* 3. Suggestions Section (Global Chat Prompt recommendations) */}
+      {/* 3. Yükselenler & Düşenler Section (Günün Öne Çıkan Hisseleri) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        
+        {/* En Çok Yükselenler Card */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-4 rounded-full bg-emerald-500" />
+            <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <ArrowUpCircle size={14} className="text-emerald-500" />
+              <span>En Çok Yükselenler</span>
+            </h3>
+          </div>
+
+          {loading ? (
+            <div className="border border-border/30 rounded-2xl bg-card/5 p-8 flex flex-col items-center justify-center gap-2.5">
+              <Loader2 className="animate-spin text-emerald-500" size={16} />
+              <span className="text-[10px] text-muted-foreground font-medium">Veriler yükleniyor...</span>
+            </div>
+          ) : (
+            <div className="border border-emerald-500/10 rounded-2xl bg-card/15 overflow-hidden shadow-3xs backdrop-blur-md">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs select-none">
+                  <thead>
+                    <tr className="border-b border-border/30 text-muted-foreground font-semibold text-[10px] uppercase tracking-wider bg-emerald-500/5">
+                      <th className="py-2.5 px-4">Hisse</th>
+                      <th className="py-2.5 px-3">Adı</th>
+                      <th className="py-2.5 px-3 text-right">Fiyat</th>
+                      <th className="py-2.5 px-4 text-right">Değişim</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/20">
+                    {topGainers.map((row) => (
+                      <tr 
+                        key={row.symbol}
+                        onClick={() => navigate({ to: `/panel/sirketler/${row.symbol.toLowerCase()}` })}
+                        className="group hover:bg-emerald-500/5 cursor-pointer transition-colors"
+                      >
+                        <td className="py-2.5 px-4 font-bold font-mono text-[11px] tracking-tight text-foreground">
+                          <span className="px-1.5 py-0.5 rounded bg-emerald-500/5 border border-emerald-500/10 group-hover:border-emerald-500/25 group-hover:text-emerald-500 transition-all">
+                            {row.symbol}
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3 font-medium text-muted-foreground max-w-[120px] truncate">
+                          {row.name}
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-semibold font-mono tracking-tight text-foreground">
+                          {row.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL
+                        </td>
+                        <td className="py-2.5 px-4 text-right">
+                          <span className="inline-flex items-center gap-0.5 font-bold font-mono tracking-tight text-[11px] text-emerald-500">
+                            ▲ +{row.diffPercent.toFixed(2)}%
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* En Çok Düşenler Card */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-4 rounded-full bg-destructive" />
+            <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <ArrowDownCircle size={14} className="text-destructive" />
+              <span>En Çok Düşenler</span>
+            </h3>
+          </div>
+
+          {loading ? (
+            <div className="border border-border/30 rounded-2xl bg-card/5 p-8 flex flex-col items-center justify-center gap-2.5">
+              <Loader2 className="animate-spin text-destructive" size={16} />
+              <span className="text-[10px] text-muted-foreground font-medium">Veriler yükleniyor...</span>
+            </div>
+          ) : (
+            <div className="border border-destructive/10 rounded-2xl bg-card/15 overflow-hidden shadow-3xs backdrop-blur-md">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs select-none">
+                  <thead>
+                    <tr className="border-b border-border/30 text-muted-foreground font-semibold text-[10px] uppercase tracking-wider bg-destructive/5">
+                      <th className="py-2.5 px-4">Hisse</th>
+                      <th className="py-2.5 px-3">Adı</th>
+                      <th className="py-2.5 px-3 text-right">Fiyat</th>
+                      <th className="py-2.5 px-4 text-right">Değişim</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/20">
+                    {topLosers.map((row) => (
+                      <tr 
+                        key={row.symbol}
+                        onClick={() => navigate({ to: `/panel/sirketler/${row.symbol.toLowerCase()}` })}
+                        className="group hover:bg-destructive/5 cursor-pointer transition-colors"
+                      >
+                        <td className="py-2.5 px-4 font-bold font-mono text-[11px] tracking-tight text-foreground">
+                          <span className="px-1.5 py-0.5 rounded bg-destructive/5 border border-destructive/10 group-hover:border-destructive/25 group-hover:text-destructive transition-all">
+                            {row.symbol}
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3 font-medium text-muted-foreground max-w-[120px] truncate">
+                          {row.name}
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-semibold font-mono tracking-tight text-foreground">
+                          {row.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL
+                        </td>
+                        <td className="py-2.5 px-4 text-right">
+                          <span className="inline-flex items-center gap-0.5 font-bold font-mono tracking-tight text-[11px] text-destructive">
+                            ▼ {row.diffPercent.toFixed(2)}%
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+
+      </div>
+
+      {/* 4. Suggestions Section (Global Chat Prompt recommendations) */}
       <div className="border border-border/40 rounded-3xl p-5 md:p-6 bg-card/15 shadow-3xs relative overflow-hidden backdrop-blur-md">
         <div className="flex items-center gap-2.5 mb-4 shrink-0">
           <div className="w-1.5 h-4 rounded-full bg-primary" />
