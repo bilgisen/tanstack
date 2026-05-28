@@ -2,10 +2,9 @@ import { createFileRoute, Outlet, useNavigate, useLocation, Link } from '@tansta
 import { useAuth } from '../hooks/useAuth'
 import { useEffect, useRef } from 'react'
 import { LeftSidebar } from '../components/layout/LeftSidebar'
-import { RightSidebar } from '../components/layout/RightSidebar'
 import { useUIStore } from '../store/ui'
 import { useChatStore } from '../store/chat'
-import { PanelLeft, PanelRight, Sparkles, Loader2 } from 'lucide-react'
+import { PanelLeft, Sparkles, Loader2 } from 'lucide-react'
 import { ChatPane } from '../components/dashboard/ChatPane'
 import { MarkdownRenderer } from '../components/dashboard/MarkdownRenderer'
 
@@ -20,8 +19,6 @@ function PanelLayout() {
   const { 
     isLeftSidebarExpanded, 
     toggleLeftSidebarExpanded,
-    isRightSidebarOpen,
-    toggleRightSidebar 
   } = useUIStore()
   const { messages, isLoading } = useChatStore()
   const mainScrollRef = useRef<HTMLDivElement>(null)
@@ -111,14 +108,6 @@ function PanelLayout() {
         />
       )}
 
-      {/* Mobile Right Sidebar Backdrop Overlay */}
-      {isRightSidebarOpen && (
-        <div 
-          onClick={toggleRightSidebar}
-          className="fixed inset-0 bg-background/80 backdrop-blur-xs z-45 lg:hidden cursor-pointer animate-in fade-in duration-200"
-        />
-      )}
-
       {/* Sol Collapsible Sidebar */}
       <LeftSidebar />
 
@@ -139,32 +128,15 @@ function PanelLayout() {
             hissepro
           </Link>
           
-          <button
-            onClick={toggleRightSidebar}
-            className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-foreground rounded-xl hover:bg-muted/50 transition-all cursor-pointer"
-            title="Sağ Paneli Göster"
-          >
-            <PanelRight size={18} />
-          </button>
+          <div className="w-9 h-9" /> {/* Spacer to center title */}
         </header>
-
-        {/* Floating Mobile/Desktop Toggle Controls (Desktop Only) */}
-        {!isRightSidebarOpen && (
-          <button
-            onClick={toggleRightSidebar}
-            className="hidden lg:flex absolute top-4 right-4 p-2 rounded-xl bg-card/80 backdrop-blur-md border border-border text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-card transition-all z-35 cursor-pointer shadow-md items-center justify-center hover:scale-105"
-            title="Sağ Paneli Göster"
-          >
-            <PanelRight size={16} />
-          </button>
-        )}
 
         {/* Scrollable Sub-Page area (Outlet) OR Active Chat Stream Messages */}
         <main 
           ref={mainScrollRef}
           className="flex-1 overflow-y-auto bg-background p-4 md:p-6 custom-scrollbar min-w-0 relative z-10 pb-36 scroll-smooth"
         >
-          {messages.length > 0 ? (
+          {messages.length > 0 && !(pathname.includes('/sirketler/') || pathname.includes('/endeksler/')) ? (
             <div className="max-w-3xl mx-auto space-y-6 py-4 animate-in fade-in duration-300">
               {messages.map((msg, idx) => (
                 <div key={idx} className={`flex gap-4 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
@@ -207,6 +179,8 @@ function PanelLayout() {
           )}
         </main>
 
+
+
         {/* Floating Glassmorphic Chatbot Container at the Bottom */}
         <div className="absolute bottom-4 left-4 right-4 md:left-6 md:right-6 z-40 flex justify-center pointer-events-none">
           <div className="w-full max-w-3xl bg-card/75 backdrop-blur-xl border border-border/50 rounded-full shadow-2xl pointer-events-auto overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
@@ -218,9 +192,6 @@ function PanelLayout() {
           </div>
         </div>
       </div>
-
-      {/* Sağ Collapsible Sidebar */}
-      <RightSidebar />
     </div>
   )
 }

@@ -2,6 +2,8 @@ import { useState, useRef } from "react";
 import { ArrowUp } from "lucide-react";
 import { useChatStore } from "../../store/chat";
 import { ModelSelector } from "./ModelSelector";
+import { useNavigate, useLocation } from "@tanstack/react-router";
+import companyNames from "../../constants/companyNames.json";
 
 interface ChatPaneProps {
   context?: string;
@@ -15,8 +17,38 @@ export function ChatPane({
   className = "",
 }: ChatPaneProps) {
   const [input, setInput] = useState("");
-  const { isLoading, sendMessage } = useChatStore();
+  const { isLoading, sendMessage, clearChat } = useChatStore();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const detectTargetAsset = (text: string): { path: string; context: string } | null => {
+    const textLower = text.toLowerCase();
+    
+    // Check indices first
+    if (textLower.includes("bist 100") || textLower.includes("bist100") || textLower.includes("xu100")) {
+      return { path: "/panel/endeksler/bist100", context: "endeks:bist100" };
+    }
+    if (textLower.includes("bist 30") || textLower.includes("bist30") || textLower.includes("xu030")) {
+      return { path: "/panel/endeksler/bist30", context: "endeks:bist30" };
+    }
+    if (textLower.includes("bist 500") || textLower.includes("bist500") || textLower.includes("xu500")) {
+      return { path: "/panel/endeksler/bist500", context: "endeks:bist500" };
+    }
+    if (textLower.includes("bankacılık") || textLower.includes("bist banka") || textLower.includes("xbank") || textLower.includes("bistbanka")) {
+      return { path: "/panel/endeksler/bistbanka", context: "endeks:bistbanka" };
+    }
+
+    // Check stocks
+    const words = textLower.match(/[a-zA-Z0-9]+/g) || [];
+    for (const w of words) {
+      const upperWord = w.toUpperCase();
+      if (upperWord.length >= 3 && upperWord.length <= 6 && upperWord in companyNames) {
+        return { path: `/panel/sirketler/${w.toLowerCase()}`, context: `sirket:${w.toLowerCase()}` };
+      }
+    }
+    return null;
+  };
 
   const handleSend = async () => {
     const textToSend = input.trim();
@@ -26,6 +58,22 @@ export function ChatPane({
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
     }
+
+    // Smart Redirection Logic
+    const currentPath = location.pathname.toLowerCase();
+    const isGlobalHome = currentPath === "/panel" || currentPath === "/panel/" || context === "global";
+    
+    if (isGlobalHome) {
+      const target = detectTargetAsset(textToSend);
+      if (target) {
+        // Clear global chats first to avoid pollution, then navigate and send message in correct context
+        clearChat();
+        navigate({ to: target.path as any });
+        await sendMessage(textToSend, target.context);
+        return;
+      }
+    }
+
     await sendMessage(textToSend, context);
   };
 

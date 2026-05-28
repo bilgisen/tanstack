@@ -1,8 +1,10 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Globe, Sparkles, HelpCircle } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { Sparkles, HelpCircle, Star, Globe, TrendingUp, Compass, ArrowLeft, Loader2 } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
 import { useChatStore } from '../store/chat'
-import { useUIStore } from '../store/ui'
+import { useWatchlistStore } from '../store/watchlist'
+import { TradingViewChart } from '../components/dashboard/TradingViewChart'
+import { MarkdownRenderer } from '../components/dashboard/MarkdownRenderer'
 
 export const Route = createFileRoute('/panel/endeksler/$id')({
   component: EndeksDetailPage,
@@ -11,14 +13,18 @@ export const Route = createFileRoute('/panel/endeksler/$id')({
 type IndexMeta = {
   name: string;
   code: string;
+  price: number;
+  diffPercent: number;
   description: string;
   components: { code: string; name: string; price: number; diff: number; volume: string }[];
 };
 
-const indexMetadata: Record<string, IndexMeta> = {
+const indexMetadataFallbacks: Record<string, IndexMeta> = {
   bist30: {
     name: "BIST 30 Endeksi",
     code: "XU030",
+    price: 11250.40,
+    diffPercent: 1.45,
     description: "Borsa İstanbul'da işlem gören, işlem hacmi ve piyasa değeri en yüksek 30 şirketin ortak performansını gösterir.",
     components: [
       { code: "THYAO", name: "Türk Hava Yolları", price: 312.50, diff: 4.82, volume: "12.4M" },
@@ -32,6 +38,8 @@ const indexMetadata: Record<string, IndexMeta> = {
   bist100: {
     name: "BIST 100 Endeksi",
     code: "XU100",
+    price: 10240.20,
+    diffPercent: 1.15,
     description: "Borsa İstanbul'un ana endeksidir. Piyasa değeri ve işlem hacmi en yüksek 100 hissenin performansını temsil eder.",
     components: [
       { code: "THYAO", name: "Türk Hava Yolları", price: 312.50, diff: 4.82, volume: "12.4M" },
@@ -45,6 +53,8 @@ const indexMetadata: Record<string, IndexMeta> = {
   bist500: {
     name: "BIST 500 Endeksi",
     code: "XU500",
+    price: 12540.80,
+    diffPercent: 0.95,
     description: "Borsa İstanbul'da işlem gören ve en geniş kapsamlı 500 şirketin ortak performansını ölçen endekstir.",
     components: [
       { code: "THYAO", name: "Türk Hava Yolları", price: 312.50, diff: 4.82, volume: "12.4M" },
@@ -56,8 +66,10 @@ const indexMetadata: Record<string, IndexMeta> = {
     ]
   },
   bistbanka: {
-    name: "BIST Bankacılık Endeksi",
+    name: "BIST Bankacılık",
     code: "XBANK",
+    price: 14520.10,
+    diffPercent: -2.15,
     description: "Borsa İstanbul'da işlem gören ve ana faaliyet alanı bankacılık olan tüm finans kurumlarının performansını ölçer.",
     components: [
       { code: "AKBNK", name: "Akbank", price: 58.40, diff: -3.42, volume: "14.2M" },
@@ -73,161 +85,483 @@ const indexMetadata: Record<string, IndexMeta> = {
 function EndeksDetailPage() {
   const { id } = Route.useParams()
   const navigate = useNavigate()
-  const [indexData, setIndexData] = useState<IndexMeta | null>(null)
-  const [indexSummary, setIndexSummary] = useState<string[] | null>(null)
-  const [suggestedQuestions, setSuggestedQuestions] = useState<string[] | null>(null)
-
-  const { sendMessage } = useChatStore()
-  const { isRightSidebarOpen, toggleRightSidebar } = useUIStore()
-
   const rawId = id.toLowerCase();
-  const currentMeta = indexMetadata[rawId] || indexMetadata.bist100;
+  const currentFallback = indexMetadataFallbacks[rawId] || indexMetadataFallbacks.bist100;
 
+  const [priceDetails, setPriceDetails] = useState<IndexMeta | null>(null)
+  const [indexSummary, setIndexSummary] = useState<string[] | null>(null)
+  const [techSinyaller, setTechnicalSinyaller] = useState<any | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [showChatMode, setShowChatMode] = useState(false)
+
+  const { messages, isLoading, sendMessage, clearChat } = useChatStore()
+  const { watchlists, addItem, removeItem } = useWatchlistStore()
+  const chatScrollRef = useRef<HTMLDivElement>(null)
+
+  const defaultWatchlist = watchlists.find(w => w.id === "default-list") || watchlists[0];
+  const isStarred = defaultWatchlist?.items.some(item => item.symbol === currentFallback.code);
+
+  const toggleWatchlist = () => {
+    const defaultId = defaultWatchlist?.id || "default-list";
+    if (isStarred) {
+      removeItem(defaultId, currentFallback.code);
+    } else {
+      addItem(defaultId, currentFallback.code, "index");
+    }
+  };
+
+  // Sync dual-mode chat state with global chat store messages
   useEffect(() => {
-    async function fetchIndexDetail() {
-      try {
-        const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev";
+    const hasMessagesForThisIndex = messages.length > 0 && !!messages[messages.length - 1].context?.includes(`endeks:${currentFallback.code.toLowerCase()}`);
+    setShowChatMode(hasMessagesForThisIndex);
 
-        // Fetch dynamic index AI Header Summary
-        try {
-          const summaryRes = await fetch(`${apiUrl}/api/market/symbol/${currentMeta.code.toUpperCase()}/header-summary`);
-          if (summaryRes.ok) {
-            const summaryJson = await summaryRes.json();
-            if (summaryJson) {
-              if (summaryJson.paragraphs) {
-                setIndexSummary(summaryJson.paragraphs);
-              }
-              if (summaryJson.questions) {
-                setSuggestedQuestions(summaryJson.questions);
-              }
+    if (hasMessagesForThisIndex && chatScrollRef.current) {
+      setTimeout(() => {
+        if (chatScrollRef.current) {
+          chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+        }
+      }, 100);
+    }
+  }, [messages, currentFallback]);
+
+  // Load all details on mount
+  useEffect(() => {
+    let isMounted = true;
+    setLoading(true);
+
+    async function loadIndexData() {
+      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev";
+      
+      let liveVal = currentFallback.price;
+      let liveDf = currentFallback.diffPercent;
+      let apiComponents = [...currentFallback.components];
+
+      // 1. Fetch live index value from market summary
+      try {
+        const res = await fetch(`${apiUrl}/api/market/summary`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data && Array.isArray(json.data)) {
+            const apiItem = json.data.find((item: any) => item.code.toUpperCase() === currentFallback.code);
+            if (apiItem) {
+              liveVal = apiItem.last_price || liveVal;
+              liveDf = apiItem.diff_percent !== undefined ? apiItem.diff_percent : liveDf;
             }
           }
-        } catch (e) {
-          console.error("Failed to load index AI summary", e);
         }
-
-      } catch (err) {
-        console.error("Failed to load index detail", err);
+      } catch (e) {
+        console.error("Failed loading live index value", e);
       }
+
+      // 2. Fetch constituent stock details for accuracy
+      try {
+        const resList = await fetch(`${apiUrl}/api/market/stocks`);
+        if (resList.ok) {
+          const listJson = await resList.json();
+          if (listJson.data && Array.isArray(listJson.data)) {
+            // Match our constituent codes with live stock prices
+            apiComponents = currentFallback.components.map((fallbackComp) => {
+              const liveStock = listJson.data.find((item: any) => item.code.toUpperCase() === fallbackComp.code);
+              return {
+                code: fallbackComp.code,
+                name: fallbackComp.name,
+                price: liveStock ? liveStock.last_price : fallbackComp.price,
+                diff: liveStock ? liveStock.diff_percent : fallbackComp.diff,
+                volume: fallbackComp.volume,
+              };
+            });
+          }
+        }
+      } catch (e) {
+        console.error("Failed fetching live components list", e);
+      }
+
+      // 3. Fetch technical signals for index
+      let indexRsi = "54.1 (Nötr)";
+      let indexMacd = "Nötr";
+      let indexBollinger = "Orta Bantta";
+      let indexStop = `${(liveVal * 0.97).toFixed(0)}`;
+      let indexDestek = `${(liveVal * 0.96).toFixed(0)}`;
+      let indexDirenc = `${(liveVal * 1.04).toFixed(0)}`;
+
+      try {
+        const taRes = await fetch(`${apiUrl}/api/market/symbol/${currentFallback.code}/ta/summary`);
+        if (taRes.ok) {
+          const tJson = await taRes.json();
+          if (tJson && !tJson.error) {
+            indexRsi = `${tJson.rsi ? tJson.rsi.toFixed(1) : "50.0"} (${tJson.rsi_status || "Nötr"})`;
+            indexMacd = tJson.macd_status || "Nötr";
+            indexBollinger = tJson.bollinger_status || "Orta Bantta";
+            indexStop = tJson.stop_loss ? `${tJson.stop_loss.toFixed(0)}` : indexStop;
+            indexDestek = tJson.support ? `${tJson.support.toFixed(0)}` : indexDestek;
+            indexDirenc = tJson.resistance ? `${tJson.resistance.toFixed(0)}` : indexDirenc;
+          }
+        }
+      } catch (_) {}
+
+      // 4. Fetch AI Summary paragraphs for index
+      let paragraphs = [
+        `**${currentFallback.name} (${currentFallback.code})**, işlem gören en likit hisselerin performans ağırlıklı ortalamasıyla son dönemde dengeli bir seyir izlemektedir.`,
+        "Küresel piyasalardaki sektörel rotasyonlar ve hacim bazlı değişimler endeks trendi üzerinde doğrudan belirleyici olmaktadır."
+      ];
+
+      try {
+        const summaryRes = await fetch(`${apiUrl}/api/market/symbol/${currentFallback.code}/header-summary`);
+        if (summaryRes.ok) {
+          const summaryJson = await summaryRes.json();
+          if (summaryJson) {
+            if (summaryJson.paragraphs && summaryJson.paragraphs.length > 0) {
+              paragraphs = summaryJson.paragraphs;
+            }
+          }
+        }
+      } catch (_) {}
+
+      if (!isMounted) return;
+
+      setPriceDetails({
+        name: currentFallback.name,
+        code: currentFallback.code,
+        price: liveVal,
+        diffPercent: liveDf,
+        description: currentFallback.description,
+        components: apiComponents,
+      });
+
+      setTechnicalSinyaller({
+        rsi: indexRsi,
+        macd: indexMacd,
+        bollinger: indexBollinger,
+        atrStop: indexStop,
+        destek: indexDestek,
+        direnc: indexDirenc,
+      });
+
+      setIndexSummary(paragraphs);
+      setLoading(false);
     }
 
-    setIndexData(currentMeta);
-    fetchIndexDetail();
-  }, [id, currentMeta]);
+    loadIndexData();
+    return () => {
+      isMounted = false;
+    };
+  }, [id, currentFallback.code]);
 
-  if (!indexData) return null;
+  if (loading || !priceDetails) {
+    return (
+      <div className="flex h-[360px] items-center justify-center text-muted-foreground font-medium text-xs gap-2 animate-pulse">
+        <Loader2 className="animate-spin text-primary" size={16} />
+        <span>Veriler yükleniyor, lütfen bekleyin...</span>
+      </div>
+    );
+  }
 
-  const chatContext = `endeks:${currentMeta.code.toLowerCase()}`;
+  const isUp = priceDetails.diffPercent >= 0;
+  const chatContext = `endeks:${currentFallback.code.toLowerCase()}`;
+
+  // Predefined Quick-click technical questions for index
+  const technicalQuestions = [
+    `${priceDetails.code} endeksi destek ve direnç pivot noktaları nerede?`,
+    `${priceDetails.code} RSI, MACD ve teknik osilatörler ne durumda?`,
+    `${priceDetails.code} için son 50 günlük hareketli ortalama konumu nasıl?`,
+    `${priceDetails.code} endeksinde Bollinger Bandı genişliği düzeltme sinyali veriyor mu?`,
+    `${priceDetails.code} endeks trend gücü ve momentum analizi ne gösteriyor?`
+  ];
+
+  // Predefined Quick-click fundamental/sector questions for index
+  const macroQuestions = [
+    `${priceDetails.code} içindeki en yüksek ağırlığa sahip hisseler hangileri?`,
+    `Sanayi ve Bankacılık rasyoları endeks üzerinde nasıl bir korelasyona sahip?`,
+    `Yabancı saklama oranlarındaki değişimlerin endekse yansıması nasıl olur?`,
+    `${priceDetails.code}'de çarpan bazında ucuz kalan sektörler hangileri?`,
+    `Global enflasyon ve para politikası gelişmelerinin endekse etkisi nasıl olur?`
+  ];
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300 flex flex-col min-h-fit pb-12">
-      {/* Breadcrumb Header */}
-      <div className="flex items-center gap-1 shrink-0">
-        <div>
-          <span className="text-xs text-muted-foreground uppercase tracking-wider">Endeks Detay</span>
-          <h1 className="text-lg md:text-xl font-bold text-foreground tracking-tight leading-none mt-1">{indexData.name}</h1>
-        </div>
-      </div>
-
-      {/* Description Info */}
-      <div className="border border-border/50 p-5 rounded-xl bg-card/40 text-xs text-muted-foreground/80 leading-relaxed">
-        {indexData.description}
-      </div>
-
-      {/* AI Analiz Raporu */}
-      {indexSummary && indexSummary.length > 0 && (
-        <div className="relative overflow-hidden space-y-6">
-          <div className="space-y-3.5">
+    <div className="space-y-6 animate-in fade-in duration-400 flex flex-col min-h-fit pb-32">
+      
+      {/* SECTION A: Asset Heading Block (Fixed/Always Visible) */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between border border-border/45 bg-card/25 rounded-2xl p-5 gap-4 relative overflow-hidden shrink-0 transition-all hover:border-border/60">
+        
+        {/* Left Info Area */}
+        <div className="flex items-center gap-3.5 min-w-0">
+          <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/15 flex items-center justify-center text-primary font-bold text-xs tracking-tight shrink-0">
+            {priceDetails.code}
+          </div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <Sparkles size={15} className="text-primary" />
-              <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider">AI ÖZET ANALİZ</h3>
+              <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Piyasa Endeksi / BIST</span>
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" title="Borsa Canlı Akış" />
             </div>
-            
-            <div className="text-[15px] md:text-[17px] text-foreground/85 leading-relaxed font-medium">
-              {indexSummary.map((p, idx) => (
-                <p key={idx} dangerouslySetInnerHTML={{ __html: p.replace(/\*\*(.*?)\*\*/g, '<strong class="text-foreground font-semibold">$1</strong>') }} />
-              ))}
+            <h1 className="text-base md:text-lg font-bold text-foreground tracking-tight leading-none mt-1 truncate">{priceDetails.name}</h1>
+          </div>
+        </div>
+
+        {/* Value Area */}
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3 shrink-0">
+          <div className="flex flex-col">
+            <span className="text-[10px] text-muted-foreground font-medium uppercase">Endeks Değeri</span>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-lg md:text-xl font-bold text-foreground tracking-tight">
+                {priceDetails.price.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5 ${
+                isUp ? 'bg-emerald-500/10 text-emerald-500' : 'bg-destructive/10 text-destructive'
+              }`}>
+                {isUp ? '+' : ''}{priceDetails.diffPercent.toFixed(2)}%
+              </span>
             </div>
           </div>
 
-          {/* Suggested Questions Section */}
-          {suggestedQuestions && suggestedQuestions.length > 0 && (
-            <div className="space-y-3 pt-2">
+          {/* Description Block */}
+          <div className="hidden lg:flex max-w-[280px] xl:max-w-xs border-l border-border/40 pl-6 text-[10px] text-muted-foreground leading-normal font-medium">
+            {priceDetails.description}
+          </div>
+
+          {/* Watchlist toggle */}
+          <button
+            onClick={toggleWatchlist}
+            className={`w-10 h-10 flex items-center justify-center rounded-xl border transition-all cursor-pointer ${
+              isStarred
+                ? "bg-amber-500/15 border-amber-500/40 text-amber-500 scale-[1.03] shadow-2xs"
+                : "border-border/40 hover:border-border text-muted-foreground hover:text-foreground hover:bg-muted/30"
+            }`}
+            title={isStarred ? "Takip Listesinden Çıkar" : "Takip Listeme Ekle"}
+          >
+            <Star size={16} fill={isStarred ? "currentColor" : "none"} strokeWidth={isStarred ? 1.5 : 2} />
+          </button>
+        </div>
+      </div>
+
+      {/* SECTION B: Asset Body Block (Dynamic Dual-Mode Area) */}
+      
+      {/* MODE 1: Dashboard View (Default, showChatMode = false) */}
+      {!showChatMode ? (
+        <div className="space-y-6">
+          
+          {/* Historical Trend Chart */}
+          <TradingViewChart symbol={priceDetails.code} lastPrice={priceDetails.price} />
+
+          {/* AI summaries summary text */}
+          {indexSummary && indexSummary.length > 0 && (
+            <div className="border border-border/40 bg-muted/15 p-5 rounded-2xl space-y-3">
               <div className="flex items-center gap-2">
-                <HelpCircle size={15} className="text-primary/75" />
-                <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider">ÖNERİLEN ANALİZ SORULARI</h3>
+                <Sparkles size={14} className="text-primary animate-pulse" />
+                <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Yapay Zeka Analiz Özeti</h3>
               </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {suggestedQuestions.map((q, idx) => (
-                  <button
-                    key={idx}
-                    onClick={async () => {
-                      await sendMessage(q, chatContext);
-                      if (!isRightSidebarOpen) {
-                        toggleRightSidebar();
-                      }
-                    }}
-                    className="text-left text-xs text-muted-foreground hover:text-foreground bg-muted/20 hover:bg-muted/50 border border-border/40 hover:border-border rounded-xl p-3.5 transition-all cursor-pointer leading-relaxed active:scale-[0.99] font-medium"
-                  >
-                    {q}
-                  </button>
+              <div className="text-xs md:text-sm text-foreground/80 leading-relaxed space-y-2.5">
+                {indexSummary.map((p, idx) => (
+                  <p key={idx} dangerouslySetInnerHTML={{ __html: p.replace(/\*\*(.*?)\*\*/g, '<strong class="text-foreground font-semibold">$1</strong>') }} />
                 ))}
               </div>
             </div>
           )}
+
+          {/* Dual Columns Grid: Technical Indicators & Constituents */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            {/* COLUMN 1: Technical Indicators card */}
+            <div className="border border-border/45 bg-card/20 rounded-2xl p-5 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/30">
+                  <div className="w-6 h-6 rounded-md bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                    <TrendingUp size={12} />
+                  </div>
+                  <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Teknik Sinyaller</h3>
+                </div>
+
+                {techSinyaller && (
+                  <div className="overflow-hidden border border-border/40 rounded-xl mb-6 bg-muted/10 divide-y divide-border/30">
+                    <div className="flex justify-between items-center p-3 text-xs">
+                      <span className="text-muted-foreground font-medium">RSI (14) Durumu</span>
+                      <span className="font-semibold text-foreground">{techSinyaller.rsi}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 text-xs">
+                      <span className="text-muted-foreground font-medium">MACD Trend</span>
+                      <span className="font-semibold text-foreground">{techSinyaller.macd}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 text-xs">
+                      <span className="text-muted-foreground font-medium">Bollinger Bands Konumu</span>
+                      <span className="font-semibold text-foreground">{techSinyaller.bollinger}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 text-xs">
+                      <span className="text-muted-foreground font-medium">Kritik Destek Seviyesi</span>
+                      <span className="font-semibold text-foreground">
+                        {Number(techSinyaller.destek).toLocaleString("tr-TR")} Puan
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 text-xs">
+                      <span className="text-muted-foreground font-medium">Kritik Direnç Seviyesi</span>
+                      <span className="font-semibold text-foreground">
+                        {Number(techSinyaller.direnc).toLocaleString("tr-TR")} Puan
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 5 Technical Questions */}
+              <div className="space-y-2 pt-2">
+                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-2">
+                  <HelpCircle size={12} />
+                  <span>Endeks Teknik Soruları</span>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  {technicalQuestions.map((q, idx) => (
+                    <button
+                      key={idx}
+                      onClick={async () => {
+                        await sendMessage(q, chatContext);
+                      }}
+                      className="text-left text-xs text-muted-foreground hover:text-foreground bg-muted/20 hover:bg-muted/50 border border-border/30 hover:border-border/60 rounded-xl p-3 transition-colors cursor-pointer leading-normal active:scale-[0.99] font-medium"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* COLUMN 2: Constituents & Weights card */}
+            <div className="border border-border/45 bg-card/20 rounded-2xl p-5 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/30">
+                  <div className="w-6 h-6 rounded-md bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                    <Globe size={12} />
+                  </div>
+                  <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Endeks Bileşenleri</h3>
+                </div>
+
+                {/* constituents list table with nested link navigation */}
+                <div className="overflow-hidden border border-border/40 rounded-xl mb-6 bg-muted/10">
+                  <table className="w-full border-collapse text-left text-xs">
+                    <thead>
+                      <tr className="bg-muted/35 text-[10px] text-muted-foreground uppercase font-semibold tracking-wider border-b border-border/45">
+                        <th className="p-3">Hisse</th>
+                        <th className="p-3">Son Fiyat</th>
+                        <th className="p-3 text-right">Değişim</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/30">
+                      {priceDetails.components.map((comp) => {
+                        const compUp = comp.diff >= 0;
+                        return (
+                          <tr 
+                            key={comp.code}
+                            onClick={() => navigate({ to: `/panel/sirketler/${comp.code.toLowerCase()}` as any })}
+                            className="group hover:bg-muted/40 cursor-pointer transition-colors"
+                          >
+                            <td className="p-3 flex flex-col min-w-0">
+                              <span className="font-bold text-foreground group-hover:text-primary transition-colors">{comp.code}</span>
+                              <span className="text-[10px] text-muted-foreground truncate max-w-[150px]">{comp.name}</span>
+                            </td>
+                            <td className="p-3 font-semibold text-foreground">
+                              {comp.price.toFixed(2)} TL
+                            </td>
+                            <td className="p-3 text-right">
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                                compUp ? 'bg-emerald-500/10 text-emerald-500' : 'bg-destructive/10 text-destructive'
+                              }`}>
+                                {compUp ? '+' : ''}{comp.diff.toFixed(2)}%
+                              </span>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* 5 Macro/Constituents suggested questions */}
+              <div className="space-y-2 pt-2">
+                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-2">
+                  <Compass size={12} />
+                  <span>Bileşen ve Sektör Soruları</span>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  {macroQuestions.map((q, idx) => (
+                    <button
+                      key={idx}
+                      onClick={async () => {
+                        await sendMessage(q, chatContext);
+                      }}
+                      className="text-left text-xs text-muted-foreground hover:text-foreground bg-muted/20 hover:bg-muted/50 border border-border/30 hover:border-border/60 rounded-xl p-3 transition-colors cursor-pointer leading-normal active:scale-[0.99] font-medium"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      ) : (
+        
+        // MODE 2: Chat View (Sohbet Başladığında, showChatMode = true)
+        <div className="border border-border/45 rounded-2xl bg-card/15 flex flex-col h-[520px] overflow-hidden relative">
+          
+          {/* Action header with go back button */}
+          <div className="px-5 py-3 border-b border-border/30 bg-muted/10 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span className="text-xs font-semibold text-foreground tracking-tight">Sohbet Analiz Raporu (Aktif)</span>
+            </div>
+            
+            <button
+              onClick={() => {
+                clearChat();
+                setShowChatMode(false);
+              }}
+              className="text-xs text-primary hover:text-primary-foreground bg-primary/10 hover:bg-primary border border-primary/20 px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 font-medium shadow-2xs"
+            >
+              <ArrowLeft size={13} strokeWidth={2.5} />
+              <span>Grafiğe ve Analizlere Dön</span>
+            </button>
+          </div>
+
+          {/* Active Chat Conversation History Container */}
+          <div 
+            ref={chatScrollRef}
+            className="flex-1 overflow-y-auto p-5 space-y-6 custom-scrollbar scroll-smooth"
+          >
+            {messages.map((msg, idx) => (
+              <div key={idx} className={`flex gap-3.5 ${msg.role === "user" ? "justify-end" : "justify-start animate-in fade-in duration-300"}`}>
+                
+                {msg.role !== "user" && (
+                  <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/15 shadow-2xs">
+                    <Sparkles size={13} />
+                  </div>
+                )}
+                
+                <div className={`rounded-2xl px-4 py-3 text-xs md:text-sm max-w-[85%] sm:max-w-[75%] leading-relaxed ${
+                  msg.role === "user"
+                    ? "bg-primary text-primary-foreground font-medium rounded-tr-sm shadow-sm"
+                    : "bg-muted/40 text-foreground border border-border/40 rounded-tl-sm w-full chatbot-response"
+                }`}>
+                  <MarkdownRenderer text={msg.text} isAssistant={msg.role === "assistant"} context={msg.context || chatContext} />
+                </div>
+              </div>
+            ))}
+
+            {isLoading && (
+              <div className="flex gap-3.5 justify-start animate-pulse">
+                <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/15 shadow-2xs">
+                  <Sparkles size={13} />
+                </div>
+                <div className="bg-muted/20 text-muted-foreground text-xs md:text-sm rounded-2xl rounded-tl-sm px-4 py-3 border border-border/30 flex items-center gap-2">
+                  <Loader2 size={13} className="animate-spin text-primary" />
+                  <span>Yapay zeka analiz raporu hazırlıyor...</span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
-
-      {/* Constituent Stocks Table */}
-      <div className="border border-border/75 rounded-xl p-5 bg-card/40">
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground uppercase tracking-wider mb-4 shrink-0">
-          <Globe size={14} className="text-primary" />
-          <span>Bileşenler ve Ağırlıklar</span>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left text-xs">
-            <thead>
-              <tr className="border-b border-border/60 text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
-                <th className="pb-3 pr-2 font-semibold">Hisse</th>
-                <th className="pb-3 pr-2 font-semibold">Şirket Unvanı</th>
-                <th className="pb-3 text-right pr-2 font-semibold">Son Fiyat</th>
-                <th className="pb-3 text-right font-semibold">Değişim</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/30">
-              {indexData.components.map((comp) => {
-                const compUp = comp.diff >= 0;
-                return (
-                  <tr 
-                    key={comp.code}
-                    onClick={() => navigate({ to: `/panel/sirketler/${comp.code.toLowerCase()}` as any })}
-                    className="group hover:bg-muted/40 cursor-pointer transition-colors"
-                  >
-                    <td className="py-3 pr-2 font-semibold text-foreground group-hover:text-primary transition-colors">
-                      {comp.code}
-                    </td>
-                    <td className="py-3 pr-2 text-muted-foreground max-w-[150px] truncate">
-                      {comp.name}
-                    </td>
-                    <td className="py-3 text-right pr-2 text-foreground font-medium">
-                      {comp.price.toFixed(2)} TL
-                    </td>
-                    <td className="py-3 text-right">
-                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                        compUp ? "bg-emerald-500/10 text-emerald-500" : "bg-destructive/10 text-destructive"
-                      }`}>
-                        {compUp ? "+" : ""}{comp.diff.toFixed(2)}%
-                      </span>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
 
     </div>
   )
