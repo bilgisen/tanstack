@@ -32,11 +32,11 @@ export function LeftSidebar() {
 
   return (
     <aside className={`
-      flex flex-col border-r border-border bg-card text-card-foreground shrink-0 transition-all duration-300 h-full overflow-hidden select-none
+      flex flex-col border-r border-border bg-card text-card-foreground shrink-0 transition-all duration-300 h-full select-none relative
       fixed inset-y-0 left-0 z-50 lg:static
       ${isLeftSidebarExpanded 
-        ? "w-[260px] translate-x-0" 
-        : "w-0 -translate-x-full lg:translate-x-0 lg:w-14"
+        ? "w-[260px] translate-x-0 overflow-hidden" 
+        : "w-0 -translate-x-full lg:translate-x-0 lg:w-14 lg:overflow-visible overflow-hidden"
       }
     `}>
       {isLeftSidebarExpanded ? (
@@ -49,7 +49,7 @@ export function LeftSidebar() {
               to="/panel" 
               className="flex items-center gap-2 text-foreground hover:opacity-90 transition-opacity text-sm font-bold tracking-tight"
             >
-              <Logo size={15} className="text-[#1D9BF0] shrink-0" />
+              <Logo size={15} className="text-foreground shrink-0" />
               <span>hissepro</span>
             </Link>
             
@@ -176,52 +176,6 @@ export function LeftSidebar() {
 
           {/* Fixed Footer Profile */}
           <div className="p-4 border-t border-border/40 shrink-0 flex flex-col gap-4 relative">
-            {isSettingsOpen && (
-              <div className="absolute bottom-16 left-4 right-4 bg-card border border-border/80 rounded-2xl p-2 shadow-lg z-50 animate-in slide-in-from-bottom-2 fade-in duration-200 text-xs">
-                <div className="flex flex-col gap-0.5">
-                  <div className="px-3 py-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Ayarlar</div>
-                  
-                  {/* Theme Selector (Compact / Beautiful inline buttons) */}
-                  <div className="p-1 bg-muted/40 rounded-xl mb-1 mt-0.5">
-                    <div className="px-2 py-1 text-[10px] text-muted-foreground/80 font-medium">Tema Seçimi</div>
-                    <div className="grid grid-cols-3 gap-1 mt-1">
-                      {(['light', 'dark', 'system'] as const).map((t) => (
-                        <button
-                          key={t}
-                          onClick={() => setTheme(t)}
-                          className={`py-1 rounded-lg text-[10px] font-semibold transition-all capitalize cursor-pointer ${
-                            theme === t 
-                              ? "bg-[#1D9BF0] text-white shadow-2xs" 
-                              : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                          }`}
-                        >
-                          {t === 'light' ? 'Açık' : t === 'dark' ? 'Koyu' : 'Sistem'}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <button 
-                    onClick={() => alert("Etkinlik geçmişi yakında eklenecek!")}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-foreground/90 transition-colors text-left cursor-pointer"
-                  >
-                    <History size={13} className="text-muted-foreground" />
-                    <span>Etkinlik Geçmişi</span>
-                  </button>
-
-                  <div className="h-px bg-border/40 my-1" />
-
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors text-left cursor-pointer font-semibold"
-                  >
-                    <LogOut size={13} />
-                    <span>Çıkış Yap</span>
-                  </button>
-                </div>
-              </div>
-            )}
-
             {user && <HTDashboard />}
             {user ? (
               <div className="flex items-center justify-between gap-3 group">
@@ -274,13 +228,13 @@ export function LeftSidebar() {
         </div>
       ) : (
         /* Slim, Ultra-Clean Collapsed Sidebar Content (Thinner, finer padding & sleek gap) */
-        <div className="flex-1 flex flex-col h-full py-3 items-center justify-between overflow-y-auto overflow-x-hidden scrollbar-none animate-in fade-in duration-300 select-none">
+        <div className="flex-1 flex flex-col h-full py-3 items-center justify-between overflow-y-auto overflow-x-visible scrollbar-none animate-in fade-in duration-300 select-none">
           <div className="flex flex-col items-center gap-4 w-full px-2">
             
             {/* Logo in Collapsed State with Gemini-like Hover Expand Trigger */}
             <div className="relative group w-9 h-9 flex items-center justify-center mb-1">
               <div className="transition-all duration-200 group-hover:scale-0 group-hover:opacity-0 flex items-center justify-center">
-                <Logo size={16} className="text-[#1D9BF0]" />
+                <Logo size={16} className="text-foreground" />
               </div>
               <button
                 onClick={toggleLeftSidebarExpanded}
@@ -291,16 +245,7 @@ export function LeftSidebar() {
               </button>
             </div>
 
-            {/* 1. Toggle Button */}
-            <button
-              onClick={toggleLeftSidebarExpanded}
-              className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 rounded-lg transition-all duration-200 border border-border bg-card shadow-3xs hover:border-[#0e75ec]/70 hover:shadow-[0_0_8px_rgba(14,117,236,0.15)] cursor-pointer"
-              title="Genişlet"
-            >
-              <PanelLeft size={14} />
-            </button>
-
-            {/* 2. Plus (Yeni Sohbet) Button */}
+            {/* 1. Plus (Yeni Sohbet) Button */}
             <button
               onClick={() => clearChat()}
               className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-foreground bg-muted/40 hover:bg-muted/80 rounded-full transition-all duration-200 cursor-pointer border border-border/30 animate-pulse"
@@ -309,7 +254,7 @@ export function LeftSidebar() {
               <MessageCirclePlus size={15} className="text-[#1D9BF0]" />
             </button>
 
-            {/* 3. Sohbet Geçmişi Toggle (Expands the sidebar to show list) */}
+            {/* 2. Sohbet Geçmişi Toggle (Expands the sidebar to show list) */}
             <button
               onClick={toggleLeftSidebarExpanded}
               className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/40 rounded-lg transition-all duration-200 cursor-pointer"
@@ -318,7 +263,7 @@ export function LeftSidebar() {
               <History size={14} />
             </button>
 
-            {/* 4. Watchlist (Star) Icon to quickly navigate to Watchlist page */}
+            {/* 3. Watchlist (Star) Icon to quickly navigate to Watchlist page */}
             <Link
               to="/panel/takip-listesi"
               className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/40 rounded-lg transition-all duration-200"
@@ -331,51 +276,6 @@ export function LeftSidebar() {
 
           {/* Bottom profile/logout area for collapsed state */}
           <div className="w-full px-2 flex flex-col items-center gap-2 shrink-0 relative">
-            {isSettingsOpen && (
-              <div className="absolute bottom-24 left-12 w-48 bg-card border border-border/80 rounded-2xl p-2 shadow-lg z-50 animate-in slide-in-from-left-2 fade-in duration-200 text-xs text-left">
-                <div className="flex flex-col gap-0.5">
-                  <div className="px-3 py-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Ayarlar</div>
-                  
-                  <div className="p-1 bg-muted/40 rounded-xl mb-1 mt-0.5">
-                    <div className="px-2 py-1 text-[10px] text-muted-foreground/80 font-medium">Tema</div>
-                    <div className="grid grid-cols-3 gap-1 mt-1">
-                      {(['light', 'dark', 'system'] as const).map((t) => (
-                        <button
-                          key={t}
-                          onClick={() => setTheme(t)}
-                          className={`py-1 rounded-lg text-[9px] font-semibold transition-all capitalize cursor-pointer ${
-                            theme === t 
-                              ? "bg-[#1D9BF0] text-white shadow-2xs" 
-                              : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                          }`}
-                        >
-                          {t === 'light' ? 'Açık' : t === 'dark' ? 'Koyu' : 'Sis'}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <button 
-                    onClick={() => alert("Etkinlik geçmişi yakında eklenecek!")}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted text-foreground/90 transition-colors text-left cursor-pointer"
-                  >
-                    <History size={12} className="text-muted-foreground" />
-                    <span>Etkinlik</span>
-                  </button>
-
-                  <div className="h-px bg-border/40 my-1" />
-
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors text-left cursor-pointer font-semibold"
-                  >
-                    <LogOut size={12} />
-                    <span>Çıkış Yap</span>
-                  </button>
-                </div>
-              </div>
-            )}
-
             {/* Settings Gear Button placed above the Avatar when Collapsed */}
             <button
               onClick={() => setIsSettingsOpen(!isSettingsOpen)}
@@ -397,7 +297,7 @@ export function LeftSidebar() {
                 <img 
                   src={user.user_metadata?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} 
                   alt="Avatar" 
-                  className="w-6.5 h-6.5 rounded-full border border-border bg-card shadow-2xs group-hover:border-[#1D9BF0] transition-all duration-300" 
+                  className="w-6.5 h-6.5 rounded-full border border-border bg-card shadow-2xs group-hover:border-foreground transition-all duration-300" 
                 />
               </button>
             ) : (
@@ -409,6 +309,59 @@ export function LeftSidebar() {
                 <User size={14} />
               </button>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Unified Settings Popover placed outside of inner scrolling content to guarantee rendering without clipping */}
+      {isSettingsOpen && (
+        <div className={`
+          absolute z-50 bg-card border border-border/80 rounded-2xl p-2.5 shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-200 text-xs text-left
+          ${isLeftSidebarExpanded 
+            ? "bottom-18 left-4 right-4" 
+            : "bottom-24 left-14 w-48"
+          }
+        `}>
+          <div className="flex flex-col gap-1">
+            <div className="px-2 py-1 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Ayarlar</div>
+            
+            {/* Theme Selector Popover */}
+            <div className="p-1.5 bg-muted/40 rounded-xl mb-1">
+              <div className="px-1.5 pb-1 text-[10px] text-muted-foreground/80 font-medium">Tema Seçimi</div>
+              <div className="grid grid-cols-3 gap-1">
+                {(['light', 'dark', 'system'] as const).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setTheme(t)}
+                    className={`py-1 rounded-lg text-[10px] font-semibold transition-all capitalize cursor-pointer ${
+                      theme === t 
+                        ? "bg-[#1D9BF0] text-white shadow-xs" 
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {t === 'light' ? 'Açık' : t === 'dark' ? 'Koyu' : 'Sistem'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button 
+              onClick={() => alert("Etkinlik geçmişi yakında eklenecek!")}
+              className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-muted text-foreground/90 transition-colors text-left cursor-pointer"
+            >
+              <History size={13} className="text-muted-foreground" />
+              <span>Etkinlik Geçmişi</span>
+            </button>
+
+            <div className="h-px bg-border/40 my-1" />
+
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-destructive/10 text-destructive transition-colors text-left cursor-pointer font-semibold"
+            >
+              <LogOut size={13} />
+              <span>Çıkış Yap</span>
+            </button>
           </div>
         </div>
       )}
