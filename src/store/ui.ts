@@ -48,9 +48,9 @@ const getInitialLeftSidebar = (): boolean => {
     if (stored !== null) {
       return stored === 'true';
     }
-    return isMobile ? false : true;
+    return false;
   }
-  return true;
+  return false;
 };
 
 const getInitialRightSidebar = (): boolean => {
