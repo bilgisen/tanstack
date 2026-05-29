@@ -248,7 +248,7 @@ export function LeftSidebar() {
             {/* 1. Plus (Yeni Sohbet) Button */}
             <button
               onClick={() => clearChat()}
-              className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-foreground bg-muted/40 hover:bg-muted/80 rounded-full transition-all duration-200 cursor-pointer border border-border/30 animate-pulse"
+              className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-foreground bg-muted/40 hover:bg-muted/80 rounded-full transition-all duration-200 cursor-pointer border border-border/30"
               title="Yeni Sohbet"
             >
               <MessageCirclePlus size={15} className="text-[#1D9BF0]" />

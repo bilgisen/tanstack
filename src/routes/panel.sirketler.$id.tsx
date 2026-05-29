@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Sparkles, HelpCircle, Star, TrendingUp, Compass, ArrowLeft, Loader2 } from 'lucide-react'
+import { Sparkles, HelpCircle, Star, TrendingUp, Compass, Loader2 } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import companyNames from '../constants/companyNames.json'
 import companyLogos from '../constants/companyLogos.json'
@@ -7,6 +7,7 @@ import { useChatStore } from '../store/chat'
 import { useWatchlistStore } from '../store/watchlist'
 import { TradingViewChart } from '../components/dashboard/TradingViewChart'
 import { MarkdownRenderer } from '../components/dashboard/MarkdownRenderer'
+
 
 export const Route = createFileRoute('/panel/sirketler/$id')({
   component: SirketDetailPage,
@@ -59,7 +60,7 @@ function SirketDetailPage() {
     `Sektörel beklentilerin ${tickerUpper} hissesine etkisi nasıl olur?`
   ])
 
-  const { messages, isLoading, sendMessage, clearChat } = useChatStore()
+  const { messages, isLoading, sendMessage } = useChatStore()
   const { watchlists, addItem, removeItem } = useWatchlistStore()
   const chatScrollRef = useRef<HTMLDivElement>(null)
 
@@ -291,20 +292,32 @@ function SirketDetailPage() {
         {/* Left Info Area */}
         <div className="flex items-center gap-3.5 min-w-0">
           {companyLogos[tickerUpper as keyof typeof companyLogos] ? (
-            <div className="h-12 w-12 rounded-2xl bg-white border border-border/40 overflow-hidden flex items-center justify-center shrink-0 p-1 shadow-2xs">
+            <div className="h-12 w-12 rounded-full bg-white border border-border/40 overflow-hidden flex items-center justify-center shrink-0 p-1 shadow-2xs">
               <img src={`/logos/${companyLogos[tickerUpper as keyof typeof companyLogos]}`} alt={priceDetails.code} className="h-full w-full object-contain" />
             </div>
           ) : (
-            <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/15 flex items-center justify-center text-primary font-bold text-sm tracking-tight shrink-0">
+            <div className="h-12 w-12 rounded-full bg-primary/10 border border-primary/15 flex items-center justify-center text-primary font-bold text-sm tracking-tight shrink-0">
               {priceDetails.code}
             </div>
           )}
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Hisse Senedi / BIST</span>
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" title="Piyasa Açık / Canlı Veri" />
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" title="Piyasa Açık / Canlı Veri" />
             </div>
-            <h1 className="text-base md:text-lg font-bold text-foreground tracking-tight leading-none mt-1 truncate">{priceDetails.name}</h1>
+            <div className="flex items-center gap-2 mt-1 min-w-0">
+              <h1 className="text-base md:text-lg font-bold text-foreground tracking-tight leading-none truncate">{priceDetails.name}</h1>
+              {/* Star Watchlist Action Button */}
+              <button
+                onClick={toggleWatchlist}
+                className={`p-1 bg-transparent border-none shadow-none text-muted-foreground hover:text-foreground cursor-pointer shrink-0 transition-colors ${
+                  isStarred ? "text-amber-500 hover:text-amber-600" : ""
+                }`}
+                title={isStarred ? "Takip Listesinden Çıkar" : "Takip Listeme Ekle"}
+              >
+                <Star size={16} fill={isStarred ? "currentColor" : "none"} strokeWidth={isStarred ? 1.5 : 2} />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -340,18 +353,7 @@ function SirketDetailPage() {
             </div>
           </div>
 
-          {/* Star Watchlist Action Button */}
-          <button
-            onClick={toggleWatchlist}
-            className={`w-10 h-10 flex items-center justify-center rounded-xl border transition-all cursor-pointer ${
-              isStarred
-                ? "bg-amber-500/15 border-amber-500/40 text-amber-500 scale-[1.03] shadow-2xs"
-                : "border-border/40 hover:border-border text-muted-foreground hover:text-foreground hover:bg-muted/30"
-            }`}
-            title={isStarred ? "Takip Listesinden Çıkar" : "Takip Listeme Ekle"}
-          >
-            <Star size={16} fill={isStarred ? "currentColor" : "none"} strokeWidth={isStarred ? 1.5 : 2} />
-          </button>
+
         </div>
       </div>
 
@@ -501,34 +503,12 @@ function SirketDetailPage() {
       ) : (
         
         // MODE 2: Chat View (Sohbet Başladığında, showChatMode = true)
-        <div className="border border-border/45 rounded-2xl bg-card/15 flex flex-col h-[520px] overflow-hidden relative">
+        <div className="border border-border/45 rounded-2xl bg-card/15 flex flex-col h-auto relative">
           
-          {/* Reset / Go back to Chart Action Header */}
-          <div className="px-5 py-3 border-b border-border/30 bg-muted/10 flex items-center justify-between shrink-0">
-            <div className="flex items-center gap-2">
-              <span className="relative flex h-2 w-2 shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
-              <span className="text-xs font-semibold text-foreground tracking-tight">Sohbet Analiz Raporu (Aktif)</span>
-            </div>
-            
-            <button
-              onClick={() => {
-                clearChat();
-                setShowChatMode(false);
-              }}
-              className="text-xs text-primary hover:text-primary-foreground bg-primary/10 hover:bg-primary border border-primary/20 px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 font-medium shadow-2xs"
-            >
-              <ArrowLeft size={13} strokeWidth={2.5} />
-              <span>Grafiğe ve Analizlere Dön</span>
-            </button>
-          </div>
-
           {/* Active Chat Conversation History Container */}
           <div 
             ref={chatScrollRef}
-            className="flex-1 overflow-y-auto p-5 space-y-6 custom-scrollbar scroll-smooth"
+            className="flex-1 p-5 space-y-6"
           >
             {messages.map((msg, idx) => (
               <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start animate-in fade-in duration-300"}`}>
