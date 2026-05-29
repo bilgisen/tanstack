@@ -180,6 +180,14 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    font-size: 16px;
+  }
+  @media (max-width: 768px) {
+    html {
+      font-size: 17.5px; /* increase base font size for better mobile readability */
+    }
+  }
   body {
     @apply bg-background text-foreground;
     letter-spacing: var(--tracking-normal);
@@ -306,4 +314,15 @@
 }
 .chatbot-response tr:hover td {
   background-color: var(--secondary);
+}
+
+/* Premium Chatbot Question Bubble Styles */
+.chat-question-bubble {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+.dark .chat-question-bubble {
+  background-color: oklch(0.36 0.08 162.0); /* Deeper, rich emerald green that looks amazing in dark mode and is easier on the eyes */
+  color: oklch(0.99 0.01 174.0); /* High-contrast crisp text color */
+  border: 1px solid oklch(0.44 0.09 162.0 / 0.15); /* Sleek micro border highlight */
 }

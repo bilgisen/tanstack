@@ -523,7 +523,7 @@ function SirketDetailPage() {
                 {/* Message bubble */}
                 <div className={`rounded-2xl px-4 py-3 text-xs md:text-sm max-w-[85%] sm:max-w-[75%] leading-relaxed ${
                   msg.role === "user"
-                    ? "bg-primary text-primary-foreground font-medium rounded-tr-sm shadow-sm"
+                    ? "chat-question-bubble font-medium rounded-tr-sm shadow-sm"
                     : "bg-muted/40 text-foreground border border-border/40 rounded-tl-sm w-full chatbot-response"
                 }`}>
                   <MarkdownRenderer text={msg.text} isAssistant={msg.role === "assistant"} context={msg.context || chatContext} />

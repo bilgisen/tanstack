@@ -110,11 +110,11 @@ export function ChatPane({
         className="flex-1 bg-transparent border-none outline-none resize-none py-2 text-base md:text-[17px] text-foreground placeholder-muted-foreground/60 disabled:opacity-50 min-h-[38px] max-h-[140px] font-sans leading-relaxed custom-scrollbar"
       />
 
-      {/* Antigravity Blue Send Button */}
+      {/* Semantic Green Send Button */}
       <button
         onClick={handleSend}
         disabled={isLoading || !input.trim()}
-        className="w-10 h-10 flex items-center justify-center rounded-full bg-[#0e75ec] hover:bg-[#0c62bd] text-white disabled:opacity-30 transition-all cursor-pointer shadow-xs shrink-0 self-center"
+        className="w-10 h-10 flex items-center justify-center rounded-full bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-30 transition-all cursor-pointer shadow-xs shrink-0 self-center"
         title="Gönder"
       >
         <ArrowUp size={18} strokeWidth={2.5} />

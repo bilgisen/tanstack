@@ -47,10 +47,10 @@ export function LeftSidebar() {
           <div className="flex items-center justify-between p-4 pb-3 border-b border-border/40 shrink-0">
             <Link 
               to="/panel" 
-              className="flex items-center gap-2 text-foreground hover:opacity-90 transition-opacity text-sm font-bold tracking-tight"
+              className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10 border border-primary/15 text-primary hover:bg-primary/20 hover:border-primary/25 transition-all shadow-3xs hover:scale-105 active:scale-[0.98] shrink-0"
+              title="HissePro Paneli"
             >
-              <Logo size={15} className="text-foreground shrink-0" />
-              <span>hissepro</span>
+              <Logo size={20} className="shrink-0" />
             </Link>
             
             <button 

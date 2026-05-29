@@ -7,6 +7,7 @@ import { useChatStore } from '../store/chat'
 import { PanelLeft, Sparkles, Loader2 } from 'lucide-react'
 import { ChatPane } from '../components/dashboard/ChatPane'
 import { MarkdownRenderer } from '../components/dashboard/MarkdownRenderer'
+import { Logo } from '../components/layout/Logo'
 
 export const Route = createFileRoute('/panel')({
   component: PanelLayout,
@@ -124,8 +125,12 @@ function PanelLayout() {
             <PanelLeft size={18} />
           </button>
           
-          <Link to="/panel" className="text-foreground text-sm font-bold tracking-tight">
-            hissepro
+          <Link 
+            to="/panel" 
+            className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10 border border-primary/15 text-primary hover:bg-primary/15 transition-all shrink-0"
+            title="HissePro Paneli"
+          >
+            <Logo size={18} className="shrink-0" />
           </Link>
           
           <div className="w-9 h-9" /> {/* Spacer to center title */}
@@ -147,7 +152,7 @@ function PanelLayout() {
                   )}
                   <div className={`rounded-2xl px-4 py-3 text-sm max-w-[85%] sm:max-w-[75%] leading-relaxed ${
                     msg.role === "user"
-                      ? "bg-primary text-primary-foreground font-medium rounded-tr-sm shadow-sm"
+                      ? "chat-question-bubble font-medium rounded-tr-sm shadow-sm"
                       : "bg-muted/40 text-foreground border border-border/40 rounded-tl-sm w-full"
                   }`}>
                     <MarkdownRenderer text={msg.text} isAssistant={msg.role === "assistant"} context={msg.context || context} />
