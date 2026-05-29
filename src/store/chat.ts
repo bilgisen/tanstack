@@ -5,6 +5,12 @@ export type Message = {
   role: "user" | "assistant";
   text: string;
   context?: string;
+  suggestions?: string[];
+  widget?: {
+    type: 'comparison' | 'ratio_chart' | 'calculator';
+    title: string;
+    data: any;
+  } | null;
 };
 
 export interface ChatSession {
@@ -309,7 +315,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
         useWatchlistStore.getState().removeItem(activeId, symbol);
       }
 
-      const newAssistantMessage: Message = { role: "assistant", text: replyText, context };
+      const newAssistantMessage: Message = { 
+        role: "assistant", 
+        text: replyText, 
+        context,
+        suggestions: data.suggestions || [],
+        widget: data.widget || null
+      };
       
       // Update session with assistant reply
       const updatedSessions = get().sessions.map(s => {

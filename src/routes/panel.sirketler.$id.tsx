@@ -50,6 +50,13 @@ function SirketDetailPage() {
   const [headerSummary, setHeaderSummary] = useState<string[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [showChatMode, setShowChatMode] = useState(false)
+  const [fundamentalQuestions, setFundamentalQuestions] = useState<string[]>([
+    `${tickerUpper} bilançosundaki en kritik finansal oranlar neler?`,
+    `${tickerUpper} F/K ve PD/DD oranları sektöre göre ucuz mu?`,
+    `${tickerUpper} şirketi borçluluk seviyesi ve likiditesi nasıl?`,
+    `${tickerUpper} Özsermaye karlılığı ve büyüme trendini yorumlar mısın?`,
+    `Sektörel beklentilerin ${tickerUpper} hissesine etkisi nasıl olur?`
+  ])
 
   const { messages, isLoading, sendMessage, clearChat } = useChatStore()
   const { watchlists, addItem, removeItem } = useWatchlistStore()
@@ -178,20 +185,30 @@ function SirketDetailPage() {
         console.error("Failed fetching technical indicators", e);
       }
 
-      // 5. Fetch LLM header summary paragraphs
+      // 5. Fetch LLM header summary paragraphs & fundamental questions
       let paragraphs: string[] = [
         `**${tickerUpper}** hissesi için son analizler, fiyat hareketlerinin kısa vadeli düzeltme eğiliminde olduğunu fakat güçlü destek noktalarından dönüş sinyalleri verdiğini göstermektedir.`,
         "Sektör ortalamalarına göre dengeli rasyolara sahip olan şirket, orta ve uzun vadeli yatırımcılar için yakından izlenmektedir."
       ];
+      let customFundQs: string[] = [];
 
       try {
-        const summaryRes = await fetch(`${apiUrl}/api/market/symbol/${tickerUpper}/header-summary`);
-        if (summaryRes.ok) {
-          const summaryJson = await summaryRes.json();
-          if (summaryJson) {
-            if (summaryJson.paragraphs && summaryJson.paragraphs.length > 0) {
-              paragraphs = summaryJson.paragraphs;
-            }
+        const [summaryRes, fundRes] = await Promise.allSettled([
+          fetch(`${apiUrl}/api/market/symbol/${tickerUpper}/header-summary`),
+          fetch(`${apiUrl}/api/market/symbol/${tickerUpper}/fundamental-summary`)
+        ]);
+
+        if (summaryRes.status === 'fulfilled' && summaryRes.value.ok) {
+          const summaryJson = await summaryRes.value.json();
+          if (summaryJson && summaryJson.paragraphs && summaryJson.paragraphs.length > 0) {
+            paragraphs = summaryJson.paragraphs;
+          }
+        }
+
+        if (fundRes.status === 'fulfilled' && fundRes.value.ok) {
+          const fundJson = await fundRes.value.json();
+          if (fundJson && fundJson.questions && fundJson.questions.length > 0) {
+            customFundQs = fundJson.questions;
           }
         }
       } catch (e) {
@@ -229,6 +246,9 @@ function SirketDetailPage() {
       });
 
       setHeaderSummary(paragraphs);
+      if (customFundQs.length > 0) {
+        setFundamentalQuestions(customFundQs);
+      }
       setLoading(false);
     }
 
@@ -259,14 +279,7 @@ function SirketDetailPage() {
     `${tickerUpper} ATR bazlı stop-loss seviyesi kaç olmalıdır?`
   ];
 
-  // Predefined Quick-click fundamental analysis questions
-  const fundamentalQuestions = [
-    `${tickerUpper} bilançosundaki en kritik finansal oranlar neler?`,
-    `${tickerUpper} F/K ve PD/DD oranları sektöre göre ucuz mu?`,
-    `${tickerUpper} şirketi borçluluk seviyesi ve likiditesi nasıl?`,
-    `${tickerUpper} Özsermaye karlılığı ve büyüme trendini yorumlar mısın?`,
-    `Sektörel beklentilerin ${tickerUpper} hissesine etkisi nasıl olur?`
-  ];
+  // Predefined Quick-click fundamental analysis questions are managed by fundamentalQuestions state variable
 
   return (
     <div className="space-y-6 animate-in fade-in duration-400 flex flex-col min-h-fit pb-32">
@@ -526,7 +539,7 @@ function SirketDetailPage() {
                     ? "chat-question-bubble font-medium rounded-tr-sm shadow-sm"
                     : "bg-muted/40 text-foreground border border-border/40 rounded-tl-sm w-full chatbot-response"
                 }`}>
-                  <MarkdownRenderer text={msg.text} isAssistant={msg.role === "assistant"} context={msg.context || chatContext} />
+                  <MarkdownRenderer text={msg.text} isAssistant={msg.role === "assistant"} context={msg.context || chatContext} suggestions={msg.suggestions} widget={msg.widget} />
                 </div>
               </div>
             ))}

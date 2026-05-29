@@ -155,7 +155,7 @@ function PanelLayout() {
                       ? "chat-question-bubble font-medium rounded-tr-sm shadow-sm"
                       : "bg-muted/40 text-foreground border border-border/40 rounded-tl-sm w-full"
                   }`}>
-                    <MarkdownRenderer text={msg.text} isAssistant={msg.role === "assistant"} context={msg.context || context} />
+                    <MarkdownRenderer text={msg.text} isAssistant={msg.role === "assistant"} context={msg.context || context} suggestions={msg.suggestions} widget={msg.widget} />
                   </div>
                   {msg.role === "user" && (
                     <img 

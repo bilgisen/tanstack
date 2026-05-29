@@ -12,11 +12,14 @@ import {
   Activity, 
   Compass 
 } from "lucide-react";
+import { InteractiveWidget } from "./InteractiveWidget";
 
 interface MarkdownRendererProps {
   text: string;
   isAssistant: boolean;
   context?: string;
+  suggestions?: string[];
+  widget?: any;
 }
 
 export interface ExtractedMetrics {
@@ -131,15 +134,18 @@ export function extractMetricsFromText(text: string): ExtractedMetrics | null {
   return null;
 }
 
-export function MarkdownRenderer({ text, isAssistant, context = "global" }: MarkdownRendererProps) {
+export function MarkdownRenderer({ text, isAssistant, context = "global", suggestions, widget }: MarkdownRendererProps) {
   const { sendMessage, isLoading } = useChatStore();
   const { openRightSidebar } = useUIStore();
   
   // Extract questions and clean text
   const { cleanText, questions } = useMemo(() => {
     if (!isAssistant) return { cleanText: text, questions: [] };
+    if (suggestions && suggestions.length > 0) {
+      return { cleanText: text, questions: suggestions };
+    }
     return extractSuggestedQuestions(text);
-  }, [text, isAssistant]);
+  }, [text, isAssistant, suggestions]);
 
   // Extract financial indicators for rich UI presentations
   const metrics = useMemo(() => {
@@ -164,31 +170,31 @@ export function MarkdownRenderer({ text, isAssistant, context = "global" }: Mark
   };
 
   if (!isAssistant) {
-    return <div className="whitespace-pre-wrap leading-relaxed">{text}</div>;
+    return <div className="whitespace-pre-wrap text-base sm:text-[15px] leading-relaxed text-foreground">{text}</div>;
   }
 
   return (
     <div className="space-y-4 w-full animate-in fade-in duration-300">
       {/* 1. Main Chat Text Rendered as Rich HTML */}
       <div 
-        className="chatbot-response text-sm text-foreground/95 leading-relaxed"
+        className="chatbot-response text-[15px] sm:text-base text-foreground/95 leading-relaxed space-y-3"
         dangerouslySetInnerHTML={{ __html: htmlContent }}
       />
 
       {/* 2. Zengin Teknik Dashboard / Kart Sunumu (Tables / Gauges) */}
       {metrics && (
-        <div className="mt-4 p-4 rounded-2xl bg-muted/20 border border-border/40 grid grid-cols-2 sm:grid-cols-4 gap-3 animate-in zoom-in-95 duration-300 shadow-2xs">
+        <div className="mt-4 p-3.5 rounded-xl bg-muted/5 border border-border/10 grid grid-cols-2 sm:grid-cols-4 gap-3 shadow-xs">
           
           {/* Trend Card */}
           {metrics.trend && (
-            <div className="flex flex-col gap-1 p-2.5 rounded-xl bg-card border border-border/40 hover:border-primary/25 transition-all">
-              <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider flex items-center gap-1">
-                <Activity size={10} className="text-primary" /> Trend Durumu
+            <div className="flex flex-col gap-1 p-3 rounded-lg bg-card border border-border/10">
+              <span className="text-xs text-muted-foreground uppercase font-medium tracking-wider flex items-center gap-1.5">
+                <Activity size={12} className="text-muted-foreground" /> Trend
               </span>
-              <span className={`text-xs font-bold mt-1.5 flex items-center gap-1 ${
+              <span className={`text-sm font-semibold mt-1 flex items-center gap-1.5 ${
                 metrics.trend.includes("Yükseliş") ? "text-emerald-500" : metrics.trend.includes("Düşüş") ? "text-destructive" : "text-amber-500"
               }`}>
-                {metrics.trend.includes("Yükseliş") ? <TrendingUp size={13} /> : metrics.trend.includes("Düşüş") ? <TrendingDown size={13} /> : <Minus size={13} />}
+                {metrics.trend.includes("Yükseliş") ? <TrendingUp size={14} /> : metrics.trend.includes("Düşüş") ? <TrendingDown size={14} /> : <Minus size={14} />}
                 {metrics.trend.split(" ")[0]}
               </span>
             </div>
@@ -196,14 +202,14 @@ export function MarkdownRenderer({ text, isAssistant, context = "global" }: Mark
 
           {/* RSI Gauge Card */}
           {metrics.rsi && (
-            <div className="flex flex-col gap-1 p-2.5 rounded-xl bg-card border border-border/40 hover:border-primary/25 transition-all">
-              <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider flex items-center gap-1">
-                <BarChart3 size={10} className="text-primary" /> RSI (14)
+            <div className="flex flex-col gap-1 p-3 rounded-lg bg-card border border-border/10">
+              <span className="text-xs text-muted-foreground uppercase font-medium tracking-wider flex items-center gap-1.5">
+                <BarChart3 size={12} className="text-muted-foreground" /> RSI
               </span>
-              <span className="text-xs font-black text-foreground mt-1.5 flex items-center gap-2">
+              <span className="text-sm font-semibold mt-1 flex items-center gap-2">
                 {metrics.rsi}
                 <span className={`w-2 h-2 rounded-full ${
-                  parseFloat(metrics.rsi) > 70 ? "bg-destructive animate-ping" : parseFloat(metrics.rsi) < 30 ? "bg-emerald-50 animate-ping" : "bg-primary/40"
+                  parseFloat(metrics.rsi) > 70 ? "bg-destructive" : parseFloat(metrics.rsi) < 30 ? "bg-emerald-500" : "bg-primary/40"
                 }`} />
               </span>
             </div>
@@ -211,26 +217,26 @@ export function MarkdownRenderer({ text, isAssistant, context = "global" }: Mark
 
           {/* Destek / Direnç Aralığı Card */}
           {(metrics.support || metrics.resistance) && (
-            <div className="col-span-1 flex flex-col gap-1 p-2.5 rounded-xl bg-card border border-border/40 hover:border-primary/25 transition-all">
-              <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider flex items-center gap-1">
-                <Compass size={10} className="text-primary" /> Destek / Direnç
+            <div className="flex flex-col gap-1 p-3 rounded-lg bg-card border border-border/10">
+              <span className="text-xs text-muted-foreground uppercase font-medium tracking-wider flex items-center gap-1.5">
+                <Compass size={12} className="text-muted-foreground" /> Destek/Direnç
               </span>
-              <span className="text-[11px] font-bold text-foreground mt-1.5 truncate">
-                <span className="text-emerald-500">{metrics.support || "—"}</span>
+              <span className="text-sm font-semibold mt-1 truncate">
+                <span className="text-emerald-500">₺{metrics.support || "—"}</span>
                 <span className="text-muted-foreground mx-1">/</span>
-                <span className="text-destructive">{metrics.resistance || "—"} TL</span>
+                <span className="text-destructive">₺{metrics.resistance || "—"}</span>
               </span>
             </div>
           )}
 
           {/* ATR Stop Loss Card */}
           {metrics.stopLoss && (
-            <div className="flex flex-col gap-1 p-2.5 rounded-xl bg-card border border-border/40 hover:border-primary/25 transition-all">
-              <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider flex items-center gap-1">
-                <ShieldAlert size={10} className="text-primary" /> ATR Stop-Loss
+            <div className="flex flex-col gap-1 p-3 rounded-lg bg-card border border-border/10">
+              <span className="text-xs text-muted-foreground uppercase font-medium tracking-wider flex items-center gap-1.5">
+                <ShieldAlert size={12} className="text-muted-foreground" /> Stop-Loss
               </span>
-              <span className="text-xs font-black text-destructive mt-1.5">
-                {metrics.stopLoss} TL
+              <span className="text-sm font-semibold text-destructive mt-1">
+                ₺{metrics.stopLoss}
               </span>
             </div>
           )}
@@ -238,22 +244,27 @@ export function MarkdownRenderer({ text, isAssistant, context = "global" }: Mark
         </div>
       )}
 
+      {/* 2.5 Dinamik İnteraktif Widget */}
+      {isAssistant && widget && (
+        <InteractiveWidget widget={widget} />
+      )}
+
       {/* 3. Konuyu Derinleştirecek Sade Önerilen Sorular */}
       {questions.length > 0 && (
-        <div className="mt-4 pt-3 border-t border-border/25 space-y-2">
-          <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider block select-none">
-            Konuyu Derinleştirin:
+        <div className="mt-5 pt-4 border-t border-border/10 space-y-3">
+          <span className="text-xs text-muted-foreground uppercase font-medium tracking-wider block select-none">
+            Sıradaki Adım Önerileri:
           </span>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2">
             {questions.map((q, idx) => (
               <button
                 key={idx}
                 onClick={() => handleQuestionClick(q)}
                 disabled={isLoading}
-                className="w-full flex items-center justify-between text-left text-xs text-muted-foreground hover:text-primary hover:bg-primary/5 active:bg-primary/10 border border-border/20 hover:border-primary/30 rounded-xl px-3 py-2 transition-all duration-200 cursor-pointer disabled:opacity-50 group font-medium"
+                className="w-full flex items-center justify-between text-left text-sm text-foreground/85 hover:text-primary hover:bg-primary/5 active:bg-primary/10 border border-border/10 hover:border-primary/20 rounded-xl px-4 py-3 transition-all duration-200 cursor-pointer disabled:opacity-50 group font-medium bg-card/40"
               >
                 <span className="truncate pr-4">{q}</span>
-                <ChevronRight size={12} className="text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+                <ChevronRight size={14} className="text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
               </button>
             ))}
           </div>
