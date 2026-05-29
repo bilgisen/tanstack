@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 import { LeftSidebar } from '../components/layout/LeftSidebar'
 import { useUIStore } from '../store/ui'
 import { useChatStore } from '../store/chat'
-import { PanelLeft, Sparkles, Loader2 } from 'lucide-react'
+import { PanelLeft, Loader2 } from 'lucide-react'
 import { ChatPane } from '../components/dashboard/ChatPane'
 import { MarkdownRenderer } from '../components/dashboard/MarkdownRenderer'
 import { Logo } from '../components/layout/Logo'
@@ -144,12 +144,7 @@ function PanelLayout() {
           {messages.length > 0 && !(pathname.includes('/sirketler/') || pathname.includes('/endeksler/')) ? (
             <div className="max-w-3xl mx-auto space-y-6 py-4 animate-in fade-in duration-300">
               {messages.map((msg, idx) => (
-                <div key={idx} className={`flex gap-4 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                  {msg.role !== "user" && (
-                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20 shadow-2xs">
-                      <Sparkles size={14} />
-                    </div>
-                  )}
+                <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div className={`rounded-2xl px-4 py-3 text-sm max-w-[85%] sm:max-w-[75%] leading-relaxed ${
                     msg.role === "user"
                       ? "chat-question-bubble font-medium rounded-tr-sm shadow-sm"
@@ -157,21 +152,11 @@ function PanelLayout() {
                   }`}>
                     <MarkdownRenderer text={msg.text} isAssistant={msg.role === "assistant"} context={msg.context || context} suggestions={msg.suggestions} widget={msg.widget} />
                   </div>
-                  {msg.role === "user" && (
-                    <img 
-                      src={user?.user_metadata?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} 
-                      alt="User Avatar" 
-                      className="w-8 h-8 rounded-full border border-border bg-card shadow-2xs shrink-0" 
-                    />
-                  )}
                 </div>
               ))}
 
               {isLoading && (
-                <div className="flex gap-4 animate-pulse justify-start">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20 shadow-2xs">
-                    <Sparkles size={14} />
-                  </div>
+                <div className="flex justify-start animate-pulse">
                   <div className="bg-muted/25 text-muted-foreground text-sm rounded-2xl rounded-tl-sm px-4 py-3 border border-border/30 flex items-center gap-2">
                     <Loader2 size={14} className="animate-spin text-primary" />
                     Yapay zeka analiz ediyor...

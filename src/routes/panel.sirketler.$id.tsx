@@ -531,14 +531,7 @@ function SirketDetailPage() {
             className="flex-1 overflow-y-auto p-5 space-y-6 custom-scrollbar scroll-smooth"
           >
             {messages.map((msg, idx) => (
-              <div key={idx} className={`flex gap-3.5 ${msg.role === "user" ? "justify-end" : "justify-start animate-in fade-in duration-300"}`}>
-                
-                {/* Assistant Bot Icon Avatar */}
-                {msg.role !== "user" && (
-                  <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/15 shadow-2xs">
-                    <Sparkles size={13} />
-                  </div>
-                )}
+              <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start animate-in fade-in duration-300"}`}>
                 
                 {/* Message bubble */}
                 <div className={`rounded-2xl px-4 py-3 text-xs md:text-sm max-w-[85%] sm:max-w-[75%] leading-relaxed ${
@@ -553,10 +546,7 @@ function SirketDetailPage() {
 
             {/* AI Streaming Loading bubble */}
             {isLoading && (
-              <div className="flex gap-3.5 justify-start animate-pulse">
-                <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/15 shadow-2xs">
-                  <Sparkles size={13} />
-                </div>
+              <div className="flex justify-start animate-pulse">
                 <div className="bg-muted/20 text-muted-foreground text-xs md:text-sm rounded-2xl rounded-tl-sm px-4 py-3 border border-border/30 flex items-center gap-2">
                   <Loader2 size={13} className="animate-spin text-primary" />
                   <span>Yapay zeka analiz raporu hazırlıyor...</span>
