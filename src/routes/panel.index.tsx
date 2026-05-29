@@ -384,7 +384,7 @@ function PanelIndexPage() {
                          <td className="py-3 px-4 font-medium text-muted-foreground max-w-[160px] md:max-w-xs truncate">
                           <div className="flex items-center gap-2">
                             {row.type === 'stock' && companyLogos[row.symbol as keyof typeof companyLogos] ? (
-                              <img src={`/logos/${companyLogos[row.symbol as keyof typeof companyLogos]}`} className="w-4 h-4 object-contain rounded bg-white p-0.5 border border-border/40 shrink-0 shadow-3xs" alt="" />
+                              <img src={`/logos/${companyLogos[row.symbol as keyof typeof companyLogos]}`} className="w-4 h-4 object-contain rounded-full bg-white p-0.5 border border-border/40 shrink-0 shadow-3xs" alt="" />
                             ) : null}
                             <span>{row.name}</span>
                           </div>
@@ -466,7 +466,7 @@ function PanelIndexPage() {
                         <td className="py-2.5 px-3 font-medium text-muted-foreground max-w-[120px] truncate">
                           <div className="flex items-center gap-2">
                             {companyLogos[row.symbol as keyof typeof companyLogos] ? (
-                              <img src={`/logos/${companyLogos[row.symbol as keyof typeof companyLogos]}`} className="w-4 h-4 object-contain rounded bg-white p-0.5 border border-border/40 shrink-0 shadow-3xs" alt="" />
+                              <img src={`/logos/${companyLogos[row.symbol as keyof typeof companyLogos]}`} className="w-4 h-4 object-contain rounded-full bg-white p-0.5 border border-border/40 shrink-0 shadow-3xs" alt="" />
                             ) : null}
                             <span>{row.name}</span>
                           </div>
@@ -530,7 +530,7 @@ function PanelIndexPage() {
                         <td className="py-2.5 px-3 font-medium text-muted-foreground max-w-[120px] truncate">
                           <div className="flex items-center gap-2">
                             {companyLogos[row.symbol as keyof typeof companyLogos] ? (
-                              <img src={`/logos/${companyLogos[row.symbol as keyof typeof companyLogos]}`} className="w-4 h-4 object-contain rounded bg-white p-0.5 border border-border/40 shrink-0 shadow-3xs" alt="" />
+                              <img src={`/logos/${companyLogos[row.symbol as keyof typeof companyLogos]}`} className="w-4 h-4 object-contain rounded-full bg-white p-0.5 border border-border/40 shrink-0 shadow-3xs" alt="" />
                             ) : null}
                             <span>{row.name}</span>
                           </div>

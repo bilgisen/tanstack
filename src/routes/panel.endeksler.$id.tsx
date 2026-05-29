@@ -292,7 +292,6 @@ function EndeksDetailPage() {
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Piyasa Endeksi / BIST</span>
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" title="Borsa Canlı Akış" />
             </div>
             <div className="flex items-center gap-2 mt-1 min-w-0">
               <h1 className="text-base md:text-lg font-bold text-foreground tracking-tight leading-none truncate">{priceDetails.name}</h1>
@@ -300,7 +299,7 @@ function EndeksDetailPage() {
               <button
                 onClick={toggleWatchlist}
                 className={`p-1 bg-transparent border-none shadow-none text-muted-foreground hover:text-foreground cursor-pointer shrink-0 transition-colors ${
-                  isStarred ? "text-amber-500 hover:text-amber-600" : ""
+                  isStarred ? "text-[#FFD700] hover:text-[#FFC700]" : ""
                 }`}
                 title={isStarred ? "Takip Listesinden Çıkar" : "Takip Listeme Ekle"}
               >
@@ -455,7 +454,7 @@ function EndeksDetailPage() {
                           >
                             <td className="p-3 flex items-center gap-2 min-w-0">
                               {companyLogos[comp.code as keyof typeof companyLogos] ? (
-                                <img src={`/logos/${companyLogos[comp.code as keyof typeof companyLogos]}`} className="w-4 h-4 object-contain rounded bg-white p-0.5 border border-border/40 shrink-0 shadow-3xs" alt="" />
+                                <img src={`/logos/${companyLogos[comp.code as keyof typeof companyLogos]}`} className="w-4 h-4 object-contain rounded-full bg-white p-0.5 border border-border/40 shrink-0 shadow-3xs" alt="" />
                               ) : null}
                               <div className="flex flex-col min-w-0">
                                 <span className="font-bold text-foreground group-hover:text-primary transition-colors">{comp.code}</span>

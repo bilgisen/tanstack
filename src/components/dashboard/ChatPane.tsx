@@ -1,7 +1,6 @@
 import { useState, useRef } from "react";
 import { ArrowUp } from "lucide-react";
 import { useChatStore } from "../../store/chat";
-import { ModelSelector } from "./ModelSelector";
 import { useNavigate, useLocation } from "@tanstack/react-router";
 import companyNames from "../../constants/companyNames.json";
 
@@ -95,9 +94,6 @@ export function ChatPane({
 
   return (
     <div className={`flex items-center gap-3 bg-transparent px-4 py-1.5 w-full select-none ${className}`}>
-      {/* Model Selector dropdown pill */}
-      <ModelSelector />
-
       {/* Textarea Input */}
       <textarea
         ref={textareaRef}

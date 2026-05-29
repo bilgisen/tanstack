@@ -298,7 +298,7 @@ export function RightSidebar() {
                   <div className="flex justify-between items-baseline">
                     <span className="text-xs text-muted-foreground font-medium flex items-center gap-2">
                       {companyLogos[activeCompanyTicker as keyof typeof companyLogos] ? (
-                        <img src={`/logos/${companyLogos[activeCompanyTicker as keyof typeof companyLogos]}`} className="w-5 h-5 object-contain rounded bg-white p-0.5 border border-border/40 shrink-0 shadow-3xs" alt="" />
+                        <img src={`/logos/${companyLogos[activeCompanyTicker as keyof typeof companyLogos]}`} className="w-5 h-5 object-contain rounded-full bg-white p-0.5 border border-border/40 shrink-0 shadow-3xs" alt="" />
                       ) : null}
                       <span>Anlık Fiyat</span>
                     </span>
@@ -420,7 +420,7 @@ export function RightSidebar() {
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         {companyLogos[c.code as keyof typeof companyLogos] ? (
-                          <img src={`/logos/${companyLogos[c.code as keyof typeof companyLogos]}`} className="w-4 h-4 object-contain rounded bg-white p-0.5 border border-border/40 shrink-0 shadow-3xs" alt="" />
+                          <img src={`/logos/${companyLogos[c.code as keyof typeof companyLogos]}`} className="w-4 h-4 object-contain rounded-full bg-white p-0.5 border border-border/40 shrink-0 shadow-3xs" alt="" />
                         ) : null}
                         <div className="flex flex-col min-w-0">
                           <span className="font-bold text-xs text-foreground group-hover:text-primary transition-colors">{c.code}</span>
@@ -464,7 +464,7 @@ export function RightSidebar() {
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         {companyLogos[s.code as keyof typeof companyLogos] ? (
-                          <img src={`/logos/${companyLogos[s.code as keyof typeof companyLogos]}`} className="w-4 h-4 object-contain rounded bg-white p-0.5 border border-border/40 shrink-0 shadow-3xs" alt="" />
+                          <img src={`/logos/${companyLogos[s.code as keyof typeof companyLogos]}`} className="w-4 h-4 object-contain rounded-full bg-white p-0.5 border border-border/40 shrink-0 shadow-3xs" alt="" />
                         ) : null}
                         <div className="flex flex-col min-w-0">
                           <span className="font-bold text-xs text-foreground group-hover:text-primary transition-colors">
@@ -508,7 +508,7 @@ export function RightSidebar() {
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         {companyLogos[s.code as keyof typeof companyLogos] ? (
-                          <img src={`/logos/${companyLogos[s.code as keyof typeof companyLogos]}`} className="w-4 h-4 object-contain rounded bg-white p-0.5 border border-border/40 shrink-0 shadow-3xs" alt="" />
+                          <img src={`/logos/${companyLogos[s.code as keyof typeof companyLogos]}`} className="w-4 h-4 object-contain rounded-full bg-white p-0.5 border border-border/40 shrink-0 shadow-3xs" alt="" />
                         ) : null}
                         <div className="flex flex-col min-w-0">
                           <span className="font-bold text-xs text-foreground group-hover:text-primary transition-colors">

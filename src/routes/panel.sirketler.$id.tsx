@@ -303,7 +303,6 @@ function SirketDetailPage() {
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Hisse Senedi / BIST</span>
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" title="Piyasa Açık / Canlı Veri" />
             </div>
             <div className="flex items-center gap-2 mt-1 min-w-0">
               <h1 className="text-base md:text-lg font-bold text-foreground tracking-tight leading-none truncate">{priceDetails.name}</h1>
@@ -311,7 +310,7 @@ function SirketDetailPage() {
               <button
                 onClick={toggleWatchlist}
                 className={`p-1 bg-transparent border-none shadow-none text-muted-foreground hover:text-foreground cursor-pointer shrink-0 transition-colors ${
-                  isStarred ? "text-amber-500 hover:text-amber-600" : ""
+                  isStarred ? "text-[#FFD700] hover:text-[#FFC700]" : ""
                 }`}
                 title={isStarred ? "Takip Listesinden Çıkar" : "Takip Listeme Ekle"}
               >
