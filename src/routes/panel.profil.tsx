@@ -318,7 +318,7 @@ function ProfilePage() {
                         <span className="text-3xl font-black text-foreground tracking-tight">
                           {config.price.toLocaleString()}
                         </span>
-                        <span className="text-sm font-bold text-muted-foreground">TL / Ay</span>
+                        <span className="text-sm font-bold text-muted-foreground">₺ / Ay</span>
                       </>
                     )}
                   </div>
@@ -411,7 +411,7 @@ function ProfilePage() {
             <div className="flex items-baseline justify-center sm:justify-start gap-1 mt-0.5">
               <span className="text-xl font-black text-foreground">+{EXTRA_HT_PRICING.amount.toLocaleString()} HT</span>
               <span className="text-xs text-muted-foreground font-bold">/</span>
-              <span className="text-sm font-black text-amber-500">{EXTRA_HT_PRICING.price} TL</span>
+              <span className="text-sm font-black text-amber-500">{EXTRA_HT_PRICING.price} ₺</span>
             </div>
           </div>
 

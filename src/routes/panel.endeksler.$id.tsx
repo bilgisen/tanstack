@@ -5,6 +5,7 @@ import { useChatStore } from '../store/chat'
 import { useWatchlistStore } from '../store/watchlist'
 import { TradingViewChart } from '../components/dashboard/TradingViewChart'
 import { MarkdownRenderer } from '../components/dashboard/MarkdownRenderer'
+import companyLogos from '../constants/companyLogos.json'
 
 export const Route = createFileRoute('/panel/endeksler/$id')({
   component: EndeksDetailPage,
@@ -451,12 +452,17 @@ function EndeksDetailPage() {
                             onClick={() => navigate({ to: `/panel/sirketler/${comp.code.toLowerCase()}` as any })}
                             className="group hover:bg-muted/40 cursor-pointer transition-colors"
                           >
-                            <td className="p-3 flex flex-col min-w-0">
-                              <span className="font-bold text-foreground group-hover:text-primary transition-colors">{comp.code}</span>
-                              <span className="text-[10px] text-muted-foreground truncate max-w-[150px]">{comp.name}</span>
+                            <td className="p-3 flex items-center gap-2 min-w-0">
+                              {companyLogos[comp.code as keyof typeof companyLogos] ? (
+                                <img src={`/logos/${companyLogos[comp.code as keyof typeof companyLogos]}`} className="w-4 h-4 object-contain rounded bg-white p-0.5 border border-border/40 shrink-0 shadow-3xs" alt="" />
+                              ) : null}
+                              <div className="flex flex-col min-w-0">
+                                <span className="font-bold text-foreground group-hover:text-primary transition-colors">{comp.code}</span>
+                                <span className="text-[10px] text-muted-foreground truncate max-w-[150px]">{comp.name}</span>
+                              </div>
                             </td>
                             <td className="p-3 font-semibold text-foreground">
-                              {comp.price.toFixed(2)} TL
+                              {comp.price.toFixed(2)} ₺
                             </td>
                             <td className="p-3 text-right">
                               <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${

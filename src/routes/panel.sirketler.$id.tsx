@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Sparkles, HelpCircle, Star, TrendingUp, Compass, ArrowLeft, Loader2 } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import companyNames from '../constants/companyNames.json'
+import companyLogos from '../constants/companyLogos.json'
 import { useChatStore } from '../store/chat'
 import { useWatchlistStore } from '../store/watchlist'
 import { TradingViewChart } from '../components/dashboard/TradingViewChart'
@@ -104,7 +105,7 @@ function SirketDetailPage() {
       let low = 119.10;
       let open = 119.80;
       let close = 120.20;
-      let volume = "45.2M TL";
+      let volume = "45.2M ₺";
 
       // 1. Fetch live stock price
       try {
@@ -164,9 +165,9 @@ function SirketDetailPage() {
       let rsi = "52.4 (Nötr)";
       let macd = "Nötr";
       let bollinger = "Orta Bantta";
-      let atrStop = `${(lastPrice * 0.97).toFixed(2)} TL`;
-      let destek = `${(lastPrice * 0.96).toFixed(2)} TL`;
-      let direnc = `${(lastPrice * 1.04).toFixed(2)} TL`;
+      let atrStop = `${(lastPrice * 0.97).toFixed(2)} ₺`;
+      let destek = `${(lastPrice * 0.96).toFixed(2)} ₺`;
+      let direnc = `${(lastPrice * 1.04).toFixed(2)} ₺`;
 
       try {
         const taRes = await fetch(`${apiUrl}/api/market/symbol/${tickerUpper}/ta/summary`);
@@ -176,9 +177,9 @@ function SirketDetailPage() {
             rsi = `${tJson.rsi ? tJson.rsi.toFixed(1) : "50.0"} (${tJson.rsi_status || "Nötr"})`;
             macd = tJson.macd_status || "Nötr";
             bollinger = tJson.bollinger_status || "Orta Bantta";
-            atrStop = tJson.stop_loss ? `${tJson.stop_loss.toFixed(2)} TL` : atrStop;
-            destek = tJson.support ? `${tJson.support.toFixed(2)} TL` : destek;
-            direnc = tJson.resistance ? `${tJson.resistance.toFixed(2)} TL` : direnc;
+            atrStop = tJson.stop_loss ? `${tJson.stop_loss.toFixed(2)} ₺` : atrStop;
+            destek = tJson.support ? `${tJson.support.toFixed(2)} ₺` : destek;
+            direnc = tJson.resistance ? `${tJson.resistance.toFixed(2)} ₺` : direnc;
           }
         }
       } catch (e) {
@@ -289,9 +290,15 @@ function SirketDetailPage() {
         
         {/* Left Info Area */}
         <div className="flex items-center gap-3.5 min-w-0">
-          <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/15 flex items-center justify-center text-primary font-bold text-sm tracking-tight shrink-0">
-            {priceDetails.code}
-          </div>
+          {companyLogos[tickerUpper as keyof typeof companyLogos] ? (
+            <div className="h-12 w-12 rounded-2xl bg-white border border-border/40 overflow-hidden flex items-center justify-center shrink-0 p-1 shadow-2xs">
+              <img src={`/logos/${companyLogos[tickerUpper as keyof typeof companyLogos]}`} alt={priceDetails.code} className="h-full w-full object-contain" />
+            </div>
+          ) : (
+            <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/15 flex items-center justify-center text-primary font-bold text-sm tracking-tight shrink-0">
+              {priceDetails.code}
+            </div>
+          )}
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Hisse Senedi / BIST</span>
@@ -308,7 +315,7 @@ function SirketDetailPage() {
           <div className="flex flex-col">
             <span className="text-[10px] text-muted-foreground font-medium uppercase">Anlık Fiyat</span>
             <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-lg md:text-xl font-bold text-foreground tracking-tight">{priceDetails.price.toFixed(2)} TRY</span>
+              <span className="text-lg md:text-xl font-bold text-foreground tracking-tight">{priceDetails.price.toFixed(2)} ₺</span>
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5 ${
                 isUp ? 'bg-emerald-500/10 text-emerald-500' : 'bg-destructive/10 text-destructive'
               }`}>

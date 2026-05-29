@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useWatchlistStore } from '../store/watchlist'
 import { useChatStore } from '../store/chat'
 import companyNames from '../constants/companyNames.json'
+import companyLogos from '../constants/companyLogos.json'
 
 export const Route = createFileRoute('/panel/')({
   component: PanelIndexPage,
@@ -380,11 +381,16 @@ function PanelIndexPage() {
                             {row.symbol}
                           </span>
                         </td>
-                        <td className="py-3 px-4 font-medium text-muted-foreground max-w-[160px] md:max-w-xs truncate">
-                          {row.name}
+                         <td className="py-3 px-4 font-medium text-muted-foreground max-w-[160px] md:max-w-xs truncate">
+                          <div className="flex items-center gap-2">
+                            {row.type === 'stock' && companyLogos[row.symbol as keyof typeof companyLogos] ? (
+                              <img src={`/logos/${companyLogos[row.symbol as keyof typeof companyLogos]}`} className="w-4 h-4 object-contain rounded bg-white p-0.5 border border-border/40 shrink-0 shadow-3xs" alt="" />
+                            ) : null}
+                            <span>{row.name}</span>
+                          </div>
                         </td>
                         <td className="py-3 px-4 text-right font-semibold font-mono tracking-tight text-foreground">
-                          {row.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL
+                          {row.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺
                         </td>
                         <td className="py-3 px-4 text-right">
                           <span className={`inline-flex items-center gap-0.5 font-semibold font-mono tracking-tight text-[11px] ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
@@ -458,10 +464,15 @@ function PanelIndexPage() {
                           </span>
                         </td>
                         <td className="py-2.5 px-3 font-medium text-muted-foreground max-w-[120px] truncate">
-                          {row.name}
+                          <div className="flex items-center gap-2">
+                            {companyLogos[row.symbol as keyof typeof companyLogos] ? (
+                              <img src={`/logos/${companyLogos[row.symbol as keyof typeof companyLogos]}`} className="w-4 h-4 object-contain rounded bg-white p-0.5 border border-border/40 shrink-0 shadow-3xs" alt="" />
+                            ) : null}
+                            <span>{row.name}</span>
+                          </div>
                         </td>
                         <td className="py-2.5 px-3 text-right font-semibold font-mono tracking-tight text-foreground">
-                          {row.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL
+                          {row.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺
                         </td>
                         <td className="py-2.5 px-4 text-right">
                           <span className="inline-flex items-center gap-0.5 font-bold font-mono tracking-tight text-[11px] text-emerald-500">
@@ -517,10 +528,15 @@ function PanelIndexPage() {
                           </span>
                         </td>
                         <td className="py-2.5 px-3 font-medium text-muted-foreground max-w-[120px] truncate">
-                          {row.name}
+                          <div className="flex items-center gap-2">
+                            {companyLogos[row.symbol as keyof typeof companyLogos] ? (
+                              <img src={`/logos/${companyLogos[row.symbol as keyof typeof companyLogos]}`} className="w-4 h-4 object-contain rounded bg-white p-0.5 border border-border/40 shrink-0 shadow-3xs" alt="" />
+                            ) : null}
+                            <span>{row.name}</span>
+                          </div>
                         </td>
                         <td className="py-2.5 px-3 text-right font-semibold font-mono tracking-tight text-foreground">
-                          {row.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL
+                          {row.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺
                         </td>
                         <td className="py-2.5 px-4 text-right">
                           <span className="inline-flex items-center gap-0.5 font-bold font-mono tracking-tight text-[11px] text-destructive">

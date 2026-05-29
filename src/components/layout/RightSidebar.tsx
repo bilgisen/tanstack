@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "@tanstack/react-router";
 import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, PanelRight } from "lucide-react";
 import { useUIStore } from "../../store/ui";
 import companyNames from "../../constants/companyNames.json";
+import companyLogos from "../../constants/companyLogos.json";
 
 type StockItem = {
   code: string;
@@ -148,7 +149,7 @@ export function RightSidebar() {
           diffPercent: apiSummaryCard?.diff_percent !== undefined ? apiSummaryCard.diff_percent : diffPercent,
           high: apiSummaryCard?.high || lastPrice * 1.02,
           low: apiSummaryCard?.low || lastPrice * 0.98,
-          volume: apiSummaryCard?.volume || "250M TL",
+          volume: (apiSummaryCard?.volume || "250M TL").replace("TL", "₺").replace("TRY", "₺"),
           fk: (apiDetail as any).fk || (apiDetail as any).FK || "8.50",
           pddf: (apiDetail as any).pddf || (apiDetail as any).PD_DD || "1.20",
           halkaAciklik: (apiDetail as any).halka_aciklik_orani || "40.0%",
@@ -156,7 +157,7 @@ export function RightSidebar() {
           rsi: apiSummaryCard ? `${apiSummaryCard.rsi.toFixed(1)} (${apiSummaryCard.rsi_status})` : ((apiTa as any).rsi_status || "50.0 (Nötr)"),
           macd: apiSummaryCard ? apiSummaryCard.macd_status : ((apiTa as any).macd_status || "Nötr"),
           bollinger: (apiTa as any).bollinger_status || "Orta Bantta",
-          atrStop: apiSummaryCard?.stop_loss ? `${apiSummaryCard.stop_loss.toFixed(2)} TL` : `${(apiTa.atr_stop_loss || lastPrice * 0.97).toFixed(2)} TL`,
+          atrStop: apiSummaryCard?.stop_loss ? `${apiSummaryCard.stop_loss.toFixed(2)} ₺` : `${(apiTa.atr_stop_loss || lastPrice * 0.97).toFixed(2)} ₺`,
         });
       } catch (err) {
         console.error("Failed to load company metrics for sidebar", err);
@@ -295,9 +296,14 @@ export function RightSidebar() {
                 <h3 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Güncel Değerler</h3>
                 <div className="border border-border/60 rounded-xl p-4 bg-muted/20 space-y-3">
                   <div className="flex justify-between items-baseline">
-                    <span className="text-xs text-muted-foreground font-medium">Anlık Fiyat</span>
+                    <span className="text-xs text-muted-foreground font-medium flex items-center gap-2">
+                      {companyLogos[activeCompanyTicker as keyof typeof companyLogos] ? (
+                        <img src={`/logos/${companyLogos[activeCompanyTicker as keyof typeof companyLogos]}`} className="w-5 h-5 object-contain rounded bg-white p-0.5 border border-border/40 shrink-0 shadow-3xs" alt="" />
+                      ) : null}
+                      <span>Anlık Fiyat</span>
+                    </span>
                     <div className="flex items-center gap-1.5">
-                      <span className="font-bold text-foreground">{companyDetails.price.toFixed(2)} TL</span>
+                      <span className="font-bold text-foreground">{companyDetails.price.toFixed(2)} ₺</span>
                       <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${companyDetails.diffPercent >= 0 ? "bg-emerald-500/10 text-emerald-500" : "bg-destructive/10 text-destructive"}`}>
                         {companyDetails.diffPercent > 0 ? "+" : ""}{companyDetails.diffPercent.toFixed(2)}%
                       </span>
@@ -306,7 +312,7 @@ export function RightSidebar() {
                   <div className="h-px bg-border/40" />
                   <div className="flex justify-between text-xs">
                     <span className="text-muted-foreground">En Yüksek / En Düşük</span>
-                    <span className="font-medium text-foreground">{companyDetails.high.toFixed(2)} / {companyDetails.low.toFixed(2)} TL</span>
+                    <span className="font-medium text-foreground">{companyDetails.high.toFixed(2)} / {companyDetails.low.toFixed(2)} ₺</span>
                   </div>
                   <div className="h-px bg-border/40" />
                   <div className="flex justify-between text-xs">
@@ -337,7 +343,7 @@ export function RightSidebar() {
                   <div className="h-px bg-border/40" />
                   <div className="flex justify-between text-xs">
                     <span className="text-muted-foreground">Pivot Destek / Direnç</span>
-                    <span className="font-semibold text-emerald-500">Dst: {((2 * ((companyDetails.high + companyDetails.low + companyDetails.price) / 3)) - companyDetails.high).toFixed(2)} TL</span>
+                    <span className="font-semibold text-emerald-500">Dst: {((2 * ((companyDetails.high + companyDetails.low + companyDetails.price) / 3)) - companyDetails.high).toFixed(2)} ₺</span>
                   </div>
                   <div className="h-px bg-border/40" />
                   <div className="flex justify-between text-xs">
@@ -412,9 +418,14 @@ export function RightSidebar() {
                       onClick={() => navigate({ to: `/panel/sirketler/${c.code.toLowerCase()}` as any })}
                       className="flex items-center justify-between p-2.5 rounded-xl hover:bg-muted/50 border border-transparent hover:border-border/40 transition-colors cursor-pointer group"
                     >
-                      <div className="flex flex-col min-w-0">
-                        <span className="font-bold text-xs text-foreground group-hover:text-primary transition-colors">{c.code}</span>
-                        <span className="text-[10px] text-muted-foreground truncate max-w-[140px]">{c.name || "BIST Şirketi"}</span>
+                      <div className="flex items-center gap-2 min-w-0">
+                        {companyLogos[c.code as keyof typeof companyLogos] ? (
+                          <img src={`/logos/${companyLogos[c.code as keyof typeof companyLogos]}`} className="w-4 h-4 object-contain rounded bg-white p-0.5 border border-border/40 shrink-0 shadow-3xs" alt="" />
+                        ) : null}
+                        <div className="flex flex-col min-w-0">
+                          <span className="font-bold text-xs text-foreground group-hover:text-primary transition-colors">{c.code}</span>
+                          <span className="text-[10px] text-muted-foreground truncate max-w-[140px]">{c.name || "BIST Şirketi"}</span>
+                        </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <span className="text-xs font-semibold text-foreground">{(c.last_price || c.price || 0).toFixed(2)}</span>
@@ -451,13 +462,18 @@ export function RightSidebar() {
                       onClick={() => navigate({ to: `/panel/sirketler/${s.code.toLowerCase()}` as any })}
                       className="flex items-center justify-between p-2.5 rounded-xl hover:bg-muted/50 border border-transparent hover:border-border/40 transition-colors cursor-pointer group"
                     >
-                      <div className="flex flex-col min-w-0">
-                        <span className="font-bold text-xs text-foreground group-hover:text-primary transition-colors">
-                          {s.code}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground truncate max-w-[130px] xl:max-w-[160px]">
-                          {s.name}
-                        </span>
+                      <div className="flex items-center gap-2 min-w-0">
+                        {companyLogos[s.code as keyof typeof companyLogos] ? (
+                          <img src={`/logos/${companyLogos[s.code as keyof typeof companyLogos]}`} className="w-4 h-4 object-contain rounded bg-white p-0.5 border border-border/40 shrink-0 shadow-3xs" alt="" />
+                        ) : null}
+                        <div className="flex flex-col min-w-0">
+                          <span className="font-bold text-xs text-foreground group-hover:text-primary transition-colors">
+                            {s.code}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground truncate max-w-[130px] xl:max-w-[160px]">
+                            {s.name}
+                          </span>
+                        </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <span className="text-xs font-semibold text-foreground">
@@ -490,13 +506,18 @@ export function RightSidebar() {
                       onClick={() => navigate({ to: `/panel/sirketler/${s.code.toLowerCase()}` as any })}
                       className="flex items-center justify-between p-2.5 rounded-xl hover:bg-muted/50 border border-transparent hover:border-border/40 transition-colors cursor-pointer group"
                     >
-                      <div className="flex flex-col min-w-0">
-                        <span className="font-bold text-xs text-foreground group-hover:text-primary transition-colors">
-                          {s.code}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground truncate max-w-[130px] xl:max-w-[160px]">
-                          {s.name}
-                        </span>
+                      <div className="flex items-center gap-2 min-w-0">
+                        {companyLogos[s.code as keyof typeof companyLogos] ? (
+                          <img src={`/logos/${companyLogos[s.code as keyof typeof companyLogos]}`} className="w-4 h-4 object-contain rounded bg-white p-0.5 border border-border/40 shrink-0 shadow-3xs" alt="" />
+                        ) : null}
+                        <div className="flex flex-col min-w-0">
+                          <span className="font-bold text-xs text-foreground group-hover:text-primary transition-colors">
+                            {s.code}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground truncate max-w-[130px] xl:max-w-[160px]">
+                            {s.name}
+                          </span>
+                        </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <span className="text-xs font-semibold text-foreground">

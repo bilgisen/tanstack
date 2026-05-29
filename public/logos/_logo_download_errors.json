@@ -1,0 +1,1223 @@
+[
+  {
+    "status": "error",
+    "ticker": "A1CAP",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/A1CAP.png",
+      "https://storage.fintables.com/media/uploads/company-logos/A1CAP.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/A1CAP.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/A1CAP.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "AGROT",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/AGROT.png",
+      "https://storage.fintables.com/media/uploads/company-logos/AGROT.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/AGROT.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/AGROT.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "AHGAZ",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/AHGAZ.png",
+      "https://storage.fintables.com/media/uploads/company-logos/AHGAZ.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/AHGAZ.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/AHGAZ.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "AHSGY",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/AHSGY.png",
+      "https://storage.fintables.com/media/uploads/company-logos/AHSGY.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/AHSGY.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/AHSGY.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "AKFIS",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/AKFIS.png",
+      "https://storage.fintables.com/media/uploads/company-logos/AKFIS.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/AKFIS.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/AKFIS.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "AKFYE",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/AKFYE.png",
+      "https://storage.fintables.com/media/uploads/company-logos/AKFYE.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/AKFYE.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/AKFYE.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "AKHAN",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/AKHAN.png",
+      "https://storage.fintables.com/media/uploads/company-logos/AKHAN.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/AKHAN.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/AKHAN.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "ALTNY",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/ALTNY.png",
+      "https://storage.fintables.com/media/uploads/company-logos/ALTNY.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/ALTNY.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/ALTNY.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "ALVES",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/ALVES.png",
+      "https://storage.fintables.com/media/uploads/company-logos/ALVES.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/ALVES.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/ALVES.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "ARFYE",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/ARFYE.png",
+      "https://storage.fintables.com/media/uploads/company-logos/ARFYE.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/ARFYE.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/ARFYE.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "ARMGD",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/ARMGD.png",
+      "https://storage.fintables.com/media/uploads/company-logos/ARMGD.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/ARMGD.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/ARMGD.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "ARTMS",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/ARTMS.png",
+      "https://storage.fintables.com/media/uploads/company-logos/ARTMS.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/ARTMS.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/ARTMS.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "ATATR",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/ATATR.png",
+      "https://storage.fintables.com/media/uploads/company-logos/ATATR.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/ATATR.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/ATATR.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "AVPGY",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/AVPGY.png",
+      "https://storage.fintables.com/media/uploads/company-logos/AVPGY.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/AVPGY.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/AVPGY.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "AZTEK",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/AZTEK.png",
+      "https://storage.fintables.com/media/uploads/company-logos/AZTEK.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/AZTEK.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/AZTEK.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "BAHKM",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/BAHKM.png",
+      "https://storage.fintables.com/media/uploads/company-logos/BAHKM.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/BAHKM.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/BAHKM.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "BARMA",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/BARMA.png",
+      "https://storage.fintables.com/media/uploads/company-logos/BARMA.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/BARMA.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/BARMA.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "BEGYO",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/BEGYO.png",
+      "https://storage.fintables.com/media/uploads/company-logos/BEGYO.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/BEGYO.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/BEGYO.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "BESLR",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/BESLR.png",
+      "https://storage.fintables.com/media/uploads/company-logos/BESLR.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/BESLR.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/BESLR.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "BESTE",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/BESTE.png",
+      "https://storage.fintables.com/media/uploads/company-logos/BESTE.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/BESTE.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/BESTE.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "BIGEN",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/BIGEN.png",
+      "https://storage.fintables.com/media/uploads/company-logos/BIGEN.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/BIGEN.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/BIGEN.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "BIGTK",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/BIGTK.png",
+      "https://storage.fintables.com/media/uploads/company-logos/BIGTK.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/BIGTK.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/BIGTK.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "BINBN",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/BINBN.png",
+      "https://storage.fintables.com/media/uploads/company-logos/BINBN.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/BINBN.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/BINBN.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "BINHO",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/BINHO.png",
+      "https://storage.fintables.com/media/uploads/company-logos/BINHO.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/BINHO.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/BINHO.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "BLUME",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/BLUME.png",
+      "https://storage.fintables.com/media/uploads/company-logos/BLUME.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/BLUME.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/BLUME.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "BORLS",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/BORLS.png",
+      "https://storage.fintables.com/media/uploads/company-logos/BORLS.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/BORLS.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/BORLS.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "BORSK",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/BORSK.png",
+      "https://storage.fintables.com/media/uploads/company-logos/BORSK.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/BORSK.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/BORSK.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "BULGS",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/BULGS.png",
+      "https://storage.fintables.com/media/uploads/company-logos/BULGS.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/BULGS.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/BULGS.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "BYDNR",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/BYDNR.png",
+      "https://storage.fintables.com/media/uploads/company-logos/BYDNR.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/BYDNR.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/BYDNR.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "CATES",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/CATES.png",
+      "https://storage.fintables.com/media/uploads/company-logos/CATES.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/CATES.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/CATES.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "CGCAM",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/CGCAM.png",
+      "https://storage.fintables.com/media/uploads/company-logos/CGCAM.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/CGCAM.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/CGCAM.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "CVKMD",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/CVKMD.png",
+      "https://storage.fintables.com/media/uploads/company-logos/CVKMD.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/CVKMD.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/CVKMD.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "CWENE",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/CWENE.png",
+      "https://storage.fintables.com/media/uploads/company-logos/CWENE.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/CWENE.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/CWENE.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "DCTTR",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/DCTTR.png",
+      "https://storage.fintables.com/media/uploads/company-logos/DCTTR.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/DCTTR.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/DCTTR.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "DOCO",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/DOCO.png",
+      "https://storage.fintables.com/media/uploads/company-logos/DOCO.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/DOCO.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/DOCO.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "DOFRB",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/DOFRB.png",
+      "https://storage.fintables.com/media/uploads/company-logos/DOFRB.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/DOFRB.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/DOFRB.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "DSTKF",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/DSTKF.png",
+      "https://storage.fintables.com/media/uploads/company-logos/DSTKF.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/DSTKF.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/DSTKF.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "DUNYH",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/DUNYH.png",
+      "https://storage.fintables.com/media/uploads/company-logos/DUNYH.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/DUNYH.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/DUNYH.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "EBEBK",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/EBEBK.png",
+      "https://storage.fintables.com/media/uploads/company-logos/EBEBK.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/EBEBK.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/EBEBK.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "ECOGR",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/ECOGR.png",
+      "https://storage.fintables.com/media/uploads/company-logos/ECOGR.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/ECOGR.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/ECOGR.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "EFOR",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/EFOR.png",
+      "https://storage.fintables.com/media/uploads/company-logos/EFOR.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/EFOR.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/EFOR.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "EGEGY",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/EGEGY.png",
+      "https://storage.fintables.com/media/uploads/company-logos/EGEGY.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/EGEGY.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/EGEGY.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "EKOS",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/EKOS.png",
+      "https://storage.fintables.com/media/uploads/company-logos/EKOS.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/EKOS.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/EKOS.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "EKSUN",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/EKSUN.png",
+      "https://storage.fintables.com/media/uploads/company-logos/EKSUN.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/EKSUN.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/EKSUN.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "ENDAE",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/ENDAE.png",
+      "https://storage.fintables.com/media/uploads/company-logos/ENDAE.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/ENDAE.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/ENDAE.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "ENERY",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/ENERY.png",
+      "https://storage.fintables.com/media/uploads/company-logos/ENERY.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/ENERY.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/ENERY.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "ENTRA",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/ENTRA.png",
+      "https://storage.fintables.com/media/uploads/company-logos/ENTRA.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/ENTRA.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/ENTRA.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "FRMPL",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/FRMPL.png",
+      "https://storage.fintables.com/media/uploads/company-logos/FRMPL.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/FRMPL.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/FRMPL.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "GLRMK",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/GLRMK.png",
+      "https://storage.fintables.com/media/uploads/company-logos/GLRMK.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/GLRMK.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/GLRMK.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "GRTHO",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/GRTHO.png",
+      "https://storage.fintables.com/media/uploads/company-logos/GRTHO.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/GRTHO.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/GRTHO.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "GUNDG",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/GUNDG.png",
+      "https://storage.fintables.com/media/uploads/company-logos/GUNDG.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/GUNDG.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/GUNDG.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "HKTM",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/HKTM.png",
+      "https://storage.fintables.com/media/uploads/company-logos/HKTM.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/HKTM.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/HKTM.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "HOROZ",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/HOROZ.png",
+      "https://storage.fintables.com/media/uploads/company-logos/HOROZ.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/HOROZ.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/HOROZ.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "HRKET",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/HRKET.png",
+      "https://storage.fintables.com/media/uploads/company-logos/HRKET.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/HRKET.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/HRKET.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "INGRM",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/INGRM.png",
+      "https://storage.fintables.com/media/uploads/company-logos/INGRM.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/INGRM.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/INGRM.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "INTEK",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/INTEK.png",
+      "https://storage.fintables.com/media/uploads/company-logos/INTEK.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/INTEK.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/INTEK.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "IZENR",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/IZENR.png",
+      "https://storage.fintables.com/media/uploads/company-logos/IZENR.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/IZENR.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/IZENR.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "KAYSE",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/KAYSE.png",
+      "https://storage.fintables.com/media/uploads/company-logos/KAYSE.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/KAYSE.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/KAYSE.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "KCAER",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/KCAER.png",
+      "https://storage.fintables.com/media/uploads/company-logos/KCAER.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/KCAER.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/KCAER.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "KLRHO",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/KLRHO.png",
+      "https://storage.fintables.com/media/uploads/company-logos/KLRHO.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/KLRHO.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/KLRHO.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "KLYPV",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/KLYPV.png",
+      "https://storage.fintables.com/media/uploads/company-logos/KLYPV.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/KLYPV.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/KLYPV.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "KOCMT",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/KOCMT.png",
+      "https://storage.fintables.com/media/uploads/company-logos/KOCMT.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/KOCMT.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/KOCMT.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "KOPOL",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/KOPOL.png",
+      "https://storage.fintables.com/media/uploads/company-logos/KOPOL.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/KOPOL.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/KOPOL.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "KOTON",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/KOTON.png",
+      "https://storage.fintables.com/media/uploads/company-logos/KOTON.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/KOTON.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/KOTON.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "KRPLS",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/KRPLS.png",
+      "https://storage.fintables.com/media/uploads/company-logos/KRPLS.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/KRPLS.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/KRPLS.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "KTLEV",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/KTLEV.png",
+      "https://storage.fintables.com/media/uploads/company-logos/KTLEV.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/KTLEV.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/KTLEV.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "KZGYO",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/KZGYO.png",
+      "https://storage.fintables.com/media/uploads/company-logos/KZGYO.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/KZGYO.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/KZGYO.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "LILAK",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/LILAK.png",
+      "https://storage.fintables.com/media/uploads/company-logos/LILAK.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/LILAK.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/LILAK.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "LRSHO",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/LRSHO.png",
+      "https://storage.fintables.com/media/uploads/company-logos/LRSHO.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/LRSHO.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/LRSHO.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "LYDHO",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/LYDHO.png",
+      "https://storage.fintables.com/media/uploads/company-logos/LYDHO.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/LYDHO.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/LYDHO.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "LYDYE",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/LYDYE.png",
+      "https://storage.fintables.com/media/uploads/company-logos/LYDYE.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/LYDYE.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/LYDYE.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "MARBL",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/MARBL.png",
+      "https://storage.fintables.com/media/uploads/company-logos/MARBL.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/MARBL.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/MARBL.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "MARMR",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/MARMR.png",
+      "https://storage.fintables.com/media/uploads/company-logos/MARMR.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/MARMR.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/MARMR.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "MEGMT",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/MEGMT.png",
+      "https://storage.fintables.com/media/uploads/company-logos/MEGMT.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/MEGMT.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/MEGMT.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "MEYSU",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/MEYSU.png",
+      "https://storage.fintables.com/media/uploads/company-logos/MEYSU.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/MEYSU.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/MEYSU.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "MNDTR",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/MNDTR.png",
+      "https://storage.fintables.com/media/uploads/company-logos/MNDTR.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/MNDTR.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/MNDTR.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "MOGAN",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/MOGAN.png",
+      "https://storage.fintables.com/media/uploads/company-logos/MOGAN.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/MOGAN.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/MOGAN.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "MOPAS",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/MOPAS.png",
+      "https://storage.fintables.com/media/uploads/company-logos/MOPAS.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/MOPAS.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/MOPAS.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "NETCD",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/NETCD.png",
+      "https://storage.fintables.com/media/uploads/company-logos/NETCD.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/NETCD.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/NETCD.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "OBASE",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/OBASE.png",
+      "https://storage.fintables.com/media/uploads/company-logos/OBASE.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/OBASE.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/OBASE.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "ODINE",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/ODINE.png",
+      "https://storage.fintables.com/media/uploads/company-logos/ODINE.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/ODINE.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/ODINE.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "OFSYM",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/OFSYM.png",
+      "https://storage.fintables.com/media/uploads/company-logos/OFSYM.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/OFSYM.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/OFSYM.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "OZYSR",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/OZYSR.png",
+      "https://storage.fintables.com/media/uploads/company-logos/OZYSR.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/OZYSR.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/OZYSR.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "PAHOL",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/PAHOL.png",
+      "https://storage.fintables.com/media/uploads/company-logos/PAHOL.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/PAHOL.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/PAHOL.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "PATEK",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/PATEK.png",
+      "https://storage.fintables.com/media/uploads/company-logos/PATEK.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/PATEK.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/PATEK.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "QNBFK",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/QNBFK.png",
+      "https://storage.fintables.com/media/uploads/company-logos/QNBFK.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/QNBFK.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/QNBFK.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "QNBTR",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/QNBTR.png",
+      "https://storage.fintables.com/media/uploads/company-logos/QNBTR.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/QNBTR.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/QNBTR.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "RGYAS",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/RGYAS.png",
+      "https://storage.fintables.com/media/uploads/company-logos/RGYAS.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/RGYAS.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/RGYAS.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "RUBNS",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/RUBNS.png",
+      "https://storage.fintables.com/media/uploads/company-logos/RUBNS.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/RUBNS.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/RUBNS.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "RUZYE",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/RUZYE.png",
+      "https://storage.fintables.com/media/uploads/company-logos/RUZYE.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/RUZYE.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/RUZYE.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "SERNT",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/SERNT.png",
+      "https://storage.fintables.com/media/uploads/company-logos/SERNT.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/SERNT.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/SERNT.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "SKYLP",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/SKYLP.png",
+      "https://storage.fintables.com/media/uploads/company-logos/SKYLP.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/SKYLP.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/SKYLP.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "SKYMD",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/SKYMD.png",
+      "https://storage.fintables.com/media/uploads/company-logos/SKYMD.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/SKYMD.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/SKYMD.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "SMRVA",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/SMRVA.png",
+      "https://storage.fintables.com/media/uploads/company-logos/SMRVA.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/SMRVA.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/SMRVA.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "SURGY",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/SURGY.png",
+      "https://storage.fintables.com/media/uploads/company-logos/SURGY.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/SURGY.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/SURGY.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "TARKM",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/TARKM.png",
+      "https://storage.fintables.com/media/uploads/company-logos/TARKM.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/TARKM.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/TARKM.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "TATEN",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/TATEN.png",
+      "https://storage.fintables.com/media/uploads/company-logos/TATEN.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/TATEN.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/TATEN.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "TCKRC",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/TCKRC.png",
+      "https://storage.fintables.com/media/uploads/company-logos/TCKRC.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/TCKRC.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/TCKRC.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "TEHOL",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/TEHOL.png",
+      "https://storage.fintables.com/media/uploads/company-logos/TEHOL.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/TEHOL.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/TEHOL.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "TRALT",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/TRALT.png",
+      "https://storage.fintables.com/media/uploads/company-logos/TRALT.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/TRALT.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/TRALT.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "TRENJ",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/TRENJ.png",
+      "https://storage.fintables.com/media/uploads/company-logos/TRENJ.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/TRENJ.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/TRENJ.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "TRHOL",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/TRHOL.png",
+      "https://storage.fintables.com/media/uploads/company-logos/TRHOL.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/TRHOL.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/TRHOL.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "TRMET",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/TRMET.png",
+      "https://storage.fintables.com/media/uploads/company-logos/TRMET.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/TRMET.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/TRMET.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "UCAYM",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/UCAYM.png",
+      "https://storage.fintables.com/media/uploads/company-logos/UCAYM.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/UCAYM.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/UCAYM.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "VAKFA",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/VAKFA.png",
+      "https://storage.fintables.com/media/uploads/company-logos/VAKFA.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/VAKFA.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/VAKFA.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "VRGYO",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/VRGYO.png",
+      "https://storage.fintables.com/media/uploads/company-logos/VRGYO.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/VRGYO.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/VRGYO.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "VSNMD",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/VSNMD.png",
+      "https://storage.fintables.com/media/uploads/company-logos/VSNMD.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/VSNMD.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/VSNMD.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "YIGIT",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/YIGIT.png",
+      "https://storage.fintables.com/media/uploads/company-logos/YIGIT.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/YIGIT.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/YIGIT.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "ZEDUR",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/ZEDUR.png",
+      "https://storage.fintables.com/media/uploads/company-logos/ZEDUR.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/ZEDUR.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/ZEDUR.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "ZERGY",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/ZERGY.png",
+      "https://storage.fintables.com/media/uploads/company-logos/ZERGY.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/ZERGY.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/ZERGY.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  },
+  {
+    "status": "error",
+    "ticker": "ZGYO",
+    "attempted": [
+      "https://storage.fintables.com/media/uploads/company-logos/ZGYO.png",
+      "https://storage.fintables.com/media/uploads/company-logos/ZGYO.svg",
+      "https://storage.fintables.com/media/uploads/company-logos/ZGYO.jpg",
+      "https://storage.fintables.com/media/uploads/company-logos/ZGYO.webp"
+    ],
+    "error": "HTTP 404 Not Found"
+  }
+]
