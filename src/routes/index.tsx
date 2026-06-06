@@ -15,6 +15,7 @@ import {
   ArrowRight, 
   HelpCircle
 } from 'lucide-react'
+import { Logo } from '../components/layout/Logo'
 
 export const Route = createFileRoute('/')({
   component: LandingPage,
@@ -133,22 +134,20 @@ function LandingPage() {
       {/* 🚀 Main Hero Section (Slightly more padding top to account for absolute topbar) */}
       <section className="container mx-auto px-4 pt-28 pb-16 md:pt-36 md:pb-24 text-center max-w-5xl relative z-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
         
-        {/* Brand Tagline */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-medium tracking-wide uppercase mb-6 shadow-2xs backdrop-blur-sm">
-          <Sparkles size={11} className="animate-pulse" />
-          Borsa Analiz Platformu
+        {/* Brand Logo (Clean & Simple) */}
+        <div className="flex justify-center mb-10">
+          <Logo size={48} className="text-primary" />
         </div>
 
         {/* Headline (Styled with Geist font weight: font-bold for bold premium elegance) */}
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-6 text-foreground">
-          BIST Uzmanı <br className="hidden md:inline" />
-          Tek Yapay Zeka
+          Borsa uzmanı <br className="hidden md:inline" />
+          yapay zeka asistanı
         </h1>
 
         {/* Subtitle */}
         <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto font-light leading-relaxed mb-10">
-          HissePro, BIST'e özel güvenilir veriler ve güçlü bir finansal analiz motoruyla çalışır. 
-          Hisse analizi, Sektör karşılaştırması, teknik formasyonlar, temel rasyolar — hepsi tek bir zeki asistanda.
+          Güvenilir ve zengin veri seti, gelişkin finansal analiz motoru ve yapay zekanın gücü.
         </p>
 
         {/* Google CTA Button Container */}
@@ -156,25 +155,25 @@ function LandingPage() {
           {user ? (
             <button
               onClick={() => navigate({ to: '/panel' })}
-              className="group flex items-center justify-center gap-3.5 bg-primary hover:bg-primary/95 text-primary-foreground px-8 py-4 rounded-full font-bold text-base transition-all duration-300 shadow-md hover:shadow-primary/25 hover:shadow-lg hover:scale-102 active:scale-98 cursor-pointer"
+              className="group flex items-center justify-center gap-3.5 border border-primary text-primary hover:bg-primary/5 px-6 py-2.5 rounded-full font-bold text-sm transition-all duration-300 hover:shadow-md hover:scale-102 active:scale-98 cursor-pointer"
             >
               <span>Hemen Panele Git</span>
-              <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+              <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
             </button>
           ) : (
             <button
               onClick={handleLogin}
-              className="group flex items-center justify-center gap-3.5 bg-primary hover:bg-primary/95 text-primary-foreground px-8 py-4 rounded-full font-bold text-base transition-all duration-300 shadow-md hover:shadow-primary/25 hover:shadow-lg hover:scale-102 active:scale-98 cursor-pointer"
+              className="group flex items-center justify-center gap-3.5 border border-primary text-primary hover:bg-primary/5 px-6 py-2.5 rounded-full font-bold text-sm transition-all duration-300 hover:shadow-md hover:scale-102 active:scale-98 cursor-pointer"
             >
               {/* Google Logo Icon */}
-              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                 <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
                 <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05" />
                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
               </svg>
               <span>Ücretsiz Deneyin</span>
-              <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+              <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
             </button>
           )}
           
@@ -189,20 +188,6 @@ function LandingPage() {
           {/* Neon Gradient Glow behind mockup */}
           <div className="absolute inset-0 -z-10 rounded-3xl bg-gradient-to-tr from-primary/10 via-fuchsia-500/10 to-transparent blur-xl opacity-70 group-hover:opacity-100 transition-opacity duration-500" />
           
-          {/* Mockup Topbar controls */}
-          <div className="flex items-center justify-between border-b border-border/40 pb-4 mb-6">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-red-400/40" />
-              <div className="w-3 h-3 rounded-full bg-amber-400/40" />
-              <div className="w-3 h-3 rounded-full bg-green-400/40" />
-              <span className="text-[11px] text-muted-foreground/50 ml-2 font-mono">hissepro_terminal_v1.0</span>
-            </div>
-            <div className="flex items-center gap-2 bg-muted/45 px-3 py-1 rounded-full border border-border/30">
-              <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
-              <span className="text-[10px] font-bold text-muted-foreground/80 font-mono">BIST LIVE</span>
-            </div>
-          </div>
-
           {/* Grid: Left - Stock overview, Right - AI Chatbot */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 text-left">
             
