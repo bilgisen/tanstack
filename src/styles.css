@@ -302,7 +302,7 @@
   @apply p-3 text-[14px] border-b border-border text-foreground;
 }
 .chatbot-response tr:last-child td {
-  @apply border-bottom-none;
+  @apply border-b-0;
 }
 .chatbot-response tr:hover td {
   @apply bg-muted/50;
