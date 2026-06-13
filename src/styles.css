@@ -284,10 +284,10 @@
   @apply mt-2 mb-4 pl-5;
 }
 .chatbot-response ul {
-  @apply list-style-type-disc;
+  @apply list-disc;
 }
 .chatbot-response ol {
-  @apply list-style-type-decimal;
+  @apply list-decimal;
 }
 .chatbot-response li {
   @apply mb-1.5 leading-[1.5];
