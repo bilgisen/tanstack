@@ -93,7 +93,7 @@ export function ChatPane({
   };
 
   return (
-    <div className={`flex items-center gap-3 bg-transparent px-4 py-1.5 w-full select-none ${className}`}>
+    <div className={`flex items-center gap-2 bg-transparent px-6 py-2 w-full select-none ${className}`}>
       {/* Textarea Input */}
       <textarea
         ref={textareaRef}
@@ -103,18 +103,19 @@ export function ChatPane({
         disabled={isLoading}
         placeholder={placeholder}
         rows={1}
-        className="flex-1 bg-transparent border-none outline-none resize-none py-2 text-base md:text-[17px] text-foreground placeholder-muted-foreground/60 disabled:opacity-50 min-h-[38px] max-h-[140px] font-sans leading-relaxed custom-scrollbar"
+        className="flex-1 bg-transparent border-none outline-none resize-none py-3 text-base md:text-lg text-foreground placeholder-muted-foreground/50 disabled:opacity-50 min-h-[48px] max-h-[140px] font-sans leading-relaxed custom-scrollbar"
       />
 
-      {/* Semantic Green Send Button */}
+      {/* Revolut Cobalt Send Button */}
       <button
         onClick={handleSend}
         disabled={isLoading || !input.trim()}
-        className="w-10 h-10 flex items-center justify-center rounded-full bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-30 transition-all cursor-pointer shadow-xs shrink-0 self-center"
+        className="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-white disabled:opacity-20 transition-all cursor-pointer shadow-sm shrink-0 self-center hover:brightness-110 active:scale-90"
         title="Gönder"
       >
-        <ArrowUp size={18} strokeWidth={2.5} />
+        <ArrowUp size={20} strokeWidth={2.5} />
       </button>
     </div>
   );
 }
+

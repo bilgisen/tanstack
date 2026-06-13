@@ -101,11 +101,11 @@ function PanelLayout() {
 
   return (
     <div className="flex-1 flex flex-row overflow-hidden relative bg-background font-sans h-full">
-      {/* Mobile Sidebar Backdrop Overlay - Elevated z-index to z-45 */}
+      {/* Mobile Sidebar Backdrop Overlay */}
       {isLeftSidebarExpanded && (
         <div 
           onClick={toggleLeftSidebarExpanded}
-          className="fixed inset-0 bg-background/80 backdrop-blur-xs z-45 lg:hidden cursor-pointer animate-in fade-in duration-200"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-45 lg:hidden cursor-pointer animate-in fade-in duration-200"
         />
       )}
 
@@ -115,40 +115,38 @@ function PanelLayout() {
       {/* Ana Kolon */}
       <div className="flex-1 flex flex-col min-w-0 h-full relative overflow-hidden bg-background">
         
-        {/* Seamless Mobile Header / Topbar */}
-        <header className="lg:hidden h-14 border-b border-border/40 bg-background/95 backdrop-blur-md flex items-center justify-between px-4 shrink-0 z-35 select-none">
+        {/* Revolut-style Mobile Header */}
+        <header className="lg:hidden h-16 bg-background/80 backdrop-blur-xl flex items-center justify-between px-6 shrink-0 z-35 select-none border-b border-border/50">
           <button
             onClick={toggleLeftSidebarExpanded}
-            className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-foreground rounded-xl hover:bg-muted/50 transition-all cursor-pointer"
-            title="Menüyü Göster"
+            className="w-10 h-10 flex items-center justify-center text-foreground hover:bg-muted rounded-full transition-all cursor-pointer"
           >
-            <PanelLeft size={18} />
+            <PanelLeft size={20} />
           </button>
           
-          <Link 
-            to="/panel" 
-            className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10 border border-primary/15 text-primary hover:bg-primary/15 transition-all shrink-0"
-            title="HissePro Paneli"
-          >
-            <Logo size={18} className="shrink-0" />
-          </Link>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white">
+              <Logo size={16} />
+            </div>
+            <span className="font-display font-medium tracking-tight">hissepro</span>
+          </div>
           
-          <div className="w-9 h-9" /> {/* Spacer to center title */}
+          <div className="w-10 h-10" /> {/* Spacer */}
         </header>
 
         {/* Scrollable Sub-Page area (Outlet) OR Active Chat Stream Messages */}
         <main 
           ref={mainScrollRef}
-          className="flex-1 overflow-y-auto bg-background p-4 md:p-6 custom-scrollbar min-w-0 relative z-10 pb-36 scroll-smooth"
+          className="flex-1 overflow-y-auto bg-background px-6 md:px-8 py-6 custom-scrollbar min-w-0 relative z-10 pb-40 scroll-smooth"
         >
           {messages.length > 0 && !(pathname.includes('/sirketler/') || pathname.includes('/endeksler/')) ? (
-            <div className="max-w-3xl mx-auto space-y-6 py-4 animate-in fade-in duration-300">
+            <div className="max-w-3xl mx-auto space-y-8 py-4 animate-in fade-in duration-500">
               {messages.map((msg, idx) => (
                 <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className={`rounded-2xl px-4 py-3 text-sm max-w-[85%] sm:max-w-[75%] leading-relaxed ${
+                  <div className={`px-6 py-4 text-[15px] max-w-[90%] sm:max-w-[80%] leading-relaxed rounded-[20px] shadow-sm ${
                     msg.role === "user"
-                      ? "chat-question-bubble font-medium rounded-tr-sm shadow-sm"
-                      : "bg-muted/40 text-foreground border border-border/40 rounded-tl-sm w-full"
+                      ? "chat-question-bubble font-medium rounded-tr-sm"
+                      : "chat-response-bubble rounded-tl-sm w-full"
                   }`}>
                     <MarkdownRenderer text={msg.text} isAssistant={msg.role === "assistant"} context={msg.context || context} suggestions={msg.suggestions} widget={msg.widget} />
                   </div>
@@ -157,23 +155,23 @@ function PanelLayout() {
 
               {isLoading && (
                 <div className="flex justify-start animate-pulse">
-                  <div className="bg-muted/25 text-muted-foreground text-sm rounded-2xl rounded-tl-sm px-4 py-3 border border-border/30 flex items-center gap-2">
-                    <Loader2 size={14} className="animate-spin text-primary" />
-                    Yapay zeka analiz ediyor...
+                  <div className="chat-response-bubble text-muted-foreground text-sm rounded-[20px] rounded-tl-sm px-6 py-4 flex items-center gap-3">
+                    <Loader2 size={16} className="animate-spin text-primary" />
+                    Analiz ediliyor...
                   </div>
                 </div>
               )}
             </div>
           ) : (
-            <Outlet />
+            <div className="h-full w-full">
+              <Outlet />
+            </div>
           )}
         </main>
 
-
-
-        {/* Floating Glassmorphic Chatbot Container at the Bottom */}
-        <div className="absolute bottom-4 left-4 right-4 md:left-6 md:right-6 z-40 flex justify-center pointer-events-none">
-          <div className="w-full max-w-3xl bg-card/75 backdrop-blur-xl border border-border/50 rounded-full shadow-2xl pointer-events-auto overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+        {/* Floating Revolut-style Chatbot Container */}
+        <div className="absolute bottom-6 left-6 right-6 md:left-8 md:right-8 z-40 flex justify-center pointer-events-none">
+          <div className="w-full max-w-3xl bg-background/80 backdrop-blur-2xl border border-border/50 rounded-full shadow-2xl pointer-events-auto overflow-hidden animate-in slide-in-from-bottom-6 duration-500">
             <ChatPane
               context={context}
               placeholder={placeholder}
@@ -185,3 +183,4 @@ function PanelLayout() {
     </div>
   )
 }
+

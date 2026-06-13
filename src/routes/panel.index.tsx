@@ -228,27 +228,6 @@ function PanelIndexPage() {
   return (
     <div className="flex flex-col space-y-8 select-none max-w-5xl mx-auto py-2 animate-in fade-in duration-500 pb-16">
       
-      {/* Premium Header Summary Card */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 md:p-6 rounded-3xl border border-border/40 bg-card/15 shadow-3xs relative overflow-hidden backdrop-blur-md">
-        <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="flex items-center gap-3 md:gap-4 z-10">
-          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 text-primary shadow-xs shrink-0">
-            <Sparkles size={20} className="animate-pulse" />
-          </div>
-          <div>
-            <h1 className="text-base md:text-lg font-bold text-foreground tracking-tight">HissePro Finansal Analiz Paneli</h1>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Yapay zeka desteğiyle BIST piyasalarını, hisse analizlerini ve bilançoları yakından takip edin.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-muted/30 border border-border/30 text-[11px] text-muted-foreground font-semibold shrink-0 w-fit self-start md:self-center z-10">
-          <Calendar size={11} className="text-[#1D9BF0]" />
-          <span>{formattedDate}</span>
-        </div>
-      </div>
-
       {/* 1. Bugün Borsa Section */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
