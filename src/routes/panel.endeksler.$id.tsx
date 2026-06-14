@@ -291,10 +291,10 @@ function EndeksDetailPage() {
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Piyasa Endeksi / BIST</span>
+              <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Endeksler</span>
             </div>
             <div className="flex items-center gap-2 mt-1 min-w-0">
-              <h1 className="text-base md:text-lg font-bold text-foreground tracking-tight leading-none truncate">{priceDetails.name}</h1>
+              <h1 className="text-base md:text-2xl font-bold text-foreground tracking-tight leading-none truncate">{priceDetails.name}</h1>
               {/* Star Watchlist Action Button */}
               <button
                 onClick={toggleWatchlist}
@@ -303,34 +303,25 @@ function EndeksDetailPage() {
                 }`}
                 title={isStarred ? "Takip Listesinden Çıkar" : "Takip Listeme Ekle"}
               >
-                <Star size={16} fill={isStarred ? "currentColor" : "none"} strokeWidth={isStarred ? 1.5 : 2} />
+                <Star size={20} fill={isStarred ? "currentColor" : "none"} strokeWidth={isStarred ? 1.5 : 2} />
               </button>
             </div>
           </div>
         </div>
 
         {/* Value Area */}
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3 shrink-0">
-          <div className="flex flex-col">
-            <span className="text-[10px] text-muted-foreground font-medium uppercase">Endeks Değeri</span>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-lg md:text-xl font-bold text-foreground tracking-tight">
-                {priceDetails.price.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </span>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5 ${
-                isUp ? 'bg-emerald-500/10 text-emerald-500' : 'bg-destructive/10 text-destructive'
-              }`}>
-                {isUp ? '+' : ''}{priceDetails.diffPercent.toFixed(2)}%
-              </span>
-            </div>
+        <div className="flex items-center gap-6 shrink-0">
+          <div className="flex items-center gap-4">
+            <span className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
+              {priceDetails.price.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+            <span className={`text-base md:text-lg font-bold px-3 py-1 rounded-full flex items-center gap-1 ${
+              isUp ? 'bg-emerald-500/10 text-emerald-500' : 'bg-destructive/10 text-destructive'
+            }`}>
+              {isUp ? <TrendingUp size={18} /> : <TrendingUp size={18} className="rotate-180" />}
+              <span>{isUp ? '+' : ''}{priceDetails.diffPercent.toFixed(2)}%</span>
+            </span>
           </div>
-
-          {/* Description Block */}
-          <div className="hidden lg:flex max-w-[280px] xl:max-w-xs border-l border-border/40 pl-6 text-[10px] text-muted-foreground leading-normal font-medium">
-            {priceDetails.description}
-          </div>
-
-
         </div>
       </div>
 

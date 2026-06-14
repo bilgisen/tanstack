@@ -172,6 +172,10 @@ export function TradingViewChart({
           borderColor: isDark ? "rgba(255, 255, 255, 0.07)" : "rgba(0, 0, 0, 0.05)",
           visible: true,
           alignLabels: true,
+          scaleMargins: {
+            top: 0.15, // Provide 15% top margin for price labels
+            bottom: 0.25, // Provide 25% bottom margin to keep price candles above volume
+          },
         },
         timeScale: {
           borderColor: isDark ? "rgba(255, 255, 255, 0.07)" : "rgba(0, 0, 0, 0.05)",
@@ -257,25 +261,6 @@ export function TradingViewChart({
   return (
     <div className="border border-border/40 rounded-2xl bg-card/15 p-4 md:p-5 flex flex-col relative overflow-hidden group select-none transition-all duration-300 hover:border-border/60">
       
-      {/* Chart Top Header Summary Bar */}
-      <div className="flex items-center justify-between mb-4 pb-3 border-b border-border/30 z-10 shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-            <BarChart2 size={14} />
-          </div>
-          <div>
-            <h4 className="text-xs font-semibold text-foreground tracking-tight">{symbol.toUpperCase()} Geçmiş Trend Grafiği</h4>
-            <span className="text-[10px] text-muted-foreground">90 Günlük Teknik Mum Görünümü</span>
-          </div>
-        </div>
-        
-        {/* Subtle Indicators Pill */}
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted/30 border border-border/30 text-[10px] text-muted-foreground font-medium">
-          <TrendingUp size={10} className="text-emerald-500" />
-          <span>Mum Grafik + Hacim</span>
-        </div>
-      </div>
-
       {/* Main Canvas Body */}
       <div className="relative flex-1 w-full min-h-[300px]">
         {loading && (
