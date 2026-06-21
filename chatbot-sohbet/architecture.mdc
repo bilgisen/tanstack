@@ -1,0 +1,131 @@
+---
+description: Sayfa mimarisi — Ticker, Endeks, Sektör sayfaları layout ve davranış kararları
+globs: ["src/routes/dashboard/**/*", "src/components/layout/**/*"]
+alwaysApply: false
+---
+
+# Sayfa Mimarisi
+
+## Genel İlke
+
+Her sayfa (ticker, endeks, sektör) aynı layout shell'i kullanır.
+İçerik ve context farklıdır, mimari aynıdır.
+
+```
+┌─────────────────────────────────┐
+│  Sticky Header (Context Bar)    │
+├─────────────────────────────────┤
+│  Content Area (scroll)          │
+│  - Tab navigation               │
+│  - Tab content                  │
+├─────────────────────────────────┤
+│  Pinned Cards Shelf (opsiyonel) │
+├─────────────────────────────────┤
+│  Chat Input Bar (sticky bottom) │
+└─────────────────────────────────┘
+```
+
+## Desktop Layout (≥1024px)
+
+Split-pane: sol içerik (%60), sağ chat panel (%40).
+Chat panel sabit, içerik paneli scroll eder.
+Split oranı kullanıcı tarafından drag ile ayarlanabilir.
+
+```
+┌──────────────────────┬─────────────────┐
+│  Context Bar                           │  ← full width sticky
+├──────────────────────┬─────────────────┤
+│                      │                 │
+│  İçerik (60%)        │  Chat (40%)     │
+│  scroll              │  fixed          │
+│                      │                 │
+├──────────────────────┤  ─────────────  │
+│                      │  [input]        │
+└──────────────────────┴─────────────────┘
+```
+
+## Mobile Layout (<1024px)
+
+Tek kolon. Chat bottom sheet olarak overlay açılır.
+
+```
+┌─────────────────────┐
+│  Context Bar        │  ← sticky top
+├─────────────────────┤
+│  İçerik             │
+│  (scroll)           │
+├─────────────────────┤
+│  [Chat Input Bar]   │  ← sticky bottom, tap → sheet açılır
+└─────────────────────┘
+```
+
+Chat açıkken bottom sheet full-screen olur, backdrop blur ile içerik görünür kalır.
+
+## Context Bar (Sticky Header)
+
+Ticker sayfası:
+```
+[← Geri]  AKBNK · Akbank  |  ₺47.20  +1.2%  |  Hcm: 842M  |  [📌] [⋯]
+```
+
+Endeks sayfası:
+```
+[← Geri]  BIST 100  |  9,847  -0.3%  |  Güncelleme: 14:32
+```
+
+Sektör sayfası:
+```
+[← Geri]  Bankacılık Sektörü  |  12 Şirket  |  Ort. +0.8%
+```
+
+Context bar her zaman sticky, scroll'da kaybolmaz.
+Minimum bilgi göster — cognitive load düşük tut.
+
+## Tab Yapısı
+
+### Ticker Sayfası (4 tab)
+
+| Tab | İçerik |
+|---|---|
+| **Özet** | AI brief + fiyat + kritik 2-3 metrik. Default açık. |
+| **Analiz** | Chart (üst) + Teknik kartlar + Temel kartlar |
+| **Haberler** | Haber listesi + KAP bildirimleri birlikte |
+| **Finansallar** | Mali tablolar + sermaye hareketleri |
+
+### Endeks Sayfası (3 tab)
+
+| Tab | İçerik |
+|---|---|
+| **Özet** | Endeks chart + piyasa özeti |
+| **Hisseler** | Endeks bileşenleri tablosu, filtrelenebilir |
+| **Haberler** | Endeks haberleri |
+
+### Sektör Sayfası (3 tab)
+
+| Tab | İçerik |
+|---|---|
+| **Özet** | Sektör performansı + AI brief |
+| **Şirketler** | Sektördeki şirketler karşılaştırma tablosu |
+| **Haberler** | Sektör haberleri |
+
+## Pinned Cards Shelf
+
+Kullanıcı response card'ını pin'lediğinde burada görünür.
+Mobile: yatay scroll eden chip'ler olarak sticky header altında.
+Desktop: sağ chat panel üstünde collapsible bölüm.
+
+```tsx
+// DO
+<PinnedShelf cards={pinnedCards} onUnpin={handleUnpin} />
+
+// DON'T — pin state'i component içinde tutma
+<ChatPanel pinnedCards={[...]} />
+```
+
+Pin state global store'da tutulur (Zustand), sayfa değişince temizlenmez.
+
+## Sayfa Geçişleri
+
+- Ticker → Ticker: context bar animate ile değişir, tab pozisyonu korunur
+- Chat'ten navigate: soft confirmation göster, direkt yönlendirme yapma
+- Browser back: scroll pozisyonu korunur (TanStack Router scroll restoration)

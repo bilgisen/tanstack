@@ -1,0 +1,185 @@
+---
+description: Tasarım sistemi — prensipler, renkler, tipografi, component kuralları
+globs: ["src/components/**/*", "src/**/*.css", "tailwind.config*"]
+alwaysApply: false
+---
+
+# Tasarım Sistemi
+
+## Tasarım Felsefesi
+
+**Minimalizm + Fonksiyonalizm.**
+Her element bir işlev taşır. Dekoratif element yoktur.
+Kullanıcı veriyi okur, karar verir — UI buna hizmet eder.
+
+**Utility-First.**
+Tailwind class'ları direkt kullan. Custom CSS sadece Tailwind'in yetersiz kaldığı yerde.
+
+**Chatbot-Merkezi.**
+Chat input her sayfada prominent ve erişilebilir.
+İçerik chat'i gölgelemez, chat içeriği gölgelemez — denge.
+
+## Renk Paleti
+
+Finans uygulaması: güven, netlik, odak.
+
+```
+Background:    zinc-950  (#09090b)  — ana arka plan
+Surface:       zinc-900  (#18181b)  — card, panel
+Border:        zinc-800  (#27272a)  — ayırıcılar
+Muted:         zinc-600  (#52525b)  — secondary text
+
+Primary:       violet-500 (#8b5cf6) — aksiyon, CTA
+Primary hover: violet-400
+
+Up/Positive:   emerald-500 (#10b981)
+Down/Negative: red-500     (#ef4444)
+Neutral:       zinc-400    (#a1a1aa)
+
+Text primary:  zinc-50    (#fafafa)
+Text secondary:zinc-400   (#a1a1aa)
+```
+
+Dark mode default. Light mode sonraki fazda.
+
+## Tipografi
+
+```
+Font: Inter (system-ui fallback)
+
+Fiyat / Ana Metrik:  text-2xl font-semibold tabular-nums
+Section başlık:      text-sm font-medium text-zinc-400 uppercase tracking-wider
+Body:                text-sm text-zinc-200
+Secondary:           text-xs text-zinc-400
+```
+
+Fiyat ve sayısal veriler her zaman `tabular-nums` — hizalama bozulmasın.
+
+## Spacing Sistemi
+
+8px grid. Tailwind spacing scale kullan.
+
+```
+Component iç padding:  p-4  (16px)
+Card gap:              gap-3 (12px)
+Section gap:           gap-6 (24px)
+```
+
+## Component Kuralları
+
+### Card
+
+```tsx
+// Standart card
+<div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+  {children}
+</div>
+
+// Vurgulu card (pinned, aktif)
+<div className="rounded-lg border border-violet-500/30 bg-zinc-900 p-4">
+  {children}
+</div>
+```
+
+Card'lar asla shadow kullanmaz — dark bg üzerinde gereksiz.
+Border ile ayrım yeterli.
+
+### Değişim Göstergesi
+
+```tsx
+const ChangeIndicator = ({ value }: { value: number }) => (
+  <span className={cn(
+    "text-sm font-medium tabular-nums",
+    value > 0 ? "text-emerald-500" : value < 0 ? "text-red-500" : "text-zinc-400"
+  )}>
+    {value > 0 ? "+" : ""}{value.toFixed(2)}%
+  </span>
+)
+```
+
+### Tab Navigation
+
+```tsx
+// Shadcn Tabs kullan, custom styling
+<Tabs defaultValue="ozet">
+  <TabsList className="bg-zinc-900 border border-zinc-800">
+    <TabsTrigger value="ozet">Özet</TabsTrigger>
+    <TabsTrigger value="analiz">Analiz</TabsTrigger>
+    <TabsTrigger value="haberler">Haberler</TabsTrigger>
+    <TabsTrigger value="finansallar">Finansallar</TabsTrigger>
+  </TabsList>
+</Tabs>
+```
+
+Tab sayısı 4'ü geçmez. Geçiyorsa içerik reorganize edilmeli.
+
+### Button Hiyerarşisi
+
+```
+Primary:   violet-500 bg, beyaz text — tek CTA per view
+Secondary: zinc-800 bg, zinc-200 text — yardımcı aksiyonlar
+Ghost:     transparent, zinc-400 text — düşük öncelik
+Destructive: red-500 — sadece silme/iptal
+```
+
+### Loading States
+
+Skeleton loader kullan, spinner kullanma.
+
+```tsx
+// DO
+<Skeleton className="h-4 w-24 bg-zinc-800" />
+
+// DON'T
+<Spinner />
+```
+
+Streaming içerik için typing indicator:
+```tsx
+<span className="inline-flex gap-1">
+  <span className="animate-bounce">·</span>
+  <span className="animate-bounce delay-100">·</span>
+  <span className="animate-bounce delay-200">·</span>
+</span>
+```
+
+## Mobile-First Kuralları
+
+- Touch target minimum 44px
+- Bottom navigation max 5 item
+- Swipe gesture: tab'lar arası geçiş
+- Bottom sheet: drag handle göster, snap points: 50% ve 100%
+- Keyboard açıkken chat input yukarı kayar (viewport resize handle et)
+
+## Animasyon
+
+Minimal. Sadece anlam taşıyan animasyonlar.
+
+```
+Sayfa geçişi:   fade (150ms)
+Card mount:     fade + translateY(4px) (200ms)
+Sheet open:     spring (350ms)
+Değer değişimi: sayı flip (300ms) — fiyat güncellemelerinde
+```
+
+```tsx
+// Framer Motion yerine Tailwind transition tercih et
+className="transition-colors duration-150"
+
+// Framer sadece complex sequence'lar için
+```
+
+## DO / DON'T
+
+### DO
+- Veriyi öne çıkar, UI'ı geri çek
+- Boşluk kullan — breathing room cognitive load'u düşürür
+- Tutarlı renk semantiği — yeşil her zaman up, kırmızı her zaman down
+- Shadcn component'larını extend et, replace etme
+
+### DON'T
+- Gradient background kullanma
+- 3+ farklı font weight aynı component'ta
+- Tooltip'i tek bilgi kaynağı yapma (mobile'da hover yok)
+- Her şeyi modal'la gösterme — inline veya sheet tercih et
+- Icon only button (label ekle veya tooltip zorunlu)

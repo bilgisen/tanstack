@@ -144,6 +144,17 @@ export function RightSidebar() {
           }
         } catch (_) {}
 
+        const formatRsiValue = (val: any) => {
+          if (val === undefined || val === null) return "50.0";
+          const num = typeof val === "number" ? val : parseFloat(val);
+          return isNaN(num) ? "50.0" : num.toFixed(1);
+        };
+        const formatNumberValue = (val: any, decimals: number, fallback: string) => {
+          if (val === undefined || val === null) return fallback;
+          const num = typeof val === "number" ? val : parseFloat(val);
+          return isNaN(num) ? fallback : num.toFixed(decimals);
+        };
+
         setCompanyDetails({
           price: apiSummaryCard?.last_price || lastPrice,
           diffPercent: apiSummaryCard?.diff_percent !== undefined ? apiSummaryCard.diff_percent : diffPercent,
@@ -154,10 +165,10 @@ export function RightSidebar() {
           pddf: (apiDetail as any).pddf || (apiDetail as any).PD_DD || "1.20",
           halkaAciklik: (apiDetail as any).halka_aciklik_orani || "40.0%",
           ozsermayeKari: (apiDetail as any).ozsermaye_karliligi || "18.0%",
-          rsi: apiSummaryCard ? `${apiSummaryCard.rsi.toFixed(1)} (${apiSummaryCard.rsi_status})` : ((apiTa as any).rsi_status || "50.0 (Nötr)"),
+          rsi: apiSummaryCard && apiSummaryCard.rsi !== undefined ? `${formatRsiValue(apiSummaryCard.rsi)} (${apiSummaryCard.rsi_status || "Nötr"})` : ((apiTa as any).rsi_status || "50.0 (Nötr)"),
           macd: apiSummaryCard ? apiSummaryCard.macd_status : ((apiTa as any).macd_status || "Nötr"),
           bollinger: (apiTa as any).bollinger_status || "Orta Bantta",
-          atrStop: apiSummaryCard?.stop_loss ? `${apiSummaryCard.stop_loss.toFixed(2)} ₺` : `${(apiTa.atr_stop_loss || lastPrice * 0.97).toFixed(2)} ₺`,
+          atrStop: apiSummaryCard?.stop_loss ? `${formatNumberValue(apiSummaryCard.stop_loss, 2, (lastPrice * 0.97).toFixed(2))} ₺` : `${formatNumberValue(apiTa.atr_stop_loss, 2, (lastPrice * 0.97).toFixed(2))} ₺`,
         });
       } catch (err) {
         console.error("Failed to load company metrics for sidebar", err);

@@ -192,10 +192,10 @@ export function MarkdownRenderer({ text, isAssistant, context = "global", sugges
                 <Activity size={12} className="text-muted-foreground" /> Trend
               </span>
               <span className={`text-sm font-semibold mt-1 flex items-center gap-1.5 ${
-                metrics.trend.includes("Yükseliş") ? "text-emerald-500" : metrics.trend.includes("Düşüş") ? "text-destructive" : "text-amber-500"
+                metrics.trend?.includes("Yükseliş") ? "text-emerald-500" : metrics.trend?.includes("Düşüş") ? "text-destructive" : "text-amber-500"
               }`}>
-                {metrics.trend.includes("Yükseliş") ? <TrendingUp size={14} /> : metrics.trend.includes("Düşüş") ? <TrendingDown size={14} /> : <Minus size={14} />}
-                {metrics.trend.split(" ")[0]}
+                {metrics.trend?.includes("Yükseliş") ? <TrendingUp size={14} /> : metrics.trend?.includes("Düşüş") ? <TrendingDown size={14} /> : <Minus size={14} />}
+                {metrics.trend?.split(" ")[0]}
               </span>
             </div>
           )}

@@ -1,10 +1,9 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Sparkles, HelpCircle, Star, Globe, TrendingUp, Compass, Loader2 } from 'lucide-react'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useChatStore } from '../store/chat'
 import { useWatchlistStore } from '../store/watchlist'
 import { TradingViewChart } from '../components/dashboard/TradingViewChart'
-import { MarkdownRenderer } from '../components/dashboard/MarkdownRenderer'
 import companyLogos from '../constants/companyLogos.json'
 
 export const Route = createFileRoute('/panel/endeksler/$id')({
@@ -93,11 +92,9 @@ function EndeksDetailPage() {
   const [indexSummary, setIndexSummary] = useState<string[] | null>(null)
   const [techSinyaller, setTechnicalSinyaller] = useState<any | null>(null)
   const [loading, setLoading] = useState(true)
-  const [showChatMode, setShowChatMode] = useState(false)
 
-  const { messages, isLoading, sendMessage } = useChatStore()
+  const { sendMessage } = useChatStore()
   const { watchlists, addItem, removeItem } = useWatchlistStore()
-  const chatScrollRef = useRef<HTMLDivElement>(null)
 
   const defaultWatchlist = watchlists.find(w => w.id === "default-list") || watchlists[0];
   const isStarred = defaultWatchlist?.items.some(item => item.symbol === currentFallback.code);
@@ -110,20 +107,6 @@ function EndeksDetailPage() {
       addItem(defaultId, currentFallback.code, "index");
     }
   };
-
-  // Sync dual-mode chat state with global chat store messages
-  useEffect(() => {
-    const hasMessagesForThisIndex = messages.length > 0 && !!messages[messages.length - 1].context?.includes(`endeks:${currentFallback.code.toLowerCase()}`);
-    setShowChatMode(hasMessagesForThisIndex);
-
-    if (hasMessagesForThisIndex && chatScrollRef.current) {
-      setTimeout(() => {
-        if (chatScrollRef.current) {
-          chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
-        }
-      }, 100);
-    }
-  }, [messages, currentFallback]);
 
   // Load all details on mount
   useEffect(() => {
@@ -190,12 +173,22 @@ function EndeksDetailPage() {
         if (taRes.ok) {
           const tJson = await taRes.json();
           if (tJson && !tJson.error) {
-            indexRsi = `${tJson.rsi ? tJson.rsi.toFixed(1) : "50.0"} (${tJson.rsi_status || "Nötr"})`;
+            const formatRsiValue = (val: any) => {
+              if (val === undefined || val === null) return "50.0";
+              const num = typeof val === "number" ? val : parseFloat(val);
+              return isNaN(num) ? "50.0" : num.toFixed(1);
+            };
+            const formatNumberValue = (val: any, decimals: number, fallback: string) => {
+              if (val === undefined || val === null) return fallback;
+              const num = typeof val === "number" ? val : parseFloat(val);
+              return isNaN(num) ? fallback : num.toFixed(decimals);
+            };
+            indexRsi = `${formatRsiValue(tJson.rsi)} (${tJson.rsi_status || "Nötr"})`;
             indexMacd = tJson.macd_status || "Nötr";
             indexBollinger = tJson.bollinger_status || "Orta Bantta";
-            indexStop = tJson.stop_loss ? `${tJson.stop_loss.toFixed(0)}` : indexStop;
-            indexDestek = tJson.support ? `${tJson.support.toFixed(0)}` : indexDestek;
-            indexDirenc = tJson.resistance ? `${tJson.resistance.toFixed(0)}` : indexDirenc;
+            indexStop = tJson.stop_loss ? `${formatNumberValue(tJson.stop_loss, 0, (liveVal * 0.97).toFixed(0))}` : indexStop;
+            indexDestek = tJson.support ? `${formatNumberValue(tJson.support, 0, (liveVal * 0.96).toFixed(0))}` : indexDestek;
+            indexDirenc = tJson.resistance ? `${formatNumberValue(tJson.resistance, 0, (liveVal * 1.04).toFixed(0))}` : indexDirenc;
           }
         }
       } catch (_) {}
@@ -325,11 +318,8 @@ function EndeksDetailPage() {
         </div>
       </div>
 
-      {/* SECTION B: Asset Body Block (Dynamic Dual-Mode Area) */}
-      
-      {/* MODE 1: Dashboard View (Default, showChatMode = false) */}
-      {!showChatMode ? (
-        <div className="space-y-6">
+      {/* SECTION B: Asset Body Block */}
+      <div className="space-y-6">
           
           {/* Historical Trend Chart */}
           <TradingViewChart symbol={priceDetails.code} lastPrice={priceDetails.price} />
@@ -403,6 +393,9 @@ function EndeksDetailPage() {
                     <button
                       key={idx}
                       onClick={async () => {
+                        if (window.innerWidth < 1024) {
+                          window.dispatchEvent(new CustomEvent('open-mobile-chat'));
+                        }
                         await sendMessage(q, chatContext);
                       }}
                       className="text-left text-xs text-muted-foreground hover:text-foreground bg-muted/20 hover:bg-muted/50 border border-border/30 hover:border-border/60 rounded-xl p-3 transition-colors cursor-pointer leading-normal active:scale-[0.99] font-medium"
@@ -481,6 +474,9 @@ function EndeksDetailPage() {
                     <button
                       key={idx}
                       onClick={async () => {
+                        if (window.innerWidth < 1024) {
+                          window.dispatchEvent(new CustomEvent('open-mobile-chat'));
+                        }
                         await sendMessage(q, chatContext);
                       }}
                       className="text-left text-xs text-muted-foreground hover:text-foreground bg-muted/20 hover:bg-muted/50 border border-border/30 hover:border-border/60 rounded-xl p-3 transition-colors cursor-pointer leading-normal active:scale-[0.99] font-medium"
@@ -493,42 +489,9 @@ function EndeksDetailPage() {
             </div>
 
           </div>
-        </div>
-      ) : (
-        
-        // MODE 2: Chat View (Sohbet Başladığında, showChatMode = true)
-        <div className="border border-border/45 rounded-2xl bg-card/15 flex flex-col h-auto relative">
-          
-          {/* Active Chat Conversation History Container */}
-          <div 
-            ref={chatScrollRef}
-            className="flex-1 p-5 space-y-6"
-          >
-            {messages.map((msg, idx) => (
-              <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start animate-in fade-in duration-300"}`}>
-                
-                <div className={`rounded-2xl px-4 py-3 text-xs md:text-sm max-w-[85%] sm:max-w-[75%] leading-relaxed ${
-                  msg.role === "user"
-                    ? "chat-question-bubble font-medium rounded-tr-sm shadow-sm"
-                    : "bg-muted/40 text-foreground border border-border/40 rounded-tl-sm w-full chatbot-response"
-                }`}>
-                  <MarkdownRenderer text={msg.text} isAssistant={msg.role === "assistant"} context={msg.context || chatContext} suggestions={msg.suggestions} widget={msg.widget} />
-                </div>
-              </div>
-            ))}
 
-            {isLoading && (
-              <div className="flex justify-start animate-pulse">
-                <div className="bg-muted/20 text-muted-foreground text-xs md:text-sm rounded-2xl rounded-tl-sm px-4 py-3 border border-border/30 flex items-center gap-2">
-                  <Loader2 size={13} className="animate-spin text-primary" />
-                  <span>Yapay zeka analiz raporu hazırlıyor...</span>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
-      )}
 
-    </div>
+      </div>
   )
 }

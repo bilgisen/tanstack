@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createChart, ColorType, CandlestickSeries, HistogramSeries } from "lightweight-charts";
 import type { IChartApi } from "lightweight-charts";
-import { Loader2, TrendingUp, BarChart2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 interface TradingViewChartProps {
   symbol: string;

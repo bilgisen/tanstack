@@ -22,30 +22,35 @@ export const Route = createFileRoute('/api/user/credits')({
 
         const userId = session.user.id;
 
-        // Fetch or auto-provision credits
-        let credits = await db
-          .select()
-          .from(userCredits)
-          .where(eq(userCredits.userId, userId))
-          .then((res: any[]) => res[0]);
+        // Fetch or auto-provision credits with try-catch fallback
+        let credits: any = null;
+        try {
+          credits = await db
+            .select()
+            .from(userCredits)
+            .where(eq(userCredits.userId, userId))
+            .then((res: any[]) => res[0]);
 
-        if (!credits) {
-          try {
-            credits = await db
-              .insert(userCredits)
-              .values({
-                userId,
-                tier: 'free',
-                monthlyHt: 5000,
-                usedHt: 0,
-                extraHt: 0,
-                resetAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-              })
-              .returning()
-              .then((res: any[]) => res[0]);
-          } catch (err) {
-            console.error("Auto-provision error in GET /api/user/credits:", err);
+          if (!credits) {
+            try {
+              credits = await db
+                .insert(userCredits)
+                .values({
+                  userId,
+                  tier: 'free',
+                  monthlyHt: 5000,
+                  usedHt: 0,
+                  extraHt: 0,
+                  resetAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+                })
+                .returning()
+                .then((res: any[]) => res[0]);
+            } catch (err) {
+              console.error("Auto-provision error in GET /api/user/credits:", err);
+            }
           }
+        } catch (dbErr) {
+          console.warn("Database connection or query failed in GET /api/user/credits, falling back to mock credits:", dbErr);
         }
 
         const monthlyHT = credits?.monthlyHt ?? 5000;

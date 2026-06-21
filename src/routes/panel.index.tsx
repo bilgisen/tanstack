@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { Sparkles, Star, Trash2, TrendingUp, TrendingDown, ChevronRight, ArrowUpRight, Activity, Calendar, Loader2, ArrowUpCircle, ArrowDownCircle } from 'lucide-react'
+import { Sparkles, Star, Trash2, TrendingUp, TrendingDown, ChevronRight, ArrowUpRight, Activity, Loader2, ArrowUpCircle, ArrowDownCircle } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useWatchlistStore } from '../store/watchlist'
 import { useChatStore } from '../store/chat'
@@ -234,7 +234,7 @@ function PanelIndexPage() {
           <div className="w-1.5 h-4 rounded-full bg-primary" />
           <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2.5">
             <Activity size={12} className="text-[#22c55e]" />
-            <span>Bugün Borsa</span>
+            <span>Bugün Borsa · {formattedDate}</span>
           </h3>
         </div>
 

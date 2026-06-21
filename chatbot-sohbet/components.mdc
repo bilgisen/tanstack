@@ -1,0 +1,236 @@
+---
+description: Component patterns, data flow, store yapısı
+globs: ["src/components/**/*", "src/stores/**/*", "src/hooks/**/*"]
+alwaysApply: false
+---
+
+# Component Patterns
+
+## Klasör Yapısı
+
+```
+src/components/
+├── chat/
+│   ├── ChatPanel.tsx          # Sağ panel wrapper (desktop)
+│   ├── ChatSheet.tsx          # Bottom sheet (mobile)
+│   ├── ChatInput.tsx          # Unified command bar
+│   ├── ChatThread.tsx         # Mesaj listesi
+│   ├── ContextBreadcrumb.tsx  # "📍 AKBNK · 3 mesaj"
+│   ├── NavigationConfirm.tsx  # Soft navigation prompt
+│   ├── ToolIndicator.tsx      # "Teknik analiz çekiliyor..."
+│   └── cards/
+│       ├── ResponseCard.tsx   # Card router
+│       ├── TextCard.tsx
+│       ├── MetricCard.tsx
+│       ├── CompareCard.tsx
+│       ├── ChartCard.tsx
+│       ├── NewsCard.tsx
+│       └── CardActions.tsx    # Pin, kaydet, git
+├── layout/
+│   ├── AppShell.tsx           # Ana layout wrapper
+│   ├── ContextBar.tsx         # Sticky header
+│   ├── LeftSidebar.tsx        # Watchlist + history
+│   ├── PinnedShelf.tsx        # Pin'li kartlar
+│   └── SplitPane.tsx          # Desktop split layout
+└── ticker/
+    ├── TickerTabs.tsx
+    ├── tabs/
+    │   ├── OverviewTab.tsx
+    │   ├── AnalysisTab.tsx
+    │   ├── NewsTab.tsx
+    │   └── FinancialsTab.tsx
+    └── sections/
+        ├── PriceHeader.tsx
+        ├── TechnicalCards.tsx
+        ├── FundamentalCards.tsx
+        └── AISummary.tsx
+```
+
+## Store Yapısı (Zustand)
+
+```tsx
+// stores/chatStore.ts
+interface ChatStore {
+  // Conversation
+  messages: Message[]
+  isStreaming: boolean
+  currentTool: string | null
+
+  // Context
+  pageContext: PageContext  // { type: 'ticker', symbol: 'AKBNK' }
+
+  // Pinned
+  pinnedCards: ResponseCard[]
+
+  // Actions
+  sendMessage: (text: string) => void
+  pinCard: (card: ResponseCard) => void
+  unpinCard: (id: string) => void
+  clearThread: () => void
+}
+
+// stores/watchlistStore.ts
+interface WatchlistStore {
+  items: WatchlistItem[]
+  addTicker: (ticker: string) => void
+  removeTicker: (ticker: string) => void
+}
+```
+
+## Data Fetching
+
+TanStack Query kullan. Her sayfa kendi query'lerini tanımlar.
+
+```tsx
+// hooks/useTickerData.ts
+export const useTickerData = (symbol: string) => {
+  return useQuery({
+    queryKey: ['ticker', symbol],
+    queryFn: () => api.getTicker(symbol),
+    staleTime: 30_000,      // 30sn — fiyat verisi
+    refetchInterval: 30_000, // otomatik yenileme
+  })
+}
+
+// hooks/useTechnicalAnalysis.ts
+export const useTechnicalAnalysis = (symbol: string) => {
+  return useQuery({
+    queryKey: ['technical', symbol],
+    queryFn: () => api.getTechnical(symbol),
+    staleTime: 5 * 60_000,  // 5dk — teknik analiz
+  })
+}
+```
+
+## API Client
+
+Tüm istekler Hono üzerinden. Direkt FastAPI'ye çağrı yok.
+
+```tsx
+// lib/api.ts
+const API_BASE = process.env.VITE_HONO_URL
+
+export const api = {
+  getTicker: (symbol: string) =>
+    fetch(`${API_BASE}/market/ticker/${symbol}`).then(r => r.json()),
+
+  getTechnical: (symbol: string) =>
+    fetch(`${API_BASE}/analysis/technical/${symbol}`).then(r => r.json()),
+
+  // Chat — SSE streaming
+  sendMessage: (message: string, context: PageContext) =>
+    new EventSource(`${API_BASE}/chat?msg=${encodeURIComponent(message)}&ctx=${context.type}:${context.id}`)
+}
+```
+
+## Response Tipleri
+
+```tsx
+// types/chat.ts
+interface ChatResponse {
+  id: string
+  cardType: 'text' | 'metric' | 'compare' | 'chart' | 'news' | 'table' | 'alert'
+  data: unknown          // cardType'a göre type-safe alt tip
+  context: PageContext
+  timestamp: string
+  canPin: boolean
+  canSave: boolean
+  navigationTarget?: string  // navigation intent ise
+}
+
+interface CompareData {
+  tickers: TickerMetrics[]
+  metrics: string[]
+  winner?: string        // opsiyonel AI yorum
+}
+
+interface MetricData {
+  ticker: string
+  price: number
+  change: number
+  changePercent: number
+  metrics: Record<string, string | number>
+  technicalSignal: 'strong_buy' | 'buy' | 'neutral' | 'sell' | 'strong_sell'
+}
+```
+
+## Comparison Component
+
+```tsx
+// components/chat/cards/CompareCard.tsx
+interface CompareCardProps {
+  data: CompareData
+  onPin: () => void
+  onDrillDown: (ticker: string) => void
+}
+
+// Layout: 2 ticker yan yana, 3+ ticker tablo
+const CompareCard = ({ data, onPin, onDrillDown }: CompareCardProps) => {
+  const isQuickCompare = data.tickers.length === 2
+
+  return (
+    <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+      {isQuickCompare
+        ? <QuickCompareLayout {...data} onDrillDown={onDrillDown} />
+        : <TableCompareLayout {...data} onDrillDown={onDrillDown} />
+      }
+      <CardActions onPin={onPin} navigationTargets={data.tickers.map(t => t.symbol)} />
+    </div>
+  )
+}
+```
+
+## Streaming Pattern
+
+```tsx
+// hooks/useChat.ts
+export const useChat = () => {
+  const { addMessage, setStreaming, setCurrentTool } = useChatStore()
+
+  const sendMessage = useCallback(async (text: string, context: PageContext) => {
+    setStreaming(true)
+
+    const es = api.sendMessage(text, context)
+
+    es.addEventListener('tool_start', (e) => {
+      setCurrentTool(JSON.parse(e.data).tool)
+    })
+
+    es.addEventListener('tool_end', () => {
+      setCurrentTool(null)
+    })
+
+    es.addEventListener('response', (e) => {
+      addMessage(JSON.parse(e.data))
+      setStreaming(false)
+      es.close()
+    })
+
+    es.onerror = () => {
+      setStreaming(false)
+      es.close()
+    }
+  }, [])
+
+  return { sendMessage }
+}
+```
+
+## Public vs Auth Guard
+
+```tsx
+// Sayfa bazlı guard
+export const TickerPage = () => {
+  const { user } = useAuth()
+
+  if (!user) {
+    return <PublicTickerPage />  // kısıtlı içerik + login teaser
+  }
+
+  return <AuthenticatedTickerPage />
+}
+```
+
+Public sayfada chat limiti component seviyesinde kontrol edilir.
+Limit dolunca input disabled olur, inline teaser gösterilir.
+Modal kullanma.

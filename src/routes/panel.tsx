@@ -1,12 +1,12 @@
-import { createFileRoute, Outlet, useNavigate, useLocation, Link } from '@tanstack/react-router'
+import { createFileRoute, Outlet, useNavigate, useLocation } from '@tanstack/react-router'
 import { useAuth } from '../hooks/useAuth'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { LeftSidebar } from '../components/layout/LeftSidebar'
+import { RightSidebar } from '../components/layout/RightSidebar'
+import { ChatPanel } from '../components/chat/ChatPanel'
+import { ChatSheet } from '../components/chat/ChatSheet'
 import { useUIStore } from '../store/ui'
-import { useChatStore } from '../store/chat'
-import { PanelLeft, Loader2 } from 'lucide-react'
-import { ChatPane } from '../components/dashboard/ChatPane'
-import { MarkdownRenderer } from '../components/dashboard/MarkdownRenderer'
+import { PanelLeft, ArrowUp } from 'lucide-react'
 import { Logo } from '../components/layout/Logo'
 
 export const Route = createFileRoute('/panel')({
@@ -21,8 +21,9 @@ function PanelLayout() {
     isLeftSidebarExpanded, 
     toggleLeftSidebarExpanded,
   } = useUIStore()
-  const { messages, isLoading } = useChatStore()
+
   const mainScrollRef = useRef<HTMLDivElement>(null)
+  const [isChatSheetOpen, setIsChatSheetOpen] = useState(false)
 
   useEffect(() => {
     if (!loading && !user) {
@@ -36,30 +37,27 @@ function PanelLayout() {
       const customEvent = e as CustomEvent<{ path: string }>
       if (customEvent.detail?.path) {
         navigate({ to: customEvent.detail.path })
+        // Close mobile chat overlay if open
+        setIsChatSheetOpen(false)
       }
     }
+    const handleOpenMobileChat = () => {
+      setIsChatSheetOpen(true)
+    }
     window.addEventListener('app-navigate', handleNavigate)
+    window.addEventListener('open-mobile-chat', handleOpenMobileChat)
     return () => {
       window.removeEventListener('app-navigate', handleNavigate)
+      window.removeEventListener('open-mobile-chat', handleOpenMobileChat)
     }
   }, [navigate])
 
-  // Scroll to bottom whenever messages or loading state change
+  // Scroll main container to bottom on routing or context change if required
   useEffect(() => {
     if (mainScrollRef.current) {
-      // Immediate scroll
-      mainScrollRef.current.scrollTop = mainScrollRef.current.scrollHeight;
-      
-      // Delayed scroll to account for async markdown HTML rendering & layout reflows
-      const timer = setTimeout(() => {
-        if (mainScrollRef.current) {
-          mainScrollRef.current.scrollTop = mainScrollRef.current.scrollHeight;
-        }
-      }, 100);
-      
-      return () => clearTimeout(timer);
+      mainScrollRef.current.scrollTop = 0
     }
-  }, [messages, isLoading])
+  }, [location.pathname])
 
   if (loading) {
     return (
@@ -98,7 +96,6 @@ function PanelLayout() {
     placeholder = 'Takip listeniz hakkında bir soru sorun...'
   }
 
-
   return (
     <div className="flex-1 flex flex-row overflow-hidden relative bg-background font-sans h-full">
       {/* Mobile Sidebar Backdrop Overlay */}
@@ -112,75 +109,71 @@ function PanelLayout() {
       {/* Sol Collapsible Sidebar */}
       <LeftSidebar />
 
-      {/* Ana Kolon */}
-      <div className="flex-1 flex flex-col min-w-0 h-full relative overflow-hidden bg-background">
+      {/* Ana Grid */}
+      <div className="flex-1 flex flex-row min-w-0 h-full relative overflow-hidden bg-background">
         
-        {/* Revolut-style Mobile Header */}
-        <header className="lg:hidden h-16 bg-background/80 backdrop-blur-xl flex items-center justify-between px-6 shrink-0 z-35 select-none border-b border-border/50">
-          <button
-            onClick={toggleLeftSidebarExpanded}
-            className="w-10 h-10 flex items-center justify-center text-foreground hover:bg-muted rounded-full transition-all cursor-pointer"
+        {/* Left Column: Sub-Page content (Outlet) */}
+        <div className="flex-1 flex flex-col min-w-0 h-full relative overflow-hidden bg-background">
+          {/* Revolut-style Mobile Header */}
+          <header className="lg:hidden h-16 bg-background/80 backdrop-blur-xl flex items-center justify-between px-6 shrink-0 z-35 select-none border-b border-border/50">
+            <button
+              onClick={toggleLeftSidebarExpanded}
+              className="w-10 h-10 flex items-center justify-center text-foreground hover:bg-muted rounded-full transition-all cursor-pointer"
+            >
+              <PanelLeft size={20} />
+            </button>
+            
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white">
+                <Logo size={16} />
+              </div>
+              <span className="font-display font-medium tracking-tight">hissepro</span>
+            </div>
+            
+            <div className="w-10 h-10" /> {/* Spacer */}
+          </header>
+
+          {/* Scrollable Sub-Page area (Outlet) */}
+          <main 
+            ref={mainScrollRef}
+            className="flex-1 overflow-y-auto bg-background px-6 md:px-8 py-6 custom-scrollbar min-w-0 relative z-10 pb-24 lg:pb-12 scroll-smooth"
           >
-            <PanelLeft size={20} />
-          </button>
-          
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white">
-              <Logo size={16} />
-            </div>
-            <span className="font-display font-medium tracking-tight">hissepro</span>
-          </div>
-          
-          <div className="w-10 h-10" /> {/* Spacer */}
-        </header>
-
-        {/* Scrollable Sub-Page area (Outlet) OR Active Chat Stream Messages */}
-        <main 
-          ref={mainScrollRef}
-          className="flex-1 overflow-y-auto bg-background px-6 md:px-8 py-6 custom-scrollbar min-w-0 relative z-10 pb-40 scroll-smooth"
-        >
-          {messages.length > 0 && !(pathname.includes('/sirketler/') || pathname.includes('/endeksler/')) ? (
-            <div className="max-w-3xl mx-auto space-y-8 py-4 animate-in fade-in duration-500">
-              {messages.map((msg, idx) => (
-                <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className={`px-6 py-4 text-[15px] max-w-[90%] sm:max-w-[80%] leading-relaxed rounded-[20px] shadow-sm ${
-                    msg.role === "user"
-                      ? "chat-question-bubble font-medium rounded-tr-sm"
-                      : "chat-response-bubble rounded-tl-sm w-full"
-                  }`}>
-                    <MarkdownRenderer text={msg.text} isAssistant={msg.role === "assistant"} context={msg.context || context} suggestions={msg.suggestions} widget={msg.widget} />
-                  </div>
-                </div>
-              ))}
-
-              {isLoading && (
-                <div className="flex justify-start animate-pulse">
-                  <div className="chat-response-bubble text-muted-foreground text-sm rounded-[20px] rounded-tl-sm px-6 py-4 flex items-center gap-3">
-                    <Loader2 size={16} className="animate-spin text-primary" />
-                    Analiz ediliyor...
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
             <div className="h-full w-full">
               <Outlet />
             </div>
-          )}
-        </main>
+          </main>
 
-        {/* Floating Revolut-style Chatbot Container */}
-        <div className="absolute bottom-6 left-6 right-6 md:left-8 md:right-8 z-40 flex justify-center pointer-events-none">
-          <div className="w-full max-w-3xl bg-background/80 backdrop-blur-2xl border border-border/50 rounded-full shadow-2xl pointer-events-auto overflow-hidden animate-in slide-in-from-bottom-6 duration-500">
-            <ChatPane
-              context={context}
-              placeholder={placeholder}
-              className="w-full border-none shadow-none bg-transparent"
-            />
+          {/* Floating Chat Trigger Bar (Mobile only) */}
+          <div className="lg:hidden absolute bottom-6 left-6 right-6 z-40 flex justify-center pointer-events-none">
+            <div 
+              onClick={() => setIsChatSheetOpen(true)}
+              className="w-full max-w-3xl bg-background/80 backdrop-blur-2xl border border-border/50 rounded-full shadow-2xl pointer-events-auto overflow-hidden animate-in slide-in-from-bottom-6 duration-500 cursor-pointer flex items-center px-6 py-2.5 justify-between"
+            >
+              <span className="text-muted-foreground/60 text-sm truncate pr-4">{placeholder}</span>
+              <button className="w-9 h-9 flex items-center justify-center rounded-full bg-primary text-white shrink-0 self-center">
+                <ArrowUp size={16} strokeWidth={2.5} />
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Desktop Right Column: Dedicated Fixed Chat Panel (40%) */}
+        <div className="hidden lg:block lg:w-[380px] xl:w-[420px] h-full shrink-0">
+          <ChatPanel context={context} placeholder={placeholder} />
+        </div>
+
       </div>
+
+      {/* RightSidebar (Detailed Stats Panel, slides in/out) */}
+      <RightSidebar />
+
+      {/* Mobile Chat Bottom Sheet */}
+      <ChatSheet 
+        isOpen={isChatSheetOpen} 
+        onClose={() => setIsChatSheetOpen(false)} 
+        context={context} 
+        placeholder={placeholder} 
+      />
     </div>
   )
 }
-

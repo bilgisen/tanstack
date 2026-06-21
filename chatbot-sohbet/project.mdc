@@ -1,0 +1,82 @@
+---
+description: HissePro project identity, stack, and core decisions
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# HissePro — AI-Destekli Borsa Analiz Uygulaması (BIST)
+
+## Ürün Kimliği
+
+HissePro, Borsa İstanbul odaklı, chatbot-merkezi bir finansal analiz platformudur.
+Hedef kitle: bireysel yatırımcılar (üyeler ve aboneler).
+Temel differentiator: doğal dil ile finansal analiz — kullanıcı soru sorar, sistem teknik + temel + haber analizini bütünleşik sunar.
+
+## Kullanıcı Tipleri
+
+| Tip | Erişim |
+|---|---|
+| Public (anonim) | Landing page, kısıtlı chatbot (rate-limited) |
+| Üye | Dashboard, standart özellikler (kotayla) |
+| Abone - Temel Plan | Tam özellik seti |
+| Abone - Pro Plan | Gelişmiş özellikler, yüksek kota |
+
+## Tech Stack
+
+### Frontend
+- **Framework:** TanStack Start (SSR + file-based routing)
+- **Hosting:** Cloudflare Pages
+- **UI:** Shadcn/ui + Tailwind CSS
+- **State:** TanStack Query (server state), Zustand (client state)
+- **Charts:** TradingView Lightweight Charts veya Recharts
+
+### Backend / Orchestration
+- **Orchestration:** Hono (Cloudflare Workers) — chatbot intent routing, API orchestration
+- **Analysis Engines:** FastAPI servisleri
+  - Teknik Analiz Engine
+  - Temel Analiz Engine
+  - Haber / KAP Engine
+- **Database:** PostgreSQL
+- **Cache:** Valkey (Redis-compatible)
+- **KV Store:** Cloudflare KV
+
+### Auth
+- Google OAuth (Google Connect)
+
+## Temel Mimari Kararlar
+
+- Chatbot, uygulamanın merkezi — UI buna göre tasarlanır
+- Orchestration Cloudflare Workers üzerinde Hono ile yapılır
+- Tüm API çağrıları Hono üzerinden geçer, frontend direkt FastAPI'ye çağrı yapmaz
+- Mobile-first tasarım, desktop split-pane layout
+- Streaming response desteklenir (Hono → frontend SSE/streaming)
+
+## Dizin Yapısı (Frontend)
+
+```
+src/
+├── routes/
+│   ├── index.tsx          # Landing (public chatbot)
+│   ├── dashboard/
+│   │   ├── index.tsx      # Ana dashboard
+│   │   ├── ticker/$symbol.tsx
+│   │   ├── endeks/$index.tsx
+│   │   └── sektor/$sector.tsx
+├── components/
+│   ├── chat/              # Chatbot bileşenleri
+│   ├── cards/             # Response card'ları
+│   ├── charts/            # Chart bileşenleri
+│   ├── layout/            # Header, sidebar, panels
+│   └── ui/                # Shadcn bileşenleri
+├── stores/                # Zustand stores
+├── hooks/                 # Custom hooks
+└── lib/                   # Utilities, API clients
+```
+
+## Kod Standartları
+
+- TypeScript — strict mode, no `any`
+- Component'lar functional, hooks ile
+- Her component tek sorumluluk
+- Shadcn bileşenlerini doğrudan kullan, gereksiz wrapper yaratma
+- Tailwind class'ları utility-first, custom CSS minimum

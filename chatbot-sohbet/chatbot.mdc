@@ -1,0 +1,233 @@
+---
+description: Chatbot sistemi — intent routing, UX patterns, conversation yönetimi
+globs: ["src/components/chat/**/*", "src/stores/chat*", "src/hooks/useChat*"]
+alwaysApply: false
+---
+
+# Chatbot Sistemi
+
+## Temel İlke
+
+Chat input = Unified Command Bar.
+Kullanıcı için tek alan, ama arkada üç farklı intent tipi:
+
+| Intent | Örnek | Davranış |
+|---|---|---|
+| **Query** | "RSI ne durumda?" | Mevcut context'te cevap |
+| **Navigation** | "AEFES nasıl?" | Soft confirmation → sayfa geçişi |
+| **Comparison** | "AKBNK vs GARAN" | Multi-context response card |
+
+Intent classification Hono orchestration katmanında yapılır.
+Frontend intent tipine göre farklı UI render eder.
+
+## Chat Input Bar
+
+Her zaman görünür. Sticky bottom (mobile), sağ panel alt kısmı (desktop).
+
+```tsx
+// Placeholder bağlama göre değişir
+ticker sayfası:    "AKBNK hakkında sor..."
+endeks sayfası:    "BIST 100 hakkında sor..."
+sektör sayfası:    "Bankacılık sektörü hakkında sor..."
+public landing:    "Piyasa hakkında bir şey sor..."
+```
+
+Input alanı büyük, prominent. Kullanıcı direkt yazmaya başlayabilmeli.
+Cmd+K (desktop) veya floating button (mobile) ile her yerden odaklanır.
+
+## Context Breadcrumb
+
+Chat paneli üstünde, her zaman görünür:
+
+```
+📍 AKBNK · Teknik Analiz · 3 mesaj
+```
+
+Context değişince animate ile güncellenir.
+Kullanıcı context'e tıklayınca ilgili sayfaya gider.
+
+## Intent: Navigation
+
+Kullanıcı başka bir ticker'ı sorarsa hard redirect yapma.
+
+```tsx
+// Soft confirmation pattern
+<NavigationConfirmation
+  ticker="AEFES"
+  onNavigate={() => router.push('/dashboard/ticker/AEFES')}
+  onStay={() => answerInContext('AEFES')}
+/>
+```
+
+UI:
+```
+┌──────────────────────────────────────┐
+│ 💡 AEFES için farklı bir sayfa var   │
+│                                      │
+│ [AEFES sayfasına git →]  [Burada cevapla] │
+└──────────────────────────────────────┘
+```
+
+## Intent: Comparison
+
+Comparison response card'ı chat thread içinde render edilir.
+Kullanıcı card'ı pin'leyebilir, ticker sayfalarına drill-down yapabilir.
+
+### Quick Compare (2 ticker)
+```tsx
+<CompareCard
+  tickers={['AKBNK', 'GARAN']}
+  metrics={['price', 'change', 'pe', 'pbv', 'roe', 'technical']}
+  onPin={handlePin}
+  onDrillDown={(ticker) => router.push(`/dashboard/ticker/${ticker}`)}
+/>
+```
+
+### Contextual Compare ("rakipleriyle karşılaştır")
+Sistem otomatik olarak sektör peer'larını seçer.
+Kullanıcı ticker belirtmez, context'ten (mevcut sayfa) çözülür.
+
+```tsx
+// Hono'ya gönderilen context
+{
+  intent: 'comparison',
+  type: 'contextual',
+  anchor: 'AKBNK',        // mevcut sayfa
+  sector: 'banking',      // otomatik
+  peerCount: 3            // kaç peer
+}
+```
+
+## Response Card Tipleri
+
+Her response tek bir card tipinde render edilir.
+Card tipi Hono response'unda `cardType` field ile gelir.
+
+| cardType | Kullanım |
+|---|---|
+| `text` | Düz metin cevap |
+| `metric` | Tek ticker, key metrikler |
+| `compare` | 2+ ticker karşılaştırma |
+| `chart` | Mini chart embed |
+| `news` | Haber listesi |
+| `table` | Genel tablo |
+| `alert` | Uyarı / bilgilendirme |
+
+```tsx
+// Card router — DO
+const ResponseCard = ({ response }: { response: ChatResponse }) => {
+  const components = {
+    text: TextCard,
+    metric: MetricCard,
+    compare: CompareCard,
+    chart: ChartCard,
+    news: NewsCard,
+    table: TableCard,
+    alert: AlertCard,
+  }
+  const Component = components[response.cardType]
+  return <Component data={response.data} onPin={handlePin} />
+}
+```
+
+## Card Aksiyonları
+
+Her card'da standart aksiyon bar:
+
+```
+[📌 Sabitle]  [💾 Kaydet]  [↗ Sayfaya git]  [↩ Paylaş]
+```
+
+- **Sabitle:** Pinned Cards Shelf'e taşır
+- **Kaydet:** Analizler bölümüne snapshot olarak kaydeder
+- **Sayfaya git:** İlgili ticker/endeks sayfasına navigate eder
+- Aksiyonlar card hover'da görünür (mobile: her zaman görünür)
+
+## Conversation History
+
+Her konuşma `{ticker}_{date}` formatında kaydedilir.
+Örnek: `AKBNK_2025-06-01`
+
+Sol sidebar'da listelenir:
+```
+Sohbet Geçmişi
+├── AKBNK · 1 Haz  ← aktif
+├── BIST100 · 29 May
+└── GARAN · 28 May
+```
+
+Kullanıcı geçmiş konuşmaya tıklayınca:
+1. İlgili ticker sayfasına gider
+2. O konuşma chat panelinde açılır
+3. Kullanıcı devam edebilir
+
+Konuşma geçmişi PostgreSQL'de tutulur, Valkey ile cache'lenir.
+
+## Streaming
+
+Hono'dan gelen response SSE ile stream edilir.
+Streaming sırasında tool call state'leri gösterilir:
+
+```tsx
+// Tool call indicators
+const toolMessages = {
+  technical: "📊 Teknik analiz çekiliyor...",
+  fundamental: "📈 Temel veriler analiz ediliyor...",
+  news: "📰 Haberler taranıyor...",
+  comparison: "⚖️ Karşılaştırma yapılıyor...",
+}
+```
+
+Streaming bitince tool indicator'lar kaybolur, card render edilir.
+
+## Public Chatbot (Landing Page)
+
+Rate limiting: IP başına günde 10 mesaj, session başına 5 mesaj.
+Cevap derinliği kısıtlı — veri verilir, analiz verilmez.
+
+```
+Ücretsiz:  "BIST 100 bugün -1.2% düştü"
+Login wall: "Neden düştü, hangi sektör baskı yarattı → Devamını görmek için giriş yap"
+```
+
+Login daveti ceza değil, teaser olmalı. Agresif modal kullanma.
+
+```tsx
+// DO — inline teaser
+<LoginTeaser
+  preview="Bankacılık sektörü %2.3 baskı yarattı..."
+  cta="Detaylı analizi görmek için giriş yap"
+  variant="inline"  // modal değil
+/>
+
+// DON'T
+<Modal open={true}>Giriş yapman gerekiyor!</Modal>
+```
+
+## Watchlist Entegrasyonu
+
+Chat sırasında keşfedilen ticker'lar watchlist'e tek tap ile eklenebilir.
+
+```tsx
+// Her metric card altında
+<AddToWatchlist ticker="ASELSAN" />
+```
+
+Watchlist state global store'da, sol sidebar'da görünür.
+
+## Scheduled Insights
+
+Kullanıcı "THYAO bilanço açıklıyor" gibi tarih bazlı konuşma yaptığında sistem bildirim teklif eder.
+
+```tsx
+<ScheduledInsightPrompt
+  ticker="THYAO"
+  event="Bilanço açıklaması"
+  date="2025-06-15"
+  onAccept={handleSchedule}
+  onDismiss={handleDismiss}
+/>
+```
+
+Bu opsiyonel bir upsell değil, kullanıcıya gerçek değer katan bir özellik.
+Abonelik gerektirmez, tüm üyelere açık.

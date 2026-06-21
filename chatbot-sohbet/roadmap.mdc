@@ -1,0 +1,119 @@
+---
+description: MVP kapsamı ve faz planı — neyin şimdi, neyin sonra yapılacağını belirler
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Roadmap & MVP Kapsamı
+
+## Geliştirme Felsefesi
+
+Önce çalışan, sonra güzel, sonra akıllı.
+Her faz bağımsız olarak deploy edilebilir ve kullanılabilir olmalı.
+Over-engineering yapma — MVP'de olmayan özellik için infrastructure kurma.
+
+---
+
+## Faz 1 — MVP (Şu an)
+
+### Public Landing
+- [ ] Landing page — chatbot input merkezi, minimal copy
+- [ ] Public chatbot — rate-limited (IP: 10/gün, session: 5)
+- [ ] Login teaser — inline, modal değil
+- [ ] Google OAuth login
+
+### Auth & Layout
+- [ ] App shell — context bar, left sidebar, main content
+- [ ] Left sidebar — watchlist + conversation history
+- [ ] Mobile bottom navigation
+- [ ] Desktop split-pane (60/40)
+
+### Ticker Sayfası
+- [ ] Context bar — fiyat, değişim, hacim
+- [ ] 4 tab: Özet, Analiz, Haberler, Finansallar
+- [ ] Özet tab: fiyat kartı + AI brief (statik metin) + 3 metrik
+- [ ] Analiz tab: chart + teknik kartlar + temel kartlar
+- [ ] Haberler tab: haber listesi + KAP bildirimleri
+- [ ] Finansallar tab: mali tablo özeti
+
+### Chat (Core)
+- [ ] ChatInput — unified command bar, context-aware placeholder
+- [ ] ChatThread — mesaj listesi, scroll
+- [ ] ContextBreadcrumb — "📍 AKBNK · 3 mesaj"
+- [ ] ToolIndicator — streaming sırasında tool state gösterimi
+- [ ] ResponseCard router — cardType'a göre doğru card
+- [ ] TextCard, MetricCard — ilk iki kart tipi
+- [ ] Mobile bottom sheet chat
+
+### Conversation
+- [ ] Konuşma kaydetme — `{ticker}_{date}` formatı
+- [ ] Sol sidebar'da history listesi
+- [ ] Geçmiş konuşmaya dönme
+
+### Endeks & Sektör Sayfaları
+- [ ] Endeks sayfası — 3 tab (Özet, Hisseler, Haberler)
+- [ ] Sektör sayfası — 3 tab (Özet, Şirketler, Haberler)
+
+---
+
+## Faz 2 — Comparison & Rich Cards
+
+- [ ] CompareCard — QuickCompare (2 ticker) ve TableCompare (3+)
+- [ ] Navigation intent — soft confirmation pattern
+- [ ] Contextual compare — "rakipleriyle karşılaştır"
+- [ ] ChartCard — mini chart embed in response
+- [ ] NewsCard — haber listesi in response
+- [ ] Watchlist — ticker ekleme/çıkarma
+- [ ] AddToWatchlist — card aksiyonu
+
+---
+
+## Faz 3 — Power Features
+
+- [ ] Pinned Cards Shelf — mobile chip shelf, desktop collapsible
+- [ ] CardActions — pin, kaydet, sayfaya git
+- [ ] Snapshot kaydetme — "Analizler" bölümü
+- [ ] Scheduled Insights — bilanço/temettü bildirimleri
+- [ ] Abone planları UI — plan seçim sayfası, kota göstergesi
+- [ ] Kota indicator — chat input yanında kalan hak
+- [ ] Desktop split-pane drag resize
+
+---
+
+## Faz 4 — Polish & Growth
+
+- [ ] Light mode
+- [ ] Keyboard shortcuts (Cmd+K command bar, tab navigation)
+- [ ] Onboarding flow — ilk giriş, watchlist kurulum
+- [ ] Empty states — watchlist boş, henüz sohbet yok
+- [ ] Error states — API hatası, timeout
+- [ ] PWA — offline capable, install prompt
+- [ ] Bildirim sistemi — push notification (scheduled insights)
+
+---
+
+## Şu An Yapılmayan (Kapsam Dışı)
+
+Aşağıdakiler için kod yazma, infrastructure kurma:
+
+- ❌ Sosyal özellikler (paylaşım, yorum)
+- ❌ Portfolio takip
+- ❌ Otomatik alım-satım sinyali
+- ❌ Email bildirim sistemi
+- ❌ Admin paneli
+- ❌ Multi-language (şimdilik sadece Türkçe)
+- ❌ Third-party chart library entegrasyonu (önce lightweight)
+
+---
+
+## Teknik Borç Listesi
+
+MVP'de bilinçli olarak ertelenen, sonra çözülecek:
+
+| Konu | Durum | Hedef Faz |
+|---|---|---|
+| Hono best-practice routing | Temel çalışıyor | Faz 2 |
+| SSE → WebSocket migration | SSE ile başla | Faz 3 |
+| Gerçek zamanlı fiyat (WebSocket) | 30sn polling | Faz 2 |
+| E2E test coverage | Manuel test | Faz 3 |
+| Rate limiting (Redis) | Basit IP check | Faz 2 |

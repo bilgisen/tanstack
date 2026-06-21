@@ -1,12 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Sparkles, HelpCircle, Star, TrendingUp, Compass, Loader2 } from 'lucide-react'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import companyNames from '../constants/companyNames.json'
 import companyLogos from '../constants/companyLogos.json'
 import { useChatStore } from '../store/chat'
 import { useWatchlistStore } from '../store/watchlist'
 import { TradingViewChart } from '../components/dashboard/TradingViewChart'
-import { MarkdownRenderer } from '../components/dashboard/MarkdownRenderer'
 
 
 export const Route = createFileRoute('/panel/sirketler/$id')({
@@ -51,7 +50,6 @@ function SirketDetailPage() {
   const [techSinyaller, setTechnicalSinyaller] = useState<TechnicalSinyaller | null>(null)
   const [headerSummary, setHeaderSummary] = useState<string[] | null>(null)
   const [loading, setLoading] = useState(true)
-  const [showChatMode, setShowChatMode] = useState(false)
   const [fundamentalQuestions, setFundamentalQuestions] = useState<string[]>([
     `${tickerUpper} bilançosundaki en kritik finansal oranlar neler?`,
     `${tickerUpper} F/K ve PD/DD oranları sektöre göre ucuz mu?`,
@@ -60,9 +58,8 @@ function SirketDetailPage() {
     `Sektörel beklentilerin ${tickerUpper} hissesine etkisi nasıl olur?`
   ])
 
-  const { messages, isLoading, sendMessage } = useChatStore()
+  const { sendMessage } = useChatStore()
   const { watchlists, addItem, removeItem } = useWatchlistStore()
-  const chatScrollRef = useRef<HTMLDivElement>(null)
 
   // Track Watchlist status
   const defaultWatchlist = watchlists.find(w => w.id === "default-list") || watchlists[0];
@@ -76,21 +73,6 @@ function SirketDetailPage() {
       addItem(defaultId, tickerUpper, "stock");
     }
   };
-
-  // Sync dual-mode chat state with global chatStore messages
-  useEffect(() => {
-    const hasMessagesForThisStock = messages.length > 0 && !!messages[messages.length - 1].context?.includes(`sirket:${tickerUpper.toLowerCase()}`);
-    setShowChatMode(hasMessagesForThisStock);
-    
-    // Auto Scroll to bottom of chat area if active
-    if (hasMessagesForThisStock && chatScrollRef.current) {
-      setTimeout(() => {
-        if (chatScrollRef.current) {
-          chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
-        }
-      }, 100);
-    }
-  }, [messages, tickerUpper]);
 
   // Load all stock metrics, summaries, prices and indicators
   useEffect(() => {
@@ -175,12 +157,22 @@ function SirketDetailPage() {
         if (taRes.ok) {
           const tJson = await taRes.json();
           if (tJson && !tJson.error) {
-            rsi = `${tJson.rsi ? tJson.rsi.toFixed(1) : "50.0"} (${tJson.rsi_status || "Nötr"})`;
+            const formatRsiValue = (val: any) => {
+              if (val === undefined || val === null) return "50.0";
+              const num = typeof val === "number" ? val : parseFloat(val);
+              return isNaN(num) ? "50.0" : num.toFixed(1);
+            };
+            const formatNumberValue = (val: any, decimals: number, fallback: string) => {
+              if (val === undefined || val === null) return fallback;
+              const num = typeof val === "number" ? val : parseFloat(val);
+              return isNaN(num) ? fallback : num.toFixed(decimals);
+            };
+            rsi = `${formatRsiValue(tJson.rsi)} (${tJson.rsi_status || "Nötr"})`;
             macd = tJson.macd_status || "Nötr";
             bollinger = tJson.bollinger_status || "Orta Bantta";
-            atrStop = tJson.stop_loss ? `${tJson.stop_loss.toFixed(2)} ₺` : atrStop;
-            destek = tJson.support ? `${tJson.support.toFixed(2)} ₺` : destek;
-            direnc = tJson.resistance ? `${tJson.resistance.toFixed(2)} ₺` : direnc;
+            atrStop = tJson.stop_loss ? `${formatNumberValue(tJson.stop_loss, 2, (lastPrice * 0.97).toFixed(2))} ₺` : atrStop;
+            destek = tJson.support ? `${formatNumberValue(tJson.support, 2, (lastPrice * 0.96).toFixed(2))} ₺` : destek;
+            direnc = tJson.resistance ? `${formatNumberValue(tJson.resistance, 2, (lastPrice * 1.04).toFixed(2))} ₺` : direnc;
           }
         }
       } catch (e) {
@@ -356,11 +348,8 @@ function SirketDetailPage() {
         </div>
       </div>
 
-      {/* SECTION B: Asset Body Block (Dynamic Dual-Mode Area) */}
-      
-      {/* MODE 1: Dashboard View (Default, showChatMode = false) */}
-      {!showChatMode ? (
-        <div className="space-y-6">
+      {/* SECTION B: Asset Body Block */}
+      <div className="space-y-6">
           
           {/* TradingView Candlestick Chart */}
           <TradingViewChart symbol={tickerUpper} lastPrice={priceDetails.price} />
@@ -431,6 +420,9 @@ function SirketDetailPage() {
                     <button
                       key={idx}
                       onClick={async () => {
+                        if (window.innerWidth < 1024) {
+                          window.dispatchEvent(new CustomEvent('open-mobile-chat'));
+                        }
                         await sendMessage(q, chatContext);
                       }}
                       className="text-left text-xs text-muted-foreground hover:text-foreground bg-muted/20 hover:bg-muted/50 border border-border/30 hover:border-border/60 rounded-xl p-3 transition-colors cursor-pointer leading-normal active:scale-[0.99] font-medium"
@@ -486,6 +478,9 @@ function SirketDetailPage() {
                     <button
                       key={idx}
                       onClick={async () => {
+                        if (window.innerWidth < 1024) {
+                          window.dispatchEvent(new CustomEvent('open-mobile-chat'));
+                        }
                         await sendMessage(q, chatContext);
                       }}
                       className="text-left text-xs text-muted-foreground hover:text-foreground bg-muted/20 hover:bg-muted/50 border border-border/30 hover:border-border/60 rounded-xl p-3 transition-colors cursor-pointer leading-normal active:scale-[0.99] font-medium"
@@ -498,44 +493,9 @@ function SirketDetailPage() {
             </div>
 
           </div>
-        </div>
-      ) : (
-        
-        // MODE 2: Chat View (Sohbet Başladığında, showChatMode = true)
-        <div className="border border-border/45 rounded-2xl bg-card/15 flex flex-col h-auto relative">
-          
-          {/* Active Chat Conversation History Container */}
-          <div 
-            ref={chatScrollRef}
-            className="flex-1 p-5 space-y-6"
-          >
-            {messages.map((msg, idx) => (
-              <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start animate-in fade-in duration-300"}`}>
-                
-                {/* Message bubble */}
-                <div className={`rounded-2xl px-4 py-3 text-xs md:text-sm max-w-[85%] sm:max-w-[75%] leading-relaxed ${
-                  msg.role === "user"
-                    ? "chat-question-bubble font-medium rounded-tr-sm shadow-sm"
-                    : "bg-muted/40 text-foreground border border-border/40 rounded-tl-sm w-full chatbot-response"
-                }`}>
-                  <MarkdownRenderer text={msg.text} isAssistant={msg.role === "assistant"} context={msg.context || chatContext} suggestions={msg.suggestions} widget={msg.widget} />
-                </div>
-              </div>
-            ))}
 
-            {/* AI Streaming Loading bubble */}
-            {isLoading && (
-              <div className="flex justify-start animate-pulse">
-                <div className="bg-muted/20 text-muted-foreground text-xs md:text-sm rounded-2xl rounded-tl-sm px-4 py-3 border border-border/30 flex items-center gap-2">
-                  <Loader2 size={13} className="animate-spin text-primary" />
-                  <span>Yapay zeka analiz raporu hazırlıyor...</span>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
-      )}
 
-    </div>
+      </div>
   )
 }
