@@ -97,17 +97,17 @@ function PanelLayout() {
       <Topbar />
 
       {/* Remaining Layout: Body area (Sub-page content + Chat Panel) */}
-      <div className="flex-1 flex flex-row min-w-0 h-full relative overflow-hidden bg-background">
+      <div className="flex-1 flex flex-row min-w-0 relative overflow-hidden bg-background">
         
         {/* Left Column: Sub-Page content (Outlet) */}
-        <div className="flex-1 flex flex-col min-w-0 h-full relative overflow-hidden bg-background">
+        <div className="flex-1 flex flex-col min-w-0 relative overflow-hidden bg-background">
           
           {/* Scrollable Sub-Page area (Outlet) */}
           <main 
             ref={mainScrollRef}
             className="flex-1 overflow-y-auto bg-background px-6 md:px-8 py-6 custom-scrollbar min-w-0 relative z-10 pb-24 lg:pb-12 scroll-smooth"
           >
-            <div className="h-full w-full">
+            <div className="w-full">
               <Outlet />
             </div>
           </main>

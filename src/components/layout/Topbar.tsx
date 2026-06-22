@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { Logo } from "./Logo";
-import { Settings, Sun, Moon, Monitor, Sparkles } from "lucide-react";
+import { Settings, Sun, Moon, Monitor, Sparkles, PanelRight, User } from "lucide-react";
 import { useUIStore } from "../../store/ui";
+import { useAuth } from "../../hooks/useAuth";
 import type { Theme } from "../../store/ui";
 
 export function Topbar() {
-  const { theme, setTheme } = useUIStore();
+  const { theme, setTheme, isRightSidebarOpen, toggleRightSidebar } = useUIStore();
+  const { user, login: handleLogin } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
 
@@ -16,8 +18,8 @@ export function Topbar() {
         setDropdownOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
+    window.addEventListener("mousedown", handleOutsideClick);
+    return () => window.removeEventListener("mousedown", handleOutsideClick);
   }, []);
 
   const handleThemeChange = (newTheme: Theme) => {
@@ -26,29 +28,38 @@ export function Topbar() {
   };
 
   return (
-    <header className="h-16 w-full bg-background/85 backdrop-blur-md border-b border-border/40 px-6 flex items-center justify-between shrink-0 select-none relative z-40 transition-colors">
+    <header className="w-full h-14 border-b border-border/40 bg-card/15 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between shrink-0 select-none z-30">
       
-      {/* Left: Brand logo & name */}
+      {/* Left: Branding & Icon */}
       <div className="flex items-center gap-3">
-        <Link to="/panel" className="flex items-center gap-2.5 select-none hover:opacity-95 transition-all">
-          <Logo size={24} className="text-primary shrink-0" />
-          <span className="font-semibold text-lg tracking-tight font-sans text-foreground">
+        <Link to="/panel" className="flex items-center gap-2 select-none hover:opacity-95 transition-all">
+          <Logo size={18} className="text-foreground shrink-0" />
+          <span className="font-semibold text-base tracking-tight font-sans text-foreground">
             Hisse<span className="text-muted-foreground/60 font-medium">Pro</span>
           </span>
         </Link>
       </div>
 
       {/* Right: Actions */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3.5">
         
         {/* Yükselt Button */}
         <Link 
           to="/panel/profil" 
-          className="px-4 py-1.5 rounded-full bg-primary hover:bg-primary/95 text-white text-xs font-semibold tracking-tight transition-all duration-200 shadow-sm flex items-center gap-1.5 shrink-0"
+          className="px-4 py-1.5 rounded-full bg-primary hover:bg-primary/95 text-white text-[11px] sm:text-xs font-semibold tracking-tight transition-all duration-200 shadow-sm flex items-center gap-1.5 shrink-0"
         >
           <Sparkles size={11} fill="currentColor" className="shrink-0" />
           <span>Yükselt</span>
         </Link>
+
+        {/* RightSidebar Toggle (Stats Panel) */}
+        <button 
+          onClick={toggleRightSidebar}
+          className={`p-2 rounded-full transition-all cursor-pointer flex items-center justify-center border border-transparent active:scale-95 shrink-0 ${isRightSidebarOpen ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+          title="Finansal Detaylar"
+        >
+          <PanelRight size={18} />
+        </button>
 
         {/* Settings & Theme Dropdown Trigger */}
         <div className="relative" ref={settingsRef}>
@@ -102,6 +113,29 @@ export function Topbar() {
             </div>
           )}
         </div>
+
+        {/* User Profile Avatar / Login Icon */}
+        {user ? (
+          <Link 
+            to="/panel/profil"
+            className="w-8 h-8 rounded-full overflow-hidden border border-border/60 hover:border-primary/50 transition-all shrink-0 cursor-pointer shadow-3xs"
+            title={user.email || "Profil"}
+          >
+            <img 
+              src={user.user_metadata?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} 
+              alt="Avatar" 
+              className="w-full h-full object-cover" 
+            />
+          </Link>
+        ) : (
+          <button
+            onClick={handleLogin}
+            className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground bg-muted hover:bg-muted/80 transition-all cursor-pointer border border-border/40 shrink-0"
+            title="Giriş Yap"
+          >
+            <User size={14} />
+          </button>
+        )}
 
       </div>
 
