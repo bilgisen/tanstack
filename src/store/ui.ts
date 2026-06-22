@@ -19,6 +19,8 @@ interface UIState {
   setTheme: (theme: Theme) => void;
   globalPrompt: string | null;
   setGlobalPrompt: (prompt: string | null) => void;
+  isChatMaximized: boolean;
+  toggleChatMaximized: () => void;
 }
 
 const getInitialTheme = (): Theme => {
@@ -106,5 +108,7 @@ export const useUIStore = create<UIState>((set) => ({
   }),
   globalPrompt: null,
   setGlobalPrompt: (prompt) => set({ globalPrompt: prompt }),
+  isChatMaximized: false,
+  toggleChatMaximized: () => set((state) => ({ isChatMaximized: !state.isChatMaximized })),
 }));
 

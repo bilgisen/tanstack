@@ -5,6 +5,7 @@ import { Topbar } from '../components/layout/Topbar'
 import { RightSidebar } from '../components/layout/RightSidebar'
 import { ChatPanel } from '../components/chat/ChatPanel'
 import { ChatSheet } from '../components/chat/ChatSheet'
+import { useUIStore } from '../store/ui'
 import { ArrowUp } from 'lucide-react'
 
 export const Route = createFileRoute('/panel')({
@@ -15,6 +16,7 @@ function PanelLayout() {
   const { user, loading } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const { isChatMaximized } = useUIStore()
 
   const mainScrollRef = useRef<HTMLDivElement>(null)
   const [isChatSheetOpen, setIsChatSheetOpen] = useState(false)
@@ -100,7 +102,7 @@ function PanelLayout() {
       <div className="flex-1 flex flex-row min-w-0 min-h-0 relative overflow-hidden bg-background">
         
         {/* Left Column: Sub-Page content (Outlet) */}
-        <div className="flex-1 flex flex-col min-w-0 min-h-0 relative overflow-hidden bg-background">
+        <div className={`flex-1 flex flex-col min-w-0 min-h-0 relative overflow-hidden bg-background ${isChatMaximized ? 'hidden lg:hidden' : ''}`}>
           
           {/* Scrollable Sub-Page area (Outlet) */}
           <main 
@@ -126,8 +128,8 @@ function PanelLayout() {
           </div>
         </div>
 
-        {/* Desktop Right Column: Dedicated Fixed Chat Panel (40%) */}
-        <div className="hidden lg:block lg:w-[380px] xl:w-[420px] h-full shrink-0">
+        {/* Desktop Right Column: Dedicated Fixed Chat Panel (40% or 100% maximized) */}
+        <div className={`hidden lg:block h-full shrink-0 transition-all duration-300 ${isChatMaximized ? 'w-full flex-1' : 'lg:w-[380px] xl:w-[420px]'}`}>
           <ChatPanel context={context} placeholder={placeholder} />
         </div>
 

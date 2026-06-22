@@ -2,7 +2,8 @@ import { useRef, useEffect, useState } from "react";
 import { useChatStore } from "../../store/chat";
 import { MarkdownRenderer } from "../dashboard/MarkdownRenderer";
 import { ChatPane } from "../dashboard/ChatPane";
-import { Loader2, Compass, X, Plus, History } from "lucide-react";
+import { useUIStore } from "../../store/ui";
+import { Loader2, Compass, X, Plus, History, Maximize2, Minimize2 } from "lucide-react";
 
 interface ChatPanelProps {
   context: string;
@@ -12,6 +13,7 @@ interface ChatPanelProps {
 
 export function ChatPanel({ context, placeholder, onClose }: ChatPanelProps) {
   const { messages, isLoading, sessions, activeSessionId, loadSession, deleteSession, clearChat } = useChatStore();
+  const { isChatMaximized, toggleChatMaximized } = useUIStore();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const historyRef = useRef<HTMLDivElement>(null);
@@ -67,6 +69,15 @@ export function ChatPanel({ context, placeholder, onClose }: ChatPanelProps) {
             title="Sohbet Geçmişi"
           >
             <History size={16} />
+          </button>
+
+          {/* Maximize / Minimize Button */}
+          <button
+            onClick={toggleChatMaximized}
+            className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all cursor-pointer flex items-center justify-center border border-transparent active:scale-95"
+            title={isChatMaximized ? "Sohbeti Küçült" : "Sohbeti Genişlet"}
+          >
+            {isChatMaximized ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
           </button>
 
           {onClose && (
