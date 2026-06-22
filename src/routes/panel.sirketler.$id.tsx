@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { Sparkles, HelpCircle, Star, TrendingUp, Compass, Loader2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import companyNames from '../constants/companyNames.json'
@@ -49,6 +49,7 @@ function SirketDetailPage() {
   const [metrics, setDetailedMetrics] = useState<DetailedMetrics | null>(null)
   const [techSinyaller, setTechnicalSinyaller] = useState<TechnicalSinyaller | null>(null)
   const [headerSummary, setHeaderSummary] = useState<string[] | null>(null)
+  const [sectorPeers, setSectorPeers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [fundamentalQuestions, setFundamentalQuestions] = useState<string[]>([
     `${tickerUpper} bilançosundaki en kritik finansal oranlar neler?`,
@@ -81,6 +82,7 @@ function SirketDetailPage() {
 
     async function loadAllDetails() {
       const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev";
+      const compUrl = import.meta.env.VITE_COMP_API_URL || "https://comp-ef958063.fastapicloud.dev";
       
       let lastPrice = 120.50;
       let diffPercent = 1.85;
@@ -209,7 +211,32 @@ function SirketDetailPage() {
         console.error("Failed fetching AI summaries", e);
       }
 
+      // 6. Fetch sector peers
+      let peersList: any[] = [];
+      try {
+        const profileRes = await fetch(`${compUrl}/api/v1/companies/${tickerUpper}/profile`);
+        if (profileRes.ok) {
+          const profileJson = await profileRes.json();
+          const sectorMain = profileJson.sector_main;
+          if (sectorMain) {
+            const peersRes = await fetch(`${compUrl}/api/v1/sectors/${encodeURIComponent(sectorMain)}/companies`);
+            if (peersRes.ok) {
+              const peersJson = await peersRes.json();
+              if (peersJson && peersJson.companies) {
+                peersList = peersJson.companies
+                  .filter((c: any) => c.ticker.toUpperCase() !== tickerUpper)
+                  .slice(0, 5);
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Failed fetching sector peers", e);
+      }
+
       if (!isMounted) return;
+
+      setSectorPeers(peersList);
 
       setPriceDetails({
         name: officialName,
@@ -354,13 +381,9 @@ function SirketDetailPage() {
           {/* TradingView Candlestick Chart */}
           <TradingViewChart symbol={tickerUpper} lastPrice={priceDetails.price} />
 
-          {/* AI Brief Summary Paragraphs */}
+          {/* AI Brief Summary Paragraphs (No Header) */}
           {headerSummary && headerSummary.length > 0 && (
-            <div className="border border-border/40 bg-muted/15 p-5 rounded-2xl space-y-3">
-              <div className="flex items-center gap-2">
-                <Sparkles size={14} className="text-primary animate-pulse" />
-                <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Yapay Zeka Analiz Özeti</h3>
-              </div>
+            <div className="border border-border/40 bg-muted/15 p-5 rounded-2xl">
               <div className="text-xs md:text-sm text-foreground/80 leading-relaxed space-y-2.5">
                 {headerSummary.map((p, idx) => (
                   <p key={idx} dangerouslySetInnerHTML={{ __html: p.replace(/\*\*(.*?)\*\*/g, '<strong class="text-foreground font-semibold">$1</strong>') }} />
@@ -369,53 +392,49 @@ function SirketDetailPage() {
             </div>
           )}
 
-          {/* Two Columns Grid for Tech Analysis and Fundamentals */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            
-            {/* COLUMN 1: Technical Analysis Dashboard */}
-            <div className="border border-border/45 bg-card/20 rounded-2xl p-5 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/30">
-                  <div className="w-6 h-6 rounded-md bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-                    <TrendingUp size={12} />
-                  </div>
-                  <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Teknik Gösterge Kartı</h3>
-                </div>
-
-                {/* Technical Metric Table */}
-                {techSinyaller && (
-                  <div className="overflow-hidden border border-border/40 rounded-xl mb-6 bg-muted/10 divide-y divide-border/30">
-                    <div className="flex justify-between items-center p-3 text-xs">
-                      <span className="text-muted-foreground font-medium">RSI (14) Durumu</span>
-                      <span className="font-semibold text-foreground">{techSinyaller.rsi}</span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 text-xs">
-                      <span className="text-muted-foreground font-medium">MACD Sinyali</span>
-                      <span className="font-semibold text-foreground">{techSinyaller.macd}</span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 text-xs">
-                      <span className="text-muted-foreground font-medium">Bollinger Konumu</span>
-                      <span className="font-semibold text-foreground">{techSinyaller.bollinger}</span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 text-xs">
-                      <span className="text-muted-foreground font-medium">Destek / Direnç Seviyeleri</span>
-                      <span className="font-semibold text-foreground">{techSinyaller.destek} / {techSinyaller.direnc}</span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 text-xs">
-                      <span className="text-muted-foreground font-medium">ATR Pivot Stop-Loss</span>
-                      <span className="font-semibold text-primary">{techSinyaller.atrStop}</span>
-                    </div>
-                  </div>
-                )}
+          {/* Technical Analysis Block */}
+          <div className="border border-border/45 bg-card/20 rounded-2xl p-6 space-y-6">
+            <div className="flex items-center gap-2 pb-3 border-b border-border/30">
+              <div className="w-6 h-6 rounded-md bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                <TrendingUp size={12} />
               </div>
+              <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Teknik Analiz Göstergeleri</h3>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Technical Metric Table */}
+              {techSinyaller && (
+                <div className="overflow-hidden border border-border/40 rounded-xl bg-muted/10 divide-y divide-border/30">
+                  <div className="flex justify-between items-center p-3.5 text-xs">
+                    <span className="text-muted-foreground font-medium">RSI (14) Durumu</span>
+                    <span className="font-semibold text-foreground">{techSinyaller.rsi}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3.5 text-xs">
+                    <span className="text-muted-foreground font-medium">MACD Sinyali</span>
+                    <span className="font-semibold text-foreground">{techSinyaller.macd}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3.5 text-xs">
+                    <span className="text-muted-foreground font-medium">Bollinger Konumu</span>
+                    <span className="font-semibold text-foreground">{techSinyaller.bollinger}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3.5 text-xs">
+                    <span className="text-muted-foreground font-medium">Destek / Direnç Seviyeleri</span>
+                    <span className="font-semibold text-foreground">{techSinyaller.destek} / {techSinyaller.direnc}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3.5 text-xs">
+                    <span className="text-muted-foreground font-medium">ATR Pivot Stop-Loss</span>
+                    <span className="font-semibold text-primary">{techSinyaller.atrStop}</span>
+                  </div>
+                </div>
+              )}
 
               {/* 5 Technical Suggested Questions */}
-              <div className="space-y-2 pt-2">
+              <div className="space-y-2">
                 <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-2">
                   <HelpCircle size={12} />
-                  <span>Teknik Analiz Soruları</span>
+                  <span>Önerilen Teknik Analiz Soruları</span>
                 </div>
-                <div className="flex flex-col gap-1.5">
+                <div className="grid grid-cols-1 gap-1.5">
                   {technicalQuestions.map((q, idx) => (
                     <button
                       key={idx}
@@ -425,7 +444,7 @@ function SirketDetailPage() {
                         }
                         await sendMessage(q, chatContext);
                       }}
-                      className="text-left text-xs text-muted-foreground hover:text-foreground bg-muted/20 hover:bg-muted/50 border border-border/30 hover:border-border/60 rounded-xl p-3 transition-colors cursor-pointer leading-normal active:scale-[0.99] font-medium"
+                      className="text-left text-xs text-muted-foreground hover:bg-muted/20 hover:bg-muted/50 border border-border/30 hover:border-border/60 rounded-xl p-3 transition-colors cursor-pointer leading-normal active:scale-[0.99] font-medium"
                     >
                       {q}
                     </button>
@@ -433,47 +452,47 @@ function SirketDetailPage() {
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* COLUMN 2: Fundamental Analysis Dashboard */}
-            <div className="border border-border/45 bg-card/20 rounded-2xl p-5 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/30">
-                  <div className="w-6 h-6 rounded-md bg-blue-500/10 text-blue-500 flex items-center justify-center">
-                    <Compass size={12} />
-                  </div>
-                  <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Temel Analiz Rasyoları</h3>
-                </div>
-
-                {/* Fundamental Metrics Cards Grid */}
-                {metrics && (
-                  <div className="grid grid-cols-2 gap-3.5 mb-6">
-                    <div className="p-3.5 border border-border/40 rounded-xl bg-muted/10 flex flex-col">
-                      <span className="text-[10px] text-muted-foreground font-medium uppercase">Fiyat / Kazanç (F/K)</span>
-                      <span className="text-sm md:text-base font-bold text-foreground mt-1">{metrics.fk}</span>
-                    </div>
-                    <div className="p-3.5 border border-border/40 rounded-xl bg-muted/10 flex flex-col">
-                      <span className="text-[10px] text-muted-foreground font-medium uppercase">Piyasa Değeri / Defter Değeri (PD/DD)</span>
-                      <span className="text-sm md:text-base font-bold text-foreground mt-1">{metrics.pddf}</span>
-                    </div>
-                    <div className="p-3.5 border border-border/40 rounded-xl bg-muted/10 flex flex-col">
-                      <span className="text-[10px] text-muted-foreground font-medium uppercase">Halka Açıklık Oranı</span>
-                      <span className="text-sm md:text-base font-bold text-foreground mt-1">{metrics.halkaAciklik}</span>
-                    </div>
-                    <div className="p-3.5 border border-border/40 rounded-xl bg-muted/10 flex flex-col">
-                      <span className="text-[10px] text-muted-foreground font-medium uppercase">Özsermaye Karlılığı (ROE)</span>
-                      <span className="text-sm md:text-base font-bold text-foreground mt-1">{metrics.ozsermayeKari}</span>
-                    </div>
-                  </div>
-                )}
+          {/* Fundamental Analysis Block */}
+          <div className="border border-border/45 bg-card/20 rounded-2xl p-6 space-y-6">
+            <div className="flex items-center gap-2 pb-3 border-b border-border/30">
+              <div className="w-6 h-6 rounded-md bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                <Compass size={12} />
               </div>
+              <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Temel Analiz Rasyoları</h3>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Fundamental Metrics Cards Grid */}
+              {metrics && (
+                <div className="grid grid-cols-2 gap-3.5">
+                  <div className="p-3.5 border border-border/40 rounded-xl bg-muted/10 flex flex-col justify-center">
+                    <span className="text-[10px] text-muted-foreground font-medium uppercase">Fiyat / Kazanç (F/K)</span>
+                    <span className="text-sm md:text-base font-bold text-foreground mt-1">{metrics.fk}</span>
+                  </div>
+                  <div className="p-3.5 border border-border/40 rounded-xl bg-muted/10 flex flex-col justify-center">
+                    <span className="text-[10px] text-muted-foreground font-medium uppercase">Piyasa Değeri / Defter Değeri (PD/DD)</span>
+                    <span className="text-sm md:text-base font-bold text-foreground mt-1">{metrics.pddf}</span>
+                  </div>
+                  <div className="p-3.5 border border-border/40 rounded-xl bg-muted/10 flex flex-col justify-center">
+                    <span className="text-[10px] text-muted-foreground font-medium uppercase">Halka Açıklık Oranı</span>
+                    <span className="text-sm md:text-base font-bold text-foreground mt-1">{metrics.halkaAciklik}</span>
+                  </div>
+                  <div className="p-3.5 border border-border/40 rounded-xl bg-muted/10 flex flex-col justify-center">
+                    <span className="text-[10px] text-muted-foreground font-medium uppercase">Özsermaye Karlılığı (ROE)</span>
+                    <span className="text-sm md:text-base font-bold text-foreground mt-1">{metrics.ozsermayeKari}</span>
+                  </div>
+                </div>
+              )}
 
               {/* 5 Fundamental Suggested Questions */}
-              <div className="space-y-2 pt-2">
+              <div className="space-y-2">
                 <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-2">
                   <HelpCircle size={12} />
-                  <span>Temel Analiz & Bilanço Soruları</span>
+                  <span>Önerilen Temel Analiz & Bilanço Soruları</span>
                 </div>
-                <div className="flex flex-col gap-1.5">
+                <div className="grid grid-cols-1 gap-1.5">
                   {fundamentalQuestions.map((q, idx) => (
                     <button
                       key={idx}
@@ -491,10 +510,52 @@ function SirketDetailPage() {
                 </div>
               </div>
             </div>
-
           </div>
 
-        </div>
+          {/* Sektörel Akran Hisseler (Sector Block) */}
+          {sectorPeers && sectorPeers.length > 0 && (
+            <div className="border border-border/45 bg-card/20 rounded-2xl p-6 space-y-4">
+              <div className="flex items-center gap-2 pb-3 border-b border-border/30">
+                <div className="w-6 h-6 rounded-md bg-purple-500/10 text-purple-500 flex items-center justify-center">
+                  <Sparkles size={12} />
+                </div>
+                <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Sektörel Akran Şirketler</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                {sectorPeers.map((peer) => {
+                  const peerTicker = peer.ticker.toUpperCase();
+                  const peerName = (companyNames as Record<string, string>)[peerTicker] || peer.name;
+                  const logoFile = companyLogos[peerTicker as keyof typeof companyLogos];
+                  
+                  return (
+                    <Link
+                      key={peer.ticker}
+                      to="/panel/sirketler/$id"
+                      params={{ id: peer.ticker.toLowerCase() }}
+                      className="flex items-center gap-3 p-3 border border-border/35 hover:border-border/60 bg-card/40 hover:bg-muted/10 rounded-xl transition-all cursor-pointer group min-w-0"
+                    >
+                      {logoFile ? (
+                        <div className="h-9 w-9 rounded-full bg-white border border-border/35 overflow-hidden flex items-center justify-center shrink-0 p-1 shadow-2xs group-hover:scale-105 transition-transform">
+                          <img src={`/logos/${logoFile}`} alt={peerTicker} className="h-full w-full object-contain" />
+                        </div>
+                      ) : (
+                        <div className="h-9 w-9 rounded-full bg-primary/10 border border-primary/15 flex items-center justify-center text-primary font-bold text-xs shrink-0 group-hover:scale-105 transition-transform">
+                          {peerTicker}
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <div className="font-bold text-xs text-foreground tracking-tight truncate">{peerTicker}</div>
+                        <div className="text-[10px] text-muted-foreground truncate leading-normal">{peerName}</div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+      </div>
 
       </div>
   )
