@@ -108,21 +108,21 @@ function PanelLayout() {
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden relative bg-background font-sans h-full">
+    <div className="w-full h-screen flex flex-col bg-background font-sans overflow-hidden">
       
       {/* Topbar Navigation */}
       <Topbar />
 
       {/* Remaining Layout: Body area (Sub-page content + Chat Panel) */}
-      <div className="flex-1 flex flex-row min-w-0 min-h-0 relative overflow-hidden bg-background">
+      <div className="flex-1 flex flex-row min-w-0 h-full relative overflow-hidden bg-background">
         
         {/* Left Column: Sub-Page content (Outlet) */}
-        <div className={`flex-1 flex flex-col min-w-0 min-h-0 relative overflow-hidden bg-background ${isChatMaximized ? 'hidden md:hidden' : ''}`}>
+        <div className={`flex-1 flex flex-col min-w-0 h-full relative overflow-hidden bg-background ${isChatMaximized ? 'hidden md:hidden' : ''}`}>
           
           {/* Scrollable Sub-Page area (Outlet) */}
           <main 
             ref={mainScrollRef}
-            className="flex-1 overflow-y-auto bg-background px-6 md:px-8 py-6 custom-scrollbar min-w-0 relative z-10 pb-24 lg:pb-12 scroll-smooth min-h-0"
+            className="flex-1 overflow-y-auto bg-background px-6 md:px-8 py-6 custom-scrollbar min-w-0 relative z-10 pb-24 md:pb-12 scroll-smooth"
           >
             <div className="w-full">
               <Outlet />
