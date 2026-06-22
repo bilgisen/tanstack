@@ -2,7 +2,6 @@ import { createFileRoute, Outlet, useNavigate, useLocation } from '@tanstack/rea
 import { useAuth } from '../hooks/useAuth'
 import { useEffect, useRef, useState } from 'react'
 import { Topbar } from '../components/layout/Topbar'
-import { RightSidebar } from '../components/layout/RightSidebar'
 import { ChatPanel } from '../components/chat/ChatPanel'
 import { ChatSheet } from '../components/chat/ChatSheet'
 import { useUIStore } from '../store/ui'
@@ -149,9 +148,6 @@ function PanelLayout() {
         </div>
 
       </div>
-
-      {/* RightSidebar (Detailed Stats Panel, slides in/out) */}
-      <RightSidebar />
 
       {/* Mobile Chat Bottom Sheet */}
       <ChatSheet 
