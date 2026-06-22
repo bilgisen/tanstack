@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { Logo } from "./Logo";
-import { Settings, Sun, Moon, Monitor, Sparkles, PanelRight, User } from "lucide-react";
+import { Settings, Sun, Moon, Monitor, User } from "lucide-react";
 import { useUIStore } from "../../store/ui";
 import { useAuth } from "../../hooks/useAuth";
 import type { Theme } from "../../store/ui";
 
 export function Topbar() {
-  const { theme, setTheme, isRightSidebarOpen, toggleRightSidebar } = useUIStore();
+  const { theme, setTheme } = useUIStore();
   const { user, login: handleLogin } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
@@ -46,20 +46,10 @@ export function Topbar() {
         {/* Yükselt Button */}
         <Link 
           to="/panel/profil" 
-          className="px-4 py-1.5 rounded-full bg-primary hover:bg-primary/95 text-white text-[11px] sm:text-xs font-semibold tracking-tight transition-all duration-200 shadow-sm flex items-center gap-1.5 shrink-0"
+          className="px-4 py-1.5 rounded-full bg-primary hover:bg-primary/95 text-white text-[11px] sm:text-xs font-semibold tracking-tight transition-all duration-200 shadow-sm shrink-0 text-center"
         >
-          <Sparkles size={11} fill="currentColor" className="shrink-0" />
-          <span>Yükselt</span>
+          Yükselt
         </Link>
-
-        {/* RightSidebar Toggle (Stats Panel) */}
-        <button 
-          onClick={toggleRightSidebar}
-          className={`p-2 rounded-full transition-all cursor-pointer flex items-center justify-center border border-transparent active:scale-95 shrink-0 ${isRightSidebarOpen ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
-          title="Finansal Detaylar"
-        >
-          <PanelRight size={18} />
-        </button>
 
         {/* Settings & Theme Dropdown Trigger */}
         <div className="relative" ref={settingsRef}>

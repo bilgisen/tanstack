@@ -1,9 +1,8 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useChatStore } from "../../store/chat";
 import { MarkdownRenderer } from "../dashboard/MarkdownRenderer";
 import { ChatPane } from "../dashboard/ChatPane";
-import { ModelSelector } from "../dashboard/ModelSelector";
-import { Loader2, MessageSquare, Compass, X } from "lucide-react";
+import { Loader2, Compass, X, Plus, History } from "lucide-react";
 
 interface ChatPanelProps {
   context: string;
@@ -12,8 +11,20 @@ interface ChatPanelProps {
 }
 
 export function ChatPanel({ context, placeholder, onClose }: ChatPanelProps) {
-  const { messages, isLoading } = useChatStore();
+  const { messages, isLoading, sessions, activeSessionId, loadSession, deleteSession, clearChat } = useChatStore();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const historyRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (historyRef.current && !historyRef.current.contains(e.target as Node)) {
+        setHistoryOpen(false);
+      }
+    };
+    window.addEventListener("mousedown", handleOutsideClick);
+    return () => window.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
 
   // Auto scroll to bottom when messages or loading state changes
   useEffect(() => {
@@ -29,44 +40,86 @@ export function ChatPanel({ context, placeholder, onClose }: ChatPanelProps) {
     }
   }, [messages, isLoading]);
 
-  // Determine breadcrumb label based on context
-  let contextLabel = "Genel Sohbet";
-  if (context.startsWith("sirket:")) {
-    contextLabel = `${context.split(":")[1].toUpperCase()} Analizi`;
-  } else if (context.startsWith("endeks:")) {
-    const endeksId = context.split(":")[1];
-    contextLabel = endeksId === "bist30" ? "BIST 30" : endeksId === "bist100" ? "BIST 100" : endeksId === "bistbanka" ? "BIST Bankacılık" : endeksId.toUpperCase();
-  } else if (context === "takip-listesi") {
-    contextLabel = "Takip Listesi";
-  }
+
 
   return (
     <div className="flex flex-col h-full bg-card border-l border-border/60 relative overflow-hidden font-sans">
       {/* 1. Header Banner */}
-      <div className="h-14 flex items-center justify-between px-5 border-b border-border/50 bg-background/95 backdrop-blur-md shrink-0 select-none z-10">
+      <div className="h-14 flex items-center justify-between px-5 border-b border-border/50 bg-background/95 backdrop-blur-md shrink-0 select-none z-10 relative" ref={historyRef}>
         <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-primary/80 animate-pulse" />
-          <span className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <MessageSquare size={13} className="text-muted-foreground" />
-            <span>{contextLabel}</span>
-          </span>
-          <span className="text-[10px] text-muted-foreground font-mono bg-muted/40 px-2 py-0.5 rounded-full">
-            {messages.length} mesaj
-          </span>
+          <span className="text-sm font-normal text-foreground">Sohbet</span>
         </div>
         
-        <div className="flex items-center gap-3">
-          <ModelSelector />
+        <div className="flex items-center gap-1.5">
+          {/* New Chat Button */}
+          <button
+            onClick={() => clearChat()}
+            className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all cursor-pointer flex items-center justify-center border border-transparent active:scale-95"
+            title="Yeni Sohbet"
+          >
+            <Plus size={16} />
+          </button>
+
+          {/* Sohbet Geçmişi Button */}
+          <button
+            onClick={() => setHistoryOpen(!historyOpen)}
+            className={`p-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center border border-transparent active:scale-95 ${historyOpen ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+            title="Sohbet Geçmişi"
+          >
+            <History size={16} />
+          </button>
+
           {onClose && (
             <button
               onClick={onClose}
-              className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 rounded-lg transition-colors cursor-pointer"
+              className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors cursor-pointer"
               title="Kapat"
             >
-              <X size={15} />
+              <X size={16} />
             </button>
           )}
         </div>
+
+        {/* History Dropdown Overlay */}
+        {historyOpen && (
+          <div className="absolute right-5 top-12 w-64 bg-card border border-border/80 rounded-2xl shadow-xl p-2 z-50 animate-in fade-in slide-in-from-top-3 duration-200">
+            <div className="text-[10px] font-bold text-muted-foreground/65 uppercase tracking-wider px-3 pb-2 pt-1.5 border-b border-border/30 mb-1">
+              Geçmiş Sohbetler
+            </div>
+            <div className="max-h-60 overflow-y-auto space-y-0.5 custom-scrollbar">
+              {sessions.length === 0 ? (
+                <div className="px-3 py-4 text-xs text-muted-foreground/60 italic text-center">
+                  Sohbet geçmişi bulunmuyor.
+                </div>
+              ) : (
+                sessions.map((session) => (
+                  <div 
+                    key={session.id} 
+                    className={`flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition-all cursor-pointer ${session.id === activeSessionId ? 'bg-primary/10 text-primary font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                    onClick={() => {
+                      loadSession(session.id);
+                      setHistoryOpen(false);
+                    }}
+                  >
+                    <span className="truncate pr-2 select-none">
+                      {session.ticker || "Genel"} Analizi
+                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteSession(session.id);
+                      }}
+                      className="text-muted-foreground hover:text-destructive p-1 rounded-md transition-colors"
+                      title="Sil"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 2. Messages Scroll Area */}
