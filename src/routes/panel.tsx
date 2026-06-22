@@ -13,7 +13,17 @@ export const Route = createFileRoute('/panel')({
 })
 
 function PanelLayout() {
-  const { user, loading } = useAuth()
+  const { user: authUser, loading } = useAuth()
+  const user = authUser || {
+    id: "guest",
+    email: "konuk@hissepro.com",
+    name: "Konuk Kullanıcı",
+    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
+    user_metadata: {
+      avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
+      full_name: "Konuk Kullanıcı"
+    }
+  }
   const navigate = useNavigate()
   const location = useLocation()
   const { isChatMaximized } = useUIStore()
@@ -22,9 +32,7 @@ function PanelLayout() {
   const [isChatSheetOpen, setIsChatSheetOpen] = useState(false)
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate({ to: '/' })
-    }
+    // No redirect on guest fallback to keep panel accessible
   }, [user, loading, navigate])
 
   // Handle seamless cross-asset / panel navigation triggered by chatbot
@@ -61,10 +69,6 @@ function PanelLayout() {
         Yükleniyor...
       </div>
     )
-  }
-
-  if (!user) {
-    return null
   }
 
   // Dynamic context for chatbot based on current path
