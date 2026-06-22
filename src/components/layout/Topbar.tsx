@@ -108,14 +108,17 @@ export function Topbar() {
         {user ? (
           <Link 
             to="/panel/profil"
-            className="w-8 h-8 rounded-full overflow-hidden border border-border/60 hover:border-primary/50 transition-all shrink-0 cursor-pointer shadow-3xs"
+            className="w-8 h-8 rounded-full overflow-hidden border border-border/60 hover:border-primary/50 transition-all shrink-0 cursor-pointer shadow-3xs flex items-center justify-center bg-primary/15 text-primary font-semibold text-xs"
             title={user.email || "Profil"}
           >
-            <img 
-              src={user.user_metadata?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} 
-              alt="Avatar" 
-              className="w-full h-full object-cover" 
-            />
+            {(() => {
+              const name = user.user_metadata?.full_name || user.user_metadata?.name || user.email || "";
+              const parts = name.trim().split(/[\s._-]+/).filter(Boolean);
+              const initials = parts.length >= 2
+                ? (parts[0][0] + parts[1][0]).toUpperCase()
+                : (parts[0]?.[0] || "U").toUpperCase();
+              return initials;
+            })()}
           </Link>
         ) : (
           <button

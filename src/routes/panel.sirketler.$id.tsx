@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { Sparkles, HelpCircle, Star, TrendingUp, Compass, Loader2 } from 'lucide-react'
+import { HelpCircle, Star, TrendingUp, Compass, Loader2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import companyNames from '../constants/companyNames.json'
 import companyLogos from '../constants/companyLogos.json'
@@ -50,6 +50,7 @@ function SirketDetailPage() {
   const [techSinyaller, setTechnicalSinyaller] = useState<TechnicalSinyaller | null>(null)
   const [headerSummary, setHeaderSummary] = useState<string[] | null>(null)
   const [sectorPeers, setSectorPeers] = useState<any[]>([])
+  const [sectorName, setSectorName] = useState<string>("")
   const [loading, setLoading] = useState(true)
   const [fundamentalQuestions, setFundamentalQuestions] = useState<string[]>([
     `${tickerUpper} bilançosundaki en kritik finansal oranlar neler?`,
@@ -213,11 +214,12 @@ function SirketDetailPage() {
 
       // 6. Fetch sector peers
       let peersList: any[] = [];
+      let sectorMain = "";
       try {
         const profileRes = await fetch(`${compUrl}/api/v1/companies/${tickerUpper}/profile`);
         if (profileRes.ok) {
           const profileJson = await profileRes.json();
-          const sectorMain = profileJson.sector_main;
+          sectorMain = profileJson.sector_main || "";
           if (sectorMain) {
             const peersRes = await fetch(`${compUrl}/api/v1/sectors/${encodeURIComponent(sectorMain)}/companies`);
             if (peersRes.ok) {
@@ -237,6 +239,7 @@ function SirketDetailPage() {
       if (!isMounted) return;
 
       setSectorPeers(peersList);
+      setSectorName(sectorMain || "");
 
       setPriceDetails({
         name: officialName,
@@ -311,8 +314,8 @@ function SirketDetailPage() {
         {/* Left Info Area */}
         <div className="flex items-center gap-3.5 min-w-0">
           {companyLogos[tickerUpper as keyof typeof companyLogos] ? (
-            <div className="h-12 w-12 rounded-xl bg-white border border-border/40 overflow-hidden flex items-center justify-center shrink-0 p-1 shadow-2xs">
-              <img src={`/logos/${companyLogos[tickerUpper as keyof typeof companyLogos]}`} alt={priceDetails.code} className="h-full w-full object-contain" />
+            <div className="h-12 w-12 rounded-xl bg-white overflow-hidden flex items-center justify-center shrink-0 shadow-2xs">
+              <img src={`/logos/${companyLogos[tickerUpper as keyof typeof companyLogos]}`} alt={priceDetails.code} className="h-full w-full object-cover" />
             </div>
           ) : (
             <div className="h-12 w-12 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center text-primary font-bold text-sm tracking-tight shrink-0">
@@ -515,11 +518,8 @@ function SirketDetailPage() {
           {/* Sektörel Akran Hisseler (Sector Block) */}
           {sectorPeers && sectorPeers.length > 0 && (
             <div className="border border-border/45 bg-card/20 rounded-2xl p-6 space-y-4">
-              <div className="flex items-center gap-2 pb-3 border-b border-border/30">
-                <div className="w-6 h-6 rounded-md bg-purple-500/10 text-purple-500 flex items-center justify-center">
-                  <Sparkles size={12} />
-                </div>
-                <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Sektörel Akran Şirketler</h3>
+              <div className="pb-3 border-b border-border/30">
+                <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">{sectorName} Şirketleri</h3>
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -536,8 +536,8 @@ function SirketDetailPage() {
                       className="flex items-center gap-3 p-3 border border-border/35 hover:border-border/60 bg-card/40 hover:bg-muted/10 rounded-xl transition-all cursor-pointer group min-w-0"
                     >
                       {logoFile ? (
-                        <div className="h-9 w-9 rounded-xl bg-white border border-border/35 overflow-hidden flex items-center justify-center shrink-0 p-1 shadow-2xs group-hover:scale-105 transition-transform">
-                          <img src={`/logos/${logoFile}`} alt={peerTicker} className="h-full w-full object-contain" />
+                        <div className="h-9 w-9 rounded-lg bg-white overflow-hidden flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                          <img src={`/logos/${logoFile}`} alt={peerTicker} className="h-full w-full object-cover" />
                         </div>
                       ) : (
                         <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center text-primary font-bold text-xs shrink-0 group-hover:scale-105 transition-transform">
