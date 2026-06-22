@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { 
   BarChart3, 
@@ -9,13 +9,9 @@ import {
   X, 
   ChevronDown, 
   Sparkles, 
-  ArrowRight, 
-  Loader2,
-  ArrowUp
+  ArrowRight
 } from 'lucide-react'
 import { Logo } from '../components/layout/Logo'
-import { LoginTeaser } from '../components/ui/LoginTeaser'
-import { marked } from 'marked'
 
 export const Route = createFileRoute('/')({
   component: LandingPage,
@@ -25,84 +21,6 @@ function LandingPage() {
   const { user, loading, login: handleLogin } = useAuth()
   const navigate = useNavigate()
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
-
-  // Public chatbot states
-  const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'assistant'; text: string; suggestions?: string[] }[]>([])
-  const [input, setInput] = useState('')
-  const [chatLoading, setChatLoading] = useState(false)
-  const [sessionCount, setSessionCount] = useState(0)
-  const [dailyCount, setDailyCount] = useState(0)
-
-  // Load daily count from localStorage on mount
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const today = new Date().toDateString()
-      const storedDate = localStorage.getItem('hissepro_public_chat_date')
-      if (storedDate === today) {
-        const count = parseInt(localStorage.getItem('hissepro_public_chat_count') || '0')
-        setDailyCount(count)
-      } else {
-        localStorage.setItem('hissepro_public_chat_date', today)
-        localStorage.setItem('hissepro_public_chat_count', '0')
-        setDailyCount(0)
-      }
-    }
-  }, [])
-
-  const isLimitReached = sessionCount >= 5 || dailyCount >= 10
-
-  const handlePublicSend = async (textToSend: string) => {
-    const trimmed = textToSend.trim()
-    if (!trimmed || chatLoading || isLimitReached) return
-
-    // Update counts
-    const newSessionCount = sessionCount + 1
-    const newDailyCount = dailyCount + 1
-    setSessionCount(newSessionCount)
-    setDailyCount(newDailyCount)
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('hissepro_public_chat_count', String(newDailyCount))
-    }
-
-    // Add user message
-    const updatedMessages = [...chatMessages, { role: 'user' as const, text: trimmed }]
-    setChatMessages(updatedMessages)
-    setInput('')
-    setChatLoading(true)
-
-    try {
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev"
-      const res = await fetch(`${apiUrl}/api/ai/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          message: trimmed,
-          context: 'global'
-        })
-      })
-
-      if (res.ok) {
-        const json = await res.json()
-        setChatMessages([...updatedMessages, { 
-          role: 'assistant', 
-          text: json.reply || 'Bir hata oluştu.', 
-          suggestions: json.suggestions 
-        }])
-      } else {
-        throw new Error('Response error')
-      }
-    } catch (e) {
-      console.error(e)
-      setChatMessages([...updatedMessages, { 
-        role: 'assistant', 
-        text: 'Özür dilerim, şu an yanıt üretemiyorum. Lütfen daha sonra tekrar deneyin.' 
-      }])
-    } finally {
-      setChatLoading(false)
-    }
-  }
 
   const toggleFaq = (index: number) => {
     setOpenFaqIndex(openFaqIndex === index ? null : index)
@@ -161,97 +79,7 @@ function LandingPage() {
             </button>
           </div>
 
-          {/* Chatbot Area inside Hero */}
-          <div className="mt-8 max-w-3xl mx-auto w-full bg-[#0d0d0d] border border-white/10 rounded-3xl overflow-hidden shadow-2xl p-5 sm:p-6 text-left">
-            <div className="flex items-center gap-2 mb-4 text-xs font-bold text-white/50 uppercase tracking-wider">
-              <MessageSquare size={14} className="text-[#494fdf]" />
-              <span>Public Chatbot - Canlı Analiz Sorun</span>
-            </div>
 
-            {/* Chat Messages list */}
-            {chatMessages.length > 0 && (
-              <div className="space-y-4 max-h-[300px] overflow-y-auto mb-6 pr-2 custom-scrollbar">
-                {chatMessages.map((msg, idx) => (
-                  <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`px-4 py-3 rounded-2xl text-[13px] sm:text-[14px] leading-relaxed max-w-[85%] ${
-                      msg.role === 'user'
-                        ? 'bg-[#494fdf] text-white rounded-tr-sm'
-                        : 'bg-white/5 border border-white/10 text-white/90 rounded-tl-sm w-full'
-                    }`}>
-                      {msg.role === 'user' ? (
-                        <div>{msg.text}</div>
-                      ) : (
-                        <div className="space-y-3">
-                          <div dangerouslySetInnerHTML={{ __html: marked.parse(msg.text) }} className="chatbot-response" />
-                          {msg.suggestions && msg.suggestions.length > 0 && !isLimitReached && (
-                            <div className="flex flex-col gap-1.5 mt-3 pt-3 border-t border-white/5">
-                              <span className="text-[10px] text-white/40 uppercase font-bold tracking-wider font-sans">Öneriler:</span>
-                              {msg.suggestions.map((s, sIdx) => (
-                                <button
-                                  key={sIdx}
-                                  onClick={() => handlePublicSend(s)}
-                                  className="text-left text-xs text-white/70 hover:text-white bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl px-3 py-2 transition-colors cursor-pointer font-sans font-medium"
-                                >
-                                  {s}
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-
-                {chatLoading && (
-                  <div className="flex justify-start">
-                    <div className="bg-white/5 border border-white/10 text-white/50 text-xs rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-2">
-                      <Loader2 size={13} className="animate-spin text-[#494fdf]" />
-                      <span>Analiz ediliyor...</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Input Box or LoginTeaser */}
-            {isLimitReached ? (
-              <LoginTeaser 
-                preview="Ücretsiz deneme sınırına ulaştınız (IP: 10/gün, session: 5)."
-                cta="Analizlerin tamamını kesintisiz görmek için ücretsiz üye olun."
-                className="border-white/10 bg-white/5"
-              />
-            ) : (
-              <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault()
-                      handlePublicSend(input)
-                    }
-                  }}
-                  disabled={chatLoading}
-                  placeholder="Örn: THYAO son durum ne? veya BIST100 direnci neresi?"
-                  className="flex-1 bg-transparent border-none outline-none py-3 text-sm text-white placeholder-white/35 font-sans"
-                />
-                <button
-                  onClick={() => handlePublicSend(input)}
-                  disabled={chatLoading || !input.trim()}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-[#494fdf] text-white disabled:opacity-20 transition-all cursor-pointer shadow-sm shrink-0"
-                >
-                  <ArrowUp size={16} strokeWidth={2.5} />
-                </button>
-              </div>
-            )}
-
-            <div className="flex justify-between items-center mt-3 px-1 text-[10px] text-white/40 font-mono">
-              <span>HissePro Public Chatbot (Sınırlı Sürüm)</span>
-              <span>Kalan Hakkınız: {Math.max(0, 5 - sessionCount)} / 5</span>
-            </div>
-          </div>
 
         </div>
       </section>

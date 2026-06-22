@@ -1,13 +1,11 @@
 import { createFileRoute, Outlet, useNavigate, useLocation } from '@tanstack/react-router'
 import { useAuth } from '../hooks/useAuth'
 import { useEffect, useRef, useState } from 'react'
-import { LeftSidebar } from '../components/layout/LeftSidebar'
+import { Topbar } from '../components/layout/Topbar'
 import { RightSidebar } from '../components/layout/RightSidebar'
 import { ChatPanel } from '../components/chat/ChatPanel'
 import { ChatSheet } from '../components/chat/ChatSheet'
-import { useUIStore } from '../store/ui'
-import { PanelLeft, ArrowUp } from 'lucide-react'
-import { Logo } from '../components/layout/Logo'
+import { ArrowUp } from 'lucide-react'
 
 export const Route = createFileRoute('/panel')({
   component: PanelLayout,
@@ -17,10 +15,6 @@ function PanelLayout() {
   const { user, loading } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const { 
-    isLeftSidebarExpanded, 
-    toggleLeftSidebarExpanded,
-  } = useUIStore()
 
   const mainScrollRef = useRef<HTMLDivElement>(null)
   const [isChatSheetOpen, setIsChatSheetOpen] = useState(false)
@@ -97,42 +91,17 @@ function PanelLayout() {
   }
 
   return (
-    <div className="flex-1 flex flex-row overflow-hidden relative bg-background font-sans h-full">
-      {/* Mobile Sidebar Backdrop Overlay */}
-      {isLeftSidebarExpanded && (
-        <div 
-          onClick={toggleLeftSidebarExpanded}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-45 lg:hidden cursor-pointer animate-in fade-in duration-200"
-        />
-      )}
+    <div className="flex-1 flex flex-col overflow-hidden relative bg-background font-sans h-full">
+      
+      {/* Topbar Navigation */}
+      <Topbar />
 
-      {/* Sol Collapsible Sidebar */}
-      <LeftSidebar />
-
-      {/* Ana Grid */}
+      {/* Remaining Layout: Body area (Sub-page content + Chat Panel) */}
       <div className="flex-1 flex flex-row min-w-0 h-full relative overflow-hidden bg-background">
         
         {/* Left Column: Sub-Page content (Outlet) */}
         <div className="flex-1 flex flex-col min-w-0 h-full relative overflow-hidden bg-background">
-          {/* Revolut-style Mobile Header */}
-          <header className="lg:hidden h-16 bg-background/80 backdrop-blur-xl flex items-center justify-between px-6 shrink-0 z-35 select-none border-b border-border/50">
-            <button
-              onClick={toggleLeftSidebarExpanded}
-              className="w-10 h-10 flex items-center justify-center text-foreground hover:bg-muted rounded-full transition-all cursor-pointer"
-            >
-              <PanelLeft size={20} />
-            </button>
-            
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white">
-                <Logo size={16} />
-              </div>
-              <span className="font-display font-medium tracking-tight">hissepro</span>
-            </div>
-            
-            <div className="w-10 h-10" /> {/* Spacer */}
-          </header>
-
+          
           {/* Scrollable Sub-Page area (Outlet) */}
           <main 
             ref={mainScrollRef}
