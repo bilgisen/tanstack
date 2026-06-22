@@ -311,17 +311,17 @@ function SirketDetailPage() {
         {/* Left Info Area */}
         <div className="flex items-center gap-3.5 min-w-0">
           {companyLogos[tickerUpper as keyof typeof companyLogos] ? (
-            <div className="h-12 w-12 rounded-full bg-white border border-border/40 overflow-hidden flex items-center justify-center shrink-0 p-1 shadow-2xs">
+            <div className="h-12 w-12 rounded-xl bg-white border border-border/40 overflow-hidden flex items-center justify-center shrink-0 p-1 shadow-2xs">
               <img src={`/logos/${companyLogos[tickerUpper as keyof typeof companyLogos]}`} alt={priceDetails.code} className="h-full w-full object-contain" />
             </div>
           ) : (
-            <div className="h-12 w-12 rounded-full bg-primary/10 border border-primary/15 flex items-center justify-center text-primary font-bold text-sm tracking-tight shrink-0">
+            <div className="h-12 w-12 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center text-primary font-bold text-sm tracking-tight shrink-0">
               {priceDetails.code}
             </div>
           )}
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Hisse Senedi / BIST</span>
+              <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">{tickerUpper}</span>
             </div>
             <div className="flex items-center gap-2 mt-1 min-w-0">
               <h1 className="text-base md:text-lg font-bold text-foreground tracking-tight leading-none truncate">{priceDetails.name}</h1>
@@ -536,11 +536,11 @@ function SirketDetailPage() {
                       className="flex items-center gap-3 p-3 border border-border/35 hover:border-border/60 bg-card/40 hover:bg-muted/10 rounded-xl transition-all cursor-pointer group min-w-0"
                     >
                       {logoFile ? (
-                        <div className="h-9 w-9 rounded-full bg-white border border-border/35 overflow-hidden flex items-center justify-center shrink-0 p-1 shadow-2xs group-hover:scale-105 transition-transform">
+                        <div className="h-9 w-9 rounded-xl bg-white border border-border/35 overflow-hidden flex items-center justify-center shrink-0 p-1 shadow-2xs group-hover:scale-105 transition-transform">
                           <img src={`/logos/${logoFile}`} alt={peerTicker} className="h-full w-full object-contain" />
                         </div>
                       ) : (
-                        <div className="h-9 w-9 rounded-full bg-primary/10 border border-primary/15 flex items-center justify-center text-primary font-bold text-xs shrink-0 group-hover:scale-105 transition-transform">
+                        <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center text-primary font-bold text-xs shrink-0 group-hover:scale-105 transition-transform">
                           {peerTicker}
                         </div>
                       )}
