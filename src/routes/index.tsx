@@ -49,7 +49,7 @@ function LandingPage() {
           </div>
 
           <h1 className="display-xxl mb-8 text-white text-4xl sm:text-6xl font-bold tracking-tight">
-            Jet gibi. Jilet gibi.
+            Jet Hızında Analiz
           </h1>
           
           <p className="body-lg text-white/70 max-w-2xl mx-auto mb-10 text-base sm:text-lg">
@@ -258,7 +258,10 @@ function LandingPage() {
       <section className="w-full bg-[#f4f4f4] text-black py-24 px-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="heading-lg mb-4 text-2xl sm:text-4xl font-bold tracking-tight">Kıyaslayın. Farkı görün.</h2>
+            <h2 className="heading-lg mb-4 text-2xl sm:text-4xl font-bold tracking-tight">Güvenilir veriler, güçlü algoritma, borsa uzmanı yapay zeka.</h2>
+            <p className="body-lg text-black/60 max-w-3xl mx-auto text-base">
+              ChatGPT ve Gemini gibi genel yapay zeka uygulamaları verilerinin güvenilirliğini garanti edemiyor ve halüsinasyon görüyor. Biz KAP gibi resmi kaynaklardan alınan doğruluğu teyit edilmiş verileri ve mali tabloları güçlü bir finansal analiz motoru ile işliyor ve borsa analizi için eğitilmiş yapay zekaya eksiksiz bir veri seti servis ediyoruz.
+            </p>
           </div>
 
           <div className="bg-white rounded-[20px] overflow-hidden border border-[#e2e2e7] shadow-sm">
@@ -266,34 +269,65 @@ function LandingPage() {
               <thead>
                 <tr className="bg-[#f4f4f4] border-b border-[#e2e2e7]">
                   <th className="p-6 font-bold text-[11px] uppercase tracking-widest text-black/40">Özellik</th>
-                  <th className="p-6 font-bold text-[11px] uppercase tracking-widest text-[#494fdf] text-center">Jetborsa</th>
-                  <th className="p-6 font-bold text-[11px] uppercase tracking-widest text-black/40 text-center">Diğerleri</th>
+                  <th className="p-6 font-bold text-[11px] uppercase tracking-widest text-[#494fdf] text-center">JetBorsa</th>
+                  <th className="p-6 font-bold text-[11px] uppercase tracking-widest text-black/40 text-center">ChatGPT vb.</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#e2e2e7]">
                 <tr>
-                  <td className="p-6 body-sm font-semibold">Resmi BIST Verisi</td>
-                  <td className="p-6 text-center text-[#494fdf]"><Check size={20} className="mx-auto" /></td>
-                  <td className="p-6 text-center text-black/20"><X size={20} className="mx-auto" /></td>
+                  <td className="p-5 body-sm font-semibold text-sm">Doğruluğu teyit edilmiş veriler</td>
+                  <td className="p-5 text-center text-[#494fdf]"><Check size={18} className="mx-auto" /></td>
+                  <td className="p-5 text-center text-black/20"><X size={18} className="mx-auto" /></td>
                 </tr>
                 <tr>
-                  <td className="p-6 body-sm font-semibold">AI Veri Analizi</td>
-                  <td className="p-6 text-center text-[#494fdf]"><Check size={20} className="mx-auto" /></td>
-                  <td className="p-6 text-center text-black/20"><X size={20} className="mx-auto" /></td>
+                  <td className="p-5 body-sm font-semibold text-sm">Güçlü finansal analiz motoru</td>
+                  <td className="p-5 text-center text-[#494fdf]"><Check size={18} className="mx-auto" /></td>
+                  <td className="p-5 text-center text-black/20"><X size={18} className="mx-auto" /></td>
                 </tr>
                 <tr>
-                  <td className="p-6 body-sm font-semibold">Sektör Kıyaslama</td>
-                  <td className="p-6 text-center text-[#494fdf]"><Check size={20} className="mx-auto" /></td>
-                  <td className="p-6 text-center text-black/20 text-sm">Sınırlı</td>
+                  <td className="p-5 body-sm font-semibold text-sm">BIST'e özel eğitilmiş</td>
+                  <td className="p-5 text-center text-[#494fdf]"><Check size={18} className="mx-auto" /></td>
+                  <td className="p-5 text-center text-black/20"><X size={18} className="mx-auto" /></td>
                 </tr>
                 <tr>
-                  <td className="p-6 body-sm font-semibold">Düşük Halüsinasyon</td>
-                  <td className="p-6 text-center text-[#494fdf]"><Check size={20} className="mx-auto" /></td>
-                  <td className="p-6 text-center text-black/20"><X size={20} className="mx-auto" /></td>
+                  <td className="p-5 body-sm font-semibold text-sm">Halüsinasyon riski yok</td>
+                  <td className="p-5 text-center text-[#494fdf]"><Check size={18} className="mx-auto" /></td>
+                  <td className="p-5 text-center text-black/20"><X size={18} className="mx-auto" /></td>
+                </tr>
+                <tr>
+                  <td className="p-5 body-sm font-semibold text-sm">Güncel haberler, analist raporları *</td>
+                  <td className="p-5 text-center text-[#494fdf]"><Check size={18} className="mx-auto" /></td>
+                  <td className="p-5 text-center text-black/20"><X size={18} className="mx-auto" /></td>
+                </tr>
+                <tr>
+                  <td className="p-5 body-sm font-semibold text-sm">KAP Bildirim analizi *</td>
+                  <td className="p-5 text-center text-[#494fdf]"><Check size={18} className="mx-auto" /></td>
+                  <td className="p-5 text-center text-black/20"><X size={18} className="mx-auto" /></td>
+                </tr>
+                <tr>
+                  <td className="p-5 body-sm font-semibold text-sm">Aracı Kurum analizleri *</td>
+                  <td className="p-5 text-center text-[#494fdf]"><Check size={18} className="mx-auto" /></td>
+                  <td className="p-5 text-center text-black/20"><X size={18} className="mx-auto" /></td>
+                </tr>
+                <tr>
+                  <td className="p-5 body-sm font-semibold text-sm">SWOT Analizi</td>
+                  <td className="p-5 text-center text-[#494fdf]"><Check size={18} className="mx-auto" /></td>
+                  <td className="p-5 text-center text-black/20"><X size={18} className="mx-auto" /></td>
+                </tr>
+                <tr>
+                  <td className="p-5 body-sm font-semibold text-sm">Detaylı şirket karşılaştırma</td>
+                  <td className="p-5 text-center text-[#494fdf]"><Check size={18} className="mx-auto" /></td>
+                  <td className="p-5 text-center text-black/20"><X size={18} className="mx-auto" /></td>
+                </tr>
+                <tr>
+                  <td className="p-5 body-sm font-semibold text-sm">Sektör analizleri</td>
+                  <td className="p-5 text-center text-[#494fdf]"><Check size={18} className="mx-auto" /></td>
+                  <td className="p-5 text-center text-black/20"><X size={18} className="mx-auto" /></td>
                 </tr>
               </tbody>
             </table>
           </div>
+          <p className="text-center text-xs text-black/40 mt-4">* Hazırlanıyor. Çok yakında.</p>
         </div>
       </section>
 
