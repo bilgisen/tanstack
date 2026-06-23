@@ -39,14 +39,14 @@ function Login() {
       <div className="w-full max-w-sm text-center">
         <div className="flex justify-center mb-8">
           <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white shadow-lg">
-            <Logo size={32} />
+            <Logo size={32} variant="icon" />
           </div>
         </div>
         
-        <h1 className="display-md mb-4 text-white">hissepro</h1>
+        <h1 className="display-md mb-4 text-white">Jetborsa</h1>
         
         <p className="body-md text-white/50 mb-12">
-          Borsa İstanbul'un yapay zeka analiz <br/> platformuna hoş geldiniz.
+          BIST uzmanı tek yapay zeka analiz <br/> platformuna hoş geldiniz.
         </p>
         
         <button 

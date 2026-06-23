@@ -16,7 +16,7 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "hissepro | BIST Uzmanı Tek Yapay Zeka",
+        title: "Jetborsa | BIST Uzmanı Tek Yapay Zeka",
       },
     ],
     links: [

@@ -66,10 +66,10 @@ function PanelLayout() {
   if (!user) {
     return (
       <div className="flex flex-col h-screen items-center justify-center bg-background text-muted-foreground font-sans p-6 text-center max-w-sm mx-auto space-y-4 select-none">
-        <Logo size={42} className="text-[#494fdf] animate-pulse" />
+        <Logo size={42} variant="icon" className="text-[#494fdf] animate-pulse" />
         <h4 className="text-base font-semibold text-foreground">Oturum Açmanız Gerekiyor</h4>
         <p className="text-xs text-muted-foreground leading-relaxed">
-          HissePro analiz paneline ve asistan özelliklerine erişmek için lütfen giriş yapın veya ücretsiz üye olun.
+          Jetborsa analiz paneline ve asistan özelliklerine erişmek için lütfen giriş yapın veya ücretsiz üye olun.
         </p>
         <button
           onClick={handleLogin}

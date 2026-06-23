@@ -29,7 +29,7 @@ function LandingPage() {
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-black text-white font-sans">
-        <Logo size={48} className="animate-pulse text-[#494fdf]" />
+        <Logo size={48} variant="icon" className="animate-pulse text-[#494fdf]" />
       </div>
     )
   }
@@ -45,7 +45,7 @@ function LandingPage() {
         <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-1000">
           <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-[#16181a] border border-white/10 text-white/80 text-[11px] font-bold uppercase tracking-widest mb-8">
             <Sparkles size={12} className="text-[#494fdf]" />
-            Borsa İstanbul'un Yapay Zekası
+            BIST Uzmanı Tek Yapay Zeka
           </div>
 
           <h1 className="display-xxl mb-8 text-white text-4xl sm:text-6xl font-bold tracking-tight">
@@ -53,7 +53,7 @@ function LandingPage() {
           </h1>
           
           <p className="body-lg text-white/70 max-w-2xl mx-auto mb-10 text-base sm:text-lg">
-            HissePro, BIST'e özel eğitilmiş finansal analiz motoruyla hisse analizini, rasyoları ve teknik formasyonları saniyeler içinde sunar.
+            Jetborsa, BIST'e özel eğitilmiş finansal analiz motoruyla hisse analizini, rasyoları ve teknik formasyonları saniyeler içinde sunar.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
@@ -93,10 +93,10 @@ function LandingPage() {
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-[#494fdf] flex items-center justify-center text-white">
-                    <Logo size={24} />
+                    <Logo size={24} variant="icon" />
                   </div>
                   <div>
-                    <h3 className="heading-sm font-semibold">HissePro Terminal</h3>
+                    <h3 className="heading-sm font-semibold">Jetborsa Terminal</h3>
                     <p className="body-sm text-white/50">Canlı BIST Verisi</p>
                   </div>
                 </div>
@@ -173,7 +173,7 @@ function LandingPage() {
           <div className="mb-20">
             <h2 className="display-xl mb-6 text-black text-3xl sm:text-5xl font-bold tracking-tight">Hepsi bir arada.</h2>
             <p className="body-lg text-black/60 max-w-2xl text-base sm:text-lg">
-              HissePro, karmaşık borsa verilerini anlamlı içgörülere dönüştürür.
+              Jetborsa, karmaşık borsa verilerini anlamlı içgörülere dönüştürür.
             </p>
           </div>
 
@@ -229,7 +229,7 @@ function LandingPage() {
               <thead>
                 <tr className="bg-[#f4f4f4] border-b border-[#e2e2e7]">
                   <th className="p-6 font-bold text-[11px] uppercase tracking-widest text-black/40">Özellik</th>
-                  <th className="p-6 font-bold text-[11px] uppercase tracking-widest text-[#494fdf] text-center">HissePro</th>
+                  <th className="p-6 font-bold text-[11px] uppercase tracking-widest text-[#494fdf] text-center">Jetborsa</th>
                   <th className="p-6 font-bold text-[11px] uppercase tracking-widest text-black/40 text-center">Diğerleri</th>
                 </tr>
               </thead>
@@ -320,7 +320,7 @@ function LandingPage() {
           <div className="space-y-4">
              {[
                { q: "Veriler güncel mi?", a: "Evet, tüm veriler Borsa İstanbul'dan anlık olarak alınmaktadır." },
-               { q: "HissePro yatırım tavsiyesi verir mi?", a: "Hayır, HissePro bir analiz aracıdır. Kararlarınızın sorumluluğu size aittir." },
+                { q: "Jetborsa yatırım tavsiyesi verir mi?", a: "Hayır, Jetborsa bir analiz aracıdır. Kararlarınızın sorumluluğu size aittir." },
                { q: "Kredi sistemi nasıl çalışır?", a: "Her analiz belirli bir kredi tüketir. Ücretsiz krediniz bittiğinde paket alabilirsiniz." }
              ].map((faq, i) => (
                <div key={i} className="border-b border-[#e2e2e7] pb-4">
@@ -351,7 +351,7 @@ function LandingPage() {
 
       {/* FOOTER */}
       <footer className="w-full bg-black text-white/30 py-12 px-6 border-t border-white/5 text-center body-sm">
-        <p>© 2026 hissepro. Borsa analiz yapay zekası.</p>
+        <p>© 2026 Jetborsa. BIST uzmanı tek yapay zeka.</p>
       </footer>
     </div>
   )
