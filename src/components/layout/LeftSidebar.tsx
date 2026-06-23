@@ -50,7 +50,7 @@ export function LeftSidebar() {
               className="flex items-center gap-2 group"
             >
               <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground shadow-sm group-hover:scale-105 transition-transform">
-                <Logo size={20} />
+                <Logo size={20} variant="icon" />
               </div>
               <span className="font-display font-medium text-lg tracking-tight">hissepro</span>
             </Link>
@@ -220,7 +220,7 @@ export function LeftSidebar() {
           <div className="flex flex-col items-center gap-6 w-full px-2">
             
             <div className="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-primary-foreground cursor-pointer" onClick={toggleLeftSidebarExpanded}>
-              <Logo size={20} />
+              <Logo size={20} variant="icon" />
             </div>
 
             <button

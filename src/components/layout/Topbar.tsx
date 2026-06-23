@@ -33,10 +33,7 @@ export function Topbar() {
       {/* Left: Branding & Icon */}
       <div className="flex items-center gap-3">
         <Link to="/panel" className="flex items-center gap-2 select-none hover:opacity-95 transition-all">
-          <Logo size={18} className="text-foreground shrink-0" />
-          <span className="font-semibold text-base tracking-tight font-sans text-foreground">
-            Hisse<span className="text-muted-foreground/60 font-medium">Pro</span>
-          </span>
+          <Logo size={14} className="text-foreground shrink-0" />
         </Link>
       </div>
 
