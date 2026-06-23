@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PanelRouteImport } from './routes/panel'
+import { Route as NasilCalisirRouteImport } from './routes/nasil-calisir'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PanelIndexRouteImport } from './routes/panel.index'
@@ -29,6 +30,11 @@ import { Route as ApiAiChargeRouteImport } from './routes/api/ai/charge'
 const PanelRoute = PanelRouteImport.update({
   id: '/panel',
   path: '/panel',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NasilCalisirRoute = NasilCalisirRouteImport.update({
+  id: '/nasil-calisir',
+  path: '/nasil-calisir',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -110,6 +116,7 @@ const ApiAiChargeRoute = ApiAiChargeRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/nasil-calisir': typeof NasilCalisirRoute
   '/panel': typeof PanelRouteWithChildren
   '/api/checkout': typeof ApiCheckoutRoute
   '/panel/borsa': typeof PanelBorsaRoute
@@ -128,6 +135,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/nasil-calisir': typeof NasilCalisirRoute
   '/api/checkout': typeof ApiCheckoutRoute
   '/panel/borsa': typeof PanelBorsaRoute
   '/panel/profil': typeof PanelProfilRoute
@@ -146,6 +154,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/nasil-calisir': typeof NasilCalisirRoute
   '/panel': typeof PanelRouteWithChildren
   '/api/checkout': typeof ApiCheckoutRoute
   '/panel/borsa': typeof PanelBorsaRoute
@@ -166,6 +175,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/nasil-calisir'
     | '/panel'
     | '/api/checkout'
     | '/panel/borsa'
@@ -184,6 +194,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/nasil-calisir'
     | '/api/checkout'
     | '/panel/borsa'
     | '/panel/profil'
@@ -201,6 +212,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/login'
+    | '/nasil-calisir'
     | '/panel'
     | '/api/checkout'
     | '/panel/borsa'
@@ -220,6 +232,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
+  NasilCalisirRoute: typeof NasilCalisirRoute
   PanelRoute: typeof PanelRouteWithChildren
   ApiCheckoutRoute: typeof ApiCheckoutRoute
   ApiAiChargeRoute: typeof ApiAiChargeRoute
@@ -237,6 +250,13 @@ declare module '@tanstack/react-router' {
       path: '/panel'
       fullPath: '/panel'
       preLoaderRoute: typeof PanelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nasil-calisir': {
+      id: '/nasil-calisir'
+      path: '/nasil-calisir'
+      fullPath: '/nasil-calisir'
+      preLoaderRoute: typeof NasilCalisirRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -370,6 +390,7 @@ const PanelRouteWithChildren = PanelRoute._addFileChildren(PanelRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
+  NasilCalisirRoute: NasilCalisirRoute,
   PanelRoute: PanelRouteWithChildren,
   ApiCheckoutRoute: ApiCheckoutRoute,
   ApiAiChargeRoute: ApiAiChargeRoute,

@@ -136,7 +136,7 @@ function PanelLayout() {
             >
               <span className="text-muted-foreground/60 text-sm truncate pr-4">{placeholder}</span>
               <button className="w-9 h-9 flex items-center justify-center rounded-full bg-primary text-white shrink-0 self-center">
-                <ArrowUp size={16} strokeWidth={2.5} />
+                <Logo size={14} variant="icon" className="text-white" />
               </button>
             </div>
           </div>

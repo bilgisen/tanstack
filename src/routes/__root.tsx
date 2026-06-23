@@ -73,7 +73,7 @@ function RootDocument() {
   }, [theme])
 
   return (
-    <html lang="en">
+    <html lang="tr">
       <head>
         <HeadContent />
       </head>

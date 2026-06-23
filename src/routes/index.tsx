@@ -49,14 +49,14 @@ function LandingPage() {
           </div>
 
           <h1 className="display-xxl mb-8 text-white text-4xl sm:text-6xl font-bold tracking-tight">
-            Borsa & Ötesi.
+            Jet gibi. Jilet gibi.
           </h1>
           
           <p className="body-lg text-white/70 max-w-2xl mx-auto mb-10 text-base sm:text-lg">
-            Jetborsa, BIST'e özel eğitilmiş finansal analiz motoruyla hisse analizini, rasyoları ve teknik formasyonları saniyeler içinde sunar.
+            Akıllı Borsa İstanbul analiz asistanı. Endeksleri, sektörleri, şirketleri derinlemesine analiz edin. Takip listeleri oluşturun. Artık borsa avucunuzun içinde.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-3">
             {user ? (
               <button
                 onClick={() => navigate({ to: '/panel' })}
@@ -74,10 +74,11 @@ function LandingPage() {
                 <ArrowRight size={18} className="ml-2" />
               </button>
             )}
-            <button className="btn-revolut-outline-dark w-full sm:w-auto">
+            <button onClick={() => navigate({ to: '/nasil-calisir' })} className="btn-revolut-outline-dark w-full sm:w-auto">
               Nasıl Çalışır?
             </button>
           </div>
+          <p className="text-white/30 text-xs">Kredi kartı gerektirmez</p>
 
 
 
@@ -97,11 +98,11 @@ function LandingPage() {
                   </div>
                   <div>
                     <h3 className="heading-sm font-semibold">Jetborsa Terminal</h3>
-                    <p className="body-sm text-white/50">Canlı BIST Verisi</p>
+                    <p className="body-sm text-white/50">Güncel Borsa İstanbul verileri</p>
                   </div>
                 </div>
                 <div className="px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-400 text-[10px] font-bold uppercase tracking-wider animate-pulse">
-                  Live
+                  Açık
                 </div>
               </div>
 
@@ -150,8 +151,8 @@ function LandingPage() {
                       THYAO son çeyrek bilanço analizi nedir?
                     </div>
                  </div>
-                 <div className="flex gap-3 items-start flex-row-reverse">
-                    <div className="w-6 h-6 rounded-full bg-[#494fdf] flex items-center justify-center"><Sparkles size={12} /></div>
+                  <div className="flex gap-3 items-start flex-row-reverse">
+                    <div className="w-6 h-6 rounded-full bg-[#494fdf] flex items-center justify-center"><Logo size={12} variant="icon" className="text-white" /></div>
                     <div className="bg-[#494fdf]/10 border border-[#494fdf]/20 rounded-2xl rounded-tr-none p-4 text-[13px] leading-relaxed shadow-lg">
                       <strong>THYAO</strong> son çeyrekte net kârını %24 artırdı. Operasyonel verimlilik artışı ve düşük F/K oranı ile sektörde pozitif ayrışıyor.
                     </div>
@@ -210,6 +211,42 @@ function LandingPage() {
                 <h3 className="heading-sm mb-4 font-semibold text-lg">AI Sohbet</h3>
                 <p className="body-sm text-black/60 leading-relaxed text-sm">
                   "Hangi şirket sektöründe en iskontolu?" gibi sorularınıza veriye dayalı, halüsinasyonsuz cevaplar alın.
+                </p>
+              </div>
+            </div>
+
+            <div className="card-revolut-light flex flex-col justify-between h-full group hover:border-[#494fdf]/30 transition-colors">
+              <div>
+                <div className="w-12 h-12 rounded-full bg-[#f4f4f4] text-[#494fdf] flex items-center justify-center mb-6">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                </div>
+                <h3 className="heading-sm mb-4 font-semibold text-lg">Sektör Analizi</h3>
+                <p className="body-sm text-black/60 leading-relaxed text-sm">
+                  Sektör bazlı karşılaştırmalar, ortalamalar ve sektör içi sıralamalarla yatırım kararlarınızı destekleyin.
+                </p>
+              </div>
+            </div>
+
+            <div className="card-revolut-light flex flex-col justify-between h-full group hover:border-[#494fdf]/30 transition-colors">
+              <div>
+                <div className="w-12 h-12 rounded-full bg-[#f4f4f4] text-[#494fdf] flex items-center justify-center mb-6">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <h3 className="heading-sm mb-4 font-semibold text-lg">Şirket Karşılaştırma</h3>
+                <p className="body-sm text-black/60 leading-relaxed text-sm">
+                  Aynı sektördeki şirketleri yan yana karşılaştırın, F/K, PD/DD ve diğer rasyoları doğrudan mukayese edin.
+                </p>
+              </div>
+            </div>
+
+            <div className="card-revolut-light flex flex-col justify-between h-full group hover:border-[#494fdf]/30 transition-colors">
+              <div>
+                <div className="w-12 h-12 rounded-full bg-[#f4f4f4] text-[#494fdf] flex items-center justify-center mb-6">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <h3 className="heading-sm mb-4 font-semibold text-lg">Takip Listesi</h3>
+                <p className="body-sm text-black/60 leading-relaxed text-sm">
+                  İlgilendiğiniz hisseleri ve endeksleri takip listelerinize ekleyin, kolayca erişin ve AI ile analiz edin.
                 </p>
               </div>
             </div>
