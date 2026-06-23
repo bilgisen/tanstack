@@ -13,7 +13,7 @@ export const Route = createFileRoute('/panel')({
 })
 
 function PanelLayout() {
-  const { user, loading, login: handleLogin } = useAuth()
+  const { user, loading } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const { isChatMaximized } = useUIStore()
@@ -21,11 +21,12 @@ function PanelLayout() {
   const mainScrollRef = useRef<HTMLDivElement>(null)
   const [isChatSheetOpen, setIsChatSheetOpen] = useState(false)
 
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate({ to: '/' })
-    }
-  }, [user, loading, navigate])
+  // Public erişim: Auth kontrolü kaldırıldı
+  // useEffect(() => {
+  //   if (!loading && !user) {
+  //     navigate({ to: '/' })
+  //   }
+  // }, [user, loading, navigate])
 
   // Handle seamless cross-asset / panel navigation triggered by chatbot
   useEffect(() => {
@@ -63,23 +64,24 @@ function PanelLayout() {
     )
   }
 
-  if (!user) {
-    return (
-      <div className="flex flex-col h-screen items-center justify-center bg-background text-muted-foreground font-sans p-6 text-center max-w-sm mx-auto space-y-4 select-none">
-        <Logo size={42} variant="icon" className="text-[#494fdf] animate-pulse" />
-        <h4 className="text-base font-semibold text-foreground">Oturum Açmanız Gerekiyor</h4>
-        <p className="text-xs text-muted-foreground leading-relaxed">
-          Jetborsa analiz paneline ve asistan özelliklerine erişmek için lütfen giriş yapın veya ücretsiz üye olun.
-        </p>
-        <button
-          onClick={handleLogin}
-          className="px-5 py-2 rounded-full bg-primary text-white font-semibold hover:brightness-110 active:scale-95 transition-all text-xs cursor-pointer shadow-sm animate-in fade-in duration-300"
-        >
-          Giriş Yap
-        </button>
-      </div>
-    )
-  }
+  // Public erişim: Artık login ekranı göstermiyor
+  // if (!user) {
+  //   return (
+  //     <div className="flex flex-col h-screen items-center justify-center bg-background text-muted-foreground font-sans p-6 text-center max-w-sm mx-auto space-y-4 select-none">
+  //       <Logo size={42} variant="icon" className="text-[#494fdf] animate-pulse" />
+  //       <h4 className="text-base font-semibold text-foreground">Oturum Açmanız Gerekiyor</h4>
+  //       <p className="text-xs text-muted-foreground leading-relaxed">
+  //         Jetborsa analiz paneline ve asistan özelliklerine erişmek için lütfen giriş yapın veya ücretsiz üye olun.
+  //       </p>
+  //       <button
+  //         onClick={handleLogin}
+  //         className="px-5 py-2 rounded-full bg-primary text-white font-semibold hover:brightness-110 active:scale-95 transition-all text-xs cursor-pointer shadow-sm animate-in fade-in duration-300"
+  //       >
+  //         Giriş Yap
+  //       </button>
+  //     </div>
+  //   )
+  // }
 
   // Dynamic context for chatbot based on current path
   let context = 'global'
@@ -144,7 +146,7 @@ function PanelLayout() {
 
         {/* Desktop Right Column: Dedicated Fixed Chat Panel (40% or 100% maximized) */}
         <div className={`hidden md:block h-full shrink-0 transition-all duration-300 ${isChatMaximized ? 'w-full flex-1' : 'md:w-[360px] lg:w-[400px] xl:w-[440px]'}`}>
-          <ChatPanel context={context} placeholder={placeholder} />
+          <ChatPanel context={context} placeholder={placeholder} user={user} />
         </div>
 
       </div>
@@ -154,7 +156,8 @@ function PanelLayout() {
         isOpen={isChatSheetOpen} 
         onClose={() => setIsChatSheetOpen(false)} 
         context={context} 
-        placeholder={placeholder} 
+        placeholder={placeholder}
+        user={user}
       />
     </div>
   )

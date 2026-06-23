@@ -9,9 +9,10 @@ interface ChatPanelProps {
   context: string;
   placeholder?: string;
   onClose?: () => void;
+  user?: any;
 }
 
-export function ChatPanel({ context, placeholder, onClose }: ChatPanelProps) {
+export function ChatPanel({ context, placeholder, onClose, user }: ChatPanelProps) {
   const { messages, isLoading, sessions, activeSessionId, loadSession, deleteSession, clearChat } = useChatStore();
   const { isChatMaximized, toggleChatMaximized } = useUIStore();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -192,6 +193,7 @@ export function ChatPanel({ context, placeholder, onClose }: ChatPanelProps) {
             context={context}
             placeholder={placeholder}
             className="w-full border-none shadow-none bg-transparent"
+            user={user}
           />
         </div>
       </div>
