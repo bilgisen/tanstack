@@ -99,21 +99,26 @@ function SektorDetailPage() {
         console.error('Sector detail: fetch failed:', e)
       }
 
-      // AI summary
-      const avgDiff = companies.length > 0
-        ? companies.reduce((sum, c) => sum + (c.diff_percent || 0), 0) / companies.length
-        : 0
-      setSectorSummary([
-        `**${name}** sektöründe toplam **${companies.length}** şirket bulunmaktadır.`,
-        `Sektör ortalaması bugün **${avgDiff >= 0 ? '+' : ''}${avgDiff.toFixed(2)}%** değişim göstermektedir.`
-      ])
-
       if (isMounted) setLoading(false)
     }
 
     fetchSectorCompanies()
     return () => { isMounted = false }
   }, [slug])
+
+  // Sektör özeti hesaplaması - companies state'i güncellendiğinde otomatik hesaplanır
+  useEffect(() => {
+    if (loading) return // Loading bitene kadar özet hesaplama
+
+    const avgDiff = companies.length > 0
+      ? companies.reduce((sum, c) => sum + (c.diff_percent || 0), 0) / companies.length
+      : 0
+    
+    setSectorSummary([
+      `**${sectorName}** sektöründe toplam **${companies.length}** şirket bulunmaktadır.`,
+      `Sektör ortalaması bugün **${avgDiff >= 0 ? '+' : ''}${avgDiff.toFixed(2)}%** değişim göstermektedir.`
+    ])
+  }, [companies, sectorName, loading])
 
   const technicalQuestions = [
     `${sectorName} sektöründeki en çok yükselen şirketler hangileri?`,
