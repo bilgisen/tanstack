@@ -23,7 +23,7 @@ function getAuth() {
           },
         },
       },
-      baseURL: process.env.BETTER_AUTH_URL || "https://tanstack.paraanaliz.workers.dev",
+      baseURL: process.env.BETTER_AUTH_URL || "https://jetborsa.com",
       socialProviders: {
         google: {
           clientId: process.env.GOOGLE_CLIENT_ID as string,
@@ -31,15 +31,16 @@ function getAuth() {
         },
       },
       account: {
-        storeStateStrategy: "cookie", // OAuth durumunu veritabanı yerine güvenli çerezde saklar
+        storeStateStrategy: "cookie",
       },
       session: {
         cookieCache: {
           enabled: true,
-          maxAge: 5 * 60, // Her istekte DB'ye gitmemek için 5 dakikalık session cache
+          maxAge: 5 * 60,
         },
       },
       trustedOrigins: [
+        "https://jetborsa.com",
         "https://tanstack.paraanaliz.workers.dev",
         "http://localhost:3000",
       ],
