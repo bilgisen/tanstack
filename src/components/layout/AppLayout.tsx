@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { CommandPalette } from "../ui/CommandPalette";
 import { useLocation } from "@tanstack/react-router";
+import { Topbar } from "./Topbar";
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
@@ -9,6 +10,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="h-screen w-full flex flex-col bg-background text-foreground overflow-hidden font-sans transition-colors">
+      <Topbar />
       <main className={`flex-1 bg-background relative z-0 ${
         isLanding 
           ? "overflow-auto" 

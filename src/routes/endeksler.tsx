@@ -48,9 +48,9 @@ function EndekslerPage() {
           const indexJson = await indexRes.json()
           if (indexJson && Array.isArray(indexJson.data)) {
             const liveIndices = indexJson.data.map((idx: any) => {
-              const value = typeof idx.value === 'string' ? parseFloat(idx.value.replace(',', '.')) : idx.value
-              const absChange = typeof idx.change === 'string' ? parseFloat(idx.change.replace(',', '.')) : (idx.change || 0)
-              const pctChange = typeof idx.changePercent === 'string' ? parseFloat(idx.changePercent.replace(',', '.')) : (idx.changePercent || 0)
+              const value = typeof idx.value === 'string' ? parseFloat(idx.value.replace(',', '.')) : (typeof idx.value === 'number' ? idx.value : 0)
+              const absChange = typeof idx.change === 'string' ? parseFloat(idx.change.replace(',', '.')) : (typeof idx.change === 'number' ? idx.change : 0)
+              const pctChange = typeof idx.changePercent === 'string' ? parseFloat(idx.changePercent.replace(',', '.')) : (typeof idx.changePercent === 'number' ? idx.changePercent : 0)
               return {
                 id: idx.code?.toLowerCase() || idx.id,
                 title: idx.name || idx.title,

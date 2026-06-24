@@ -1,11 +1,9 @@
 import { createFileRoute, Outlet, useNavigate, useLocation } from '@tanstack/react-router'
 import { useAuth } from '../hooks/useAuth'
 import { useEffect, useRef, useState } from 'react'
-import { Topbar } from '../components/layout/Topbar'
 import { ChatPanel } from '../components/chat/ChatPanel'
 import { ChatSheet } from '../components/chat/ChatSheet'
 import { useUIStore } from '../store/ui'
-import { ArrowUp } from 'lucide-react'
 import { Logo } from '../components/layout/Logo'
 
 export const Route = createFileRoute('/panel')({
@@ -111,9 +109,6 @@ function PanelLayout() {
   return (
     <div className="w-full h-screen flex flex-col bg-background font-sans overflow-hidden">
       
-      {/* Topbar Navigation */}
-      <Topbar />
-
       {/* Remaining Layout: Body area (Sub-page content + Chat Panel) */}
       <div className="flex-1 flex flex-row min-w-0 h-full relative overflow-hidden bg-background">
         
