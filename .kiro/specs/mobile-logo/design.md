@@ -716,24 +716,74 @@ function getNavigationItems(isMobile: boolean): MenuItem[]
 />
 ```
 
-### Without Responsive Logo Component (Direct Implementation in Topbar)
+### Mobile Menu Implementation
 
 ```pascal
-// Alternative: Handle responsiveness directly in Topbar
-const isMobile = useIsMobile()
+// Mobile navigation menu with icon-only items
+const mobileMenuItems = [
+  { id: "endeksler", label: "Endeksler", icon: ChartNoAxesCombined, path: "/endeksler", showAsIconOnMobile: true },
+  { id: "sektorler", label: "Sektörler", icon: Factory, path: "/sektorler", showAsIconOnMobile: true },
+  { id: "sirketler", label: "Şirketler", icon: Building2, path: "/sirketler", showAsIconOnMobile: true },
+  { id: "haberler", label: "Haberler", icon: Rss, path: "/haberler", showAsIconOnMobile: true },
+  { id: "raporlar", label: "Raporlar", icon: FileText, path: "/raporlar", showAsIconOnMobile: true }
+]
 
-return (
-  <Link to="/" className="flex items-center gap-2 select-none hover:opacity-95 transition-all">
-    {isMobile ? (
-      <SiteIcon size={14} className="text-foreground shrink-0" />
-    ) : (
-      <Logo size={14} className="text-foreground shrink-0" />
-    )}
+// Render mobile menu items
+RETURN mobileMenuItems.map(item => (
+  <Link 
+    to = item.path
+    className = "w-10 h-10 flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
+    title = item.label
+  >
+    <item.icon size = 16 className = "shrink-0" />
   </Link>
-)
+))
 ```
 
-**Design Recommendation**: Use the ResponsiveLogo component approach to avoid duplicating this logic in multiple components.
+### Unified User Menu with Profile Picture
+
+```pascal
+// Unified user menu component
+<UnifiedUserMenu
+  user = user
+  isOpen = dropdownOpen
+  onToggle = {() => setDropdownOpen(!dropdownOpen)}
+  onClose = {() => setDropdownOpen(false)}
+  onLogout = {handleLogout}
+  onNavigate = {navigate}
+  onThemeChange = {handleThemeChange}
+  currentTheme = theme
+/>
+
+// Avatar with profile picture and fallback
+<ProfileAvatar
+  user = user
+  size = "md"
+  onClick = {handleAvatarClick}
+  className = "cursor-pointer hover:opacity-80 transition-all"
+/>
+```
+
+### Profile Avatar with Error Handling
+
+```pascal
+// Avatar that shows profile picture or falls back to initials
+const avatarElement = loadAvatarImage(user, fallbackToInitials = true)
+
+RETURN (
+  <div 
+    onClick = {onClick}
+    className = className
+    style = {{
+      width: sizeConfig.width,
+      height: sizeConfig.height,
+      fontSize: sizeConfig.fontSize
+    }}
+  >
+    {avatarElement}
+  </div>
+)
+```
 
 ## Correctness Properties
 
