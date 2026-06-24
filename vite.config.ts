@@ -16,7 +16,7 @@ const config = defineConfig({
         wrangler: {
           name: "tanstack",
           vars: {
-            "BETTER_AUTH_URL": "https://tanstack.paraanaliz.workers.dev",
+            "BETTER_AUTH_URL": "https://jetborsa.com",
             "VITE_HONO_API_URL": "https://hono.paraanaliz.workers.dev"
           },
           hyperdrive: [

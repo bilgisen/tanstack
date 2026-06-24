@@ -41,7 +41,6 @@ function getAuth() {
       },
       trustedOrigins: [
         "https://jetborsa.com",
-        "https://tanstack.paraanaliz.workers.dev",
         "http://localhost:3000",
       ],
       advanced: {
