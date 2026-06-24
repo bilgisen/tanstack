@@ -8,60 +8,71 @@ export const Route = createFileRoute('/sektorler/$slug')({
   component: SektorDetailPage,
 })
 
+const SLUG_TO_NAME: Record<string, string> = {
+  'bankacilik': 'Bankacılık',
+  'holding': 'Holding',
+  'teknoloji': 'Teknoloji',
+  'enerji': 'Enerji',
+  'turizm': 'Turizm',
+  'otomotiv': 'Otomotiv',
+  'kimya': 'Kimya',
+  'gida-icecek-tarim': 'Gıda, İçecek ve Tarım',
+  'insaat': 'İnşaat',
+  'metal': 'Metal',
+  'tasit': 'Taşıt',
+  'tekstil': 'Tekstil',
+  'saglik': 'Sağlık',
+  'iletisim': 'İletişim',
+  'ulasim': 'Ulaştırma',
+  'madencilik': 'Madencilik',
+  'ticaret': 'Ticaret',
+  'elektrik': 'Elektrik',
+  'konaklama': 'Konaklama',
+  'gayrimenkul': 'Gayrimenkul',
+  'bilisim': 'Bilişim',
+  'sigorta': 'Sigorta',
+  'diger': 'Diğer',
+}
+
 type SectorCompany = {
   ticker: string;
   name: string;
   last_price?: number;
   diff_percent?: number;
-  market_cap?: number;
-};
-
-type SectorDetail = {
-  name: string;
-  description?: string;
-  medianPE?: number;
-  medianPD?: number;
 };
 
 function SektorDetailPage() {
   const { slug } = Route.useParams()
   const [companies, setCompanies] = useState<SectorCompany[]>([])
-  const [sectorInfo, setSectorInfo] = useState<SectorDetail | null>(null)
+  const [sectorName, setSectorName] = useState('')
   const [loading, setLoading] = useState(true)
-
-  const sectorName = slug
-    .replace(/-/g, ' ')
-    .replace(/ğ/g, 'ğ').replace(/ü/g, 'ü').replace(/ş/g, 'ş')
-    .replace(/ı/g, 'ı').replace(/ö/g, 'ö').replace(/ç/g, 'ç')
-    .replace(/\b\w/g, l => l.toUpperCase())
 
   useEffect(() => {
     let isMounted = true
     setLoading(true)
 
+    const name = SLUG_TO_NAME[slug] || slug
+    setSectorName(name)
+
     async function fetchSectorCompanies() {
       const compUrl = import.meta.env.VITE_COMP_API_URL || "https://comp-ef958063.fastapicloud.dev"
       const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev"
 
-      // Try fetching sector companies
       try {
-        const res = await fetch(`${compUrl}/api/v1/sectors/${encodeURIComponent(sectorName)}/companies`)
+        const res = await fetch(`${compUrl}/api/v1/sectors/${encodeURIComponent(name)}/companies`)
         if (res.ok) {
           const data = await res.json()
           if (data && data.companies) {
-            const tickerList: string[] = data.companies.map((c: any) => c.ticker?.toUpperCase()).filter(Boolean)
+            const tickerList: string[] = data.companies
+              .map((c: any) => c.ticker?.toUpperCase())
+              .filter(Boolean)
 
-            // Fetch prices for all tickers
-            const enriched: SectorCompany[] = []
-            for (const ticker of tickerList.slice(0, 20)) {
-              const companyName = (companyNames as Record<string, string>)[ticker] || ticker
-              enriched.push({
-                ticker,
-                name: companyName,
-              })
-            }
+            const enriched: SectorCompany[] = tickerList.map(ticker => ({
+              ticker,
+              name: (companyNames as Record<string, string>)[ticker] || ticker,
+            }))
 
-            // Try to get prices in batch
+            // Fetch prices in batch
             try {
               const priceRes = await fetch(`${apiUrl}/api/market/stocks`)
               if (priceRes.ok) {
@@ -77,17 +88,14 @@ function SektorDetailPage() {
                 }
               }
             } catch (e) {
-              console.error('Sector detail: Failed fetching prices:', e)
+              console.error('Sector detail: price fetch failed:', e)
             }
 
-            if (isMounted) {
-              setCompanies(enriched)
-              setSectorInfo({ name: sectorName })
-            }
+            if (isMounted) setCompanies(enriched)
           }
         }
       } catch (e) {
-        console.error('Sector detail: Failed fetching sector companies:', e)
+        console.error('Sector detail: fetch failed:', e)
       }
 
       if (isMounted) setLoading(false)
@@ -95,7 +103,7 @@ function SektorDetailPage() {
 
     fetchSectorCompanies()
     return () => { isMounted = false }
-  }, [slug, sectorName])
+  }, [slug])
 
   if (loading) {
     return (
@@ -120,7 +128,7 @@ function SektorDetailPage() {
             <Factory size={20} />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">{sectorInfo?.name || sectorName}</h1>
+            <h1 className="text-2xl font-bold tracking-tight">{sectorName}</h1>
             <p className="text-muted-foreground text-sm">{companies.length} şirket</p>
           </div>
         </div>
@@ -177,18 +185,6 @@ function SektorDetailPage() {
           Bu sektör için şirket bulunamadı.
         </div>
       )}
-
-      {/* Future sections placeholder */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-card border border-border/30 rounded-2xl p-6">
-          <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-2">Sektör Haberleri</h3>
-          <p className="text-xs text-muted-foreground/60">Yakında...</p>
-        </div>
-        <div className="bg-card border border-border/30 rounded-2xl p-6">
-          <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-2">Araştırma Raporları</h3>
-          <p className="text-xs text-muted-foreground/60">Yakında...</p>
-        </div>
-      </div>
     </div>
   )
 }

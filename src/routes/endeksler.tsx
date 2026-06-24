@@ -5,7 +5,8 @@ import {
   TrendingUp, 
   TrendingDown, 
   ChevronRight,
-  ExternalLink
+  ExternalLink,
+  Info
 } from 'lucide-react'
 import { useUIStore } from '../store/ui'
 import companyNames from '../constants/companyNames.json'
