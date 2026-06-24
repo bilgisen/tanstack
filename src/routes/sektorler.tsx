@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, Outlet, useMatches } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { Loader2, ChevronRight, Factory, HelpCircle } from 'lucide-react'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
@@ -24,11 +24,17 @@ function toSlug(name: string): string {
 }
 
 function SektorlerPage() {
+  const matches = useMatches()
   const [sectors, setSectors] = useState<Sector[]>([])
   const [loading, setLoading] = useState(true)
   const { sendMessage } = useChatStore()
 
+  // If there's a child route (e.g., /sektorler/holdingler), render the Outlet
+  const hasChildRoute = matches.some(m => m.routeId === '/sektorler/$slug')
+
   useEffect(() => {
+    if (hasChildRoute) return // Don't fetch if showing child route
+    
     let isMounted = true
     setLoading(true)
 
@@ -57,7 +63,7 @@ function SektorlerPage() {
 
     fetchSectors()
     return () => { isMounted = false }
-  }, [])
+  }, [hasChildRoute])
 
   const sectorQuestions = [
     'Borsa İstanbul\'da en çok yükselen sektörler hangileri?',
@@ -68,6 +74,11 @@ function SektorlerPage() {
   ]
 
   const totalCompanies = sectors.reduce((sum, s) => sum + s.companyCount, 0)
+
+  // If showing child route, render Outlet instead of list
+  if (hasChildRoute) {
+    return <Outlet />
+  }
 
   return (
     <PublicPageLayout context="sektorler" placeholder="Sektörler hakkında bir soru sorun...">
