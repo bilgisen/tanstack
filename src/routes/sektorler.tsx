@@ -46,9 +46,7 @@ function SektorlerPage() {
                 name: s.name,
                 companyCount: s.total_companies || s.active_companies || 0,
               }))
-            if (isMounted) {
-              setSectors(sectorList)
-            }
+            if (isMounted) setSectors(sectorList)
           }
         }
       } catch (e) {
@@ -69,52 +67,61 @@ function SektorlerPage() {
     'Sektörel bazda temel analiz karşılaştırması yapar mısın?'
   ]
 
+  const totalCompanies = sectors.reduce((sum, s) => sum + s.companyCount, 0)
+
   return (
     <PublicPageLayout context="sektorler" placeholder="Sektörler hakkında bir soru sorun...">
 
       {loading ? (
-        <div className="flex h-64 items-center justify-center">
-          <Loader2 className="animate-spin text-primary" size={24} />
+        <div className="flex h-[360px] items-center justify-center text-muted-foreground font-medium text-xs gap-2 animate-pulse">
+          <Loader2 className="animate-spin text-primary" size={16} />
+          <span>Veriler yükleniyor...</span>
         </div>
       ) : (
-        <div className="space-y-6 animate-in fade-in duration-400">
+        <div className="space-y-6 animate-in fade-in duration-400 flex flex-col min-h-fit pb-32">
 
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">Sektörler</h1>
-              <p className="text-muted-foreground text-sm mt-1">Borsa İstanbul sektör bazlı analiz</p>
+          {/* Header Block */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between border border-border/45 bg-card/25 rounded-2xl p-5 gap-4 relative overflow-hidden shrink-0 transition-all hover:border-border/60">
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="h-12 w-12 rounded-full bg-primary/10 border border-primary/15 flex items-center justify-center text-primary shrink-0">
+                <Factory size={20} />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Sektörler</span>
+                <h1 className="text-base md:text-2xl font-bold text-foreground tracking-tight leading-none mt-1">Borsa İstanbul Sektörleri</h1>
+              </div>
+            </div>
+            <div className="flex items-center gap-6 shrink-0">
+              <div className="text-right">
+                <div className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">{sectors.length}</div>
+                <div className="text-[10px] text-muted-foreground font-medium uppercase">Sektör</div>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">{totalCompanies}</div>
+                <div className="text-[10px] text-muted-foreground font-medium uppercase">Şirket</div>
+              </div>
             </div>
           </div>
 
-          {/* Sector Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Sector Grid - 2 columns */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {sectors.map((sector) => (
               <Link
                 key={sector.slug}
                 to="/sektorler/$slug"
                 params={{ slug: sector.slug }}
-                className="group bg-card border border-border/50 rounded-2xl p-5 transition-all hover:border-primary/30 hover:shadow-lg hover:-translate-y-0.5"
+                className="group flex items-center justify-between border border-border/45 bg-card/25 rounded-2xl p-5 transition-all hover:border-primary/30 hover:bg-card/40 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer"
               >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Factory size={16} className="text-primary shrink-0" />
-                      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{sector.slug}</span>
-                    </div>
-                    <h3 className="text-lg font-bold text-foreground truncate group-hover:text-primary transition-colors">{sector.name}</h3>
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
+                    <Factory size={16} />
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <ChevronRight size={14} className="text-muted-foreground/50 group-hover:text-foreground transition-colors" />
+                  <div className="min-w-0">
+                    <h3 className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">{sector.name}</h3>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">{sector.companyCount} şirket</p>
                   </div>
                 </div>
-
-                <div className="mt-4 pt-4 border-t border-border/30">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">{sector.companyCount} şirket</span>
-                    <span className="text-muted-foreground/50">Detaylar →</span>
-                  </div>
-                </div>
+                <ChevronRight size={14} className="text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0" />
               </Link>
             ))}
           </div>
