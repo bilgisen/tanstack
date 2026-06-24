@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { Logo } from "./Logo";
-import { Settings, Sun, Moon, Monitor, User, MoreVertical } from "lucide-react";
+import { Settings, Sun, Moon, Monitor, User, MoreVertical, Star, ChartNoAxesCombined, Factory, Building2 } from "lucide-react";
 import { useUIStore } from "../../store/ui";
 import { useAuth } from "../../hooks/useAuth";
 import type { Theme } from "../../store/ui";
@@ -30,11 +30,38 @@ export function Topbar() {
   return (
     <header className="w-full h-14 border-b border-border/40 bg-card/15 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between shrink-0 select-none z-30">
       
-      {/* Left: Branding & Icon */}
+      {/* Left: Branding & Navigation */}
       <div className="flex items-center gap-3">
         <Link to="/panel" className="flex items-center gap-2 select-none hover:opacity-95 transition-all">
           <Logo size={14} className="text-foreground shrink-0" />
         </Link>
+        
+        <nav className="hidden md:flex items-center gap-1 ml-2">
+          <Link 
+            to="/endeksler" 
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
+            title="Endeksler"
+          >
+            <ChartNoAxesCombined size={16} className="shrink-0" />
+            <span>Endeksler</span>
+          </Link>
+          <Link 
+            to="/sektorler" 
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
+            title="Sektörler"
+          >
+            <Factory size={16} className="shrink-0" />
+            <span>Sektörler</span>
+          </Link>
+          <Link 
+            to="/sirketler" 
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
+            title="Şirketler"
+          >
+            <Building2 size={16} className="shrink-0" />
+            <span>Şirketler</span>
+          </Link>
+        </nav>
       </div>
 
       {/* Right: Actions */}
@@ -161,11 +188,19 @@ export function Topbar() {
 
         {/* User Profile Avatar / Login Icon */}
         {user ? (
-          <Link 
-            to="/panel/profil"
-            className="w-8 h-8 rounded-full border border-foreground bg-background text-foreground flex items-center justify-center font-semibold text-xs shrink-0 cursor-pointer hover:opacity-80 transition-all"
-            title={user.email || "Profil"}
-          >
+          <>
+            <Link 
+              to="/takip-listesi"
+              className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all shrink-0"
+              title="Takip Listem"
+            >
+              <Star size={16} className="fill-yellow-400 text-yellow-400" />
+            </Link>
+            <Link 
+              to="/panel/profil"
+              className="w-8 h-8 rounded-full border border-foreground bg-background text-foreground flex items-center justify-center font-semibold text-xs shrink-0 cursor-pointer hover:opacity-80 transition-all"
+              title={user.email || "Profil"}
+            >
             {(() => {
               const name = user.user_metadata?.full_name || user.user_metadata?.name || user.email || "";
               const parts = name.trim().split(/[\s._-]+/).filter(Boolean);
@@ -174,7 +209,8 @@ export function Topbar() {
                 : (parts[0]?.[0] || "U").toUpperCase();
               return initials;
             })()}
-          </Link>
+            </Link>
+          </>
         ) : (
           <button
             onClick={handleLogin}

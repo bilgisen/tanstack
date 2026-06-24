@@ -304,7 +304,7 @@ function PanelIndexPage() {
           </div>
           
           <Link
-            to="/panel/takip-listesi"
+            to="/takip-listesi"
             className="text-[10px] md:text-xs font-semibold text-primary hover:underline flex items-center gap-0.5 hover:gap-1 transition-all"
           >
             <span>Yönet</span>

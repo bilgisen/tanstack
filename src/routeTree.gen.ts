@@ -9,12 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TakipListesiRouteImport } from './routes/takip-listesi'
+import { Route as SirketlerRouteImport } from './routes/sirketler'
+import { Route as SektorlerRouteImport } from './routes/sektorler'
 import { Route as PanelRouteImport } from './routes/panel'
 import { Route as NasilCalisirRouteImport } from './routes/nasil-calisir'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as EndekslerRouteImport } from './routes/endeksler'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PanelIndexRouteImport } from './routes/panel.index'
-import { Route as PanelTakipListesiRouteImport } from './routes/panel.takip-listesi'
+import { Route as SektorlerSlugRouteImport } from './routes/sektorler.$slug'
 import { Route as PanelProfilRouteImport } from './routes/panel.profil'
 import { Route as PanelBorsaRouteImport } from './routes/panel.borsa'
 import { Route as ApiCheckoutRouteImport } from './routes/api/checkout'
@@ -27,6 +31,21 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiAiPreCheckRouteImport } from './routes/api/ai/pre-check'
 import { Route as ApiAiChargeRouteImport } from './routes/api/ai/charge'
 
+const TakipListesiRoute = TakipListesiRouteImport.update({
+  id: '/takip-listesi',
+  path: '/takip-listesi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SirketlerRoute = SirketlerRouteImport.update({
+  id: '/sirketler',
+  path: '/sirketler',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SektorlerRoute = SektorlerRouteImport.update({
+  id: '/sektorler',
+  path: '/sektorler',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PanelRoute = PanelRouteImport.update({
   id: '/panel',
   path: '/panel',
@@ -42,6 +61,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EndekslerRoute = EndekslerRouteImport.update({
+  id: '/endeksler',
+  path: '/endeksler',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -52,10 +76,10 @@ const PanelIndexRoute = PanelIndexRouteImport.update({
   path: '/',
   getParentRoute: () => PanelRoute,
 } as any)
-const PanelTakipListesiRoute = PanelTakipListesiRouteImport.update({
-  id: '/takip-listesi',
-  path: '/takip-listesi',
-  getParentRoute: () => PanelRoute,
+const SektorlerSlugRoute = SektorlerSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => SektorlerRoute,
 } as any)
 const PanelProfilRoute = PanelProfilRouteImport.update({
   id: '/profil',
@@ -115,13 +139,17 @@ const ApiAiChargeRoute = ApiAiChargeRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/endeksler': typeof EndekslerRoute
   '/login': typeof LoginRoute
   '/nasil-calisir': typeof NasilCalisirRoute
   '/panel': typeof PanelRouteWithChildren
+  '/sektorler': typeof SektorlerRouteWithChildren
+  '/sirketler': typeof SirketlerRoute
+  '/takip-listesi': typeof TakipListesiRoute
   '/api/checkout': typeof ApiCheckoutRoute
   '/panel/borsa': typeof PanelBorsaRoute
   '/panel/profil': typeof PanelProfilRoute
-  '/panel/takip-listesi': typeof PanelTakipListesiRoute
+  '/sektorler/$slug': typeof SektorlerSlugRoute
   '/panel/': typeof PanelIndexRoute
   '/api/ai/charge': typeof ApiAiChargeRoute
   '/api/ai/pre-check': typeof ApiAiPreCheckRoute
@@ -134,12 +162,16 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/endeksler': typeof EndekslerRoute
   '/login': typeof LoginRoute
   '/nasil-calisir': typeof NasilCalisirRoute
+  '/sektorler': typeof SektorlerRouteWithChildren
+  '/sirketler': typeof SirketlerRoute
+  '/takip-listesi': typeof TakipListesiRoute
   '/api/checkout': typeof ApiCheckoutRoute
   '/panel/borsa': typeof PanelBorsaRoute
   '/panel/profil': typeof PanelProfilRoute
-  '/panel/takip-listesi': typeof PanelTakipListesiRoute
+  '/sektorler/$slug': typeof SektorlerSlugRoute
   '/panel': typeof PanelIndexRoute
   '/api/ai/charge': typeof ApiAiChargeRoute
   '/api/ai/pre-check': typeof ApiAiPreCheckRoute
@@ -153,13 +185,17 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/endeksler': typeof EndekslerRoute
   '/login': typeof LoginRoute
   '/nasil-calisir': typeof NasilCalisirRoute
   '/panel': typeof PanelRouteWithChildren
+  '/sektorler': typeof SektorlerRouteWithChildren
+  '/sirketler': typeof SirketlerRoute
+  '/takip-listesi': typeof TakipListesiRoute
   '/api/checkout': typeof ApiCheckoutRoute
   '/panel/borsa': typeof PanelBorsaRoute
   '/panel/profil': typeof PanelProfilRoute
-  '/panel/takip-listesi': typeof PanelTakipListesiRoute
+  '/sektorler/$slug': typeof SektorlerSlugRoute
   '/panel/': typeof PanelIndexRoute
   '/api/ai/charge': typeof ApiAiChargeRoute
   '/api/ai/pre-check': typeof ApiAiPreCheckRoute
@@ -174,13 +210,17 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/endeksler'
     | '/login'
     | '/nasil-calisir'
     | '/panel'
+    | '/sektorler'
+    | '/sirketler'
+    | '/takip-listesi'
     | '/api/checkout'
     | '/panel/borsa'
     | '/panel/profil'
-    | '/panel/takip-listesi'
+    | '/sektorler/$slug'
     | '/panel/'
     | '/api/ai/charge'
     | '/api/ai/pre-check'
@@ -193,12 +233,16 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/endeksler'
     | '/login'
     | '/nasil-calisir'
+    | '/sektorler'
+    | '/sirketler'
+    | '/takip-listesi'
     | '/api/checkout'
     | '/panel/borsa'
     | '/panel/profil'
-    | '/panel/takip-listesi'
+    | '/sektorler/$slug'
     | '/panel'
     | '/api/ai/charge'
     | '/api/ai/pre-check'
@@ -211,13 +255,17 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/endeksler'
     | '/login'
     | '/nasil-calisir'
     | '/panel'
+    | '/sektorler'
+    | '/sirketler'
+    | '/takip-listesi'
     | '/api/checkout'
     | '/panel/borsa'
     | '/panel/profil'
-    | '/panel/takip-listesi'
+    | '/sektorler/$slug'
     | '/panel/'
     | '/api/ai/charge'
     | '/api/ai/pre-check'
@@ -231,9 +279,13 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  EndekslerRoute: typeof EndekslerRoute
   LoginRoute: typeof LoginRoute
   NasilCalisirRoute: typeof NasilCalisirRoute
   PanelRoute: typeof PanelRouteWithChildren
+  SektorlerRoute: typeof SektorlerRouteWithChildren
+  SirketlerRoute: typeof SirketlerRoute
+  TakipListesiRoute: typeof TakipListesiRoute
   ApiCheckoutRoute: typeof ApiCheckoutRoute
   ApiAiChargeRoute: typeof ApiAiChargeRoute
   ApiAiPreCheckRoute: typeof ApiAiPreCheckRoute
@@ -245,6 +297,27 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/takip-listesi': {
+      id: '/takip-listesi'
+      path: '/takip-listesi'
+      fullPath: '/takip-listesi'
+      preLoaderRoute: typeof TakipListesiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sirketler': {
+      id: '/sirketler'
+      path: '/sirketler'
+      fullPath: '/sirketler'
+      preLoaderRoute: typeof SirketlerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sektorler': {
+      id: '/sektorler'
+      path: '/sektorler'
+      fullPath: '/sektorler'
+      preLoaderRoute: typeof SektorlerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/panel': {
       id: '/panel'
       path: '/panel'
@@ -266,6 +339,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/endeksler': {
+      id: '/endeksler'
+      path: '/endeksler'
+      fullPath: '/endeksler'
+      preLoaderRoute: typeof EndekslerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -280,12 +360,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PanelIndexRouteImport
       parentRoute: typeof PanelRoute
     }
-    '/panel/takip-listesi': {
-      id: '/panel/takip-listesi'
-      path: '/takip-listesi'
-      fullPath: '/panel/takip-listesi'
-      preLoaderRoute: typeof PanelTakipListesiRouteImport
-      parentRoute: typeof PanelRoute
+    '/sektorler/$slug': {
+      id: '/sektorler/$slug'
+      path: '/$slug'
+      fullPath: '/sektorler/$slug'
+      preLoaderRoute: typeof SektorlerSlugRouteImport
+      parentRoute: typeof SektorlerRoute
     }
     '/panel/profil': {
       id: '/panel/profil'
@@ -370,7 +450,6 @@ declare module '@tanstack/react-router' {
 interface PanelRouteChildren {
   PanelBorsaRoute: typeof PanelBorsaRoute
   PanelProfilRoute: typeof PanelProfilRoute
-  PanelTakipListesiRoute: typeof PanelTakipListesiRoute
   PanelIndexRoute: typeof PanelIndexRoute
   PanelEndekslerIdRoute: typeof PanelEndekslerIdRoute
   PanelSirketlerIdRoute: typeof PanelSirketlerIdRoute
@@ -379,7 +458,6 @@ interface PanelRouteChildren {
 const PanelRouteChildren: PanelRouteChildren = {
   PanelBorsaRoute: PanelBorsaRoute,
   PanelProfilRoute: PanelProfilRoute,
-  PanelTakipListesiRoute: PanelTakipListesiRoute,
   PanelIndexRoute: PanelIndexRoute,
   PanelEndekslerIdRoute: PanelEndekslerIdRoute,
   PanelSirketlerIdRoute: PanelSirketlerIdRoute,
@@ -387,11 +465,27 @@ const PanelRouteChildren: PanelRouteChildren = {
 
 const PanelRouteWithChildren = PanelRoute._addFileChildren(PanelRouteChildren)
 
+interface SektorlerRouteChildren {
+  SektorlerSlugRoute: typeof SektorlerSlugRoute
+}
+
+const SektorlerRouteChildren: SektorlerRouteChildren = {
+  SektorlerSlugRoute: SektorlerSlugRoute,
+}
+
+const SektorlerRouteWithChildren = SektorlerRoute._addFileChildren(
+  SektorlerRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  EndekslerRoute: EndekslerRoute,
   LoginRoute: LoginRoute,
   NasilCalisirRoute: NasilCalisirRoute,
   PanelRoute: PanelRouteWithChildren,
+  SektorlerRoute: SektorlerRouteWithChildren,
+  SirketlerRoute: SirketlerRoute,
+  TakipListesiRoute: TakipListesiRoute,
   ApiCheckoutRoute: ApiCheckoutRoute,
   ApiAiChargeRoute: ApiAiChargeRoute,
   ApiAiPreCheckRoute: ApiAiPreCheckRoute,

@@ -134,7 +134,7 @@ export function LeftSidebar() {
                   <span>Listeler</span>
                 </div>
                 <Link
-                  to="/panel/takip-listesi"
+                  to="/takip-listesi"
                   className="opacity-60 hover:opacity-100 transition-opacity p-1"
                 >
                   <SlidersHorizontal size={12} />
@@ -147,7 +147,7 @@ export function LeftSidebar() {
                   return (
                     <Link
                       key={list.id}
-                      to="/panel/takip-listesi"
+                      to="/takip-listesi"
                       onClick={() => {
                         setActiveWatchlistId(list.id);
                         if (window.innerWidth < 1024) toggleLeftSidebarExpanded();
@@ -240,7 +240,7 @@ export function LeftSidebar() {
             </button>
 
             <Link
-              to="/panel/takip-listesi"
+              to="/takip-listesi"
               className="w-10 h-10 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-all duration-200"
               title="Listeler"
             >

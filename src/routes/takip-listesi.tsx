@@ -13,7 +13,7 @@ import {
 import { useUIStore } from '../store/ui'
 import { useWatchlistStore } from '../store/watchlist'
 
-export const Route = createFileRoute('/panel/takip-listesi')({
+export const Route = createFileRoute('/takip-listesi')({
   component: WatchlistPage,
 })
 
