@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Create Feature Config",
+  "description": "Create config file for feature spec",
+  "version": "1",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "runCommand",
+    "command": ""
+  }
+}
