@@ -12,34 +12,7 @@ type Sector = {
   companyCount: number;
 };
 
-const SECTOR_SLUGS: Record<string, string> = {
-  'Bankacılık': 'bankacilik',
-  'Holding': 'holding',
-  'Teknoloji': 'teknoloji',
-  'Enerji': 'enerji',
-  'Turizm': 'turizm',
-  'Otomotiv': 'otomotiv',
-  'Kimya': 'kimya',
-  'Gıda, İçecek ve Tarım': 'gida-icecek-tarim',
-  'İnşaat': 'insaat',
-  'Metal': 'metal',
-  'Taşıt': 'tasit',
-  'Tekstil': 'tekstil',
-  'Sağlık': 'saglik',
-  'İletişim': 'iletisim',
-  'Ulaştırma': 'ulasim',
-  'Madencilik': 'madencilik',
-  'Ticaret': 'ticaret',
-  'Elektrik': 'elektrik',
-  'Konaklama': 'konaklama',
-  'Gayrimenkul': 'gayrimenkul',
-  'Bilişim': 'bilisim',
-  'Sigorta': 'sigorta',
-  'Diğer': 'diger',
-};
-
 function toSlug(name: string): string {
-  if (SECTOR_SLUGS[name]) return SECTOR_SLUGS[name]
   return name
     .toLowerCase()
     .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
@@ -64,11 +37,11 @@ function SektorlerPage() {
           const data = await res.json()
           if (data && data.sectors) {
             const sectorList = data.sectors
-              .filter((s: any) => s.name && s.name !== 'Diğer')
+              .filter((s: any) => s.name)
               .map((s: any) => ({
                 slug: toSlug(s.name),
                 name: s.name,
-                companyCount: s.company_count || 0,
+                companyCount: s.total_companies || s.active_companies || 0,
               }))
             if (isMounted) {
               setSectors(sectorList)
