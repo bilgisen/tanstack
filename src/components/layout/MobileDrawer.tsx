@@ -52,7 +52,7 @@ export function MobileDrawer({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 md:hidden">
+    <div className="fixed inset-0 z-50">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
@@ -62,7 +62,7 @@ export function MobileDrawer({
       {/* Drawer */}
       <div
         ref={drawerRef}
-        className="absolute right-0 top-0 bottom-0 w-72 bg-background/95 backdrop-blur-xl border-l border-white/10 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300"
+        className="absolute right-0 top-0 bottom-0 w-72 sm:w-80 bg-background/95 backdrop-blur-xl border-l border-white/10 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300"
       >
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-white/10 shrink-0">
