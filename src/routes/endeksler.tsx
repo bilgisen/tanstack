@@ -6,8 +6,7 @@ import {
   TrendingDown, 
   ChevronRight,
   ExternalLink,
-  Info,
-  Activity
+  Info
 } from 'lucide-react'
 import { useUIStore } from '../store/ui'
 import companyNames from '../constants/companyNames.json'
@@ -38,13 +37,6 @@ function EndekslerPage() {
   ])
   const [loading, setLoading] = useState(true)
   const { setGlobalPrompt, openRightSidebar } = useUIStore()
-
-  const formattedDate = new Intl.DateTimeFormat('tr-TR', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  }).format(new Date())
 
   useEffect(() => {
     let isMounted = true
@@ -107,77 +99,6 @@ function EndekslerPage() {
   return (
     <PublicPageLayout context="endeksler" placeholder="Endeksler hakkında bir soru sorun...">
       <div className="space-y-8 animate-in fade-in duration-400">
-
-        {/* Bugün Borsa Section (from panel.index) */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <div className="w-1.5 h-4 rounded-full bg-primary" />
-            <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2.5">
-              <Activity size={12} className="text-[#22c55e]" />
-              <span>Bugün Borsa · {formattedDate}</span>
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
-            {indices.slice(0, 3).map((idx) => {
-              const isUp = idx.up;
-              const sparkline = idx.sparkline || [];
-              
-              return (
-                <Link
-                  key={idx.id}
-                  to="/panel/endeksler/$id"
-                  params={{ id: idx.id }}
-                  className="group border border-border/40 hover:border-border/70 rounded-2xl p-4 md:p-5 bg-card/15 hover:bg-card/25 shadow-3xs transition-all duration-300 flex flex-col relative overflow-hidden"
-                >
-                  <div className={`absolute top-0 right-0 w-24 h-24 rounded-full blur-3xl pointer-events-none transition-opacity duration-300 opacity-0 group-hover:opacity-100 ${isUp ? 'bg-emerald-500/5' : 'bg-destructive/5'}`} />
-
-                  <div className="flex items-center justify-between mb-3 z-10">
-                    <div>
-                      <h4 className="text-xs font-bold text-foreground tracking-tight group-hover:text-primary transition-colors">{idx.title}</h4>
-                      <span className="text-[10px] text-muted-foreground font-semibold tracking-tight">{idx.code}</span>
-                    </div>
-                    <div className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5 ${
-                      isUp 
-                        ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/10' 
-                        : 'bg-destructive/10 text-destructive border border-destructive/10'
-                    }`}>
-                      {isUp ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
-                      <span>{isUp ? '+' : ''}{idx.pctChange.toFixed(2)}%</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-end justify-between mt-1 z-10">
-                    <div className="text-lg md:text-xl font-bold font-mono tracking-tight text-foreground">
-                      {idx.value.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </div>
-
-                    {sparkline.length > 0 && (
-                      <div className="w-16 h-8 pr-1 opacity-70 group-hover:opacity-100 transition-opacity duration-300">
-                        <svg viewBox="0 0 100 40" className="w-full h-full">
-                          <path
-                            d={`M ${sparkline.map((val, i) => `${(i / (sparkline.length - 1)) * 100} ${40 - ((val - Math.min(...sparkline)) / (Math.max(...sparkline) - Math.min(...sparkline) || 1)) * 30}`).join(' L ')}`}
-                            fill="none"
-                            stroke={isUp ? "#22c55e" : "#ef4444"}
-                            strokeWidth="2.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Header */}
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Endeksler</h1>
-          <p className="text-muted-foreground text-sm mt-1">Borsa İstanbul endeksleri ve performansları</p>
-        </div>
 
         {/* Index Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
