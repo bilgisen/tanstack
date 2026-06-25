@@ -17,6 +17,15 @@ type CompanyRow = {
   diff_percent?: number;
 };
 
+const BIST30_TICKERS = [
+  'KRDMD', 'MGROS', 'PETKM', 'PGSUS', 'SAHOL',
+  'SASA', 'SISE', 'TAVHL', 'TCELL', 'THYAO',
+  'TOASO', 'TRALT', 'TTKOM', 'TUPRS', 'VAKBN', 'YKBNK',
+  'AKBNK', 'ARCLK', 'ASELS', 'BIMAS', 'DOHOL',
+  'EKGYO', 'ENKAI', 'EREGL', 'FROTO', 'GARAN',
+  'HALKB', 'ISCTR', 'KCHOL', 'KOZAL', 'KOZAA',
+]
+
 function SirketlerPage() {
   const navigate = useNavigate()
   const [companies, setCompanies] = useState<CompanyRow[]>([])
@@ -31,23 +40,8 @@ function SirketlerPage() {
 
     async function fetchCompanies() {
       const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev"
-      const compUrl = import.meta.env.VITE_COMP_API_URL || "https://comp-ef958063.fastapicloud.dev"
 
-      let tickerList: string[] = []
-      try {
-        const compRes = await fetch(`${compUrl}/api/v1/companies`)
-        if (compRes.ok) {
-          const compData = await compRes.json()
-          if (compData && compData.companies) {
-            tickerList = compData.companies.map((c: any) => c.ticker?.toUpperCase()).filter(Boolean)
-          }
-        }
-      } catch (e) {
-        console.error('Şirketler: Failed fetching companies list:', e)
-        tickerList = Object.keys(companyNames)
-      }
-
-      const rows: CompanyRow[] = tickerList.map(ticker => ({
+      const rows: CompanyRow[] = BIST30_TICKERS.map(ticker => ({
         ticker,
         name: (companyNames as Record<string, string>)[ticker] || ticker,
       }))
@@ -223,7 +217,7 @@ function SirketlerPage() {
         {/* Header */}
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Şirketler</h1>
-          <p className="text-muted-foreground text-sm mt-1">Borsa İstanbul'daki tüm şirketler ({companies.length})</p>
+          <p className="text-muted-foreground text-sm mt-1">Borsa İstanbul'un öne çıkan şirketleri (BIST 30)</p>
         </div>
 
         {/* Search */}
