@@ -15,13 +15,13 @@ export function Bottombar() {
   ];
 
   return (
-    <footer className="h-8 border-t dark:border-zinc-900 border-zinc-200 dark:bg-zinc-950 bg-white flex items-center justify-between px-4 shrink-0 select-none transition-colors z-10">
-      <div className="flex items-center text-xs dark:text-zinc-500 text-zinc-400">
-        <span className="font-semibold text-zinc-500 dark:text-zinc-400 mr-1.5">SumoTerminal</span>
+    <footer className="h-8 border-t border-white/10 bg-background/50 backdrop-blur-xl flex items-center justify-between px-4 shrink-0 select-none transition-colors z-10">
+      <div className="flex items-center text-xs text-muted-foreground">
+        <span className="font-semibold text-foreground/70 mr-1.5">Jetborsa</span>
         <span>© 2026 | Yapay Zekayla Güçlendirilmiş Finans Platformu</span>
       </div>
 
-      <div className="flex items-center gap-1 h-full dark:bg-zinc-950 bg-white relative shrink-0">
+      <div className="flex items-center gap-1 h-full relative shrink-0">
         {themeOptions.map((opt) => {
           const Icon = opt.icon;
           const isActive = theme === opt.value;
@@ -30,10 +30,10 @@ export function Bottombar() {
               key={opt.value}
               onClick={() => setTheme(opt.value)}
               title={opt.label}
-              className={`w-6 h-6 flex items-center justify-center rounded transition-all ${
+              className={`w-6 h-6 flex items-center justify-center rounded transition-all cursor-pointer ${
                 isActive
-                  ? "dark:bg-zinc-900 bg-zinc-100 text-emerald-500 shadow-sm"
-                  : "dark:text-zinc-500 text-zinc-400 dark:hover:text-zinc-350 hover:text-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-900/50"
+                  ? "bg-primary/10 text-primary shadow-sm"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
               }`}
             >
               <Icon size={12} className={isActive ? "stroke-[2.5]" : "stroke-[2]"} />
@@ -44,4 +44,3 @@ export function Bottombar() {
     </footer>
   );
 }
-

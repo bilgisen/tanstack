@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { CommandPalette } from "../ui/CommandPalette";
 import { useLocation } from "@tanstack/react-router";
 import { Topbar } from "./Topbar";
+import { Bottombar } from "./Bottombar";
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
@@ -21,6 +22,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       }`}>
         {children}
       </main>
+      <Bottombar />
       <CommandPalette />
     </div>
   );
