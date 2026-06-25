@@ -30,7 +30,7 @@ export function Topbar() {
         {/* Left: Branding & Navigation */}
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2 select-none hover:opacity-95 transition-all">
-            <ResponsiveLogo mobileSize={28} className="text-foreground shrink-0" />
+            <ResponsiveLogo mobileSize={26} className="text-foreground shrink-0" />
           </Link>
           
           {/* Desktop Navigation */}
@@ -52,15 +52,6 @@ export function Topbar() {
         {/* Right: Actions */}
         <div className="flex items-center gap-2">
           
-          {/* Mobile: Hamburger Menu */}
-          <button
-            onClick={() => setDrawerOpen(true)}
-            className="md:hidden w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted transition-colors cursor-pointer"
-            aria-label="Menüyü aç"
-          >
-            <Menu size={20} className="text-muted-foreground" />
-          </button>
-
           {/* Avatar (logged in only) */}
           {user && (
             <button
@@ -71,6 +62,15 @@ export function Topbar() {
               <ProfileAvatar user={user} size="sm" />
             </button>
           )}
+
+          {/* Mobile: Hamburger Menu (far right) */}
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="md:hidden w-9 h-9 flex items-center justify-center rounded-full hover:bg-muted transition-colors cursor-pointer"
+            aria-label="Menüyü aç"
+          >
+            <Menu size={22} className="text-muted-foreground" />
+          </button>
         </div>
       </header>
 

@@ -84,10 +84,10 @@ export function MobileDrawer({
                 key={item.id}
                 to={item.path}
                 onClick={onClose}
-                className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all group"
+                className="flex items-center justify-between px-4 py-3.5 rounded-xl text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all group"
               >
                 <div className="flex items-center gap-3">
-                  <item.icon size={18} className="shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <item.icon size={20} className="shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
                   <span>{item.label}</span>
                 </div>
                 <ChevronRight size={14} className="text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
@@ -104,10 +104,10 @@ export function MobileDrawer({
               <Link
                 to="/takip-listesi"
                 onClick={onClose}
-                className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all group mb-1"
+                className="flex items-center justify-between px-4 py-3.5 rounded-xl text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all group mb-1"
               >
                 <div className="flex items-center gap-3">
-                  <Star size={18} className="shrink-0 text-amber-400" />
+                  <Star size={20} className="shrink-0 text-amber-400" />
                   <span>Takip Listem</span>
                 </div>
                 <ChevronRight size={14} className="text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
@@ -123,9 +123,9 @@ export function MobileDrawer({
                 onClose();
                 onLogout();
               }}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-destructive hover:bg-destructive/10 transition-all"
+              className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-base font-medium text-destructive hover:bg-destructive/10 transition-all"
             >
-              <LogOut size={18} className="shrink-0" />
+              <LogOut size={20} className="shrink-0" />
               <span>Çıkış Yap</span>
             </button>
           ) : (
@@ -134,7 +134,7 @@ export function MobileDrawer({
                 onClose();
                 onLogin();
               }}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-primary hover:bg-primary/10 transition-all"
+              className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-base font-medium text-primary hover:bg-primary/10 transition-all"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -151,9 +151,9 @@ export function MobileDrawer({
             <Link
               to="/panel/profil"
               onClick={onClose}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-primary hover:bg-primary/10 transition-all mt-1"
+              className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-base font-medium text-primary hover:bg-primary/10 transition-all mt-1"
             >
-              <Sparkles size={18} className="shrink-0" />
+              <Sparkles size={20} className="shrink-0" />
               <span>Yükselt</span>
             </Link>
           )}
