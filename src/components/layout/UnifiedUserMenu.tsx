@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
 import { User, LogOut, Sun, Moon, Monitor } from "lucide-react";
 import { ProfileAvatar } from "./ProfileAvatar";
-import { useUIStore } from "../../store/ui";
 import type { Theme } from "../../store/ui";
 
 export interface UnifiedUserMenuProps {
@@ -37,8 +35,6 @@ export function UnifiedUserMenu({
   showAnonymousActions = false,
   onAnonymousLogin,
 }: UnifiedUserMenuProps): React.JSX.Element {
-  const navigate = useNavigate();
-  const { theme, setTheme } = useUIStore();
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [activeIndex, setActiveIndex] = useState<number>(-1);
@@ -131,7 +127,7 @@ export function UnifiedUserMenu({
 
   // Handle theme change and close menu
   const handleThemeChange = (newTheme: Theme) => {
-    setTheme(newTheme);
+    onThemeChange(newTheme);
     setActiveIndex(-1);
     onClose();
   };
@@ -147,7 +143,7 @@ export function UnifiedUserMenu({
   const handleProfileNavigate = () => {
     setActiveIndex(-1);
     onClose();
-    navigate({ to: "/panel/profil" });
+    onNavigate("/panel/profil");
   };
 
   // Theme options

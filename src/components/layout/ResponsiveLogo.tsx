@@ -14,10 +14,21 @@ function ResponsiveLogo({
   className, 
   ...props 
 }: ResponsiveLogoProps) {
-  const [isMobile, setIsMobile] = useState<boolean>(() => window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState<boolean>(() => {
+    // SSR safety: default to false (desktop) during server-side rendering
+    if (typeof window === 'undefined') {
+      return false;
+    }
+    return window.innerWidth < 768;
+  });
   const debounceTimerRef = useRef<number | null>(null);
 
   const handleResize = useCallback(() => {
+    // SSR safety: only run on client-side
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     // Clear existing debounce timer
     if (debounceTimerRef.current) {
       window.clearTimeout(debounceTimerRef.current);
@@ -30,6 +41,11 @@ function ResponsiveLogo({
   }, []);
 
   useEffect(() => {
+    // SSR safety: only run on client-side
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     // Set initial state based on current window width
     setIsMobile(window.innerWidth < 768);
 
