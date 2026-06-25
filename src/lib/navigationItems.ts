@@ -2,9 +2,7 @@ import type { ElementType } from "react";
 import { 
   ChartNoAxesCombined, 
   Factory, 
-  Building2, 
-  Rss, 
-  FileText 
+  Building2
 } from "lucide-react";
 
 export interface MenuItem {
@@ -35,20 +33,6 @@ export const navigationItems: MenuItem[] = [
     label: "Şirketler",
     icon: Building2,
     path: "/sirketler",
-    showAsIconOnMobile: true,
-  },
-  {
-    id: "haberler",
-    label: "Haberler",
-    icon: Rss,
-    path: "/haberler",
-    showAsIconOnMobile: true,
-  },
-  {
-    id: "raporlar",
-    label: "Raporlar",
-    icon: FileText,
-    path: "/raporlar",
     showAsIconOnMobile: true,
   },
 ];
