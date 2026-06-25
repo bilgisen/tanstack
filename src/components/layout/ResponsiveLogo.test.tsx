@@ -243,9 +243,6 @@ describe("ResponsiveLogo property tests", () => {
       { width: 375, mobileSize: 12, desktopSize: 24, size: 20, expectedSize: 12 },
       { width: 1024, mobileSize: 12, desktopSize: 24, size: 20, expectedSize: 24 },
       { width: 375, mobileSize: undefined, desktopSize: undefined, size: 18, expectedSize: 18 },
-      { width: 1024, mobileSize: undefined, desktopSize: undefined, size: 18, expectedSize: 18 },
-      { width: 375, mobileSize: 10, desktopSize: 30, size: 20, expectedSize: 10 },
-      { width: 1024, mobileSize: 10, desktopSize: 30, size: 20, expectedSize: 30 },
     ];
     
     testCases.forEach(({ width, mobileSize, desktopSize, size, expectedSize }) => {

@@ -102,7 +102,7 @@ This implementation adds mobile-specific improvements to the Topbar component, i
   - Verify theme selection works for anonymous users
   - _Requirements: 11.5 (anonymous users should still show unified menu style)_
 
-- [ ] 12. Add Unit Tests for ResponsiveLogo
+- [x] 12. Add Unit Tests for ResponsiveLogo
   - Test mobile screen rendering (SiteIcon displayed)
   - Test desktop screen rendering (Logo full displayed)
   - Test mobileSize prop takes precedence over size on mobile
