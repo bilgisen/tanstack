@@ -68,7 +68,7 @@ export function HTDashboard({ collapsed = false }: { collapsed?: boolean }) {
   if (collapsed) {
     return (
       <Link
-        to="/panel/profil"
+        to="/profil"
         className="relative group w-9 h-9 flex items-center justify-center rounded-lg hover:bg-muted/40 transition-all duration-200 cursor-pointer border border-border/30"
         title={`Bakiye: ${data.availableHT.toLocaleString()} HT (${data.tierDisplayName})`}
       >
@@ -129,7 +129,7 @@ export function HTDashboard({ collapsed = false }: { collapsed?: boolean }) {
 
       {/* Profile/Upgrade CTA */}
       <Link
-        to="/panel/profil"
+        to="/profil"
         className="flex items-center justify-between w-full bg-muted/40 hover:bg-muted/80 text-[11px] font-semibold text-foreground rounded-xl py-1.5 px-3 border border-border/60 hover:border-border transition-all duration-200 cursor-pointer shadow-3xs active:scale-[0.98] relative z-10"
       >
         <span className="flex items-center gap-1.5">

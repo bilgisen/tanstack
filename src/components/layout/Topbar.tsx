@@ -3,7 +3,6 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { ResponsiveLogo } from "./ResponsiveLogo";
 import { Menu } from "lucide-react";
 import { MobileDrawer } from "./MobileDrawer";
-import { navigationItems } from "@/lib/navigationItems";
 import { useAuth } from "../../hooks/useAuth";
 import { ProfileAvatar } from "./ProfileAvatar";
 
@@ -19,7 +18,7 @@ export function Topbar() {
 
   const handleAvatarClick = () => {
     if (user) {
-      navigate({ to: "/panel/profil" });
+      navigate({ to: "/profil" });
     }
   };
 
@@ -27,26 +26,11 @@ export function Topbar() {
     <>
       <header className="w-full h-14 border-b border-white/10 bg-background/50 backdrop-blur-xl px-4 sm:px-6 flex items-center justify-between shrink-0 select-none z-30">
         
-        {/* Left: Branding & Navigation */}
+        {/* Left: Branding */}
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2 select-none hover:opacity-95 transition-all">
             <ResponsiveLogo mobileSize={26} className="text-foreground shrink-0" />
           </Link>
-          
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1">
-            {navigationItems.map((item) => (
-              <Link
-                key={item.id}
-                to={item.path}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
-                title={item.label}
-              >
-                <item.icon size={16} className="shrink-0" />
-                <span>{item.label}</span>
-              </Link>
-            ))}
-          </nav>
         </div>
 
         {/* Right: Actions */}
@@ -63,10 +47,10 @@ export function Topbar() {
             </button>
           )}
 
-          {/* Mobile: Hamburger Menu (far right) */}
+          {/* Hamburger Menu */}
           <button
             onClick={() => setDrawerOpen(true)}
-            className="md:hidden w-9 h-9 flex items-center justify-center rounded-full hover:bg-muted transition-colors cursor-pointer"
+            className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-muted transition-colors cursor-pointer"
             aria-label="Menüyü aç"
           >
             <Menu size={22} className="text-muted-foreground" />

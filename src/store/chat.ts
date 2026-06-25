@@ -164,10 +164,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
         if (!preCheckData.ok) {
           let errorMsg = "";
           if (preCheckData.error === 'MODEL_NOT_ALLOWED') {
-            errorMsg = `Seçtiğiniz model olan **${selectedModelId.toUpperCase()}** bu abonelik paketinde kullanılamamaktadır. Lütfen [Profil ve Abonelik Paneli](/panel/profil) sayfasından paketinizi yükseltin.`;
+            errorMsg = `Seçtiğiniz model olan **${selectedModelId.toUpperCase()}** bu abonelik paketinde kullanılamamaktadır. Lütfen [Profil ve Abonelik Paneli](/profil) sayfasından paketinizi yükseltin.`;
           } else if (preCheckData.error === 'INSUFFICIENT_HT') {
             const availableHT = preCheckData.availableHT || 0;
-            errorMsg = `Yetersiz HToken bakiyesi! Mevcut bakiyeniz: **${availableHT.toLocaleString()} HT**. Chatbot'u kullanmaya devam edebilmek için lütfen [Profil ve Abonelik Paneli](/panel/profil) sayfasından paketinizi yükseltin veya ek kredi satın alın.`;
+            errorMsg = `Yetersiz HToken bakiyesi! Mevcut bakiyeniz: **${availableHT.toLocaleString()} HT**. Chatbot'u kullanmaya devam edebilmek için lütfen [Profil ve Abonelik Paneli](/profil) sayfasından paketinizi yükseltin veya ek kredi satın alın.`;
           } else {
             errorMsg = "Sorgunuz bakiye yetersizliği veya yetkilendirme hatası nedeniyle işlenemedi. Lütfen profilinizden bakiye durumunuzu kontrol edin.";
           }

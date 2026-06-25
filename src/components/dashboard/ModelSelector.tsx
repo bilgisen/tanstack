@@ -59,7 +59,7 @@ export function ModelSelector() {
   const handleSelectModel = (model: ModelOption) => {
     if (!model.accessible) {
       // If locked, redirect to upgrade/profile
-      navigate({ to: "/panel/profil" });
+      navigate({ to: "/profil" });
       setIsOpen(false);
       return;
     }

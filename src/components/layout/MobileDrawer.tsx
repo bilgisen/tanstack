@@ -149,7 +149,7 @@ export function MobileDrawer({
           {/* Yükselt (Profil) */}
           {isLoggedIn && (
             <Link
-              to="/panel/profil"
+              to="/profil"
               onClick={onClose}
               className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-base font-medium text-primary hover:bg-primary/10 transition-all mt-1"
             >

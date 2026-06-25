@@ -143,7 +143,7 @@ export function UnifiedUserMenu({
   const handleProfileNavigate = () => {
     setActiveIndex(-1);
     onClose();
-    onNavigate("/panel/profil");
+    onNavigate("/profil");
   };
 
   // Theme options
@@ -198,7 +198,7 @@ export function UnifiedUserMenu({
                 onClick={() => {
                   setActiveIndex(-1);
                   onClose();
-                  onNavigate("/panel/profil");
+                  onNavigate("/profil");
                 }}
                 role="menuitem"
                 tabIndex={activeIndex === 1 ? 0 : -1}

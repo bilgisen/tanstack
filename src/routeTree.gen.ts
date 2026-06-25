@@ -12,11 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TakipListesiRouteImport } from './routes/takip-listesi'
 import { Route as SirketlerRouteImport } from './routes/sirketler'
 import { Route as SektorlerRouteImport } from './routes/sektorler'
+import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as PanelRouteImport } from './routes/panel'
 import { Route as NasilCalisirRouteImport } from './routes/nasil-calisir'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as EndekslerRouteImport } from './routes/endeksler'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProfilIndexRouteImport } from './routes/profil.index'
 import { Route as PanelIndexRouteImport } from './routes/panel.index'
 import { Route as SektorlerSlugRouteImport } from './routes/sektorler.$slug'
 import { Route as PanelProfilRouteImport } from './routes/panel.profil'
@@ -46,6 +48,11 @@ const SektorlerRoute = SektorlerRouteImport.update({
   path: '/sektorler',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfilRoute = ProfilRouteImport.update({
+  id: '/profil',
+  path: '/profil',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PanelRoute = PanelRouteImport.update({
   id: '/panel',
   path: '/panel',
@@ -70,6 +77,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ProfilIndexRoute = ProfilIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ProfilRoute,
 } as any)
 const PanelIndexRoute = PanelIndexRouteImport.update({
   id: '/',
@@ -143,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/nasil-calisir': typeof NasilCalisirRoute
   '/panel': typeof PanelRouteWithChildren
+  '/profil': typeof ProfilRouteWithChildren
   '/sektorler': typeof SektorlerRouteWithChildren
   '/sirketler': typeof SirketlerRoute
   '/takip-listesi': typeof TakipListesiRoute
@@ -151,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/panel/profil': typeof PanelProfilRoute
   '/sektorler/$slug': typeof SektorlerSlugRoute
   '/panel/': typeof PanelIndexRoute
+  '/profil/': typeof ProfilIndexRoute
   '/api/ai/charge': typeof ApiAiChargeRoute
   '/api/ai/pre-check': typeof ApiAiPreCheckRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -173,6 +187,7 @@ export interface FileRoutesByTo {
   '/panel/profil': typeof PanelProfilRoute
   '/sektorler/$slug': typeof SektorlerSlugRoute
   '/panel': typeof PanelIndexRoute
+  '/profil': typeof ProfilIndexRoute
   '/api/ai/charge': typeof ApiAiChargeRoute
   '/api/ai/pre-check': typeof ApiAiPreCheckRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -189,6 +204,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/nasil-calisir': typeof NasilCalisirRoute
   '/panel': typeof PanelRouteWithChildren
+  '/profil': typeof ProfilRouteWithChildren
   '/sektorler': typeof SektorlerRouteWithChildren
   '/sirketler': typeof SirketlerRoute
   '/takip-listesi': typeof TakipListesiRoute
@@ -197,6 +213,7 @@ export interface FileRoutesById {
   '/panel/profil': typeof PanelProfilRoute
   '/sektorler/$slug': typeof SektorlerSlugRoute
   '/panel/': typeof PanelIndexRoute
+  '/profil/': typeof ProfilIndexRoute
   '/api/ai/charge': typeof ApiAiChargeRoute
   '/api/ai/pre-check': typeof ApiAiPreCheckRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -214,6 +231,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/nasil-calisir'
     | '/panel'
+    | '/profil'
     | '/sektorler'
     | '/sirketler'
     | '/takip-listesi'
@@ -222,6 +240,7 @@ export interface FileRouteTypes {
     | '/panel/profil'
     | '/sektorler/$slug'
     | '/panel/'
+    | '/profil/'
     | '/api/ai/charge'
     | '/api/ai/pre-check'
     | '/api/auth/$'
@@ -244,6 +263,7 @@ export interface FileRouteTypes {
     | '/panel/profil'
     | '/sektorler/$slug'
     | '/panel'
+    | '/profil'
     | '/api/ai/charge'
     | '/api/ai/pre-check'
     | '/api/auth/$'
@@ -259,6 +279,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/nasil-calisir'
     | '/panel'
+    | '/profil'
     | '/sektorler'
     | '/sirketler'
     | '/takip-listesi'
@@ -267,6 +288,7 @@ export interface FileRouteTypes {
     | '/panel/profil'
     | '/sektorler/$slug'
     | '/panel/'
+    | '/profil/'
     | '/api/ai/charge'
     | '/api/ai/pre-check'
     | '/api/auth/$'
@@ -283,6 +305,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   NasilCalisirRoute: typeof NasilCalisirRoute
   PanelRoute: typeof PanelRouteWithChildren
+  ProfilRoute: typeof ProfilRouteWithChildren
   SektorlerRoute: typeof SektorlerRouteWithChildren
   SirketlerRoute: typeof SirketlerRoute
   TakipListesiRoute: typeof TakipListesiRoute
@@ -316,6 +339,13 @@ declare module '@tanstack/react-router' {
       path: '/sektorler'
       fullPath: '/sektorler'
       preLoaderRoute: typeof SektorlerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profil': {
+      id: '/profil'
+      path: '/profil'
+      fullPath: '/profil'
+      preLoaderRoute: typeof ProfilRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/panel': {
@@ -352,6 +382,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/profil/': {
+      id: '/profil/'
+      path: '/'
+      fullPath: '/profil/'
+      preLoaderRoute: typeof ProfilIndexRouteImport
+      parentRoute: typeof ProfilRoute
     }
     '/panel/': {
       id: '/panel/'
@@ -465,6 +502,17 @@ const PanelRouteChildren: PanelRouteChildren = {
 
 const PanelRouteWithChildren = PanelRoute._addFileChildren(PanelRouteChildren)
 
+interface ProfilRouteChildren {
+  ProfilIndexRoute: typeof ProfilIndexRoute
+}
+
+const ProfilRouteChildren: ProfilRouteChildren = {
+  ProfilIndexRoute: ProfilIndexRoute,
+}
+
+const ProfilRouteWithChildren =
+  ProfilRoute._addFileChildren(ProfilRouteChildren)
+
 interface SektorlerRouteChildren {
   SektorlerSlugRoute: typeof SektorlerSlugRoute
 }
@@ -483,6 +531,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   NasilCalisirRoute: NasilCalisirRoute,
   PanelRoute: PanelRouteWithChildren,
+  ProfilRoute: ProfilRouteWithChildren,
   SektorlerRoute: SektorlerRouteWithChildren,
   SirketlerRoute: SirketlerRoute,
   TakipListesiRoute: TakipListesiRoute,

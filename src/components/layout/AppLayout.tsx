@@ -8,13 +8,14 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const isLanding = location.pathname === "/";
   const isPanel = location.pathname.startsWith("/panel");
+  const isProfile = location.pathname.startsWith("/profil");
   const isPublicChat = location.pathname.startsWith("/sektorler") || location.pathname.startsWith("/sirketler") || location.pathname.startsWith("/endeksler");
 
   return (
     <div className="h-screen w-full flex flex-col bg-background text-foreground overflow-hidden font-sans transition-colors">
       <Topbar />
       <main className={`flex-1 bg-background relative z-0 ${
-        isLanding 
+        isLanding || isProfile
           ? "overflow-auto" 
           : isPanel || isPublicChat
             ? "overflow-hidden p-0 flex flex-col" 
