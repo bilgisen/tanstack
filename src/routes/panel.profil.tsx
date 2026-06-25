@@ -1,8 +1,8 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { TIER_CONFIG, EXTRA_HT_PRICING, type Tier } from '../lib/tiers'
-import { Coins, Sparkles, Zap, Shield, Check, RefreshCw, AlertCircle, Award } from 'lucide-react'
+import { Coins, Sparkles, Zap, Shield, Check, RefreshCw, AlertCircle, Award, LogOut } from 'lucide-react'
 
 export const Route = createFileRoute('/panel/profil')({
   component: ProfilePage,
@@ -20,7 +20,8 @@ interface UserCredits {
 }
 
 function ProfilePage() {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
   const [credits, setCredits] = useState<UserCredits | null>(null)
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
@@ -161,6 +162,17 @@ function ProfilePage() {
               ID: {user?.id?.substring(0, 8)}...
             </span>
           </div>
+
+          <button
+            onClick={async () => {
+              await logout()
+              navigate({ to: '/' })
+            }}
+            className="mt-4 flex items-center gap-2 text-xs font-semibold text-destructive hover:text-destructive/80 hover:bg-destructive/10 px-4 py-2 rounded-xl transition-all cursor-pointer"
+          >
+            <LogOut size={14} />
+            <span>Çıkış Yap</span>
+          </button>
 
           <div className="w-full border-t border-border/30 my-5" />
 

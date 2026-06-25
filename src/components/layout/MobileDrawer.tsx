@@ -5,10 +5,10 @@ import {
   Sparkles,
   Star,
   LogOut,
-  LogIn,
   Sun,
   Moon,
   Monitor,
+  ChevronRight,
 } from "lucide-react";
 import { navigationItems } from "@/lib/navigationItems";
 import { useUIStore } from "../../store/ui";
@@ -55,45 +55,48 @@ export function MobileDrawer({
     <div className="fixed inset-0 z-50 md:hidden">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
         onClick={onClose}
       />
 
       {/* Drawer */}
       <div
         ref={drawerRef}
-        className="absolute right-0 top-0 bottom-0 w-72 bg-background border-l border-border shadow-2xl flex flex-col animate-in slide-in-from-right duration-300"
+        className="absolute right-0 top-0 bottom-0 w-72 bg-background/95 backdrop-blur-xl border-l border-white/10 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border/50 shrink-0">
-          <span className="text-sm font-bold text-foreground">Menü</span>
+        <div className="flex items-center justify-between p-5 border-b border-white/10 shrink-0">
+          <span className="text-sm font-bold text-foreground tracking-tight">Menü</span>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted transition-colors cursor-pointer"
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted/50 transition-colors cursor-pointer"
           >
             <X size={18} className="text-muted-foreground" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto py-2 px-3 flex flex-col">
+        <div className="flex-1 overflow-y-auto py-3 px-3 flex flex-col">
           {/* Navigation Items */}
-          <div className="flex flex-col gap-1 mb-2">
+          <div className="flex flex-col gap-0.5 mb-3">
             {navigationItems.map((item) => (
               <Link
                 key={item.id}
                 to={item.path}
                 onClick={onClose}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
+                className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all group"
               >
-                <item.icon size={18} className="shrink-0" />
-                <span>{item.label}</span>
+                <div className="flex items-center gap-3">
+                  <item.icon size={18} className="shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <span>{item.label}</span>
+                </div>
+                <ChevronRight size={14} className="text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
               </Link>
             ))}
           </div>
 
           {/* Separator */}
-          <div className="border-t border-border/50 my-1" />
+          <div className="border-t border-white/10 my-1" />
 
           {/* Takip Listesi (logged in only) */}
           {isLoggedIn && (
@@ -101,12 +104,15 @@ export function MobileDrawer({
               <Link
                 to="/takip-listesi"
                 onClick={onClose}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all mb-1"
+                className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all group mb-1"
               >
-                <Star size={18} className="shrink-0" />
-                <span>Takip Listem</span>
+                <div className="flex items-center gap-3">
+                  <Star size={18} className="shrink-0 text-amber-400" />
+                  <span>Takip Listem</span>
+                </div>
+                <ChevronRight size={14} className="text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
               </Link>
-              <div className="border-t border-border/50 my-1" />
+              <div className="border-t border-white/10 my-1" />
             </>
           )}
 
@@ -117,7 +123,7 @@ export function MobileDrawer({
                 onClose();
                 onLogout();
               }}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-destructive hover:bg-destructive/10 transition-all"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-destructive hover:bg-destructive/10 transition-all"
             >
               <LogOut size={18} className="shrink-0" />
               <span>Çıkış Yap</span>
@@ -128,7 +134,7 @@ export function MobileDrawer({
                 onClose();
                 onLogin();
               }}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-primary hover:bg-primary/10 transition-all"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-primary hover:bg-primary/10 transition-all"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -145,7 +151,7 @@ export function MobileDrawer({
             <Link
               to="/panel/profil"
               onClick={onClose}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-primary hover:bg-primary/10 transition-all mt-1"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-primary hover:bg-primary/10 transition-all mt-1"
             >
               <Sparkles size={18} className="shrink-0" />
               <span>Yükselt</span>
@@ -156,14 +162,14 @@ export function MobileDrawer({
           <div className="flex-1" />
 
           {/* Separator */}
-          <div className="border-t border-border/50 my-1" />
+          <div className="border-t border-white/10 my-1" />
 
           {/* Theme Changer */}
-          <div className="px-3 py-2">
-            <div className="text-[10px] font-bold text-muted-foreground/65 uppercase tracking-wider mb-2">
+          <div className="px-3 py-3">
+            <div className="text-[10px] font-bold text-muted-foreground/65 uppercase tracking-wider mb-2 px-1">
               Tema
             </div>
-            <div className="flex gap-1">
+            <div className="flex gap-1 bg-muted/30 rounded-xl p-1">
               {themeOptions.map((opt) => {
                 const Icon = opt.icon;
                 const isActive = theme === opt.value;
@@ -174,8 +180,8 @@ export function MobileDrawer({
                     title={opt.label}
                     className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                       isActive
-                        ? "bg-primary/10 text-primary"
-                        : "text-muted-foreground hover:bg-muted/50"
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     <Icon size={14} />
