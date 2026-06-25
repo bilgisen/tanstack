@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { User, LogOut, Sun, Moon, Monitor } from "lucide-react";
+import { User, LogOut, Sun, Moon, Monitor, Star, Sparkles } from "lucide-react";
 import { ProfileAvatar } from "./ProfileAvatar";
 import type { Theme } from "../../store/ui";
 
@@ -192,6 +192,38 @@ export function UnifiedUserMenu({
                 <span>Profil</span>
               </button>
 
+              {/* Yükselt */}
+              <button
+                ref={(el) => (menuItemsRef.current[1] = el)}
+                onClick={() => {
+                  setActiveIndex(-1);
+                  onClose();
+                  onNavigate("/panel/profil");
+                }}
+                role="menuitem"
+                tabIndex={activeIndex === 1 ? 0 : -1}
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs rounded-xl transition-all font-medium text-left cursor-pointer text-primary hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <Sparkles size={14} className="shrink-0" />
+                <span>Yükselt</span>
+              </button>
+
+              {/* Takip Listesi */}
+              <button
+                ref={(el) => (menuItemsRef.current[2] = el)}
+                onClick={() => {
+                  setActiveIndex(-1);
+                  onClose();
+                  onNavigate("/takip-listesi");
+                }}
+                role="menuitem"
+                tabIndex={activeIndex === 2 ? 0 : -1}
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs rounded-xl transition-all font-medium text-left cursor-pointer text-muted-foreground hover:text-foreground hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <Star size={14} className="shrink-0" />
+                <span>Takip Listesi</span>
+              </button>
+
               <div className="border-t border-border/30 my-1" />
             </>
           )}
@@ -203,13 +235,14 @@ export function UnifiedUserMenu({
 
           {themeOptions.map((themeOption, index) => {
             const isSelected = currentTheme === themeOption.theme;
+            const menuIndex = index + (showAnonymousActions ? 0 : 3); // 3 because we added Profil, Yükselt, Takip Listesi
             return (
               <button
                 key={themeOption.id}
-                ref={(el) => (menuItemsRef.current[index + (showAnonymousActions ? 0 : 1)] = el)}
+                ref={(el) => (menuItemsRef.current[menuIndex] = el)}
                 onClick={() => handleThemeChange(themeOption.theme)}
                 role="menuitem"
-                tabIndex={activeIndex === index + (showAnonymousActions ? 0 : 1) ? 0 : -1}
+                tabIndex={activeIndex === menuIndex ? 0 : -1}
                 className={`w-full flex items-center justify-between px-3 py-2 text-xs rounded-xl transition-all font-medium text-left cursor-pointer ${
                   isSelected
                     ? "bg-primary/10 text-primary font-semibold"
@@ -257,10 +290,10 @@ export function UnifiedUserMenu({
           {/* Çıkış Yap */}
           {!showAnonymousActions && (
             <button
-              ref={(el) => (menuItemsRef.current[themeOptions.length + 1] = el)}
+              ref={(el) => (menuItemsRef.current[themeOptions.length + 3] = el)}
               onClick={handleLogout}
               role="menuitem"
-              tabIndex={activeIndex === themeOptions.length + 1 ? 0 : -1}
+              tabIndex={activeIndex === themeOptions.length + 3 ? 0 : -1}
               className="w-full flex items-center gap-2 px-3 py-2 text-xs rounded-xl transition-all font-medium text-left cursor-pointer text-destructive hover:bg-destructive/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <LogOut size={14} className="shrink-0" />

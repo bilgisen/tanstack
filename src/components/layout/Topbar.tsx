@@ -78,30 +78,9 @@ export function Topbar() {
       {/* Right: Actions */}
       <div className="flex items-center gap-2">
         
-        {/* Yükselt Button - only for logged in users */}
-        {user && (
-          <Link 
-            to="/panel/profil" 
-            className="px-4 py-1.5 rounded-full bg-primary hover:bg-primary/95 text-white text-[11px] sm:text-xs font-semibold tracking-tight transition-all duration-200 shadow-sm shrink-0 text-center"
-          >
-            Yükselt
-          </Link>
-        )}
-
-        {/* Star - Takip Listesi (logged-in only) */}
-        {user && (
-          <Link 
-            to="/takip-listesi"
-            className="w-8 h-8 flex items-center justify-center rounded-full text-foreground hover:bg-muted/50 transition-all shrink-0"
-            title="Takip Listem"
-          >
-            <Star size={16} />
-          </Link>
-        )}
-
         {/* Unified User Menu for all users */}
         <UnifiedUserMenu
-          user={{
+          user={user || {
             user_metadata: {
               full_name: "Misafir",
               avatar_url: undefined,
@@ -112,7 +91,7 @@ export function Topbar() {
           onToggle={handleAvatarClick}
           onClose={handleAvatarClose}
           onLogout={handleLogout}
-          onNavigate={navigate}
+          onNavigate={(path) => navigate({ to: path })}
           onThemeChange={handleThemeChange}
           currentTheme={theme}
           showAnonymousActions={!user}
