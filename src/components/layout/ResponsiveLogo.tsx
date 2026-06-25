@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Logo, SiteIcon } from "./Logo";
+import { Logo } from "./Logo";
 
 interface ResponsiveLogoProps extends React.SVGProps<SVGSVGElement> {
   size?: number;
@@ -65,15 +65,14 @@ function ResponsiveLogo({
   if (isMobile) {
     const effectiveSize = mobileSize ?? size;
     return (
-      <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
-        <SiteIcon
-          size={effectiveSize}
-          className="text-white"
-          role="img"
-          aria-label="Company logo"
-          {...props}
-        />
-      </div>
+      <Logo
+        variant="full"
+        size={effectiveSize}
+        className={className}
+        role="img"
+        aria-label="Company logo"
+        {...props}
+      />
     );
   }
 
