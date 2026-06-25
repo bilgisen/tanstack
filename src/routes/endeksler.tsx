@@ -21,19 +21,17 @@ type IndexData = {
   id: string;
   title: string;
   code: string;
-  value: number;
-  absChange: number;
-  pctChange: number;
+  last_price: number;
+  diff_percent: number;
   up: boolean;
   sparkline?: number[];
 };
 
 function EndekslerPage() {
   const [indices, setIndices] = useState<IndexData[]>([
-    { id: 'bist100', title: 'BIST 100', code: 'XU100', value: 10245.50, absChange: 112.50, pctChange: 1.10, up: true },
-    { id: 'bist30', title: 'BIST 30', code: 'XU030', value: 11250.40, absChange: 124.20, pctChange: 1.20, up: true },
-    { id: 'bist500', title: 'BIST 500', code: 'XU500', value: 12540.80, absChange: 182.50, pctChange: 1.45, up: true },
-    { id: 'bistbanka', title: 'BIST Banka', code: 'XBANK', value: 14320.10, absChange: -45.30, pctChange: -0.30, up: false },
+    { id: 'bist100', title: 'BIST 100', code: 'XU100', last_price: 10245.50, diff_percent: 1.10, up: true },
+    { id: 'bist30', title: 'BIST 30', code: 'XU030', last_price: 11250.40, diff_percent: 1.20, up: true },
+    { id: 'bist500', title: 'BIST 500', code: 'XU500', last_price: 12540.80, diff_percent: 1.45, up: true },
   ])
   const [loading, setLoading] = useState(true)
   const { setGlobalPrompt, openRightSidebar } = useUIStore()
@@ -49,30 +47,33 @@ function EndekslerPage() {
         if (indexRes.ok) {
           const indexJson = await indexRes.json()
           if (indexJson && Array.isArray(indexJson.data)) {
-            const liveIndices = indexJson.data.map((idx: any) => {
-              const value = typeof idx.value === 'string' ? parseFloat(idx.value.replace(',', '.')) : (typeof idx.value === 'number' ? idx.value : 0)
-              const absChange = typeof idx.change === 'string' ? parseFloat(idx.change.replace(',', '.')) : (typeof idx.change === 'number' ? idx.change : 0)
-              const pctChange = typeof idx.changePercent === 'string' ? parseFloat(idx.changePercent.replace(',', '.')) : (typeof idx.changePercent === 'number' ? idx.changePercent : 0)
-              const sparkline = [
-                value * (1 - pctChange * 0.005),
-                value * (1 - pctChange * 0.003),
-                value * (1 - pctChange * 0.004),
-                value * (1 - pctChange * 0.001),
-                value * (1 - pctChange * 0.002),
-                value * (1 + pctChange * 0.001),
-                value
-              ]
-              return {
-                id: idx.code?.toLowerCase() || idx.id,
-                title: idx.name || idx.title,
-                code: idx.code,
-                value,
-                absChange,
-                pctChange,
-                up: pctChange >= 0,
-                sparkline,
-              }
-            })
+            const liveIndices = indexJson.data
+              .filter((idx: any) => ['XU100', 'XU030', 'XU500'].includes(idx.code?.toUpperCase()))
+              .map((idx: any) => {
+                const last_price = typeof idx.last_price === 'number' ? idx.last_price : (typeof idx.value === 'string' ? parseFloat(idx.value.replace(',', '.')) : (typeof idx.value === 'number' ? idx.value : 0))
+                const diff_percent = typeof idx.diff_percent === 'number' ? idx.diff_percent : (typeof idx.changePercent === 'string' ? parseFloat(idx.changePercent.replace(',', '.')) : (typeof idx.changePercent === 'number' ? idx.changePercent : 0))
+                const code = idx.code?.toUpperCase() || ''
+                const nameMap: Record<string, string> = { XU100: 'BIST 100', XU030: 'BIST 30', XU500: 'BIST 500' }
+                const idMap: Record<string, string> = { XU100: 'bist100', XU030: 'bist30', XU500: 'bist500' }
+                const sparkline = [
+                  last_price * (1 - diff_percent * 0.005),
+                  last_price * (1 - diff_percent * 0.003),
+                  last_price * (1 - diff_percent * 0.004),
+                  last_price * (1 - diff_percent * 0.001),
+                  last_price * (1 - diff_percent * 0.002),
+                  last_price * (1 + diff_percent * 0.001),
+                  last_price
+                ]
+                return {
+                  id: idMap[code] || code.toLowerCase(),
+                  title: nameMap[code] || idx.name || code,
+                  code,
+                  last_price: Number(last_price.toFixed(2)),
+                  diff_percent: Number(diff_percent.toFixed(2)),
+                  up: diff_percent >= 0,
+                  sparkline,
+                }
+              })
             if (isMounted && liveIndices.length > 0) {
               setIndices(liveIndices)
             }
@@ -101,7 +102,7 @@ function EndekslerPage() {
       <div className="space-y-8 animate-in fade-in duration-400">
 
         {/* Index Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {indices.map((index) => (
             <Link
               key={index.id}
@@ -114,7 +115,7 @@ function EndekslerPage() {
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{index.code}</span>
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${index.up ? 'bg-emerald-500/10 text-emerald-500' : 'bg-destructive/10 text-destructive'}`}>
-                      {index.up ? '+' : ''}{index.pctChange.toFixed(2)}%
+                      {index.up ? '+' : ''}{index.diff_percent.toFixed(2)}%
                     </span>
                   </div>
                   <h3 className="text-lg font-bold text-foreground truncate group-hover:text-primary transition-colors">{index.title}</h3>
@@ -126,13 +127,10 @@ function EndekslerPage() {
               
               <div className="mt-4 pt-4 border-t border-border/30">
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-2xl font-bold tabular-nums text-foreground">{index.value.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <span className="text-2xl font-bold tabular-nums text-foreground">{index.last_price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   <div className="flex items-center gap-1 text-sm font-semibold shrink-0">
                     <span className={index.up ? 'text-emerald-500' : 'text-destructive'}>
-                      {index.absChange >= 0 ? '+' : ''}{index.absChange.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </span>
-                    <span className={index.up ? 'text-emerald-500' : 'text-destructive'}>
-                      ({index.pctChange >= 0 ? '+' : ''}{index.pctChange.toFixed(2)}%)
+                      {index.up ? '+' : ''}{index.diff_percent.toFixed(2)}%
                     </span>
                   </div>
                 </div>
