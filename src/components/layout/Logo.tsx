@@ -13,6 +13,27 @@ function JetIcon({ className, ...props }: React.SVGProps<SVGSVGElement>) {
   );
 }
 
+function JetIconBranded({ size, className }: { size: number; className?: string }) {
+  const iconSize = size * 0.55;
+  return (
+    <div
+      className={className}
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size * 0.22,
+        backgroundColor: "var(--primary)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexShrink: 0,
+      }}
+    >
+      <JetIcon width={iconSize * (1163 / 1520)} height={iconSize} style={{ color: "#fff" }} />
+    </div>
+  );
+}
+
 function BorsaText({ className, style, ...props }: React.HTMLAttributes<HTMLSpanElement>) {
   return (
     <span className={className} style={{ fontWeight: 600, ...style }} {...props}>
@@ -23,9 +44,7 @@ function BorsaText({ className, style, ...props }: React.HTMLAttributes<HTMLSpan
 
 export function Logo({ size = 24, variant = "full", className, ...props }: LogoProps) {
   if (variant === "icon") {
-    const height = size;
-    const width = size * (1163 / 1520);
-    return <JetIcon width={width} height={height} className={className} {...props} />;
+    return <JetIconBranded size={size} className={className} />;
   }
 
   if (variant === "text") {
@@ -33,19 +52,15 @@ export function Logo({ size = 24, variant = "full", className, ...props }: LogoP
   }
 
   // full = icon + "jetborsa" text side by side
-  const iconHeight = size;
-  const iconWidth = iconHeight * (1163 / 1520);
   const fontSize = size * 0.7;
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "4px" }} className={className} {...props}>
-      <JetIcon width={iconWidth} height={iconHeight} style={{ color: "var(--primary)" }} />
+      <JetIconBranded size={size} />
       <BorsaText style={{ fontSize, color: "currentColor", lineHeight: 1 }} />
     </div>
   );
 }
 
 export function SiteIcon({ size = 24, className, ...props }: LogoProps) {
-  const height = size;
-  const width = height * (1163 / 1520);
-  return <JetIcon width={width} height={height} className={className} {...props} />;
+  return <JetIconBranded size={size} className={className} />;
 }
