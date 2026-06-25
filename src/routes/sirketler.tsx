@@ -36,7 +36,6 @@ function SirketlerPage() {
 
   useEffect(() => {
     let isMounted = true
-    setLoading(true)
 
     async function fetchCompanies() {
       const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev"
@@ -52,10 +51,12 @@ function SirketlerPage() {
           const priceData = await priceRes.json()
           if (priceData && Array.isArray(priceData.data)) {
             for (const stock of priceData.data) {
-              const row = rows.find(r => r.ticker === stock.code)
+              const row = rows.find(r => r.ticker === stock.code?.toUpperCase())
               if (row) {
-                row.last_price = stock.last_price
-                row.diff_percent = stock.diff_percent
+                const lastPrice = typeof stock.last_price === 'number' ? stock.last_price : parseFloat(stock.last_price) || undefined
+                const diffPercent = typeof stock.diff_percent === 'number' ? stock.diff_percent : parseFloat(stock.diff_percent) || 0
+                row.last_price = lastPrice
+                row.diff_percent = diffPercent
               }
             }
           }
