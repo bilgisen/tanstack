@@ -874,6 +874,179 @@ const svg = getByRole('img', { name: 'Full Logo' })
 expect(svg).toHaveAttribute('width', '243.9')  // 45.1 * (2439/451)
 ```
 
+### Property 5: Mobile Menu Icon-Only Display
+
+**Universal Quantification**: On screens < 768px, navigation items display as icons only without text labels.
+
+**Formal Statement**:
+```math
+\forall item \in NavigationMenuItems, \forall s \in ScreenSize:
+  (s < 768 \implies displayedElement(item, s) = IconOnly) \land
+  (s \geq 768 \implies displayedElement(item, s) = IconWithText)
+```
+
+**Test Assertion**:
+```pascal
+// Test: Mobile shows icon-only navigation
+window.innerWidth = 375
+render(<MobileMenu items={navigationItems} />)
+navigationItems.forEach(item => {
+  const icon = screen.getByRole('img', { name: item.label })
+  expect(icon).toBeInTheDocument()
+  expect(screen.queryByText(item.label)).toBeNull()
+})
+
+// Test: Desktop shows icon + text navigation
+window.innerWidth = 1024
+render(<MobileMenu items={navigationItems} />)
+navigationItems.forEach(item => {
+  const icon = screen.getByRole('img', { name: item.label })
+  const text = screen.getByText(item.label)
+  expect(icon).toBeInTheDocument()
+  expect(text).toBeInTheDocument()
+})
+```
+
+### Property 6: Unified User Menu Single Click
+
+**Universal Quantification**: Clicking the avatar opens the dropdown menu when closed, and maintains open state when already open.
+
+**Formal Statement**:
+```math
+\forall state \in \{open, closed\}, \forall event \in ClickEvent:
+  (state = closed \implies event \implies state = open) \land
+  (state = open \implies event \implies state = open)
+```
+
+**Test Assertion**:
+```pascal
+// Test: Avatar click opens menu when closed
+render(<UnifiedUserMenu isOpen={false} onToggle={setOpen} />)
+const avatar = screen.getByRole('button', { name: 'User Avatar' })
+avatar.click()
+expect(dropdownOpen).toBe(true)
+
+// Test: Avatar click maintains open state when already open
+render(<UnifiedUserMenu isOpen={true} onToggle={setOpen} />)
+avatar.click()
+expect(dropdownOpen).toBe(true)
+```
+
+### Property 7: Avatar Fallback to Initials
+
+**Universal Quantification**: Avatar displays profile picture if available, otherwise displays initials.
+
+**Formal Statement**:
+```math
+\forall user \in User:
+  (user.avatar_url \neq \emptyset \land image\_loads(user.avatar\_url) \implies display = profile\_image) \land
+  (user.avatar\_url = \emptyset \lor image\_fails(user.avatar\_url) \implies display = initials)
+```
+
+**Test Assertion**:
+```pascal
+// Test: Avatar shows profile picture when available
+const userWithAvatar = { 
+  user_metadata: { full_name: "John Doe", avatar_url: "/path/to/avatar.jpg" },
+  email: "john@example.com" 
+}
+render(<ProfileAvatar user={userWithAvatar} />)
+expect(screen.getByRole('img', { name: 'User Avatar' })).toBeInTheDocument()
+
+// Test: Avatar shows initials when no picture
+const userWithoutAvatar = { 
+  user_metadata: { full_name: "Jane Smith" },
+  email: "jane@example.com" 
+}
+render(<ProfileAvatar user={userWithoutAvatar} />)
+expect(screen.getByText('JS')).toBeInTheDocument()
+
+// Test: Avatar shows initials when picture fails to load
+const userWithBrokenAvatar = { 
+  user_metadata: { full_name: "Bob Wilson", avatar_url: "/broken/path.jpg" },
+  email: "bob@example.com" 
+}
+render(<ProfileAvatar user={userWithBrokenAvatar} />)
+expect(screen.getByText('BW')).toBeInTheDocument()
+```
+
+### Property 8: New Menu Items Visibility
+
+**Universal Quantification**: Haberler and Raporlar items are visible in mobile menu and properly linked.
+
+**Formal Statement**:
+```math
+\forall screen \in ScreenSize:
+  (item \in \{Haberler, Raporlar\} \implies visible(item, screen) = true) \land
+  (item \in \{Haberler, Raporlar\} \implies link\_valid(item) = true)
+```
+
+**Test Assertion**:
+```pascal
+// Test: New menu items are rendered
+render(<MobileMenu items={navigationItems} />)
+expect(screen.getByRole('link', { name: 'Haberler' })).toBeInTheDocument()
+expect(screen.getByRole('link', { name: 'Raporlar' })).toBeInTheDocument()
+
+// Test: Haberler links to /haberler
+const haberlerLink = screen.getByRole('link', { name: 'Haberler' })
+expect(haberlerLink).toHaveAttribute('href', '/haberler')
+
+// Test: Raporlar links to /raporlar
+const raporlarLink = screen.getByRole('link', { name: 'Raporlar' })
+expect(raporlarLink).toHaveAttribute('href', '/raporlar')
+```
+
+### Property 9: Avatar Picture Loading with Error Fallback
+
+**Universal Quantification**: Profile picture load failures gracefully fall back to initials.
+
+**Formal Statement**:
+```math
+\forall user \in User, \forall imageEvent \in \{load, error\}:
+  (imageEvent = load \implies display = profile\_image) \land
+  (imageEvent = error \implies display = initials)
+```
+
+**Test Assertion**:
+```pascal
+// Test: Avatar gracefully handles image load failure
+const { getByRole, getByText } = render(<ProfileAvatar user={userWithBrokenAvatar} />)
+// Initially tries to load image
+const image = screen.getByRole('img', { name: 'User Avatar' })
+expect(image).toHaveAttribute('src', '/broken/path.jpg')
+
+// Simulate load error
+image.dispatchEvent(new Event('error'))
+
+// Should fall back to initials
+expect(getByText('BW')).toBeInTheDocument()
+```
+
+### Property 10: Outside Click Closes User Menu
+
+**Universal Quantification**: Clicking outside the user menu dropdown closes it when open.
+
+**Formal Statement**:
+```math
+\forall state \in \{open, closed\}, \forall event \in MouseEvent:
+  (state = open \land event.type = click \land event.target \notin menu \implies state = closed)
+```
+
+**Test Assertion**:
+```pascal
+// Test: Outside click closes menu
+render(<UnifiedUserMenu isOpen={true} onClose={setClosed} />)
+const overlay = screen.getByRole('presentation')  // Or document.body
+overlay.click()
+expect(dropdownOpen).toBe(false)
+
+// Test: Clicking inside menu keeps it open
+const menuButton = screen.getByRole('button', { name: 'Profil' })
+menuButton.click()
+expect(dropdownOpen).toBe(true)
+```
+
 ## Error Handling
 
 ### Error Scenario 1: Missing Window Object
@@ -905,6 +1078,61 @@ expect(svg).toHaveAttribute('width', '243.9')  // 45.1 * (2439/451)
 - Unsubscribe from window resize events
 
 **Recovery**: Automatic cleanup when component unmounts
+
+### Error Scenario 4: Profile Picture Load Failure
+
+**Condition**: User avatar URL is invalid or image fails to load
+
+**Response**:
+- Catch error in image onError handler
+- Fallback to initials display
+- Log warning in development mode
+
+**Recovery**: Component continues to render initials instead of image
+
+### Error Scenario 5: Missing User Metadata
+
+**Condition**: User object lacks required metadata fields (full_name, name, email)
+
+**Response**:
+- Provide sensible defaults
+- Use "U" as fallback initial if no name information
+- Log warning in development mode
+
+**Recovery**: Component renders with default initial instead of crashing
+
+### Error Scenario 6: Invalid Menu Item Structure
+
+**Condition**: Navigation menu item missing required fields (id, label, icon, path)
+
+**Response**:
+- Validate menu item structure before rendering
+- Skip invalid items with warning
+- Log error in development mode
+
+**Recovery**: Valid menu items still render, invalid items are skipped
+
+### Error Scenario 7: Breakpoint Detection Failure
+
+**Condition**: window.innerWidth returns unexpected value (null, undefined, non-numeric)
+
+**Response**:
+- Validate breakpoint detection result
+- Default to desktop if detection fails
+- Log warning in development mode
+
+**Recovery**: Component continues to render with default desktop layout
+
+### Error Scenario 8: Dropdown Menu Positioning Error
+
+**Condition**: Dropdown menu position calculation fails
+
+**Response**:
+- Use CSS position: absolute with right alignment
+- Ensure overflow: visible on parent container
+- Log warning if positioning issues detected
+
+**Recovery**: Dropdown renders at default position, may need manual adjustment
 
 ## Testing Strategy
 
@@ -950,6 +1178,78 @@ expect(svg).toHaveAttribute('width', '243.9')  // 45.1 * (2439/451)
    })
    ```
 
+5. **Mobile Menu Icon-Only Test**
+   ```pascal
+   it('displays navigation items as icons only on mobile', () => {
+     window.innerWidth = 375
+     render(<MobileMenu items={navigationItems} />)
+     navigationItems.forEach(item => {
+       const icon = screen.getByRole('img', { name: item.label })
+       expect(icon).toBeInTheDocument()
+       expect(screen.queryByText(item.label)).toBeNull()
+     })
+   })
+   ```
+
+6. **Desktop Menu Icon + Text Test**
+   ```pascal
+   it('displays navigation items as icons with text on desktop', () => {
+     window.innerWidth = 1024
+     render(<MobileMenu items={navigationItems} />)
+     navigationItems.forEach(item => {
+       const icon = screen.getByRole('img', { name: item.label })
+       const text = screen.getByText(item.label)
+       expect(icon).toBeInTheDocument()
+       expect(text).toBeInTheDocument()
+     })
+   })
+   ```
+
+7. **Unified User Menu Click Test**
+   ```pascal
+   it('opens dropdown on avatar click when closed', () => {
+     render(<UnifiedUserMenu isOpen={false} onToggle={setOpen} />)
+     const avatar = screen.getByRole('button', { name: 'User Avatar' })
+     avatar.click()
+     expect(dropdownOpen).toBe(true)
+   })
+   ```
+
+8. **Profile Avatar Fallback Test**
+   ```pascal
+   it('shows initials when profile picture is not available', () => {
+     const user = { 
+       user_metadata: { full_name: "John Doe" },
+       email: "john@example.com" 
+     }
+     render(<ProfileAvatar user={user} />)
+     expect(screen.getByText('JD')).toBeInTheDocument()
+   })
+   ```
+
+9. **New Menu Items Visibility Test**
+   ```pascal
+   it('includes Haberler and Raporlar in mobile menu', () => {
+     render(<MobileMenu items={navigationItems} />)
+     expect(screen.getByRole('link', { name: 'Haberler' })).toBeInTheDocument()
+     expect(screen.getByRole('link', { name: 'Raporlar' })).toBeInTheDocument()
+   })
+   ```
+
+10. **Avatar Error Fallback Test**
+    ```pascal
+    it('falls back to initials on profile picture load error', () => {
+      const user = { 
+        user_metadata: { full_name: "Bob Wilson", avatar_url: "/broken/path.jpg" },
+        email: "bob@example.com" 
+      }
+      const { getByText } = render(<ProfileAvatar user={user} />)
+      const image = screen.getByRole('img', { name: 'User Avatar' })
+      image.dispatchEvent(new Event('error'))
+      expect(getByText('BW')).toBeInTheDocument()
+    })
+    ```
+
 ### Property-Based Testing Approach
 
 **Property Test Library**: `fast-check`
@@ -985,6 +1285,43 @@ expect(svg).toHaveAttribute('width', '243.9')  // 45.1 * (2439/451)
    )
    ```
 
+3. **Mobile Menu Icon Consistency**
+   ```pascal
+   fc.assert(
+     fc.property(
+       fc.integer({ min: 320, max: 767 }),
+       (width) => {
+         window.innerWidth = width
+         render(<MobileMenu items={navigationItems} />)
+         // All items should display as icons only
+         navigationItems.forEach(item => {
+           expect(screen.getByRole('img', { name: item.label })).toBeInTheDocument()
+           expect(screen.queryByText(item.label)).toBeNull()
+         })
+       }
+     )
+   )
+   ```
+
+4. **Avatar Initials Generation Consistency**
+   ```pascal
+   fc.assert(
+     fc.property(
+       fc.string({ minLength: 1, maxLength: 50 }),
+       fc.string({ minLength: 1, maxLength: 50 }),
+       (firstName, lastName) => {
+         const user = { 
+           user_metadata: { full_name: `${firstName} ${lastName}` },
+           email: "test@example.com" 
+         }
+         render(<ProfileAvatar user={user} />)
+         // Should generate initials from first and last name
+         expect(screen.getByText(`${firstName[0]}${lastName[0]}`)).toBeInTheDocument()
+       }
+     )
+   )
+   ```
+
 ### Integration Testing Approach
 
 **Test Scenarios**:
@@ -1005,6 +1342,30 @@ expect(svg).toHaveAttribute('width', '243.9')  // 45.1 * (2439/451)
    - Verify no rendering lag or flickering
    - Verify no memory leaks
 
+4. **Mobile Menu Integration**
+   - Render Topbar on mobile device (375px)
+   - Verify navigation items show as icons only
+   - Verify Haberler and Raporlar items present
+   - Verify clicking items navigates correctly
+
+5. **Unified User Menu Integration**
+   - Render Topbar on mobile device (375px)
+   - Click avatar → verify dropdown opens
+   - Verify all menu options present (Profil, Tema, Çıkış Yap)
+   - Click outside dropdown → verify it closes
+
+6. **Avatar Picture Loading Integration**
+   - Render user with valid avatar URL
+   - Verify profile picture loads and displays
+   - Render user with invalid avatar URL
+   - Verify initials display as fallback
+
+7. **New Menu Items Navigation Integration**
+   - Click Haberler in mobile menu
+   - Verify navigation to "/haberler" occurs
+   - Click Raporlar in mobile menu
+   - Verify navigation to "/raporlar" occurs
+
 ## Performance Considerations
 
 ### Current Performance Profile
@@ -1012,6 +1373,7 @@ expect(svg).toHaveAttribute('width', '243.9')  // 45.1 * (2439/451)
 - **Logo Rendering**: Minimal - single SVG component
 - **Responsive Check**: O(1) - single width comparison
 - **Re-render Triggers**: Window resize events
+- **Avatar Image Loading**: Dependent on network speed and image size
 
 ### Optimization Strategies
 
@@ -1036,11 +1398,67 @@ expect(svg).toHaveAttribute('width', '243.9')  // 45.1 * (2439/451)
    )
    ```
 
+4. **Image Lazy Loading**
+   ```pascal
+   // Profile picture should use lazy loading
+   <img 
+     src={avatarUrl} 
+     alt="User avatar" 
+     loading="lazy"
+     onError={handleAvatarError}
+   />
+   ```
+
+5. **Menu Item Caching**
+   ```pascal
+   // Cache navigation items to avoid recreation on every render
+   const navigationItems = useMemo(() => getNavigationItems(isMobile), [isMobile])
+   ```
+
+6. **Debounced Outside Click Detection**
+   ```pascal
+   // Use debounce for outside click handler to prevent excessive re-renders
+   const debouncedOutsideClick = useCallback(
+     debounce((e: MouseEvent) => {
+       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+         setDropdownOpen(false)
+       }
+     }, 10),
+     [menuRef]
+   )
+   ```
+
 ### Performance Budget
 
 - **Initial Render**: < 1ms
 - **Resize Handler**: < 5ms (with debouncing)
 - **Memory Impact**: < 50KB (negligible for single component)
+- **Avatar Image Load**: < 500ms (for 100KB profile picture)
+- **Menu Open/Close**: < 100ms (with CSS transitions)
+
+### Responsive Image Loading
+
+**Strategy**:
+- Use `loading="lazy"` attribute for profile pictures
+- Preload critical assets (logo, icons)
+- Consider image CDN for optimized profile picture delivery
+- Implement placeholder for avatar during loading state
+
+### Memory Management
+
+**Best Practices**:
+- Clean up resize event listeners on unmount
+- Cancel pending image loads on unmount
+- Clear debounced function timeouts on unmount
+- Use useEffect cleanup functions appropriately
+
+### Animation Performance
+
+**Recommendations**:
+- Use CSS transforms for menu animations (GPU accelerated)
+- Avoid animating layout-triggering properties
+- Keep animation duration under 300ms for better perceived performance
+- Use `will-change` sparingly for elements that animate frequently
 
 ## Security Considerations
 
@@ -1064,6 +1482,24 @@ expect(svg).toHaveAttribute('width', '243.9')  // 45.1 * (2439/451)
 - **Mitigation**: Debounced resize handler limits re-renders
 - **Countermeasure**: 100ms debounce window prevents excessive updates
 
+### New Security Considerations for User Menu
+
+**Threat 4: Profile Picture SSRF**
+- **Mitigation**: Validate avatar_url values, use allowlist for image domains
+- **Countermeasure**: Sanitize user-uploaded URLs before storing
+
+**Threat 5: Menu Dropdown Positioning Attack**
+- **Mitigation**: Use CSS containment and proper z-index management
+- **Countermeasure**: Ensure dropdown can't overlay critical UI elements
+
+**Threat 6: Clickjacking on Menu**
+- **Mitigation**: Use iframe protection headers, proper X-Frame-Options
+- **Countermeasure**: Implement frame-busting if necessary
+
+**Threat 7: Menu State Tampering**
+- **Mitigation**: Validate dropdown state on server for sensitive operations
+- **Countermeasure**: Implement CSRF protection for logout navigation
+
 ### Accessibility Considerations
 
 **ARIA Requirements**:
@@ -1076,11 +1512,76 @@ expect(svg).toHaveAttribute('width', '243.9')  // 45.1 * (2439/451)
 <svg role="img" aria-label="Company logo" ...>
 ```
 
+### New Accessibility Requirements for User Menu
+
+**Requirements**:
+- Avatar should have `role="button"` and `aria-expanded` state
+- Dropdown menu should have `role="menu"` and `aria-labelledby`
+- Menu items should have `role="menuitem"` and `tabindex`
+- Keyboard navigation (Arrow keys, Enter, Esc) support
+- Focus management (trap focus in dropdown when open)
+
+**Implementation**:
+```pascal
+<ProfileAvatar 
+  role="button"
+  aria-haspopup="true"
+  aria-expanded={dropdownOpen}
+  aria-controls="user-menu"
+  onClick={handleAvatarClick}
+>
+  {/* avatar content */}
+</ProfileAvatar>
+
+<div 
+  id="user-menu"
+  role="menu"
+  aria-labelledby="user-avatar"
+  aria-hidden={!dropdownOpen}
+  tabIndex={-1}
+>
+  {/* menu items */}
+</div>
+```
+
+### Keyboard Navigation
+
+**Required Keys**:
+- **Enter/Space**: Activate avatar (open dropdown)
+- **Arrow Down/Up**: Navigate between menu items
+- **Escape**: Close dropdown and return focus to avatar
+- **Tab**: Navigate through menu items when dropdown is open
+
+**Focus Management**:
+```pascal
+// When dropdown opens
+avatarRef.current.focus()  // Set focus to avatar first
+// After animation completes
+menuItems[0].focus()  // Move focus to first menu item
+
+// When dropdown closes
+avatarRef.current.focus()  // Return focus to avatar
+```
+
+### Screen Reader Considerations
+
+**Live Regions**:
+- Use `aria-live="polite"` for menu state changes
+- Announce menu open/close state
+- Announce current menu item on navigation
+
+**Descriptive Labels**:
+- Avatar: "User menu, {username}, {aria-expanded state}"
+- Menu items: "Profil, Press Enter to navigate"
+- Theme options: "Açık tema, selected"
+
 ## Dependencies
 
 ### External Dependencies
 
 - None - uses existing React and project components
+- `lucide-react` - Icon components (ChartNoAxesCombined, Factory, Building2, Rss, FileText, User, MoreVertical, Star, Settings, Sun, Moon, Monitor, LogOut)
+- `@tanstack/react-router` - Navigation hooks and Link component
 
 ### Internal Dependencies
 
@@ -1088,32 +1589,135 @@ expect(svg).toHaveAttribute('width', '243.9')  // 45.1 * (2439/451)
   - Exports: `Logo`, `SiteIcon`
   - Version: Current project version
 
+- `useAuth` hook (src/hooks/useAuth.ts)
+  - Returns: `{ user, login, logout }`
+  - Version: Current project version
+
+- `useUIStore` (src/store/ui.ts)
+  - Returns: `{ theme, setTheme }`
+  - Version: Current project version
+
 ### Peer Dependencies
 
 - React 18+
 - TypeScript 5+ (for type definitions)
 
+### New Component Dependencies
+
+- `useNavigate` (from @tanstack/react-router)
+  - Required by: MobileMenu, UnifiedUserMenu
+  - Purpose: Navigation handling
+
+- `useEffect`, `useState`, `useRef`, `useCallback`, `useMemo`
+  - Required by: All new components for state and lifecycle management
+  - Purpose: Component logic and performance optimization
+
+### Image CDN Considerations
+
+**Optional External Dependency**:
+- Cloudinary, imgix, or similar for profile picture optimization
+- For future enhancement: image compression and CDN delivery
+
+### Accessibility Dependencies
+
+**No additional dependencies required**
+- All ARIA requirements can be implemented with standard React
+- Keyboard navigation uses native browser behavior
+- Focus management uses standard DOM APIs
+
 ## Implementation Checklist
 
+### Phase 1: Logo and Core Components
+
 - [ ] Create ResponsiveLogo component (src/components/layout/ResponsiveLogo.tsx)
-- [ ] Implement useIsMobile hook with resize listener
-- [ ] Add unit tests for ResponsiveLogo
+- [ ] Implement useIsMobile hook with resize listener and debouncing
+- [ ] Add unit tests for ResponsiveLogo (mobile, desktop, size props)
 - [ ] Add integration tests in Topbar
 - [ ] Verify responsive behavior across breakpoints
 - [ ] Test performance with rapid resizing
 - [ ] Update Topbar to use ResponsiveLogo
+- [ ] Verify accessibility compliance (ARIA labels, roles)
+
+### Phase 2: Mobile Menu
+
+- [ ] Create MobileMenu component (src/components/layout/MobileMenu.tsx)
+- [ ] Implement navigation items with new items (Haberler, Raporlar)
+- [ ] Add icon-only rendering for mobile (< 768px)
+- [ ] Add icon + text rendering for desktop (>= 768px)
+- [ ] Add unit tests for MobileMenu (mobile, desktop rendering)
+- [ ] Add integration tests in Topbar
+- [ ] Verify navigation works for all items
+
+### Phase 3: User Menu
+
+- [ ] Create UnifiedUserMenu component (src/components/layout/UnifiedUserMenu.tsx)
+- [ ] Create ProfileAvatar component (src/components/layout/ProfileAvatar.tsx)
+- [ ] Implement unified avatar click behavior
+- [ ] Implement profile picture loading with fallback
+- [ ] Add dropdown menu with proper ARIA attributes
+- [ ] Implement keyboard navigation (Arrow keys, Enter, Escape)
+- [ ] Add outside click detection with cleanup
+- [ ] Add unit tests for user menu components
+- [ ] Add integration tests in Topbar
 - [ ] Verify accessibility compliance
-- [ ] Document component usage
+
+### Phase 4: Testing and Validation
+
+- [ ] Add property-based tests for responsive behavior
+- [ ] Add property-based tests for user menu interactions
+- [ ] Test across multiple screen sizes (320px, 375px, 768px, 1024px, 1440px)
+- [ ] Test on mobile devices (iOS Safari, Android Chrome)
+- [ ] Test performance with React DevTools Profiler
+- [ ] Verify no memory leaks (resize listeners, event handlers)
+- [ ] Run accessibility audit (axe, Lighthouse)
+- [ ] Test error handling scenarios (broken images, invalid data)
+
+### Phase 5: Documentation
+
+- [ ] Document ResponsiveLogo component usage
+- [ ] Document MobileMenu component props and usage
+- [ ] Document UnifiedUserMenu component props and usage
+- [ ] Document ProfileAvatar component props and usage
+- [ ] Add component examples to Storybook (if available)
+- [ ] Update component README files
 
 ## Summary
 
-The mobile-specific logo requirement can be implemented by:
+This feature implements comprehensive mobile-specific improvements to the Topbar component:
 
-1. **Creating a ResponsiveLogo component** that automatically switches between SiteIcon (mobile) and Logo full (desktop)
-2. **Using a 768px breakpoint** to determine screen size category
-3. **Integrating into Topbar** by replacing the current `<Logo size={14} />` with `<ResponsiveLogo size={14} />`
-4. **Testing across breakpoints** to ensure correct variant displays
+1. **Responsive Logo**: Show simplified "J" logo (SiteIcon) on mobile devices (< 768px) while maintaining full logo on desktop (>= 768px)
 
-**Recommended Approach**: Create ResponsiveLogo component for reusability and cleaner Topbar code.
+2. **Mobile Navigation**: Convert navigation items (Endeksler, Sektörler, Şirketler) to icon-only display on mobile, with new items (Haberler with RSS icon, Raporlar with Document icon)
 
-**Alternative Approach**: Handle responsiveness directly in Topbar if this behavior is unique and unlikely to be reused.
+3. **Unified User Menu**: Merge avatar and kebab menu into single clickable avatar component that opens dropdown menu
+
+4. **Profile Picture Display**: Show user's actual profile picture in avatar component with graceful fallback to initials if no picture is available
+
+**Key Design Decisions**:
+- Use 768px breakpoint for consistent mobile/desktop separation
+- Create separate components (ResponsiveLogo, MobileMenu, UnifiedUserMenu, ProfileAvatar) for reusability
+- Implement debounced resize handlers for performance
+- Use CSS transforms for smooth menu animations
+- Follow accessibility best practices (ARIA attributes, keyboard navigation)
+- Implement proper error handling and fallback strategies
+
+**Recommended Implementation Order**:
+1. ResponsiveLogo component (core functionality)
+2. MobileMenu component (navigation items)
+3. ProfileAvatar component (user profile)
+4. UnifiedUserMenu component (menu behavior)
+5. Integration into Topbar
+6. Testing and validation
+
+**Testing Strategy**:
+- Unit tests for each component
+- Integration tests for Topbar
+- Property-based tests for responsive behavior
+- Accessibility audits
+- Performance profiling
+
+**Expected Outcomes**:
+- Improved mobile user experience with compact, accessible navigation
+- Consistent branding across devices with responsive logo
+- Simplified user menu interactions with unified avatar
+- Professional profile picture display with graceful fallbacks
