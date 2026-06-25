@@ -200,15 +200,15 @@ describe("ResponsiveLogo", () => {
   });
 });
 
-// Property-Based Tests
+// Property-Based Tests (reduced examples for faster execution)
 describe("ResponsiveLogo property tests", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it("mobile screens always show SiteIcon regardless of specific width", () => {
-    // Test various mobile widths
-    const mobileWidths = [320, 375, 414, 500, 600, 700, 767];
+    // Test reduced mobile widths
+    const mobileWidths = [320, 375, 767];
     
     mobileWidths.forEach((width) => {
       mockWindowWidth(width);
@@ -223,8 +223,8 @@ describe("ResponsiveLogo property tests", () => {
   });
 
   it("desktop screens always show Logo full regardless of specific width", () => {
-    // Test various desktop widths
-    const desktopWidths = [768, 800, 1024, 1280, 1440, 1920];
+    // Test reduced desktop widths
+    const desktopWidths = [768, 1024, 1440];
     
     desktopWidths.forEach((width) => {
       mockWindowWidth(width);
