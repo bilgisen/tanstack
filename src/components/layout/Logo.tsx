@@ -15,8 +15,8 @@ function JetIcon({ className, ...props }: React.SVGProps<SVGSVGElement>) {
 
 function BorsaText({ className, ...props }: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 1200 452" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} {...props}>
-      <text x="0" y="380" fontFamily="Inter, system-ui, sans-serif" fontSize="420" fontWeight="600" fill="currentColor">borsa</text>
+    <svg viewBox="0 0 1600 452" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} {...props}>
+      <text x="0" y="380" fontFamily="Inter, system-ui, sans-serif" fontSize="420" fontWeight="600" fill="currentColor">jetborsa</text>
     </svg>
   );
 }
@@ -34,13 +34,13 @@ export function Logo({ size = 24, variant = "full", className, ...props }: LogoP
     return <BorsaText width={width} height={height} className={className} {...props} />;
   }
 
-  // full = icon + "borsa" text side by side
+  // full = icon + "jetborsa" text side by side
   const iconHeight = size;
   const iconWidth = iconHeight * (1163 / 1520);
   const textHeight = size * 0.75;
-  const textWidth = textHeight * (1200 / 452);
+  const textWidth = textHeight * (1600 / 452);
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: size * 0.1 }} className={className} {...props}>
+    <div style={{ display: "flex", alignItems: "center", gap: "4px" }} className={className} {...props}>
       <JetIcon width={iconWidth} height={iconHeight} style={{ color: "var(--primary)" }} />
       <BorsaText width={textWidth} height={textHeight} style={{ color: "currentColor" }} />
     </div>
