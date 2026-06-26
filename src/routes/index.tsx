@@ -11,10 +11,27 @@ import {
   SquareChevronDown,
   SquareKanban
 } from 'lucide-react'
+
+const TriangleUp = ({ size = 14, className = "" }: { size?: number; className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <polygon points="12,4 22,20 2,20" />
+  </svg>
+)
+
+const TriangleDown = ({ size = 14, className = "" }: { size?: number; className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <polygon points="12,20 2,4 22,4" />
+  </svg>
+)
+
+const SquareIcon = ({ size = 14, className = "" }: { size?: number; className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <rect x="3" y="3" width="18" height="18" rx="2" />
+  </svg>
+)
 import { ChatPanel } from '../components/chat/ChatPanel'
 import { ChatSheet } from '../components/chat/ChatSheet'
 import { useUIStore } from '../store/ui'
-import { Logo } from '../components/layout/Logo'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs'
 import companyLogos from '../constants/companyLogos.json'
 import companyNames from '../constants/companyNames.json'
@@ -287,15 +304,15 @@ function LandingPage() {
             <Tabs defaultValue="gainers">
               <TabsList className="mb-4">
                 <TabsTrigger value="gainers" className="gap-1.5">
-                  <SquareChevronUp size={14} />
+                  <TriangleUp size={12} className="text-emerald-500" />
                   <span>Yükselenler</span>
                 </TabsTrigger>
                 <TabsTrigger value="losers" className="gap-1.5">
-                  <SquareChevronDown size={14} />
+                  <TriangleDown size={12} className="text-destructive" />
                   <span>Düşenler</span>
                 </TabsTrigger>
                 <TabsTrigger value="volume" className="gap-1.5">
-                  <SquareKanban size={14} />
+                  <SquareIcon size={12} className="text-primary" />
                   <span>Hacim</span>
                 </TabsTrigger>
               </TabsList>
@@ -364,9 +381,9 @@ function LandingPage() {
             onClick={() => setIsChatSheetOpen(true)}
             className="w-full max-w-3xl bg-background/80 backdrop-blur-2xl border border-border/50 rounded-full shadow-2xl pointer-events-auto overflow-hidden animate-in slide-in-from-bottom-6 duration-500 cursor-pointer flex items-center px-6 py-2.5 justify-between"
           >
-            <span className="text-muted-foreground/60 text-sm truncate pr-4">Bir soru sorun...</span>
+            <span className="text-muted-foreground/60 text-base truncate pr-4">Bir soru sorun...</span>
             <button className="w-9 h-9 flex items-center justify-center rounded-full bg-primary text-white shrink-0 self-center">
-              <Logo size={14} variant="icon" className="text-white" />
+              <ArrowUp size={18} strokeWidth={2.5} />
             </button>
           </div>
         </div>

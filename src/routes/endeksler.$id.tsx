@@ -1,5 +1,23 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { TrendingUp, TrendingDown, ArrowUpCircle, ArrowDownCircle, BarChart3, Info, AlertCircle, Sliders } from 'lucide-react'
+import { TrendingUp, TrendingDown, Info, AlertCircle, Sliders } from 'lucide-react'
+
+const TriangleUp = ({ size = 14, className = "" }: { size?: number; className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <polygon points="12,4 22,20 2,20" />
+  </svg>
+)
+
+const TriangleDown = ({ size = 14, className = "" }: { size?: number; className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <polygon points="12,20 2,4 22,4" />
+  </svg>
+)
+
+const SquareIcon = ({ size = 14, className = "" }: { size?: number; className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <rect x="3" y="3" width="18" height="18" rx="2" />
+  </svg>
+)
 import { useState, useEffect, useMemo } from 'react'
 import { TradingViewChart } from '../components/dashboard/TradingViewChart'
 import { Skeleton } from '../components/ui/skeleton'
@@ -96,12 +114,22 @@ function parseVolume(vol: unknown): number {
 
 type TaData = {
   trend: string;
-  adx_strength: string;
+  weekly_trend: string;
+  score: number;
+  confidence: string;
   rsi: { value: number; status: string };
   macd: string;
   bollinger_status: string;
+  sma: { sma_20: number; sma_50: number; sma_200: number };
   support_resistance: { support: number; resistance: number };
   atr_stop_loss: number;
+  rr_ratio: number;
+  beta: number;
+  market_breadth: { breadth: number; status: string };
+  market_regime: { regime: string; trend_direction: string; volatility_regime: string; adx: number; recommended_strategy: string };
+  signals: string[];
+  divergences: { rsi: { bullish: boolean; bearish: boolean }; macd: { bullish: boolean; bearish: boolean } };
+  score_components: { trend: number; momentum: number; volume: number };
   candlestick_patterns: string[];
   llm_summary_prompt: string;
 } | null;
@@ -186,12 +214,42 @@ function EndeksDetailPage() {
 
             setTaData({
               trend: tJson.trend || "Nötr",
-              adx_strength: tJson.adx_strength || "Veri yok",
+              weekly_trend: tJson.weekly_trend || "Veri yok",
+              score: tJson.score ?? 50,
+              confidence: tJson.confidence || "Veri yok",
               rsi: rsiData,
               macd: tJson.macd || tJson.macd_status || "Nötr",
               bollinger_status: tJson.bollinger_status || "Orta Bantta",
+              sma: {
+                sma_20: tJson.sma?.sma_20 || liveVal,
+                sma_50: tJson.sma?.sma_50 || liveVal,
+                sma_200: tJson.sma?.sma_200 || liveVal,
+              },
               support_resistance: { support, resistance },
               atr_stop_loss: tJson.atr_stop_loss || tJson.stop_loss || (liveVal * 0.03),
+              rr_ratio: tJson.rr_ratio || 0,
+              beta: tJson.beta ?? 1,
+              market_breadth: {
+                breadth: tJson.market_breadth?.breadth ?? 50,
+                status: tJson.market_breadth?.status || "Veri yok",
+              },
+              market_regime: {
+                regime: tJson.market_regime?.regime || "Veri yok",
+                trend_direction: tJson.market_regime?.trend_direction || "Veri yok",
+                volatility_regime: tJson.market_regime?.volatility_regime || "Veri yok",
+                adx: tJson.market_regime?.adx ?? 0,
+                recommended_strategy: tJson.market_regime?.recommended_strategy || "",
+              },
+              signals: tJson.signals || [],
+              divergences: {
+                rsi: tJson.divergences?.rsi || { bullish: false, bearish: false },
+                macd: tJson.divergences?.macd || { bullish: false, bearish: false },
+              },
+              score_components: {
+                trend: tJson.score_components?.trend ?? 0,
+                momentum: tJson.score_components?.momentum ?? 0,
+                volume: tJson.score_components?.volume ?? 0,
+              },
               candlestick_patterns: tJson.candlestick_patterns || [],
               llm_summary_prompt: tJson.llm_summary_prompt || "",
             });
@@ -288,15 +346,15 @@ function EndeksDetailPage() {
       <Tabs defaultValue="gainers">
         <TabsList className="mb-1">
           <TabsTrigger value="gainers" className="gap-1.5">
-            <ArrowUpCircle size={14} className="text-emerald-500" />
+            <TriangleUp size={12} className="text-emerald-500" />
             <span>Yükselenler</span>
           </TabsTrigger>
           <TabsTrigger value="losers" className="gap-1.5">
-            <ArrowDownCircle size={14} className="text-destructive" />
+            <TriangleDown size={12} className="text-destructive" />
             <span>Düşenler</span>
           </TabsTrigger>
           <TabsTrigger value="volume" className="gap-1.5">
-            <BarChart3 size={14} className="text-primary" />
+            <SquareIcon size={12} className="text-primary" />
             <span>Hacim</span>
           </TabsTrigger>
         </TabsList>
@@ -420,32 +478,77 @@ function EndeksDetailPage() {
       {/* Teknik Sinyaller - Rich TA Data */}
       {taAvailable && taData && (
         <div className="border border-border/40 bg-card/20 rounded-2xl p-4 md:p-5 space-y-4">
-          <div className="flex items-center gap-2 pb-2.5 border-b border-border/25">
-            <div className="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-              <Sliders size={12} />
+          <div className="flex items-center justify-between pb-2.5 border-b border-border/25">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                <Sliders size={12} />
+              </div>
+              <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Teknik Sinyaller</h3>
             </div>
-            <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Teknik Sinyaller</h3>
+            <div className="flex items-center gap-2">
+              <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+                taData.score >= 70 ? "bg-teal-500/10 text-teal-600" : taData.score >= 40 ? "bg-amber-500/10 text-amber-600" : "bg-destructive/10 text-destructive"
+              }`}>
+                Skor: {taData.score}/100
+              </span>
+              <span className="text-[10px] text-muted-foreground font-semibold">{taData.confidence} Güven</span>
+            </div>
           </div>
 
-          {/* Trend & ADX */}
+          {/* Trend & Weekly Trend */}
           <div className="bg-muted/30 p-4 border border-border/80 rounded-xl flex items-center justify-between">
             <div>
-              <span className="text-[11px] text-muted-foreground font-bold uppercase block mb-1">Piyasa Trendi</span>
+              <span className="text-[11px] text-muted-foreground font-bold uppercase block mb-1">Günlük Trend</span>
               <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold ${
-                taData.trend.includes("Bullish") 
-                  ? "bg-teal-500/10 text-teal-600 dark:text-teal-400" 
-                  : taData.trend.includes("Bearish") 
-                  ? "bg-destructive/10 text-destructive" 
-                  : "bg-muted text-muted-foreground"
+                taData.trend.includes("Bullish") ? "bg-teal-500/10 text-teal-600 dark:text-teal-400" 
+                : taData.trend.includes("Bearish") ? "bg-destructive/10 text-destructive" 
+                : "bg-muted text-muted-foreground"
               }`}>
                 {taData.trend.includes("Bullish") ? <TrendingUp size={14} /> : taData.trend.includes("Bearish") ? <TrendingDown size={14} /> : <Info size={14} />}
                 {taData.trend}
               </span>
             </div>
             <div className="text-right">
-              <span className="text-[11px] text-muted-foreground font-bold uppercase block mb-1">ADX Sinyal Gücü</span>
-              <span className="text-xs font-semibold text-foreground/80">{taData.adx_strength}</span>
+              <span className="text-[11px] text-muted-foreground font-bold uppercase block mb-1">Haftalık Trend</span>
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold ${
+                taData.weekly_trend.includes("Bullish") ? "bg-teal-500/10 text-teal-600 dark:text-teal-400" 
+                : taData.weekly_trend.includes("Bearish") ? "bg-destructive/10 text-destructive" 
+                : "bg-muted text-muted-foreground"
+              }`}>
+                {taData.weekly_trend}
+              </span>
             </div>
+          </div>
+
+          {/* Market Regime */}
+          <div className="bg-muted/30 p-4 border border-border/80 rounded-xl space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-[11px] text-muted-foreground font-bold uppercase">Piyasa Rejimi</span>
+              <span className="text-xs font-extrabold text-foreground">{taData.market_regime.regime}</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-[11px]">
+              <div>
+                <span className="text-muted-foreground font-semibold">Yön: </span>
+                <span className="font-bold text-foreground">{taData.market_regime.trend_direction}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground font-semibold">Volatilite: </span>
+                <span className="font-bold text-foreground">{taData.market_regime.volatility_regime}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground font-semibold">ADX: </span>
+                <span className="font-bold text-foreground">{taData.market_regime.adx}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground font-semibold">Beta: </span>
+                <span className="font-bold text-foreground">{taData.beta}</span>
+              </div>
+            </div>
+            {taData.market_regime.recommended_strategy && (
+              <p className="text-[10px] text-muted-foreground italic leading-relaxed pt-1 border-t border-border/30">
+                {taData.market_regime.recommended_strategy}
+              </p>
+            )}
           </div>
 
           {/* RSI Gauge */}
@@ -481,12 +584,31 @@ function EndeksDetailPage() {
             </div>
           </div>
 
+          {/* SMA Lines */}
+          <div className="bg-muted/30 p-4 border border-border/80 rounded-xl space-y-2">
+            <span className="text-[11px] text-muted-foreground font-bold uppercase block">Hareketli Ortalamalar</span>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { label: "SMA 20", value: taData.sma.sma_20 },
+                { label: "SMA 50", value: taData.sma.sma_50 },
+                { label: "SMA 200", value: taData.sma.sma_200 },
+              ].map((sma) => {
+                const above = priceDetails.price > sma.value;
+                return (
+                  <div key={sma.label} className="text-center">
+                    <span className="text-[9px] text-muted-foreground font-bold uppercase block">{sma.label}</span>
+                    <span className={`text-[11px] font-bold font-mono ${above ? 'text-teal-600 dark:text-teal-400' : 'text-destructive'}`}>
+                      {sma.value.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Support & Resistance */}
           <div className="bg-muted/30 p-4 border border-border/80 rounded-xl space-y-2.5">
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-[11px] text-muted-foreground font-bold uppercase">Destek / Direnç Seviyeleri</span>
-              <span className="text-[11px] text-muted-foreground/80 font-mono">BB (20, 2)</span>
-            </div>
+            <span className="text-[11px] text-muted-foreground font-bold uppercase block">Destek / Direnç Seviyeleri</span>
             <div className="relative h-2 w-full rounded-full bg-muted">
               <div 
                 className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-primary border-2 border-border shadow-sm"
@@ -499,11 +621,11 @@ function EndeksDetailPage() {
             </div>
             <div className="flex justify-between text-[11px] font-mono font-semibold">
               <div className="text-destructive flex flex-col">
-                <span className="text-[9px] text-muted-foreground font-bold uppercase">Destek (BBL)</span>
+                <span className="text-[9px] text-muted-foreground font-bold uppercase">Destek</span>
                 <span>{taData.support_resistance.support.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               <div className="text-teal-600 dark:text-teal-400 flex flex-col items-end">
-                <span className="text-[9px] text-muted-foreground font-bold uppercase text-right">Direnç (BBU)</span>
+                <span className="text-[9px] text-muted-foreground font-bold uppercase text-right">Direnç</span>
                 <span>{taData.support_resistance.resistance.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
             </div>
@@ -515,18 +637,80 @@ function EndeksDetailPage() {
             <span className="text-xs font-semibold text-foreground/85">{taData.bollinger_status}</span>
           </div>
 
-          {/* ATR Stop Loss */}
-          <div className="bg-destructive/5 p-4 border border-destructive/20 rounded-xl flex items-center justify-between">
-            <div className="space-y-0.5">
-              <span className="text-[11px] text-destructive font-extrabold uppercase flex items-center gap-1.5">
-                <AlertCircle size={12} /> Bilimsel Stop-Loss (1.5x ATR)
+          {/* Stop-Loss & Risk/Reward */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-destructive/5 p-4 border border-destructive/20 rounded-xl">
+              <span className="text-[10px] text-destructive font-extrabold uppercase flex items-center gap-1.5 mb-1">
+                <AlertCircle size={11} /> Stop-Loss (1.5x ATR)
               </span>
-              <p className="text-[10px] text-muted-foreground">ATR göstergesi temel alınarak hesaplanan koruyucu limit.</p>
+              <span className="text-lg font-bold text-destructive font-mono block">
+                {taData.atr_stop_loss.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+              </span>
+              <span className="text-[9px] text-muted-foreground">Puan</span>
             </div>
-            <span className="text-lg font-bold text-destructive font-mono whitespace-nowrap">
-              {taData.atr_stop_loss.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TRY
-            </span>
+            <div className="bg-teal-500/5 p-4 border border-teal-500/20 rounded-xl">
+              <span className="text-[10px] text-teal-600 font-extrabold uppercase flex items-center gap-1.5 mb-1">
+                <TrendingUp size={11} /> Risk/Ödül
+              </span>
+              <span className="text-lg font-bold text-teal-600 font-mono block">
+                {taData.rr_ratio.toFixed(2)}
+              </span>
+              <span className="text-[9px] text-muted-foreground">Oran</span>
+            </div>
           </div>
+
+          {/* Market Breadth */}
+          <div className="bg-muted/30 p-4 border border-border/80 rounded-xl">
+            <div className="flex justify-between items-center">
+              <span className="text-[11px] text-muted-foreground font-bold uppercase">Piyasa Genişliği</span>
+              <span className="text-xs font-bold text-foreground">{taData.market_breadth.breadth.toFixed(1)}% — {taData.market_breadth.status}</span>
+            </div>
+          </div>
+
+          {/* Score Components */}
+          <div className="bg-muted/30 p-4 border border-border/80 rounded-xl space-y-2">
+            <span className="text-[11px] text-muted-foreground font-bold uppercase block">Skor Bileşenleri</span>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { label: "Trend", value: taData.score_components.trend, color: taData.score_components.trend >= 0 ? "text-teal-600" : "text-destructive" },
+                { label: "Momentum", value: taData.score_components.momentum, color: taData.score_components.momentum >= 0 ? "text-teal-600" : "text-destructive" },
+                { label: "Hacim", value: taData.score_components.volume, color: taData.score_components.volume >= 0 ? "text-teal-600" : "text-destructive" },
+              ].map((c) => (
+                <div key={c.label} className="text-center">
+                  <span className="text-[9px] text-muted-foreground font-bold uppercase block">{c.label}</span>
+                  <span className={`text-sm font-extrabold font-mono ${c.color}`}>{c.value > 0 ? '+' : ''}{c.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Signals */}
+          {taData.signals.length > 0 && (
+            <div className="bg-muted/30 p-4 border border-border/80 rounded-xl space-y-2">
+              <span className="text-[11px] text-muted-foreground font-bold uppercase block">Aktif Sinyaller</span>
+              <div className="space-y-1.5">
+                {taData.signals.map((signal, i) => (
+                  <div key={i} className="text-[11px] text-foreground/80 font-medium flex items-start gap-2">
+                    <span className="text-primary mt-0.5 shrink-0">•</span>
+                    <span>{signal}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Divergences */}
+          {(taData.divergences.rsi.bullish || taData.divergences.rsi.bearish || taData.divergences.macd.bullish || taData.divergences.macd.bearish) && (
+            <div className="bg-muted/30 p-4 border border-border/80 rounded-xl space-y-2">
+              <span className="text-[11px] text-muted-foreground font-bold uppercase block">Sapma Analizi</span>
+              <div className="grid grid-cols-2 gap-2">
+                {taData.divergences.rsi.bullish && <span className="text-[10px] font-bold text-teal-600 bg-teal-500/10 px-2 py-0.5 rounded">RSI: Bullish Divergence ↑</span>}
+                {taData.divergences.rsi.bearish && <span className="text-[10px] font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded">RSI: Bearish Divergence ↓</span>}
+                {taData.divergences.macd.bullish && <span className="text-[10px] font-bold text-teal-600 bg-teal-500/10 px-2 py-0.5 rounded">MACD: Bullish Divergence ↑</span>}
+                {taData.divergences.macd.bearish && <span className="text-[10px] font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded">MACD: Bearish Divergence ↓</span>}
+              </div>
+            </div>
+          )}
 
           {/* Candlestick Patterns */}
           {taData.candlestick_patterns.length > 0 && (
@@ -546,7 +730,7 @@ function EndeksDetailPage() {
           {taData.llm_summary_prompt && (
             <div className="bg-muted/15 p-4 border border-border/40 rounded-xl">
               <span className="text-[11px] text-muted-foreground font-bold uppercase block mb-2">AI Yorumu</span>
-              <p className="text-xs text-foreground/80 leading-relaxed">{taData.llm_summary_prompt}</p>
+              <p className="text-xs text-foreground/80 leading-relaxed whitespace-pre-line">{taData.llm_summary_prompt}</p>
             </div>
           )}
         </div>
