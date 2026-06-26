@@ -1,11 +1,14 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../hooks/useAuth'
+import useEmblaCarousel from 'embla-carousel-react'
 import { 
   Sparkles, 
   TrendingUp, 
   TrendingDown, 
   Activity,
+  ArrowUp,
+  ArrowDown
 } from 'lucide-react'
 import { ChatPanel } from '../components/chat/ChatPanel'
 import { ChatSheet } from '../components/chat/ChatSheet'
@@ -30,10 +33,16 @@ function LandingPage() {
   const { isChatMaximized } = useUIStore()
   const [isChatSheetOpen, setIsChatSheetOpen] = useState(false)
   
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: 'start',
+    slidesToScroll: 1,
+    containScroll: 'trimSnaps',
+  })
+
   const [indexData, setIndexDisplay] = useState<IndexDisplay[]>([
-    { id: 'bist100', name: "BIST 100", code: "XU100", price: 10240.20, diffPercent: 1.15, sparkline: [10120, 10150, 10110, 10190, 10220, 10210, 10240.20] },
-    { id: 'bist30', name: "BIST 30", code: "XU030", price: 11250.40, diffPercent: 1.45, sparkline: [11080, 11110, 11150, 11130, 11190, 11220, 11250.40] },
-    { id: 'bist500', name: "BIST 500", code: "XU500", price: 12540.80, diffPercent: 0.95, sparkline: [12420, 12450, 12410, 12480, 12510, 12500, 12540.80] },
+    { id: 'bist100', name: "BIST 100", code: "XU100", price: 10240.20, diffPercent: 1.15, sparkline: [] },
+    { id: 'bist30', name: "BIST 30", code: "XU030", price: 11250.40, diffPercent: 1.45, sparkline: [] },
+    { id: 'bist500', name: "BIST 500", code: "XU500", price: 12540.80, diffPercent: 0.95, sparkline: [] },
   ])
 
   useEffect(() => {
@@ -47,22 +56,10 @@ function LandingPage() {
             setIndexDisplay(prev => prev.map(item => {
               const live = json.data.find((idx: any) => idx.code.toUpperCase() === item.code);
               if (live) {
-                const currentPrice = live.last_price || item.price;
-                const diff = live.diff_percent !== undefined ? live.diff_percent : item.diffPercent;
-                const steps = [
-                  currentPrice * (1 - diff * 0.005),
-                  currentPrice * (1 - diff * 0.003),
-                  currentPrice * (1 - diff * 0.004),
-                  currentPrice * (1 - diff * 0.001),
-                  currentPrice * (1 - diff * 0.002),
-                  currentPrice * (1 + diff * 0.001),
-                  currentPrice
-                ];
                 return {
                   ...item,
-                  price: Number(currentPrice.toFixed(2)),
-                  diffPercent: Number(diff.toFixed(2)),
-                  sparkline: steps
+                  price: Number((live.last_price || item.price).toFixed(2)),
+                  diffPercent: Number((live.diff_percent !== undefined ? live.diff_percent : item.diffPercent).toFixed(2)),
                 };
               }
               return item;
@@ -79,7 +76,7 @@ function LandingPage() {
   return (
     <div className="flex-1 flex flex-row min-w-0 h-full overflow-hidden">
       
-      {/* Left: Hero + Index Cards */}
+      {/* Left: Content */}
       <div className={`flex-1 flex flex-col min-w-0 h-full relative overflow-hidden ${isChatMaximized ? 'hidden md:hidden' : ''}`}>
         <div className="flex-1 overflow-y-auto custom-scrollbar min-w-0 relative z-10 pb-24 md:pb-4 scroll-smooth">
           
@@ -120,8 +117,8 @@ function LandingPage() {
             </div>
           </section>
 
-          {/* Index Cards */}
-          <section className="px-4 md:px-6 py-4 max-w-5xl mx-auto">
+          {/* Index Cards Carousel */}
+          <section className="px-4 md:px-6 py-4">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-1.5 h-4 rounded-full bg-primary" />
               <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2.5">
@@ -130,55 +127,47 @@ function LandingPage() {
               </h3>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
-              {indexData.map((idx) => {
-                const isUp = idx.diffPercent >= 0;
-                const routeTarget = user ? `/panel/endeksler/${idx.id}` : `/endeksler`;
-                
-                return (
-                  <Link
-                    key={idx.id}
-                    to={routeTarget}
-                    className="group border border-border/40 hover:border-border/70 rounded-2xl p-4 md:p-5 bg-card/15 hover:bg-card/25 shadow-3xs transition-all duration-300 flex flex-col relative overflow-hidden"
-                  >
-                    <div className={`absolute top-0 right-0 w-24 h-24 rounded-full blur-3xl pointer-events-none transition-opacity duration-300 opacity-0 group-hover:opacity-100 ${isUp ? 'bg-emerald-500/5' : 'bg-destructive/5'}`} />
-
-                    <div className="flex items-center justify-between mb-3 z-10">
-                      <div>
-                        <h4 className="text-xs font-bold text-foreground tracking-tight group-hover:text-primary transition-colors">{idx.name}</h4>
-                        <span className="text-[10px] text-muted-foreground font-semibold tracking-tight">{idx.code}</span>
+            <div className="overflow-hidden" ref={emblaRef}>
+              <div className="flex gap-3">
+                {indexData.map((idx) => {
+                  const isUp = idx.diffPercent >= 0;
+                  const routeTarget = user ? `/panel/endeksler/${idx.id}` : `/endeksler`;
+                  
+                  return (
+                    <Link
+                      key={idx.id}
+                      to={routeTarget}
+                      className="flex-none w-[200px] md:w-[240px] rounded-2xl p-4 bg-card/50 border border-white/5 hover:border-white/10 transition-all cursor-pointer group"
+                    >
+                      {/* Ticker + Change */}
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-sm font-bold text-foreground truncate">
+                          {idx.name}
+                        </span>
+                        <span className={`text-sm font-bold ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
+                          %{isUp ? '+' : ''}{idx.diffPercent.toFixed(2).replace('.', ',')}
+                        </span>
                       </div>
-                      <div className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5 ${
-                        isUp 
-                          ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/10' 
-                          : 'bg-destructive/10 text-destructive border border-destructive/10'
-                      }`}>
-                        {isUp ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
-                        <span>{isUp ? '+' : ''}{idx.diffPercent}%</span>
+                      
+                      {/* Price + Arrow */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-xl font-bold text-foreground font-mono truncate">
+                          ₺{idx.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                          isUp ? 'bg-emerald-500' : 'bg-destructive'
+                        }`}>
+                          {isUp ? (
+                            <ArrowUp size={16} className="text-white" />
+                          ) : (
+                            <ArrowDown size={16} className="text-white" />
+                          )}
+                        </div>
                       </div>
-                    </div>
-
-                    <div className="flex items-end justify-between mt-1 z-10">
-                      <div className="text-lg md:text-xl font-bold font-mono tracking-tight text-foreground">
-                        {idx.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </div>
-
-                      <div className="w-16 h-8 pr-1 opacity-70 group-hover:opacity-100 transition-opacity duration-300">
-                        <svg viewBox="0 0 100 40" className="w-full h-full">
-                          <path
-                            d={`M ${idx.sparkline.map((val, i) => `${(i / (idx.sparkline.length - 1)) * 100} ${40 - ((val - Math.min(...idx.sparkline)) / (Math.max(...idx.sparkline) - Math.min(...idx.sparkline) || 1)) * 30}`).join(' L ')}`}
-                            fill="none"
-                            stroke={isUp ? "#22c55e" : "#ef4444"}
-                            strokeWidth="2.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
           </section>
 
