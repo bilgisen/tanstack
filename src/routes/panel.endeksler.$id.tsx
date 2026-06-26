@@ -80,7 +80,9 @@ const indexMetadataFallbacks: Record<string, IndexMeta> = {
   }
 };
 
-function parseVolume(vol: string): number {
+function parseVolume(vol: unknown): number {
+  if (typeof vol === 'number') return vol;
+  if (typeof vol !== 'string') return 0;
   const cleaned = vol.replace(/[^\d.]/g, '');
   const num = parseFloat(cleaned);
   if (isNaN(num)) return 0;
