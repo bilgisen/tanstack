@@ -55,8 +55,8 @@ function LandingPage() {
   const [isChatSheetOpen, setIsChatSheetOpen] = useState(false)
   
   const [emblaRef] = useEmblaCarousel(
-    { align: 'start', loop: true },
-    [Autoplay({ delay: 3000, stopOnInteraction: false })]
+    { align: 'start', loop: true, slidesToScroll: 1 },
+    [Autoplay({ delay: 3000, stopOnInteraction: false, playOnInit: true })]
   )
 
   const [emblaRef2] = useEmblaCarousel({
@@ -224,7 +224,7 @@ function LandingPage() {
                 Akıllı Borsacı
               </h1>
               
-              <p className="text-muted-foreground max-w-2xl mx-auto mb-8 text-base sm:text-lg leading-relaxed">
+              <p className="text-muted-foreground max-w-2xl mx-auto mb-8 text-lg sm:text-xl leading-relaxed">
                 Borsayı derinlemesine ve jet hızında analiz edin.
               </p>
 
@@ -251,13 +251,13 @@ function LandingPage() {
           <section className="px-4 md:px-6 py-4">
             <div className="overflow-hidden" ref={emblaRef}>
               <div className="flex gap-3">
-                {[...indexData, ...indexData].map((idx, i) => {
+                {indexData.map((idx) => {
                   const isUp = idx.diffPercent >= 0;
                   const routeTarget = `/panel/endeksler/${idx.id}`;
                   
                   return (
                     <Link
-                      key={`${idx.id}-${i}`}
+                      key={idx.id}
                       to={routeTarget}
                       className="flex-none w-[200px] md:w-[240px] rounded-2xl p-4 bg-card/50 border border-white/5 hover:border-white/10 transition-all cursor-pointer group"
                     >
