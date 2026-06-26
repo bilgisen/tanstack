@@ -14,8 +14,10 @@ import { Route as SirketlerRouteImport } from './routes/sirketler'
 import { Route as SektorlerRouteImport } from './routes/sektorler'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as PanelRouteImport } from './routes/panel'
+import { Route as NedenJetborsaRouteImport } from './routes/neden-jetborsa'
 import { Route as NasilCalisirRouteImport } from './routes/nasil-calisir'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as KurumsalRouteImport } from './routes/kurumsal'
 import { Route as EndekslerRouteImport } from './routes/endeksler'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfilIndexRouteImport } from './routes/profil.index'
@@ -58,6 +60,11 @@ const PanelRoute = PanelRouteImport.update({
   path: '/panel',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NedenJetborsaRoute = NedenJetborsaRouteImport.update({
+  id: '/neden-jetborsa',
+  path: '/neden-jetborsa',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NasilCalisirRoute = NasilCalisirRouteImport.update({
   id: '/nasil-calisir',
   path: '/nasil-calisir',
@@ -66,6 +73,11 @@ const NasilCalisirRoute = NasilCalisirRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KurumsalRoute = KurumsalRouteImport.update({
+  id: '/kurumsal',
+  path: '/kurumsal',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EndekslerRoute = EndekslerRouteImport.update({
@@ -152,8 +164,10 @@ const ApiAiChargeRoute = ApiAiChargeRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/endeksler': typeof EndekslerRoute
+  '/kurumsal': typeof KurumsalRoute
   '/login': typeof LoginRoute
   '/nasil-calisir': typeof NasilCalisirRoute
+  '/neden-jetborsa': typeof NedenJetborsaRoute
   '/panel': typeof PanelRouteWithChildren
   '/profil': typeof ProfilRouteWithChildren
   '/sektorler': typeof SektorlerRouteWithChildren
@@ -177,8 +191,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/endeksler': typeof EndekslerRoute
+  '/kurumsal': typeof KurumsalRoute
   '/login': typeof LoginRoute
   '/nasil-calisir': typeof NasilCalisirRoute
+  '/neden-jetborsa': typeof NedenJetborsaRoute
   '/sektorler': typeof SektorlerRouteWithChildren
   '/sirketler': typeof SirketlerRoute
   '/takip-listesi': typeof TakipListesiRoute
@@ -201,8 +217,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/endeksler': typeof EndekslerRoute
+  '/kurumsal': typeof KurumsalRoute
   '/login': typeof LoginRoute
   '/nasil-calisir': typeof NasilCalisirRoute
+  '/neden-jetborsa': typeof NedenJetborsaRoute
   '/panel': typeof PanelRouteWithChildren
   '/profil': typeof ProfilRouteWithChildren
   '/sektorler': typeof SektorlerRouteWithChildren
@@ -228,8 +246,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/endeksler'
+    | '/kurumsal'
     | '/login'
     | '/nasil-calisir'
+    | '/neden-jetborsa'
     | '/panel'
     | '/profil'
     | '/sektorler'
@@ -253,8 +273,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/endeksler'
+    | '/kurumsal'
     | '/login'
     | '/nasil-calisir'
+    | '/neden-jetborsa'
     | '/sektorler'
     | '/sirketler'
     | '/takip-listesi'
@@ -276,8 +298,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/endeksler'
+    | '/kurumsal'
     | '/login'
     | '/nasil-calisir'
+    | '/neden-jetborsa'
     | '/panel'
     | '/profil'
     | '/sektorler'
@@ -302,8 +326,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   EndekslerRoute: typeof EndekslerRoute
+  KurumsalRoute: typeof KurumsalRoute
   LoginRoute: typeof LoginRoute
   NasilCalisirRoute: typeof NasilCalisirRoute
+  NedenJetborsaRoute: typeof NedenJetborsaRoute
   PanelRoute: typeof PanelRouteWithChildren
   ProfilRoute: typeof ProfilRouteWithChildren
   SektorlerRoute: typeof SektorlerRouteWithChildren
@@ -355,6 +381,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PanelRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/neden-jetborsa': {
+      id: '/neden-jetborsa'
+      path: '/neden-jetborsa'
+      fullPath: '/neden-jetborsa'
+      preLoaderRoute: typeof NedenJetborsaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/nasil-calisir': {
       id: '/nasil-calisir'
       path: '/nasil-calisir'
@@ -367,6 +400,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kurumsal': {
+      id: '/kurumsal'
+      path: '/kurumsal'
+      fullPath: '/kurumsal'
+      preLoaderRoute: typeof KurumsalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/endeksler': {
@@ -528,8 +568,10 @@ const SektorlerRouteWithChildren = SektorlerRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   EndekslerRoute: EndekslerRoute,
+  KurumsalRoute: KurumsalRoute,
   LoginRoute: LoginRoute,
   NasilCalisirRoute: NasilCalisirRoute,
+  NedenJetborsaRoute: NedenJetborsaRoute,
   PanelRoute: PanelRouteWithChildren,
   ProfilRoute: ProfilRouteWithChildren,
   SektorlerRoute: SektorlerRouteWithChildren,
