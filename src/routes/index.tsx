@@ -233,7 +233,7 @@ function LandingPage() {
                   return (
                     <div
                       key={stock.ticker}
-                      onClick={() => navigate({ to: `/sirketler/$id`, params: { id: stock.ticker.toLowerCase() } })}
+                      onClick={() => navigate({ to: `/panel/sirketler/$id`, params: { id: stock.ticker.toLowerCase() } })}
                       className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
                     >
                       <div className="flex items-center gap-3 min-w-0">
@@ -278,7 +278,7 @@ function LandingPage() {
                     return (
                       <div
                         key={stock.ticker}
-                        onClick={() => navigate({ to: `/sirketler/$id`, params: { id: stock.ticker.toLowerCase() } })}
+                        onClick={() => navigate({ to: `/panel/sirketler/$id`, params: { id: stock.ticker.toLowerCase() } })}
                         className="flex-none w-[180px] md:w-[200px] rounded-2xl p-4 bg-card/50 border border-white/5 hover:border-white/10 transition-all cursor-pointer group"
                       >
                         <div className="flex items-center gap-2 mb-3">
@@ -319,7 +319,7 @@ function LandingPage() {
                   return (
                     <div
                       key={stock.ticker}
-                      onClick={() => navigate({ to: `/sirketler/$id`, params: { id: stock.ticker.toLowerCase() } })}
+                      onClick={() => navigate({ to: `/panel/sirketler/$id`, params: { id: stock.ticker.toLowerCase() } })}
                       className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
                     >
                       <div className="flex items-center gap-3 min-w-0">
