@@ -226,7 +226,7 @@ function LandingPage() {
           {/* Yükselenler - Seamless List */}
           {topGainers.length > 0 && (
             <section className="px-4 md:px-6 py-4">
-              <h2 className="text-lg font-bold text-foreground mb-3 px-1">Yükselenler</h2>
+              <h2 className="text-xl font-normal text-muted-foreground mb-3 px-1">Yükselenler</h2>
               <div className="divide-y divide-white/5">
                 {topGainers.map((stock) => {
                   const logoFile = companyLogos[stock.ticker as keyof typeof companyLogos]
@@ -268,7 +268,6 @@ function LandingPage() {
           {/* BIST 30 Carousel */}
           {bist30Stocks.length > 0 && (
             <section className="px-4 md:px-6 py-4">
-              <h2 className="text-lg font-bold text-foreground mb-3 px-1">BIST 30</h2>
               <div className="overflow-hidden" ref={emblaRef2}>
                 <div className="flex gap-3">
                   {bist30Stocks.map((stock) => {
@@ -312,7 +311,7 @@ function LandingPage() {
           {/* Düşenler - Seamless List */}
           {topLosers.length > 0 && (
             <section className="px-4 md:px-6 py-4">
-              <h2 className="text-lg font-bold text-foreground mb-3 px-1">Düşenler</h2>
+              <h2 className="text-xl font-normal text-muted-foreground mb-3 px-1">Düşenler</h2>
               <div className="divide-y divide-white/5">
                 {topLosers.map((stock) => {
                   const logoFile = companyLogos[stock.ticker as keyof typeof companyLogos]
