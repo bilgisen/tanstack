@@ -251,10 +251,10 @@ function LandingPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-4 shrink-0">
-                        <span className="text-sm font-bold font-mono text-emerald-500">
+                        <span className="text-base font-bold font-mono text-emerald-500">
                           +{stock.diffPercent.toFixed(2).replace('.', ',')}%
                         </span>
-                        <span className="text-sm font-semibold font-mono text-foreground">
+                        <span className="text-base font-semibold font-mono text-foreground">
                           ₺{stock.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                         </span>
                       </div>
@@ -337,10 +337,10 @@ function LandingPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-4 shrink-0">
-                        <span className="text-sm font-bold font-mono text-destructive">
+                        <span className="text-base font-bold font-mono text-destructive">
                           {stock.diffPercent.toFixed(2).replace('.', ',')}%
                         </span>
-                        <span className="text-sm font-semibold font-mono text-foreground">
+                        <span className="text-base font-semibold font-mono text-foreground">
                           ₺{stock.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                         </span>
                       </div>
@@ -351,25 +351,6 @@ function LandingPage() {
             </section>
           )}
 
-          {/* Quick Actions for logged in users */}
-          {user && (
-            <section className="px-4 md:px-6 py-4 max-w-5xl mx-auto">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <Link to="/endeksler" className="flex items-center justify-center p-4 rounded-xl border border-border/40 hover:border-primary/20 bg-card/15 hover:bg-primary/5 transition-all">
-                  <span className="text-xs font-bold">Endeksler</span>
-                </Link>
-                <Link to="/sektorler" className="flex items-center justify-center p-4 rounded-xl border border-border/40 hover:border-primary/20 bg-card/15 hover:bg-primary/5 transition-all">
-                  <span className="text-xs font-bold">Sektörler</span>
-                </Link>
-                <Link to="/sirketler" className="flex items-center justify-center p-4 rounded-xl border border-border/40 hover:border-primary/20 bg-card/15 hover:bg-primary/5 transition-all">
-                  <span className="text-xs font-bold">Şirketler</span>
-                </Link>
-                <Link to="/takip-listesi" className="flex items-center justify-center p-4 rounded-xl border border-border/40 hover:border-primary/20 bg-card/15 hover:bg-primary/5 transition-all">
-                  <span className="text-xs font-bold">Takip Listem</span>
-                </Link>
-              </div>
-            </section>
-          )}
         </div>
 
         {/* Mobile floating chat trigger */}
