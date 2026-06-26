@@ -55,7 +55,7 @@ function LandingPage() {
   const [isChatSheetOpen, setIsChatSheetOpen] = useState(false)
   
   const [emblaRef] = useEmblaCarousel(
-    { align: 'start', loop: true, slidesToScroll: 1 },
+    { loop: true, slidesToScroll: 1, align: 'start' },
     [Autoplay({ delay: 3000, stopOnInteraction: false, playOnInit: true })]
   )
 
@@ -251,13 +251,13 @@ function LandingPage() {
           <section className="px-4 md:px-6 py-4">
             <div className="overflow-hidden" ref={emblaRef}>
               <div className="flex gap-3">
-                {indexData.map((idx) => {
+                {[...indexData, ...indexData, ...indexData].map((idx, i) => {
                   const isUp = idx.diffPercent >= 0;
                   const routeTarget = `/endeksler/${idx.id}`;
                   
                   return (
                     <Link
-                      key={idx.id}
+                      key={`${idx.id}-${i}`}
                       to={routeTarget}
                       className="flex-none w-[200px] md:w-[240px] rounded-2xl p-4 bg-card/50 border border-white/5 hover:border-white/10 transition-all cursor-pointer group"
                     >
@@ -269,7 +269,7 @@ function LandingPage() {
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-xl font-bold text-foreground font-mono truncate">
-                          ₺{idx.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          {idx.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isUp ? 'bg-emerald-500' : 'bg-destructive'}`}>
                           {isUp ? <ArrowUp size={16} className="text-white" /> : <ArrowDown size={16} className="text-white" />}
