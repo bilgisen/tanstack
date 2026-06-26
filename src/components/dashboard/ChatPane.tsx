@@ -37,16 +37,16 @@ export function ChatPane({
     
     // Check indices first
     if (textLower.includes("bist 100") || textLower.includes("bist100") || textLower.includes("xu100")) {
-      return { path: "/panel/endeksler/bist100", context: "endeks:bist100" };
+      return { path: "/endeksler/bist100", context: "endeks:bist100" };
     }
     if (textLower.includes("bist 30") || textLower.includes("bist30") || textLower.includes("xu030")) {
-      return { path: "/panel/endeksler/bist30", context: "endeks:bist30" };
+      return { path: "/endeksler/bist30", context: "endeks:bist30" };
     }
     if (textLower.includes("bist 500") || textLower.includes("bist500") || textLower.includes("xu500")) {
-      return { path: "/panel/endeksler/bist500", context: "endeks:bist500" };
+      return { path: "/endeksler/bist500", context: "endeks:bist500" };
     }
     if (textLower.includes("bankacılık") || textLower.includes("bist banka") || textLower.includes("xbank") || textLower.includes("bistbanka")) {
-      return { path: "/panel/endeksler/bistbanka", context: "endeks:bistbanka" };
+      return { path: "/endeksler/bistbanka", context: "endeks:bistbanka" };
     }
 
     // Check stocks

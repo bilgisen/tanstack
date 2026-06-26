@@ -265,7 +265,7 @@ function BorsaPage() {
         {indices.map((ind) => (
           <Link
             key={ind.id}
-            to={`/panel/endeksler/${ind.id}` as any}
+            to={`/endeksler/${ind.id}` as any}
             className="bg-card hover:bg-muted/30 border border-border/80 hover:border-border transition-all rounded-2xl p-4 flex flex-col justify-between cursor-pointer group active:scale-[0.99] select-none shadow-xs"
           >
             <div className="flex flex-col gap-1 w-full">

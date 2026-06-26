@@ -18,6 +18,7 @@ import { Route as NedenJetborsaRouteImport } from './routes/neden-jetborsa'
 import { Route as NasilCalisirRouteImport } from './routes/nasil-calisir'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as KurumsalRouteImport } from './routes/kurumsal'
+import { Route as Endeksler_indexRouteImport } from './routes/endeksler_index'
 import { Route as EndekslerRouteImport } from './routes/endeksler'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfilIndexRouteImport } from './routes/profil.index'
@@ -25,9 +26,9 @@ import { Route as PanelIndexRouteImport } from './routes/panel.index'
 import { Route as SektorlerSlugRouteImport } from './routes/sektorler.$slug'
 import { Route as PanelProfilRouteImport } from './routes/panel.profil'
 import { Route as PanelBorsaRouteImport } from './routes/panel.borsa'
+import { Route as EndekslerIdRouteImport } from './routes/endeksler.$id'
 import { Route as ApiCheckoutRouteImport } from './routes/api/checkout'
 import { Route as PanelSirketlerIdRouteImport } from './routes/panel.sirketler.$id'
-import { Route as PanelEndekslerIdRouteImport } from './routes/panel.endeksler.$id'
 import { Route as ApiWebhooksPolarRouteImport } from './routes/api/webhooks/polar'
 import { Route as ApiUserCreditsRouteImport } from './routes/api/user/credits'
 import { Route as ApiModelsAvailableRouteImport } from './routes/api/models/available'
@@ -80,6 +81,11 @@ const KurumsalRoute = KurumsalRouteImport.update({
   path: '/kurumsal',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Endeksler_indexRoute = Endeksler_indexRouteImport.update({
+  id: '/endeksler_index',
+  path: '/endeksler_index',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EndekslerRoute = EndekslerRouteImport.update({
   id: '/endeksler',
   path: '/endeksler',
@@ -115,6 +121,11 @@ const PanelBorsaRoute = PanelBorsaRouteImport.update({
   path: '/borsa',
   getParentRoute: () => PanelRoute,
 } as any)
+const EndekslerIdRoute = EndekslerIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => EndekslerRoute,
+} as any)
 const ApiCheckoutRoute = ApiCheckoutRouteImport.update({
   id: '/api/checkout',
   path: '/api/checkout',
@@ -123,11 +134,6 @@ const ApiCheckoutRoute = ApiCheckoutRouteImport.update({
 const PanelSirketlerIdRoute = PanelSirketlerIdRouteImport.update({
   id: '/sirketler/$id',
   path: '/sirketler/$id',
-  getParentRoute: () => PanelRoute,
-} as any)
-const PanelEndekslerIdRoute = PanelEndekslerIdRouteImport.update({
-  id: '/endeksler/$id',
-  path: '/endeksler/$id',
   getParentRoute: () => PanelRoute,
 } as any)
 const ApiWebhooksPolarRoute = ApiWebhooksPolarRouteImport.update({
@@ -163,7 +169,8 @@ const ApiAiChargeRoute = ApiAiChargeRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/endeksler': typeof EndekslerRoute
+  '/endeksler': typeof EndekslerRouteWithChildren
+  '/endeksler_index': typeof Endeksler_indexRoute
   '/kurumsal': typeof KurumsalRoute
   '/login': typeof LoginRoute
   '/nasil-calisir': typeof NasilCalisirRoute
@@ -174,6 +181,7 @@ export interface FileRoutesByFullPath {
   '/sirketler': typeof SirketlerRoute
   '/takip-listesi': typeof TakipListesiRoute
   '/api/checkout': typeof ApiCheckoutRoute
+  '/endeksler/$id': typeof EndekslerIdRoute
   '/panel/borsa': typeof PanelBorsaRoute
   '/panel/profil': typeof PanelProfilRoute
   '/sektorler/$slug': typeof SektorlerSlugRoute
@@ -185,12 +193,12 @@ export interface FileRoutesByFullPath {
   '/api/models/available': typeof ApiModelsAvailableRoute
   '/api/user/credits': typeof ApiUserCreditsRoute
   '/api/webhooks/polar': typeof ApiWebhooksPolarRoute
-  '/panel/endeksler/$id': typeof PanelEndekslerIdRoute
   '/panel/sirketler/$id': typeof PanelSirketlerIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/endeksler': typeof EndekslerRoute
+  '/endeksler': typeof EndekslerRouteWithChildren
+  '/endeksler_index': typeof Endeksler_indexRoute
   '/kurumsal': typeof KurumsalRoute
   '/login': typeof LoginRoute
   '/nasil-calisir': typeof NasilCalisirRoute
@@ -199,6 +207,7 @@ export interface FileRoutesByTo {
   '/sirketler': typeof SirketlerRoute
   '/takip-listesi': typeof TakipListesiRoute
   '/api/checkout': typeof ApiCheckoutRoute
+  '/endeksler/$id': typeof EndekslerIdRoute
   '/panel/borsa': typeof PanelBorsaRoute
   '/panel/profil': typeof PanelProfilRoute
   '/sektorler/$slug': typeof SektorlerSlugRoute
@@ -210,13 +219,13 @@ export interface FileRoutesByTo {
   '/api/models/available': typeof ApiModelsAvailableRoute
   '/api/user/credits': typeof ApiUserCreditsRoute
   '/api/webhooks/polar': typeof ApiWebhooksPolarRoute
-  '/panel/endeksler/$id': typeof PanelEndekslerIdRoute
   '/panel/sirketler/$id': typeof PanelSirketlerIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/endeksler': typeof EndekslerRoute
+  '/endeksler': typeof EndekslerRouteWithChildren
+  '/endeksler_index': typeof Endeksler_indexRoute
   '/kurumsal': typeof KurumsalRoute
   '/login': typeof LoginRoute
   '/nasil-calisir': typeof NasilCalisirRoute
@@ -227,6 +236,7 @@ export interface FileRoutesById {
   '/sirketler': typeof SirketlerRoute
   '/takip-listesi': typeof TakipListesiRoute
   '/api/checkout': typeof ApiCheckoutRoute
+  '/endeksler/$id': typeof EndekslerIdRoute
   '/panel/borsa': typeof PanelBorsaRoute
   '/panel/profil': typeof PanelProfilRoute
   '/sektorler/$slug': typeof SektorlerSlugRoute
@@ -238,7 +248,6 @@ export interface FileRoutesById {
   '/api/models/available': typeof ApiModelsAvailableRoute
   '/api/user/credits': typeof ApiUserCreditsRoute
   '/api/webhooks/polar': typeof ApiWebhooksPolarRoute
-  '/panel/endeksler/$id': typeof PanelEndekslerIdRoute
   '/panel/sirketler/$id': typeof PanelSirketlerIdRoute
 }
 export interface FileRouteTypes {
@@ -246,6 +255,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/endeksler'
+    | '/endeksler_index'
     | '/kurumsal'
     | '/login'
     | '/nasil-calisir'
@@ -256,6 +266,7 @@ export interface FileRouteTypes {
     | '/sirketler'
     | '/takip-listesi'
     | '/api/checkout'
+    | '/endeksler/$id'
     | '/panel/borsa'
     | '/panel/profil'
     | '/sektorler/$slug'
@@ -267,12 +278,12 @@ export interface FileRouteTypes {
     | '/api/models/available'
     | '/api/user/credits'
     | '/api/webhooks/polar'
-    | '/panel/endeksler/$id'
     | '/panel/sirketler/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/endeksler'
+    | '/endeksler_index'
     | '/kurumsal'
     | '/login'
     | '/nasil-calisir'
@@ -281,6 +292,7 @@ export interface FileRouteTypes {
     | '/sirketler'
     | '/takip-listesi'
     | '/api/checkout'
+    | '/endeksler/$id'
     | '/panel/borsa'
     | '/panel/profil'
     | '/sektorler/$slug'
@@ -292,12 +304,12 @@ export interface FileRouteTypes {
     | '/api/models/available'
     | '/api/user/credits'
     | '/api/webhooks/polar'
-    | '/panel/endeksler/$id'
     | '/panel/sirketler/$id'
   id:
     | '__root__'
     | '/'
     | '/endeksler'
+    | '/endeksler_index'
     | '/kurumsal'
     | '/login'
     | '/nasil-calisir'
@@ -308,6 +320,7 @@ export interface FileRouteTypes {
     | '/sirketler'
     | '/takip-listesi'
     | '/api/checkout'
+    | '/endeksler/$id'
     | '/panel/borsa'
     | '/panel/profil'
     | '/sektorler/$slug'
@@ -319,13 +332,13 @@ export interface FileRouteTypes {
     | '/api/models/available'
     | '/api/user/credits'
     | '/api/webhooks/polar'
-    | '/panel/endeksler/$id'
     | '/panel/sirketler/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  EndekslerRoute: typeof EndekslerRoute
+  EndekslerRoute: typeof EndekslerRouteWithChildren
+  Endeksler_indexRoute: typeof Endeksler_indexRoute
   KurumsalRoute: typeof KurumsalRoute
   LoginRoute: typeof LoginRoute
   NasilCalisirRoute: typeof NasilCalisirRoute
@@ -409,6 +422,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KurumsalRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/endeksler_index': {
+      id: '/endeksler_index'
+      path: '/endeksler_index'
+      fullPath: '/endeksler_index'
+      preLoaderRoute: typeof Endeksler_indexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/endeksler': {
       id: '/endeksler'
       path: '/endeksler'
@@ -458,6 +478,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PanelBorsaRouteImport
       parentRoute: typeof PanelRoute
     }
+    '/endeksler/$id': {
+      id: '/endeksler/$id'
+      path: '/$id'
+      fullPath: '/endeksler/$id'
+      preLoaderRoute: typeof EndekslerIdRouteImport
+      parentRoute: typeof EndekslerRoute
+    }
     '/api/checkout': {
       id: '/api/checkout'
       path: '/api/checkout'
@@ -470,13 +497,6 @@ declare module '@tanstack/react-router' {
       path: '/sirketler/$id'
       fullPath: '/panel/sirketler/$id'
       preLoaderRoute: typeof PanelSirketlerIdRouteImport
-      parentRoute: typeof PanelRoute
-    }
-    '/panel/endeksler/$id': {
-      id: '/panel/endeksler/$id'
-      path: '/endeksler/$id'
-      fullPath: '/panel/endeksler/$id'
-      preLoaderRoute: typeof PanelEndekslerIdRouteImport
       parentRoute: typeof PanelRoute
     }
     '/api/webhooks/polar': {
@@ -524,11 +544,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface EndekslerRouteChildren {
+  EndekslerIdRoute: typeof EndekslerIdRoute
+}
+
+const EndekslerRouteChildren: EndekslerRouteChildren = {
+  EndekslerIdRoute: EndekslerIdRoute,
+}
+
+const EndekslerRouteWithChildren = EndekslerRoute._addFileChildren(
+  EndekslerRouteChildren,
+)
+
 interface PanelRouteChildren {
   PanelBorsaRoute: typeof PanelBorsaRoute
   PanelProfilRoute: typeof PanelProfilRoute
   PanelIndexRoute: typeof PanelIndexRoute
-  PanelEndekslerIdRoute: typeof PanelEndekslerIdRoute
   PanelSirketlerIdRoute: typeof PanelSirketlerIdRoute
 }
 
@@ -536,7 +567,6 @@ const PanelRouteChildren: PanelRouteChildren = {
   PanelBorsaRoute: PanelBorsaRoute,
   PanelProfilRoute: PanelProfilRoute,
   PanelIndexRoute: PanelIndexRoute,
-  PanelEndekslerIdRoute: PanelEndekslerIdRoute,
   PanelSirketlerIdRoute: PanelSirketlerIdRoute,
 }
 
@@ -567,7 +597,8 @@ const SektorlerRouteWithChildren = SektorlerRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  EndekslerRoute: EndekslerRoute,
+  EndekslerRoute: EndekslerRouteWithChildren,
+  Endeksler_indexRoute: Endeksler_indexRoute,
   KurumsalRoute: KurumsalRoute,
   LoginRoute: LoginRoute,
   NasilCalisirRoute: NasilCalisirRoute,

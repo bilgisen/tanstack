@@ -1,174 +1,82 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
-import { 
-  Loader2, 
-  TrendingUp, 
-  TrendingDown, 
-  ChevronRight,
-  ExternalLink,
-  Info
-} from 'lucide-react'
+import { createFileRoute, Outlet, useLocation } from '@tanstack/react-router'
+import { useEffect, useRef, useState } from 'react'
+import { ChatPanel } from '../components/chat/ChatPanel'
+import { ChatSheet } from '../components/chat/ChatSheet'
 import { useUIStore } from '../store/ui'
-import companyNames from '../constants/companyNames.json'
-import companyLogos from '../constants/companyLogos.json'
-import { PublicPageLayout } from '../components/layout/PublicPageLayout'
+import { Logo } from '../components/layout/Logo'
 
 export const Route = createFileRoute('/endeksler')({
-  component: EndekslerPage,
+  component: EndekslerLayout,
 })
 
-type IndexData = {
-  id: string;
-  title: string;
-  code: string;
-  last_price: number;
-  diff_percent: number;
-  up: boolean;
-  sparkline?: number[];
-};
-
-function EndekslerPage() {
-  const [indices, setIndices] = useState<IndexData[]>([
-    { id: 'bist100', title: 'BIST 100', code: 'XU100', last_price: 10245.50, diff_percent: 1.10, up: true },
-    { id: 'bist30', title: 'BIST 30', code: 'XU030', last_price: 11250.40, diff_percent: 1.20, up: true },
-    { id: 'bist500', title: 'BIST 500', code: 'XU500', last_price: 12540.80, diff_percent: 1.45, up: true },
-  ])
-  const [loading, setLoading] = useState(true)
-  const { setGlobalPrompt, openRightSidebar } = useUIStore()
+function EndekslerLayout() {
+  const location = useLocation()
+  const { isChatMaximized } = useUIStore()
+  const mainScrollRef = useRef<HTMLDivElement>(null)
+  const [isChatSheetOpen, setIsChatSheetOpen] = useState(false)
 
   useEffect(() => {
-    let isMounted = true
-    setLoading(true)
-
-    async function fetchMarketData() {
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev"
-      try {
-        const indexRes = await fetch(`${apiUrl}/api/market/summary`)
-        if (indexRes.ok) {
-          const indexJson = await indexRes.json()
-          if (indexJson && Array.isArray(indexJson.data)) {
-            const liveIndices = indexJson.data
-              .filter((idx: any) => ['XU100', 'XU030', 'XU500'].includes(idx.code?.toUpperCase()))
-              .map((idx: any) => {
-                const last_price = typeof idx.last_price === 'number' ? idx.last_price : (typeof idx.value === 'string' ? parseFloat(idx.value.replace(',', '.')) : (typeof idx.value === 'number' ? idx.value : 0))
-                const diff_percent = typeof idx.diff_percent === 'number' ? idx.diff_percent : (typeof idx.changePercent === 'string' ? parseFloat(idx.changePercent.replace(',', '.')) : (typeof idx.changePercent === 'number' ? idx.changePercent : 0))
-                const code = idx.code?.toUpperCase() || ''
-                const nameMap: Record<string, string> = { XU100: 'BIST 100', XU030: 'BIST 30', XU500: 'BIST 500' }
-                const idMap: Record<string, string> = { XU100: 'bist100', XU030: 'bist30', XU500: 'bist500' }
-                const sparkline = [
-                  last_price * (1 - diff_percent * 0.005),
-                  last_price * (1 - diff_percent * 0.003),
-                  last_price * (1 - diff_percent * 0.004),
-                  last_price * (1 - diff_percent * 0.001),
-                  last_price * (1 - diff_percent * 0.002),
-                  last_price * (1 + diff_percent * 0.001),
-                  last_price
-                ]
-                return {
-                  id: idMap[code] || code.toLowerCase(),
-                  title: nameMap[code] || idx.name || code,
-                  code,
-                  last_price: Number(last_price.toFixed(2)),
-                  diff_percent: Number(diff_percent.toFixed(2)),
-                  up: diff_percent >= 0,
-                  sparkline,
-                }
-              })
-            if (isMounted && liveIndices.length > 0) {
-              setIndices(liveIndices)
-            }
-          }
-        }
-      } catch (e) {
-        console.error('Endeksler: Failed fetching live summary:', e)
-      }
-      if (isMounted) setLoading(false)
-    }
-
-    fetchMarketData()
-    return () => { isMounted = false }
+    const handleOpenMobileChat = () => setIsChatSheetOpen(true)
+    window.addEventListener('open-mobile-chat', handleOpenMobileChat)
+    return () => window.removeEventListener('open-mobile-chat', handleOpenMobileChat)
   }, [])
 
-  if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="animate-spin text-primary" size={24} />
-      </div>
-    )
+  useEffect(() => {
+    if (mainScrollRef.current) mainScrollRef.current.scrollTop = 0
+  }, [location.pathname])
+
+  const pathname = location.pathname.toLowerCase()
+  let context = 'endeksler'
+  let placeholder = 'Endeksler hakkında bir soru sorun...'
+
+  if (pathname.includes('/endeksler/')) {
+    const parts = pathname.split('/endeksler/')
+    if (parts[1]) {
+      const endeksId = parts[1]
+      context = `endeks:${endeksId}`
+      const indexName = endeksId === 'bist30' ? 'BIST 30' : endeksId === 'bist100' ? 'BIST 100' : endeksId === 'bistbanka' ? 'BIST Bankacılık' : endeksId.toUpperCase()
+      placeholder = `${indexName} hakkında bir soru sorun...`
+    }
   }
 
   return (
-    <PublicPageLayout context="endeksler" placeholder="Endeksler hakkında bir soru sorun...">
-      <div className="space-y-8 animate-in fade-in duration-400">
+    <div className="w-full h-screen flex flex-col bg-background font-sans overflow-hidden">
+      <div className="flex-1 flex flex-row min-w-0 h-full relative overflow-hidden bg-background">
+        
+        <div className={`flex-1 flex flex-col min-w-0 h-full relative overflow-hidden bg-background ${isChatMaximized ? 'hidden md:hidden' : ''}`}>
+          <main 
+            ref={mainScrollRef}
+            className="flex-1 overflow-y-auto bg-background px-6 md:px-8 py-6 custom-scrollbar min-w-0 relative z-10 pb-24 md:pb-12 scroll-smooth"
+          >
+            <div className="w-full">
+              <Outlet />
+            </div>
+          </main>
 
-        {/* Index Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {indices.map((index) => (
-            <Link
-              key={index.id}
-              to="/panel/endeksler/$id"
-              params={{ id: index.id }}
-              className="group bg-card border border-border/50 rounded-2xl p-5 transition-all hover:border-border/80 hover:shadow-lg hover:-translate-y-0.5"
+          <div className="lg:hidden absolute bottom-6 left-6 right-6 z-40 flex justify-center pointer-events-none">
+            <div 
+              onClick={() => setIsChatSheetOpen(true)}
+              className="w-full max-w-3xl bg-background/80 backdrop-blur-2xl border border-border/50 rounded-full shadow-2xl pointer-events-auto overflow-hidden animate-in slide-in-from-bottom-6 duration-500 cursor-pointer flex items-center px-6 py-2.5 justify-between"
             >
-              <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{index.code}</span>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${index.up ? 'bg-emerald-500/10 text-emerald-500' : 'bg-destructive/10 text-destructive'}`}>
-                      {index.up ? '+' : ''}{index.diff_percent.toFixed(2)}%
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-bold text-foreground truncate group-hover:text-primary transition-colors">{index.title}</h3>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <ExternalLink size={14} className="text-muted-foreground/50 group-hover:text-foreground transition-colors" />
-                </div>
-              </div>
-              
-              <div className="mt-4 pt-4 border-t border-border/30">
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-2xl font-bold tabular-nums text-foreground">{index.last_price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                  <div className="flex items-center gap-1 text-sm font-semibold shrink-0">
-                    <span className={index.up ? 'text-emerald-500' : 'text-destructive'}>
-                      {index.up ? '+' : ''}{index.diff_percent.toFixed(2)}%
-                    </span>
-                  </div>
-                </div>
-                
-                {index.sparkline && index.sparkline.length > 1 && (
-                  <div className="mt-3 h-8 relative">
-                    <svg className="w-full h-full" viewBox={`0 0 ${index.sparkline.length * 10} 40`} preserveAspectRatio="none">
-                      <polyline
-                        fill="none"
-                        stroke={index.up ? '#22c55e' : '#ef4444'}
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        points={index.sparkline.map((v, i) => {
-                          const min = Math.min(...index.sparkline!)
-                          const max = Math.max(...index.sparkline!)
-                          const range = max - min || 1
-                          const x = i * 10
-                          const y = 35 - ((v - min) / range) * 30
-                          return `${x},${y}`
-                        }).join(' ')}
-                      />
-                    </svg>
-                  </div>
-                )}
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        {/* Info Section */}
-        <div className="p-4 bg-muted/30 rounded-xl border border-border/30">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Info size={16} className="shrink-0" />
-            <span>Endeks verileri Borsa İstanbul'dan anlık olarak alınmaktadır. Detaylı analiz ve grafikler için endekse tıklayın.</span>
+              <span className="text-muted-foreground/60 text-sm truncate pr-4">{placeholder}</span>
+              <button className="w-9 h-9 flex items-center justify-center rounded-full bg-primary text-white shrink-0 self-center">
+                <Logo size={14} variant="icon" className="text-white" />
+              </button>
+            </div>
           </div>
         </div>
+
+        <div className={`hidden md:block h-full shrink-0 transition-all duration-300 ${isChatMaximized ? 'w-full flex-1' : 'md:w-[360px] lg:w-[400px] xl:w-[440px]'}`}>
+          <ChatPanel context={context} placeholder={placeholder} />
+        </div>
       </div>
-    </PublicPageLayout>
+
+      <ChatSheet 
+        isOpen={isChatSheetOpen} 
+        onClose={() => setIsChatSheetOpen(false)} 
+        context={context} 
+        placeholder={placeholder}
+      />
+    </div>
   )
 }

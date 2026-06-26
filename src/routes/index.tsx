@@ -253,7 +253,7 @@ function LandingPage() {
               <div className="flex gap-3">
                 {indexData.map((idx) => {
                   const isUp = idx.diffPercent >= 0;
-                  const routeTarget = `/panel/endeksler/${idx.id}`;
+                  const routeTarget = `/endeksler/${idx.id}`;
                   
                   return (
                     <Link

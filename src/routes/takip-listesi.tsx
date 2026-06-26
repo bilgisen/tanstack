@@ -355,7 +355,7 @@ function WatchlistPage() {
                   activeListDetailedItems.map((item) => {
                     const isUp = item.diff_percent >= 0
                     const itemUrl = item.type === 'index' 
-                      ? `/panel/endeksler/${item.code === 'XU100' ? 'bist100' : item.code === 'XU030' ? 'bist30' : 'bist100'}`
+                      ? `/endeksler/${item.code === 'XU100' ? 'bist100' : item.code === 'XU030' ? 'bist30' : 'bist100'}`
                       : `/panel/sirketler/${item.code.toLowerCase()}`
                     return (
                       <tr 

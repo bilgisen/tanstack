@@ -241,7 +241,7 @@ function PanelIndexPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
           {indexData.map((idx) => {
             const isUp = idx.diffPercent >= 0;
-            const routeTarget = `/panel/endeksler/${idx.id}`;
+            const routeTarget = `/endeksler/${idx.id}`;
             
             return (
               <Link
@@ -346,7 +346,7 @@ function PanelIndexPage() {
                   {watchlistRows.map((row) => {
                     const isUp = row.diffPercent >= 0;
                     const detailsRoute = row.type === 'index' 
-                      ? `/panel/endeksler/${row.symbol.toLowerCase() === 'xu100' ? 'bist100' : row.symbol.toLowerCase() === 'xu030' ? 'bist30' : row.symbol.toLowerCase() === 'xu500' ? 'bist500' : 'bist100'}`
+                      ? `/endeksler/${row.symbol.toLowerCase() === 'xu100' ? 'bist100' : row.symbol.toLowerCase() === 'xu030' ? 'bist30' : row.symbol.toLowerCase() === 'xu500' ? 'bist500' : 'bist100'}`
                       : `/panel/sirketler/${row.symbol.toLowerCase()}`;
                     
                     return (
