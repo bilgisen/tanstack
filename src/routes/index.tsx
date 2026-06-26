@@ -1,16 +1,21 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import useEmblaCarousel from 'embla-carousel-react'
+import Autoplay from 'embla-carousel-autoplay'
 import { 
   Sparkles, 
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  SquareChevronUp,
+  SquareChevronDown,
+  SquareKanban
 } from 'lucide-react'
 import { ChatPanel } from '../components/chat/ChatPanel'
 import { ChatSheet } from '../components/chat/ChatSheet'
 import { useUIStore } from '../store/ui'
 import { Logo } from '../components/layout/Logo'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs'
 import companyLogos from '../constants/companyLogos.json'
 import companyNames from '../constants/companyNames.json'
 
@@ -31,6 +36,7 @@ type StockRow = {
   name: string;
   price: number;
   diffPercent: number;
+  volume?: number;
 }
 
 const BIST30_TICKERS = [
@@ -48,11 +54,10 @@ function LandingPage() {
   const navigate = useNavigate()
   const [isChatSheetOpen, setIsChatSheetOpen] = useState(false)
   
-  const [emblaRef] = useEmblaCarousel({
-    align: 'start',
-    slidesToScroll: 1,
-    containScroll: 'trimSnaps',
-  })
+  const [emblaRef] = useEmblaCarousel(
+    { align: 'start', loop: true },
+    [Autoplay({ delay: 3000, stopOnInteraction: false })]
+  )
 
   const [emblaRef2] = useEmblaCarousel({
     align: 'start',
@@ -69,6 +74,7 @@ function LandingPage() {
   const [bist30Stocks, setBist30Stocks] = useState<StockRow[]>([])
   const [topGainers, setTopGainers] = useState<StockRow[]>([])
   const [topLosers, setTopLosers] = useState<StockRow[]>([])
+  const [topVolume, setTopVolume] = useState<StockRow[]>([])
 
   useEffect(() => {
     async function fetchData() {
@@ -110,6 +116,7 @@ function LandingPage() {
                 name: (companyNames as Record<string, string>)[s.code.toUpperCase()] || s.code.toUpperCase(),
                 price: Number(s.last_price),
                 diffPercent: Number(s.diff_percent || 0),
+                volume: Number(s.volume || 0),
               }))
 
             // BIST 30
@@ -120,21 +127,28 @@ function LandingPage() {
                 name: (companyNames as Record<string, string>)[ticker] || ticker,
                 price: 0,
                 diffPercent: 0,
+                volume: 0,
               }
             }).filter(s => s.price > 0)
             setBist30Stocks(bist30)
 
-            // Top gainers
+            // Top 5 gainers
             const gainers = [...allStocks]
               .sort((a, b) => b.diffPercent - a.diffPercent)
-              .slice(0, 10)
+              .slice(0, 5)
             setTopGainers(gainers)
 
-            // Top losers
+            // Top 5 losers
             const losers = [...allStocks]
               .sort((a, b) => a.diffPercent - b.diffPercent)
-              .slice(0, 10)
+              .slice(0, 5)
             setTopLosers(losers)
+
+            // Top 5 volume
+            const volume = [...allStocks]
+              .sort((a, b) => (b.volume || 0) - (a.volume || 0))
+              .slice(0, 5)
+            setTopVolume(volume)
           }
         }
       } catch (e) {
@@ -143,6 +157,51 @@ function LandingPage() {
     }
     fetchData()
   }, [])
+
+  const renderStockList = (stocks: StockRow[], color: 'emerald' | 'destructive' | 'primary') => {
+    const colorClasses = {
+      emerald: 'text-emerald-500',
+      destructive: 'text-destructive',
+      primary: 'text-primary',
+    }
+    return (
+      <div className="divide-y divide-white/5">
+        {stocks.map((stock) => {
+          const logoFile = companyLogos[stock.ticker as keyof typeof companyLogos]
+          return (
+            <div
+              key={stock.ticker}
+              onClick={() => navigate({ to: `/panel/sirketler/$id`, params: { id: stock.ticker.toLowerCase() } })}
+              className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                {logoFile ? (
+                  <div className="h-8 w-8 rounded-lg bg-white overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
+                    <img src={`/logos/${logoFile}`} alt={stock.ticker} className="h-full w-full object-cover p-0.5" />
+                  </div>
+                ) : (
+                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] shrink-0 border border-primary/10">
+                    {stock.ticker.slice(0, 2)}
+                  </div>
+                )}
+                <div className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                  {stock.ticker}
+                </div>
+              </div>
+              <div className="flex items-center gap-4 shrink-0">
+                <span className={`text-base font-bold font-mono ${colorClasses[color]}`}>
+                  {color === 'emerald' ? '+' : color === 'destructive' ? '' : ''}{stock.diffPercent.toFixed(2).replace('.', ',')}%
+                </span>
+                <span className="text-base font-semibold font-mono text-foreground">
+                  ₺{stock.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                </span>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
 
   return (
     <div className="flex-1 flex flex-row min-w-0 h-full overflow-hidden">
@@ -162,11 +221,11 @@ function LandingPage() {
               </div>
 
               <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-6">
-                Jet Hızında Analiz
+                Akıllı Borsacı
               </h1>
               
               <p className="text-muted-foreground max-w-2xl mx-auto mb-8 text-base sm:text-lg leading-relaxed">
-                Endeksleri, sektörleri, şirketleri derinlemesine analiz edin.
+                Borsayı derinlemesine ve jet hızında analiz edin.
               </p>
 
               {!user && (
@@ -188,17 +247,17 @@ function LandingPage() {
             </div>
           </section>
 
-          {/* Index Cards Carousel */}
+          {/* Index Cards Carousel - Autoplay + Loop */}
           <section className="px-4 md:px-6 py-4">
             <div className="overflow-hidden" ref={emblaRef}>
               <div className="flex gap-3">
-                {indexData.map((idx) => {
+                {[...indexData, ...indexData].map((idx, i) => {
                   const isUp = idx.diffPercent >= 0;
                   const routeTarget = `/endeksler/${idx.id}`;
                   
                   return (
                     <Link
-                      key={idx.id}
+                      key={`${idx.id}-${i}`}
                       to={routeTarget}
                       className="flex-none w-[200px] md:w-[240px] rounded-2xl p-4 bg-card/50 border border-white/5 hover:border-white/10 transition-all cursor-pointer group"
                     >
@@ -223,47 +282,37 @@ function LandingPage() {
             </div>
           </section>
 
-          {/* Yükselenler - Seamless List */}
-          {topGainers.length > 0 && (
-            <section className="px-4 md:px-6 py-4">
-              <h2 className="text-xl font-normal text-muted-foreground mb-3 px-1">Yükselenler</h2>
-              <div className="divide-y divide-white/5">
-                {topGainers.map((stock) => {
-                  const logoFile = companyLogos[stock.ticker as keyof typeof companyLogos]
-                  return (
-                    <div
-                      key={stock.ticker}
-                      onClick={() => navigate({ to: `/panel/sirketler/$id`, params: { id: stock.ticker.toLowerCase() } })}
-                      className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        {logoFile ? (
-                          <div className="h-8 w-8 rounded-lg bg-white overflow-hidden flex items-center justify-center shrink-0">
-                            <img src={`/logos/${logoFile}`} alt={stock.ticker} className="h-full w-full object-cover" />
-                          </div>
-                        ) : (
-                          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] shrink-0">
-                            {stock.ticker.slice(0, 2)}
-                          </div>
-                        )}
-                        <div className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
-                          {stock.ticker}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4 shrink-0">
-                        <span className="text-base font-bold font-mono text-emerald-500">
-                          +{stock.diffPercent.toFixed(2).replace('.', ',')}%
-                        </span>
-                        <span className="text-base font-semibold font-mono text-foreground">
-                          ₺{stock.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                        </span>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </section>
-          )}
+          {/* Tabs: Yükselenler / Düşenler / Hacim */}
+          <section className="px-4 md:px-6 py-4">
+            <Tabs defaultValue="gainers">
+              <TabsList className="mb-4">
+                <TabsTrigger value="gainers" className="gap-1.5">
+                  <SquareChevronUp size={14} />
+                  <span>Yükselenler</span>
+                </TabsTrigger>
+                <TabsTrigger value="losers" className="gap-1.5">
+                  <SquareChevronDown size={14} />
+                  <span>Düşenler</span>
+                </TabsTrigger>
+                <TabsTrigger value="volume" className="gap-1.5">
+                  <SquareKanban size={14} />
+                  <span>Hacim</span>
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="gainers">
+                {renderStockList(topGainers, 'emerald')}
+              </TabsContent>
+
+              <TabsContent value="losers">
+                {renderStockList(topLosers, 'destructive')}
+              </TabsContent>
+
+              <TabsContent value="volume">
+                {renderStockList(topVolume, 'primary')}
+              </TabsContent>
+            </Tabs>
+          </section>
 
           {/* BIST 30 Carousel */}
           {bist30Stocks.length > 0 && (
@@ -307,49 +356,6 @@ function LandingPage() {
               </div>
             </section>
           )}
-
-          {/* Düşenler - Seamless List */}
-          {topLosers.length > 0 && (
-            <section className="px-4 md:px-6 py-4">
-              <h2 className="text-xl font-normal text-muted-foreground mb-3 px-1">Düşenler</h2>
-              <div className="divide-y divide-white/5">
-                {topLosers.map((stock) => {
-                  const logoFile = companyLogos[stock.ticker as keyof typeof companyLogos]
-                  return (
-                    <div
-                      key={stock.ticker}
-                      onClick={() => navigate({ to: `/panel/sirketler/$id`, params: { id: stock.ticker.toLowerCase() } })}
-                      className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        {logoFile ? (
-                          <div className="h-8 w-8 rounded-lg bg-white overflow-hidden flex items-center justify-center shrink-0">
-                            <img src={`/logos/${logoFile}`} alt={stock.ticker} className="h-full w-full object-cover" />
-                          </div>
-                        ) : (
-                          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] shrink-0">
-                            {stock.ticker.slice(0, 2)}
-                          </div>
-                        )}
-                        <div className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
-                          {stock.ticker}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4 shrink-0">
-                        <span className="text-base font-bold font-mono text-destructive">
-                          {stock.diffPercent.toFixed(2).replace('.', ',')}%
-                        </span>
-                        <span className="text-base font-semibold font-mono text-foreground">
-                          ₺{stock.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                        </span>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </section>
-          )}
-
         </div>
 
         {/* Mobile floating chat trigger */}
