@@ -12,6 +12,7 @@ import { ChatSheet } from '../components/chat/ChatSheet'
 import { useUIStore } from '../store/ui'
 import { Logo } from '../components/layout/Logo'
 import companyLogos from '../constants/companyLogos.json'
+import companyNames from '../constants/companyNames.json'
 
 export const Route = createFileRoute('/')({
   component: LandingPage,
@@ -32,6 +33,15 @@ type StockRow = {
   diffPercent: number;
 }
 
+const BIST30_TICKERS = [
+  'THYAO', 'ASELS', 'TUPRS', 'KCHOL', 'SAHOL',
+  'GARAN', 'EREGL', 'BIMAS', 'AKBNK', 'SISE',
+  'TCELL', 'TOASO', 'SASA', 'PETKM', 'PGSUS',
+  'FROTO', 'YKBNK', 'ISCTR', 'HALKB', 'VAKBN',
+  'TAVHL', 'ARCLK', 'EKGYO', 'ENKAI', 'KOZAA',
+  'MGROS', 'TTKOM', 'KOZAL', 'DOHOL', 'TRALT'
+]
+
 function LandingPage() {
   const { user, login: handleLogin } = useAuth()
   const { isChatMaximized } = useUIStore()
@@ -44,13 +54,21 @@ function LandingPage() {
     containScroll: 'trimSnaps',
   })
 
+  const [emblaRef2] = useEmblaCarousel({
+    align: 'start',
+    slidesToScroll: 1,
+    containScroll: 'trimSnaps',
+  })
+
   const [indexData, setIndexDisplay] = useState<IndexDisplay[]>([
     { id: 'bist100', name: "BIST 100", code: "XU100", price: 10240.20, diffPercent: 1.15 },
     { id: 'bist30', name: "BIST 30", code: "XU030", price: 11250.40, diffPercent: 1.45 },
     { id: 'bist500', name: "BIST 500", code: "XU500", price: 12540.80, diffPercent: 0.95 },
   ])
 
+  const [bist30Stocks, setBist30Stocks] = useState<StockRow[]>([])
   const [topGainers, setTopGainers] = useState<StockRow[]>([])
+  const [topLosers, setTopLosers] = useState<StockRow[]>([])
 
   useEffect(() => {
     async function fetchData() {
@@ -79,23 +97,44 @@ function LandingPage() {
         console.error("Failed fetching indices:", e)
       }
 
-      // Fetch stocks for gainers
+      // Fetch stocks
       try {
         const res = await fetch(`${apiUrl}/api/market/stocks`)
         if (res.ok) {
           const json = await res.json()
           if (json && Array.isArray(json.data)) {
-            const stocks: StockRow[] = json.data
+            const allStocks: StockRow[] = json.data
               .filter((s: any) => s.code && s.last_price !== undefined)
               .map((s: any) => ({
                 ticker: s.code.toUpperCase(),
-                name: s.name || s.code.toUpperCase(),
+                name: (companyNames as Record<string, string>)[s.code.toUpperCase()] || s.code.toUpperCase(),
                 price: Number(s.last_price),
                 diffPercent: Number(s.diff_percent || 0),
               }))
-              .sort((a: StockRow, b: StockRow) => b.diffPercent - a.diffPercent)
+
+            // BIST 30
+            const bist30 = BIST30_TICKERS.map(ticker => {
+              const found = allStocks.find(s => s.ticker === ticker)
+              return found || {
+                ticker,
+                name: (companyNames as Record<string, string>)[ticker] || ticker,
+                price: 0,
+                diffPercent: 0,
+              }
+            }).filter(s => s.price > 0)
+            setBist30Stocks(bist30)
+
+            // Top gainers
+            const gainers = [...allStocks]
+              .sort((a, b) => b.diffPercent - a.diffPercent)
               .slice(0, 10)
-            setTopGainers(stocks)
+            setTopGainers(gainers)
+
+            // Top losers
+            const losers = [...allStocks]
+              .sort((a, b) => a.diffPercent - b.diffPercent)
+              .slice(0, 10)
+            setTopLosers(losers)
           }
         }
       } catch (e) {
@@ -164,21 +203,16 @@ function LandingPage() {
                       className="flex-none w-[200px] md:w-[240px] rounded-2xl p-4 bg-card/50 border border-white/5 hover:border-white/10 transition-all cursor-pointer group"
                     >
                       <div className="flex items-center gap-2 mb-3">
-                        <span className="text-sm font-bold text-foreground truncate">
-                          {idx.name}
-                        </span>
+                        <span className="text-sm font-bold text-foreground truncate">{idx.name}</span>
                         <span className={`text-sm font-bold ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
                           %{isUp ? '+' : ''}{idx.diffPercent.toFixed(2).replace('.', ',')}
                         </span>
                       </div>
-                      
                       <div className="flex items-center justify-between">
                         <span className="text-xl font-bold text-foreground font-mono truncate">
                           ₺{idx.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                          isUp ? 'bg-emerald-500' : 'bg-destructive'
-                        }`}>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isUp ? 'bg-emerald-500' : 'bg-destructive'}`}>
                           {isUp ? <ArrowUp size={16} className="text-white" /> : <ArrowDown size={16} className="text-white" />}
                         </div>
                       </div>
@@ -193,11 +227,9 @@ function LandingPage() {
           {topGainers.length > 0 && (
             <section className="px-4 md:px-6 py-4">
               <h2 className="text-lg font-bold text-foreground mb-3 px-1">Yükselenler</h2>
-              
               <div className="divide-y divide-white/5">
                 {topGainers.map((stock) => {
                   const logoFile = companyLogos[stock.ticker as keyof typeof companyLogos]
-                  
                   return (
                     <div
                       key={stock.ticker}
@@ -214,16 +246,99 @@ function LandingPage() {
                             {stock.ticker.slice(0, 2)}
                           </div>
                         )}
-                        <div className="min-w-0">
-                          <div className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
-                            {stock.ticker}
-                          </div>
+                        <div className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                          {stock.ticker}
                         </div>
                       </div>
-
                       <div className="flex items-center gap-4 shrink-0">
                         <span className="text-sm font-bold font-mono text-emerald-500">
                           +{stock.diffPercent.toFixed(2).replace('.', ',')}%
+                        </span>
+                        <span className="text-sm font-semibold font-mono text-foreground">
+                          ₺{stock.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </section>
+          )}
+
+          {/* BIST 30 Carousel */}
+          {bist30Stocks.length > 0 && (
+            <section className="px-4 md:px-6 py-4">
+              <h2 className="text-lg font-bold text-foreground mb-3 px-1">BIST 30</h2>
+              <div className="overflow-hidden" ref={emblaRef2}>
+                <div className="flex gap-3">
+                  {bist30Stocks.map((stock) => {
+                    const isUp = stock.diffPercent >= 0;
+                    const logoFile = companyLogos[stock.ticker as keyof typeof companyLogos]
+                    
+                    return (
+                      <div
+                        key={stock.ticker}
+                        onClick={() => navigate({ to: `/sirketler/$id`, params: { id: stock.ticker.toLowerCase() } })}
+                        className="flex-none w-[180px] md:w-[200px] rounded-2xl p-4 bg-card/50 border border-white/5 hover:border-white/10 transition-all cursor-pointer group"
+                      >
+                        <div className="flex items-center gap-2 mb-3">
+                          {logoFile ? (
+                            <div className="h-6 w-6 rounded bg-white overflow-hidden flex items-center justify-center shrink-0">
+                              <img src={`/logos/${logoFile}`} alt={stock.ticker} className="h-full w-full object-cover" />
+                            </div>
+                          ) : (
+                            <div className="h-6 w-6 rounded bg-primary/10 flex items-center justify-center text-primary font-bold text-[8px] shrink-0">
+                              {stock.ticker.slice(0, 2)}
+                            </div>
+                          )}
+                          <span className="text-sm font-bold text-foreground truncate">{stock.ticker}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-base font-bold text-foreground font-mono truncate">
+                            ₺{stock.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                          </span>
+                          <span className={`text-xs font-bold ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
+                            %{isUp ? '+' : ''}{stock.diffPercent.toFixed(2).replace('.', ',')}
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Düşenler - Seamless List */}
+          {topLosers.length > 0 && (
+            <section className="px-4 md:px-6 py-4">
+              <h2 className="text-lg font-bold text-foreground mb-3 px-1">Düşenler</h2>
+              <div className="divide-y divide-white/5">
+                {topLosers.map((stock) => {
+                  const logoFile = companyLogos[stock.ticker as keyof typeof companyLogos]
+                  return (
+                    <div
+                      key={stock.ticker}
+                      onClick={() => navigate({ to: `/sirketler/$id`, params: { id: stock.ticker.toLowerCase() } })}
+                      className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        {logoFile ? (
+                          <div className="h-8 w-8 rounded-lg bg-white overflow-hidden flex items-center justify-center shrink-0">
+                            <img src={`/logos/${logoFile}`} alt={stock.ticker} className="h-full w-full object-cover" />
+                          </div>
+                        ) : (
+                          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] shrink-0">
+                            {stock.ticker.slice(0, 2)}
+                          </div>
+                        )}
+                        <div className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                          {stock.ticker}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4 shrink-0">
+                        <span className="text-sm font-bold font-mono text-destructive">
+                          {stock.diffPercent.toFixed(2).replace('.', ',')}%
                         </span>
                         <span className="text-sm font-semibold font-mono text-foreground">
                           ₺{stock.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
@@ -240,17 +355,17 @@ function LandingPage() {
           {user && (
             <section className="px-4 md:px-6 py-4 max-w-5xl mx-auto">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <Link to="/endeksler" className="flex items-center gap-3 p-4 rounded-xl border border-border/40 hover:border-primary/20 bg-card/15 hover:bg-primary/5 transition-all group">
-                  <span className="text-xs font-bold block">Endeksler</span>
+                <Link to="/endeksler" className="flex items-center justify-center p-4 rounded-xl border border-border/40 hover:border-primary/20 bg-card/15 hover:bg-primary/5 transition-all">
+                  <span className="text-xs font-bold">Endeksler</span>
                 </Link>
-                <Link to="/sektorler" className="flex items-center gap-3 p-4 rounded-xl border border-border/40 hover:border-primary/20 bg-card/15 hover:bg-primary/5 transition-all group">
-                  <span className="text-xs font-bold block">Sektörler</span>
+                <Link to="/sektorler" className="flex items-center justify-center p-4 rounded-xl border border-border/40 hover:border-primary/20 bg-card/15 hover:bg-primary/5 transition-all">
+                  <span className="text-xs font-bold">Sektörler</span>
                 </Link>
-                <Link to="/sirketler" className="flex items-center gap-3 p-4 rounded-xl border border-border/40 hover:border-primary/20 bg-card/15 hover:bg-primary/5 transition-all group">
-                  <span className="text-xs font-bold block">Şirketler</span>
+                <Link to="/sirketler" className="flex items-center justify-center p-4 rounded-xl border border-border/40 hover:border-primary/20 bg-card/15 hover:bg-primary/5 transition-all">
+                  <span className="text-xs font-bold">Şirketler</span>
                 </Link>
-                <Link to="/takip-listesi" className="flex items-center gap-3 p-4 rounded-xl border border-border/40 hover:border-primary/20 bg-card/15 hover:bg-primary/5 transition-all group">
-                  <span className="text-xs font-bold block">Takip Listem</span>
+                <Link to="/takip-listesi" className="flex items-center justify-center p-4 rounded-xl border border-border/40 hover:border-primary/20 bg-card/15 hover:bg-primary/5 transition-all">
+                  <span className="text-xs font-bold">Takip Listem</span>
                 </Link>
               </div>
             </section>
