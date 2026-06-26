@@ -15,15 +15,15 @@ export function AppLayout({ children }: { children: ReactNode }) {
     <div className="h-screen w-full flex flex-col bg-background text-foreground overflow-hidden font-sans transition-colors">
       <Topbar />
       <main className={`flex-1 bg-background relative z-0 ${
-        isLanding || isProfile
-          ? "overflow-auto" 
-          : isPanel || isPublicChat
-            ? "overflow-hidden p-0 flex flex-col" 
+        isPanel || isPublicChat || isProfile
+          ? "overflow-hidden p-0 flex flex-col" 
+          : isLanding
+            ? "overflow-hidden p-0 flex flex-col"
             : "overflow-auto p-4 md:p-6"
       }`}>
         {children}
       </main>
-      <Bottombar />
+      {!isLanding && <Bottombar />}
       <CommandPalette />
     </div>
   );

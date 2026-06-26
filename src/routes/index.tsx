@@ -1,419 +1,252 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { 
-  BarChart3, 
+  Sparkles, 
   TrendingUp, 
-  MessageSquare, 
-  Check, 
-  X, 
-  ChevronDown, 
-  Sparkles
+  TrendingDown, 
+  Activity,
+  ArrowUpRight
 } from 'lucide-react'
+import { ChatPanel } from '../components/chat/ChatPanel'
+import { ChatSheet } from '../components/chat/ChatSheet'
+import { useUIStore } from '../store/ui'
 import { Logo } from '../components/layout/Logo'
 
 export const Route = createFileRoute('/')({
   component: LandingPage,
 })
 
+type IndexDisplay = {
+  id: string;
+  name: string;
+  code: string;
+  price: number;
+  diffPercent: number;
+  sparkline: number[];
+}
+
 function LandingPage() {
-  const { user, loading, login: handleLogin } = useAuth()
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
+  const { user, login: handleLogin } = useAuth()
+  const { isChatMaximized } = useUIStore()
+  const [isChatSheetOpen, setIsChatSheetOpen] = useState(false)
+  
+  const [indexData, setIndexDisplay] = useState<IndexDisplay[]>([
+    { id: 'bist100', name: "BIST 100", code: "XU100", price: 10240.20, diffPercent: 1.15, sparkline: [10120, 10150, 10110, 10190, 10220, 10210, 10240.20] },
+    { id: 'bist30', name: "BIST 30", code: "XU030", price: 11250.40, diffPercent: 1.45, sparkline: [11080, 11110, 11150, 11130, 11190, 11220, 11250.40] },
+    { id: 'bist500', name: "BIST 500", code: "XU500", price: 12540.80, diffPercent: 0.95, sparkline: [12420, 12450, 12410, 12480, 12510, 12500, 12540.80] },
+  ])
 
-  const toggleFaq = (index: number) => {
-    setOpenFaqIndex(openFaqIndex === index ? null : index)
-  }
-
-  if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-black text-white font-sans">
-        <Logo size={48} variant="icon" className="animate-pulse text-[#494fdf]" />
-      </div>
-    )
-  }
+  useEffect(() => {
+    async function fetchIndices() {
+      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev";
+      try {
+        const res = await fetch(`${apiUrl}/api/market/summary`)
+        if (res.ok) {
+          const json = await res.json()
+          if (json && Array.isArray(json.data)) {
+            setIndexDisplay(prev => prev.map(item => {
+              const live = json.data.find((idx: any) => idx.code.toUpperCase() === item.code);
+              if (live) {
+                const currentPrice = live.last_price || item.price;
+                const diff = live.diff_percent !== undefined ? live.diff_percent : item.diffPercent;
+                const steps = [
+                  currentPrice * (1 - diff * 0.005),
+                  currentPrice * (1 - diff * 0.003),
+                  currentPrice * (1 - diff * 0.004),
+                  currentPrice * (1 - diff * 0.001),
+                  currentPrice * (1 - diff * 0.002),
+                  currentPrice * (1 + diff * 0.001),
+                  currentPrice
+                ];
+                return {
+                  ...item,
+                  price: Number(currentPrice.toFixed(2)),
+                  diffPercent: Number(diff.toFixed(2)),
+                  sparkline: steps
+                };
+              }
+              return item;
+            }))
+          }
+        }
+      } catch (e) {
+        console.error("Failed fetching indices:", e)
+      }
+    }
+    fetchIndices()
+  }, [])
 
   return (
-    <div className="min-h-screen bg-black text-white select-none overflow-x-hidden font-sans">
+    <div className="flex-1 flex flex-row min-w-0 h-full overflow-hidden">
       
-      {/* 1. HERO BAND (STORYTELLING CANVAS - DARK) */}
-      <section className="relative w-full bg-black pt-24 pb-16 md:pt-36 md:pb-24 px-6 flex flex-col items-center text-center overflow-hidden">
-        {/* Animated Accent Glow (Subtle) */}
-        <div className="absolute top-[-20%] left-[-10%] w-[80vw] h-[80vw] rounded-full bg-[#494fdf]/10 blur-[120px] pointer-events-none -z-10 animate-pulse" />
-        
-        <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-1000">
-          <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-[#16181a] border border-white/10 text-white/80 text-[11px] font-bold uppercase tracking-widest mb-8">
-            <Sparkles size={12} className="text-[#494fdf]" />
-            BIST Uzmanı Tek Yapay Zeka
-          </div>
-
-          <h1 className="display-xxl mb-8 text-white text-4xl sm:text-6xl font-bold tracking-tight">
-            Jet Hızında Analiz
-          </h1>
+      {/* Left: Content */}
+      <div className={`flex-1 flex flex-col min-w-0 h-full relative overflow-hidden ${isChatMaximized ? 'hidden md:hidden' : ''}`}>
+        <div className="flex-1 overflow-y-auto custom-scrollbar min-w-0 relative z-10 pb-24 md:pb-4 scroll-smooth">
           
-          <p className="body-lg text-white/70 max-w-2xl mx-auto mb-10 text-base sm:text-lg">
-            Endeksleri, sektörleri, şirketleri derinlemesine analiz edin. Takip listeleri oluşturun. Artık borsa avucunuzun içinde.
-          </p>
+          {/* Hero */}
+          <section className="relative w-full pt-16 pb-12 md:pt-24 md:pb-16 px-6 flex flex-col items-center text-center overflow-hidden">
+            <div className="absolute top-[-20%] left-[-10%] w-[80vw] h-[80vw] rounded-full bg-primary/5 blur-[120px] pointer-events-none -z-10 animate-pulse" />
+            
+            <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-1000">
+              <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[11px] font-bold uppercase tracking-widest mb-6">
+                <Sparkles size={12} />
+                BIST Uzmanı Tek Yapay Zeka
+              </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-3">
-            <button
-              onClick={handleLogin}
-              className="btn-revolut-primary w-full sm:w-auto"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="mr-2">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-              </svg>
-              <span>Bağlanın</span>
+              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-6">
+                Jet Hızında Analiz
+              </h1>
+              
+              <p className="text-muted-foreground max-w-2xl mx-auto mb-8 text-base sm:text-lg leading-relaxed">
+                Endeksleri, sektörleri, şirketleri derinlemesine analiz edin.
+              </p>
+
+              {!user && (
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <button
+                    onClick={handleLogin}
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-opacity cursor-pointer"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#fff"/>
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#fff"/>
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#fff"/>
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#fff"/>
+                    </svg>
+                    <span>Google ile Bağlanın</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Index Cards */}
+          <section className="px-4 md:px-6 py-4 max-w-5xl mx-auto">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-1.5 h-4 rounded-full bg-primary" />
+              <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2.5">
+                <Activity size={12} className="text-emerald-500" />
+                <span>Bugün Borsa</span>
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+              {indexData.map((idx) => {
+                const isUp = idx.diffPercent >= 0;
+                const routeTarget = user ? `/panel/endeksler/${idx.id}` : `/endeksler`;
+                
+                return (
+                  <Link
+                    key={idx.id}
+                    to={routeTarget}
+                    className="group border border-border/40 hover:border-border/70 rounded-2xl p-4 md:p-5 bg-card/15 hover:bg-card/25 shadow-3xs transition-all duration-300 flex flex-col relative overflow-hidden"
+                  >
+                    <div className={`absolute top-0 right-0 w-24 h-24 rounded-full blur-3xl pointer-events-none transition-opacity duration-300 opacity-0 group-hover:opacity-100 ${isUp ? 'bg-emerald-500/5' : 'bg-destructive/5'}`} />
+
+                    <div className="flex items-center justify-between mb-3 z-10">
+                      <div>
+                        <h4 className="text-xs font-bold text-foreground tracking-tight group-hover:text-primary transition-colors">{idx.name}</h4>
+                        <span className="text-[10px] text-muted-foreground font-semibold tracking-tight">{idx.code}</span>
+                      </div>
+                      <div className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5 ${
+                        isUp 
+                          ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/10' 
+                          : 'bg-destructive/10 text-destructive border border-destructive/10'
+                      }`}>
+                        {isUp ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+                        <span>{isUp ? '+' : ''}{idx.diffPercent}%</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-end justify-between mt-1 z-10">
+                      <div className="text-lg md:text-xl font-bold font-mono tracking-tight text-foreground">
+                        {idx.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </div>
+
+                      <div className="w-16 h-8 pr-1 opacity-70 group-hover:opacity-100 transition-opacity duration-300">
+                        <svg viewBox="0 0 100 40" className="w-full h-full">
+                          <path
+                            d={`M ${idx.sparkline.map((val, i) => `${(i / (idx.sparkline.length - 1)) * 100} ${40 - ((val - Math.min(...idx.sparkline)) / (Math.max(...idx.sparkline) - Math.min(...idx.sparkline) || 1)) * 30}`).join(' L ')}`}
+                            fill="none"
+                            stroke={isUp ? "#22c55e" : "#ef4444"}
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* Quick Actions for logged in users */}
+          {user && (
+            <section className="px-4 md:px-6 py-4 max-w-5xl mx-auto">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <Link to="/endeksler" className="flex items-center gap-3 p-4 rounded-xl border border-border/40 hover:border-primary/20 bg-card/15 hover:bg-primary/5 transition-all group">
+                  <Activity size={18} className="text-primary" />
+                  <div>
+                    <span className="text-xs font-bold block">Endeksler</span>
+                    <span className="text-[10px] text-muted-foreground">BIST endeksleri</span>
+                  </div>
+                </Link>
+                <Link to="/sektorler" className="flex items-center gap-3 p-4 rounded-xl border border-border/40 hover:border-primary/20 bg-card/15 hover:bg-primary/5 transition-all group">
+                  <Activity size={18} className="text-primary" />
+                  <div>
+                    <span className="text-xs font-bold block">Sektörler</span>
+                    <span className="text-[10px] text-muted-foreground">Sektör analizi</span>
+                  </div>
+                </Link>
+                <Link to="/sirketler" className="flex items-center gap-3 p-4 rounded-xl border border-border/40 hover:border-primary/20 bg-card/15 hover:bg-primary/5 transition-all group">
+                  <Activity size={18} className="text-primary" />
+                  <div>
+                    <span className="text-xs font-bold block">Şirketler</span>
+                    <span className="text-[10px] text-muted-foreground">Hisse senetleri</span>
+                  </div>
+                </Link>
+                <Link to="/takip-listesi" className="flex items-center gap-3 p-4 rounded-xl border border-border/40 hover:border-primary/20 bg-card/15 hover:bg-primary/5 transition-all group">
+                  <Sparkles size={18} className="text-amber-400" />
+                  <div>
+                    <span className="text-xs font-bold block">Takip Listem</span>
+                    <span className="text-[10px] text-muted-foreground">Portföyüm</span>
+                  </div>
+                </Link>
+              </div>
+            </section>
+          )}
+        </div>
+
+        {/* Mobile floating chat trigger */}
+        <div className="lg:hidden absolute bottom-6 left-6 right-6 z-40 flex justify-center pointer-events-none">
+          <div
+            onClick={() => setIsChatSheetOpen(true)}
+            className="w-full max-w-3xl bg-background/80 backdrop-blur-2xl border border-border/50 rounded-full shadow-2xl pointer-events-auto overflow-hidden animate-in slide-in-from-bottom-6 duration-500 cursor-pointer flex items-center px-6 py-2.5 justify-between"
+          >
+            <span className="text-muted-foreground/60 text-sm truncate pr-4">Bir soru sorun...</span>
+            <button className="w-9 h-9 flex items-center justify-center rounded-full bg-primary text-white shrink-0 self-center">
+              <Logo size={14} variant="icon" className="text-white" />
             </button>
           </div>
-          <p className="text-white/30 text-xs">Kredi kartı gerektirmez</p>
-
-
-
         </div>
-      </section>
+      </div>
 
-      {/* 2. PRODUCT MOCKUP BAND (DARK) */}
-      <section className="w-full bg-black py-12 px-6">
-        <div className="max-w-6xl mx-auto rounded-[28px] border border-white/10 bg-[#0a0a0a] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-1000">
-          <div className="grid grid-cols-1 lg:grid-cols-12">
-            {/* Mockup Content - Left side */}
-            <div className="lg:col-span-7 p-8 md:p-12 border-b lg:border-b-0 lg:border-r border-white/5">
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-[#494fdf] flex items-center justify-center text-white">
-                    <Logo size={24} variant="icon" />
-                  </div>
-                  <div>
-                    <h3 className="heading-sm font-semibold">Jetborsa Terminal</h3>
-                    <p className="body-sm text-white/50">Güncel Borsa İstanbul verileri</p>
-                  </div>
-                </div>
-                <div className="px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-400 text-[10px] font-bold uppercase tracking-wider animate-pulse">
-                  Açık
-                </div>
-              </div>
+      {/* Desktop: Chat Panel */}
+      <div className={`hidden md:block h-full shrink-0 transition-all duration-300 ${isChatMaximized ? 'w-full flex-1' : 'md:w-[360px] lg:w-[400px] xl:w-[440px]'}`}>
+        <ChatPanel context="global" placeholder="Borsa hakkında bir soru sorun..." user={user} />
+      </div>
 
-              {/* Simulated Chart */}
-              <div className="h-64 bg-black/40 rounded-2xl border border-white/5 relative p-6 mb-8 overflow-hidden group">
-                <div className="flex justify-between items-start relative z-10">
-                  <div>
-                    <span className="text-2xl font-bold font-mono">312.50</span>
-                    <span className="ml-2 text-sm text-teal-400 font-bold">+2.45%</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-[10px] text-white/40 uppercase block font-bold">Türk Hava Yolları</span>
-                    <span className="text-sm font-bold">THYAO</span>
-                  </div>
-                </div>
-                <div className="absolute inset-0 flex items-end">
-                   <svg className="w-full h-3/4 opacity-30" viewBox="0 0 400 100" preserveAspectRatio="none">
-                    <path d="M0 80 Q 50 70, 100 85 T 200 60 T 300 40 T 400 20 L 400 100 L 0 100 Z" fill="#494fdf" />
-                    <path d="M0 80 Q 50 70, 100 85 T 200 60 T 300 40 T 400 20" fill="none" stroke="#494fdf" strokeWidth="3" />
-                   </svg>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                  <span className="block text-[10px] text-white/40 uppercase font-bold mb-1">F/K Oranı</span>
-                  <span className="text-lg font-bold font-mono">5.24</span>
-                </div>
-                <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                  <span className="block text-[10px] text-white/40 uppercase font-bold mb-1">Sektör Ort.</span>
-                  <span className="text-lg font-bold font-mono">6.85</span>
-                </div>
-                <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                  <span className="block text-[10px] text-white/40 uppercase font-bold mb-1">İskonto</span>
-                  <span className="text-lg font-bold text-teal-400 font-mono">%23.5</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Mockup Chat - Right side */}
-            <div className="lg:col-span-5 bg-[#16181a] p-8 md:p-12 flex flex-col justify-between">
-              <div className="space-y-6">
-                 <div className="flex gap-3 items-start">
-                    <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold">U</div>
-                    <div className="bg-white/5 rounded-2xl rounded-tl-none p-4 text-[13px] leading-relaxed border border-white/5">
-                      THYAO son çeyrek bilanço analizi nedir?
-                    </div>
-                 </div>
-                  <div className="flex gap-3 items-start flex-row-reverse">
-                    <div className="w-6 h-6 rounded-full bg-[#494fdf] flex items-center justify-center"><Logo size={12} variant="icon" className="text-white" /></div>
-                    <div className="bg-[#494fdf]/10 border border-[#494fdf]/20 rounded-2xl rounded-tr-none p-4 text-[13px] leading-relaxed shadow-lg">
-                      <strong>THYAO</strong> son çeyrekte net kârını %24 artırdı. Operasyonel verimlilik artışı ve düşük F/K oranı ile sektörde pozitif ayrışıyor.
-                    </div>
-                 </div>
-              </div>
-
-              <div className="mt-8 p-3 rounded-full bg-black/40 border border-white/10 flex items-center gap-3 text-white/40 text-xs">
-                <Sparkles size={14} className="text-[#494fdf]" />
-                <span>Analiz devam ediyor...</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. FEATURES BAND (CATALOGUE CANVAS - LIGHT) */}
-      <section className="w-full bg-white text-black py-24 md:py-32 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="mb-20">
-            <h2 className="display-xl mb-6 text-black text-3xl sm:text-5xl font-bold tracking-tight">Hepsi bir arada.</h2>
-            <p className="body-lg text-black/60 max-w-2xl text-base sm:text-lg">
-              Jetborsa, karmaşık borsa verilerini anlamlı içgörülere dönüştürür.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="card-revolut-light flex flex-col justify-between h-full group hover:border-[#494fdf]/30 transition-colors">
-              <div>
-                <div className="w-12 h-12 rounded-full bg-[#f4f4f4] text-[#494fdf] flex items-center justify-center mb-6">
-                  <BarChart3 size={24} />
-                </div>
-                <h3 className="heading-sm mb-4 font-semibold text-lg">Temel Analiz</h3>
-                <p className="body-sm text-black/60 leading-relaxed text-sm">
-                  Onlarca finansal rasyo otomatik hesaplanır, sektör medyanlarıyla karşılaştırılır. Şirketin trendi saniyeler içinde önünüzde.
-                </p>
-              </div>
-            </div>
-
-            <div className="card-revolut-light flex flex-col justify-between h-full group hover:border-[#494fdf]/30 transition-colors">
-              <div>
-                <div className="w-12 h-12 rounded-full bg-[#f4f4f4] text-[#494fdf] flex items-center justify-center mb-6">
-                  <TrendingUp size={24} />
-                </div>
-                <h3 className="heading-sm mb-4 font-semibold text-lg">Teknik Analiz</h3>
-                <p className="body-sm text-black/60 leading-relaxed text-sm">
-                  Destek/direnç kırılmaları, formasyon tamamlanmaları ve momentum değişimleri Python motorumuzla anlık taranır.
-                </p>
-              </div>
-            </div>
-
-            <div className="card-revolut-light flex flex-col justify-between h-full group hover:border-[#494fdf]/30 transition-colors">
-              <div>
-                <div className="w-12 h-12 rounded-full bg-[#f4f4f4] text-[#494fdf] flex items-center justify-center mb-6">
-                  <MessageSquare size={24} />
-                </div>
-                <h3 className="heading-sm mb-4 font-semibold text-lg">AI Sohbet</h3>
-                <p className="body-sm text-black/60 leading-relaxed text-sm">
-                  "Hangi şirket sektöründe en iskontolu?" gibi sorularınıza veriye dayalı, halüsinasyonsuz cevaplar alın.
-                </p>
-              </div>
-            </div>
-
-            <div className="card-revolut-light flex flex-col justify-between h-full group hover:border-[#494fdf]/30 transition-colors">
-              <div>
-                <div className="w-12 h-12 rounded-full bg-[#f4f4f4] text-[#494fdf] flex items-center justify-center mb-6">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-                </div>
-                <h3 className="heading-sm mb-4 font-semibold text-lg">Sektör Analizi</h3>
-                <p className="body-sm text-black/60 leading-relaxed text-sm">
-                  Sektör bazlı karşılaştırmalar, ortalamalar ve sektör içi sıralamalarla yatırım kararlarınızı destekleyin.
-                </p>
-              </div>
-            </div>
-
-            <div className="card-revolut-light flex flex-col justify-between h-full group hover:border-[#494fdf]/30 transition-colors">
-              <div>
-                <div className="w-12 h-12 rounded-full bg-[#f4f4f4] text-[#494fdf] flex items-center justify-center mb-6">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                </div>
-                <h3 className="heading-sm mb-4 font-semibold text-lg">Şirket Karşılaştırma</h3>
-                <p className="body-sm text-black/60 leading-relaxed text-sm">
-                  Aynı sektördeki şirketleri yan yana karşılaştırın, F/K, PD/DD ve diğer rasyoları doğrudan mukayese edin.
-                </p>
-              </div>
-            </div>
-
-            <div className="card-revolut-light flex flex-col justify-between h-full group hover:border-[#494fdf]/30 transition-colors">
-              <div>
-                <div className="w-12 h-12 rounded-full bg-[#f4f4f4] text-[#494fdf] flex items-center justify-center mb-6">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-                </div>
-                <h3 className="heading-sm mb-4 font-semibold text-lg">Takip Listesi</h3>
-                <p className="body-sm text-black/60 leading-relaxed text-sm">
-                  İlgilendiğiniz hisseleri ve endeksleri takip listelerinize ekleyin, kolayca erişin ve AI ile analiz edin.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. COMPARISON BAND (LIGHT) */}
-      <section className="w-full bg-[#f4f4f4] text-black py-24 px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="heading-lg mb-4 text-2xl sm:text-4xl font-bold tracking-tight">Güvenilir veriler, güçlü algoritma, borsa uzmanı yapay zeka.</h2>
-            <p className="body-lg text-black/60 max-w-3xl mx-auto text-base">
-              ChatGPT ve Gemini gibi genel yapay zeka uygulamaları verilerinin güvenilirliğini garanti edemiyor ve halüsinasyon görüyor. Biz KAP gibi resmi kaynaklardan alınan doğruluğu teyit edilmiş verileri ve mali tabloları güçlü bir finansal analiz motoru ile işliyor ve borsa analizi için eğitilmiş yapay zekaya eksiksiz bir veri seti servis ediyoruz.
-            </p>
-          </div>
-
-          <div className="bg-white rounded-[20px] overflow-hidden border border-[#e2e2e7] shadow-sm">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="bg-[#f4f4f4] border-b border-[#e2e2e7]">
-                  <th className="p-6 font-bold text-[11px] uppercase tracking-widest text-black/40">Özellik</th>
-                  <th className="p-6 font-bold text-[11px] uppercase tracking-widest text-[#494fdf] text-center">JetBorsa</th>
-                  <th className="p-6 font-bold text-[11px] uppercase tracking-widest text-black/40 text-center">ChatGPT vb.</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#e2e2e7]">
-                <tr>
-                  <td className="p-5 body-sm font-semibold text-sm">Doğruluğu teyit edilmiş veriler</td>
-                  <td className="p-5 text-center text-[#494fdf]"><Check size={18} className="mx-auto" /></td>
-                  <td className="p-5 text-center text-black/20"><X size={18} className="mx-auto" /></td>
-                </tr>
-                <tr>
-                  <td className="p-5 body-sm font-semibold text-sm">Güçlü finansal analiz motoru</td>
-                  <td className="p-5 text-center text-[#494fdf]"><Check size={18} className="mx-auto" /></td>
-                  <td className="p-5 text-center text-black/20"><X size={18} className="mx-auto" /></td>
-                </tr>
-                <tr>
-                  <td className="p-5 body-sm font-semibold text-sm">BIST'e özel eğitilmiş</td>
-                  <td className="p-5 text-center text-[#494fdf]"><Check size={18} className="mx-auto" /></td>
-                  <td className="p-5 text-center text-black/20"><X size={18} className="mx-auto" /></td>
-                </tr>
-                <tr>
-                  <td className="p-5 body-sm font-semibold text-sm">Halüsinasyon riski yok</td>
-                  <td className="p-5 text-center text-[#494fdf]"><Check size={18} className="mx-auto" /></td>
-                  <td className="p-5 text-center text-black/20"><X size={18} className="mx-auto" /></td>
-                </tr>
-                <tr>
-                  <td className="p-5 body-sm font-semibold text-sm">Güncel haberler, analist raporları *</td>
-                  <td className="p-5 text-center text-[#494fdf]"><Check size={18} className="mx-auto" /></td>
-                  <td className="p-5 text-center text-black/20"><X size={18} className="mx-auto" /></td>
-                </tr>
-                <tr>
-                  <td className="p-5 body-sm font-semibold text-sm">KAP Bildirim analizi *</td>
-                  <td className="p-5 text-center text-[#494fdf]"><Check size={18} className="mx-auto" /></td>
-                  <td className="p-5 text-center text-black/20"><X size={18} className="mx-auto" /></td>
-                </tr>
-                <tr>
-                  <td className="p-5 body-sm font-semibold text-sm">Aracı Kurum analizleri *</td>
-                  <td className="p-5 text-center text-[#494fdf]"><Check size={18} className="mx-auto" /></td>
-                  <td className="p-5 text-center text-black/20"><X size={18} className="mx-auto" /></td>
-                </tr>
-                <tr>
-                  <td className="p-5 body-sm font-semibold text-sm">SWOT Analizi</td>
-                  <td className="p-5 text-center text-[#494fdf]"><Check size={18} className="mx-auto" /></td>
-                  <td className="p-5 text-center text-black/20"><X size={18} className="mx-auto" /></td>
-                </tr>
-                <tr>
-                  <td className="p-5 body-sm font-semibold text-sm">Detaylı şirket karşılaştırma</td>
-                  <td className="p-5 text-center text-[#494fdf]"><Check size={18} className="mx-auto" /></td>
-                  <td className="p-5 text-center text-black/20"><X size={18} className="mx-auto" /></td>
-                </tr>
-                <tr>
-                  <td className="p-5 body-sm font-semibold text-sm">Sektör analizleri</td>
-                  <td className="p-5 text-center text-[#494fdf]"><Check size={18} className="mx-auto" /></td>
-                  <td className="p-5 text-center text-black/20"><X size={18} className="mx-auto" /></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <p className="text-center text-xs text-black/40 mt-4">* Hazırlanıyor. Çok yakında.</p>
-        </div>
-      </section>
-
-      {/* 5. PRICING BAND (STORYTELLING CANVAS - DARK) */}
-      <section className="w-full bg-black text-white py-24 md:py-32 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-20">
-            <h2 className="display-xl mb-6 text-3xl sm:text-5xl font-bold tracking-tight">Planınızı seçin.</h2>
-            <p className="body-lg text-white/60 text-base sm:text-lg">Ücretsiz başlayın, ihtiyacınıza göre yükseltin.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="card-revolut-dark border border-white/10 flex flex-col justify-between">
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-white/40 block mb-2">Standart</span>
-                <h3 className="heading-lg mb-1 text-2xl font-bold">Ücretsiz</h3>
-                <p className="body-sm text-white/50 mb-8 italic">Keşfetmek için</p>
-                <ul className="space-y-4 border-t border-white/10 pt-8 mb-8">
-                  <li className="flex items-center gap-3 text-white/80 body-sm"><Check size={16} className="text-[#494fdf]" /> Temel sorgular</li>
-                  <li className="flex items-center gap-3 text-white/80 body-sm"><Check size={16} className="text-[#494fdf]" /> Sektör ortalamaları</li>
-                </ul>
-              </div>
-              <button onClick={handleLogin} className="btn-revolut-dark w-full border border-white/20">Ücretsiz Başla</button>
-            </div>
-
-            <div className="card-revolut-featured flex flex-col justify-between shadow-2xl relative">
-              <div className="absolute top-0 right-6 -translate-y-1/2 bg-white text-black text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Önerilen</div>
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-white/60 block mb-2">Premium</span>
-                <h3 className="heading-lg mb-1 text-2xl font-bold">99 TL</h3>
-                <p className="body-sm text-white/70 mb-8 italic">Ciddi yatırımcılar için</p>
-                <ul className="space-y-4 border-t border-white/20 pt-8 mb-8">
-                  <li className="flex items-center gap-3 text-white body-sm"><Check size={16} /> Gelişmiş AI Analizi</li>
-                  <li className="flex items-center gap-3 text-white body-sm"><Check size={16} /> Teknik Formasyonlar</li>
-                  <li className="flex items-center gap-3 text-white body-sm"><Check size={16} /> KAP Bildirim Özetleri</li>
-                </ul>
-              </div>
-              <button onClick={handleLogin} className="btn-revolut-primary w-full">Satın Al</button>
-            </div>
-
-            <div className="card-revolut-dark border border-white/10 flex flex-col justify-between">
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-white/40 block mb-2">Uzman</span>
-                <h3 className="heading-lg mb-1 text-2xl font-bold">249 TL</h3>
-                <p className="body-sm text-white/50 mb-8 italic">Sınırsız güç</p>
-                <ul className="space-y-4 border-t border-white/10 pt-8 mb-8">
-                  <li className="flex items-center gap-3 text-white/80 body-sm"><Check size={16} className="text-[#494fdf]" /> Sınırsız sorgu</li>
-                  <li className="flex items-center gap-3 text-white/80 body-sm"><Check size={16} className="text-[#494fdf]" /> Öncelikli destek</li>
-                </ul>
-              </div>
-              <button onClick={handleLogin} className="btn-revolut-dark w-full border border-white/20">Ekiple İletişime Geç</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 6. FAQ BAND (LIGHT) */}
-      <section className="w-full bg-white text-black py-24 md:py-32 px-6">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="heading-lg mb-12 text-center text-2xl sm:text-4xl font-bold tracking-tight">Sorularınız mı var?</h2>
-          <div className="space-y-4">
-             {[
-               { q: "Veriler güncel mi?", a: "Evet, tüm veriler Borsa İstanbul'dan anlık olarak alınmaktadır." },
-                { q: "Jetborsa yatırım tavsiyesi verir mi?", a: "Hayır, Jetborsa bir analiz aracıdır. Kararlarınızın sorumluluğu size aittir." },
-               { q: "Kredi sistemi nasıl çalışır?", a: "Her analiz belirli bir kredi tüketir. Ücretsiz krediniz bittiğinde paket alabilirsiniz." }
-             ].map((faq, i) => (
-               <div key={i} className="border-b border-[#e2e2e7] pb-4">
-                 <button onClick={() => toggleFaq(i)} className="w-full py-4 flex items-center justify-between text-left font-semibold hover:text-[#494fdf] transition-colors">
-                    <span>{faq.q}</span>
-                    <ChevronDown size={20} className={`transition-transform ${openFaqIndex === i ? 'rotate-180' : ''}`} />
-                 </button>
-                 {openFaqIndex === i && <p className="body-sm text-black/60 pb-4 animate-in fade-in slide-in-from-top-2">{faq.a}</p>}
-               </div>
-             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 7. FINAL CTA BAND (DARK) */}
-      <section className="w-full bg-black text-white py-32 px-6 text-center relative overflow-hidden">
-        <div className="absolute bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-[#494fdf]/10 blur-[100px] pointer-events-none -z-10" />
-        <div className="max-w-4xl mx-auto">
-          <h2 className="display-lg mb-8 text-3xl sm:text-5xl font-bold tracking-tight">Yatırıma bugün başlayın.</h2>
-          <button onClick={handleLogin} className="btn-revolut-primary">
-            Ücretsiz Hesap Açın
-          </button>
-          <div className="mt-12 flex items-center justify-center gap-2 text-[11px] font-bold text-white/40 uppercase tracking-widest">
-            <Check size={14} className="text-[#494fdf]" /> Kredi kartı gerekmez
-          </div>
-        </div>
-      </section>
-
-      {/* FOOTER */}
-      <footer className="w-full bg-black text-white/30 py-12 px-6 border-t border-white/5 text-center body-sm">
-        <p>© 2026 Jetborsa. BIST uzmanı tek yapay zeka.</p>
-      </footer>
+      {/* Mobile: Chat Sheet */}
+      <ChatSheet
+        isOpen={isChatSheetOpen}
+        onClose={() => setIsChatSheetOpen(false)}
+        context="global"
+        placeholder="Borsa hakkında bir soru sorun..."
+        user={user}
+      />
     </div>
   )
 }
