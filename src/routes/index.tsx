@@ -1,12 +1,9 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { useState, useEffect, useCallback } from 'react'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import useEmblaCarousel from 'embla-carousel-react'
 import { 
   Sparkles, 
-  TrendingUp, 
-  TrendingDown, 
-  Activity,
   ArrowUp,
   ArrowDown
 } from 'lucide-react'
@@ -14,6 +11,7 @@ import { ChatPanel } from '../components/chat/ChatPanel'
 import { ChatSheet } from '../components/chat/ChatSheet'
 import { useUIStore } from '../store/ui'
 import { Logo } from '../components/layout/Logo'
+import companyLogos from '../constants/companyLogos.json'
 
 export const Route = createFileRoute('/')({
   component: LandingPage,
@@ -25,29 +23,40 @@ type IndexDisplay = {
   code: string;
   price: number;
   diffPercent: number;
-  sparkline: number[];
+}
+
+type StockRow = {
+  ticker: string;
+  name: string;
+  price: number;
+  diffPercent: number;
 }
 
 function LandingPage() {
   const { user, login: handleLogin } = useAuth()
   const { isChatMaximized } = useUIStore()
+  const navigate = useNavigate()
   const [isChatSheetOpen, setIsChatSheetOpen] = useState(false)
   
-  const [emblaRef, emblaApi] = useEmblaCarousel({
+  const [emblaRef] = useEmblaCarousel({
     align: 'start',
     slidesToScroll: 1,
     containScroll: 'trimSnaps',
   })
 
   const [indexData, setIndexDisplay] = useState<IndexDisplay[]>([
-    { id: 'bist100', name: "BIST 100", code: "XU100", price: 10240.20, diffPercent: 1.15, sparkline: [] },
-    { id: 'bist30', name: "BIST 30", code: "XU030", price: 11250.40, diffPercent: 1.45, sparkline: [] },
-    { id: 'bist500', name: "BIST 500", code: "XU500", price: 12540.80, diffPercent: 0.95, sparkline: [] },
+    { id: 'bist100', name: "BIST 100", code: "XU100", price: 10240.20, diffPercent: 1.15 },
+    { id: 'bist30', name: "BIST 30", code: "XU030", price: 11250.40, diffPercent: 1.45 },
+    { id: 'bist500', name: "BIST 500", code: "XU500", price: 12540.80, diffPercent: 0.95 },
   ])
 
+  const [topGainers, setTopGainers] = useState<StockRow[]>([])
+
   useEffect(() => {
-    async function fetchIndices() {
+    async function fetchData() {
       const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev";
+      
+      // Fetch indices
       try {
         const res = await fetch(`${apiUrl}/api/market/summary`)
         if (res.ok) {
@@ -69,8 +78,31 @@ function LandingPage() {
       } catch (e) {
         console.error("Failed fetching indices:", e)
       }
+
+      // Fetch stocks for gainers
+      try {
+        const res = await fetch(`${apiUrl}/api/market/stocks`)
+        if (res.ok) {
+          const json = await res.json()
+          if (json && Array.isArray(json.data)) {
+            const stocks: StockRow[] = json.data
+              .filter((s: any) => s.code && s.last_price !== undefined)
+              .map((s: any) => ({
+                ticker: s.code.toUpperCase(),
+                name: s.name || s.code.toUpperCase(),
+                price: Number(s.last_price),
+                diffPercent: Number(s.diff_percent || 0),
+              }))
+              .sort((a: StockRow, b: StockRow) => b.diffPercent - a.diffPercent)
+              .slice(0, 10)
+            setTopGainers(stocks)
+          }
+        }
+      } catch (e) {
+        console.error("Failed fetching stocks:", e)
+      }
     }
-    fetchIndices()
+    fetchData()
   }, [])
 
   return (
@@ -131,7 +163,6 @@ function LandingPage() {
                       to={routeTarget}
                       className="flex-none w-[200px] md:w-[240px] rounded-2xl p-4 bg-card/50 border border-white/5 hover:border-white/10 transition-all cursor-pointer group"
                     >
-                      {/* Ticker + Change */}
                       <div className="flex items-center gap-2 mb-3">
                         <span className="text-sm font-bold text-foreground truncate">
                           {idx.name}
@@ -141,7 +172,6 @@ function LandingPage() {
                         </span>
                       </div>
                       
-                      {/* Price + Arrow */}
                       <div className="flex items-center justify-between">
                         <span className="text-xl font-bold text-foreground font-mono truncate">
                           ₺{idx.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -149,11 +179,7 @@ function LandingPage() {
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
                           isUp ? 'bg-emerald-500' : 'bg-destructive'
                         }`}>
-                          {isUp ? (
-                            <ArrowUp size={16} className="text-white" />
-                          ) : (
-                            <ArrowDown size={16} className="text-white" />
-                          )}
+                          {isUp ? <ArrowUp size={16} className="text-white" /> : <ArrowDown size={16} className="text-white" />}
                         </div>
                       </div>
                     </Link>
@@ -163,37 +189,68 @@ function LandingPage() {
             </div>
           </section>
 
+          {/* Yükselenler - Seamless List */}
+          {topGainers.length > 0 && (
+            <section className="px-4 md:px-6 py-4">
+              <h2 className="text-lg font-bold text-foreground mb-3 px-1">Yükselenler</h2>
+              
+              <div className="divide-y divide-white/5">
+                {topGainers.map((stock) => {
+                  const logoFile = companyLogos[stock.ticker as keyof typeof companyLogos]
+                  
+                  return (
+                    <div
+                      key={stock.ticker}
+                      onClick={() => navigate({ to: `/sirketler/$id`, params: { id: stock.ticker.toLowerCase() } })}
+                      className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        {logoFile ? (
+                          <div className="h-8 w-8 rounded-lg bg-white overflow-hidden flex items-center justify-center shrink-0">
+                            <img src={`/logos/${logoFile}`} alt={stock.ticker} className="h-full w-full object-cover" />
+                          </div>
+                        ) : (
+                          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] shrink-0">
+                            {stock.ticker.slice(0, 2)}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <div className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                            {stock.ticker}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4 shrink-0">
+                        <span className="text-sm font-bold font-mono text-emerald-500">
+                          +{stock.diffPercent.toFixed(2).replace('.', ',')}%
+                        </span>
+                        <span className="text-sm font-semibold font-mono text-foreground">
+                          ₺{stock.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </section>
+          )}
+
           {/* Quick Actions for logged in users */}
           {user && (
             <section className="px-4 md:px-6 py-4 max-w-5xl mx-auto">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <Link to="/endeksler" className="flex items-center gap-3 p-4 rounded-xl border border-border/40 hover:border-primary/20 bg-card/15 hover:bg-primary/5 transition-all group">
-                  <Activity size={18} className="text-primary" />
-                  <div>
-                    <span className="text-xs font-bold block">Endeksler</span>
-                    <span className="text-[10px] text-muted-foreground">BIST endeksleri</span>
-                  </div>
+                  <span className="text-xs font-bold block">Endeksler</span>
                 </Link>
                 <Link to="/sektorler" className="flex items-center gap-3 p-4 rounded-xl border border-border/40 hover:border-primary/20 bg-card/15 hover:bg-primary/5 transition-all group">
-                  <Activity size={18} className="text-primary" />
-                  <div>
-                    <span className="text-xs font-bold block">Sektörler</span>
-                    <span className="text-[10px] text-muted-foreground">Sektör analizi</span>
-                  </div>
+                  <span className="text-xs font-bold block">Sektörler</span>
                 </Link>
                 <Link to="/sirketler" className="flex items-center gap-3 p-4 rounded-xl border border-border/40 hover:border-primary/20 bg-card/15 hover:bg-primary/5 transition-all group">
-                  <Activity size={18} className="text-primary" />
-                  <div>
-                    <span className="text-xs font-bold block">Şirketler</span>
-                    <span className="text-[10px] text-muted-foreground">Hisse senetleri</span>
-                  </div>
+                  <span className="text-xs font-bold block">Şirketler</span>
                 </Link>
                 <Link to="/takip-listesi" className="flex items-center gap-3 p-4 rounded-xl border border-border/40 hover:border-primary/20 bg-card/15 hover:bg-primary/5 transition-all group">
-                  <Sparkles size={18} className="text-amber-400" />
-                  <div>
-                    <span className="text-xs font-bold block">Takip Listem</span>
-                    <span className="text-[10px] text-muted-foreground">Portföyüm</span>
-                  </div>
+                  <span className="text-xs font-bold block">Takip Listem</span>
                 </Link>
               </div>
             </section>
