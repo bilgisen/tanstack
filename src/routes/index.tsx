@@ -119,19 +119,11 @@ function LandingPage() {
 
           {/* Index Cards Carousel */}
           <section className="px-4 md:px-6 py-4">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-1.5 h-4 rounded-full bg-primary" />
-              <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2.5">
-                <Activity size={12} className="text-emerald-500" />
-                <span>Bugün Borsa</span>
-              </h3>
-            </div>
-
             <div className="overflow-hidden" ref={emblaRef}>
               <div className="flex gap-3">
                 {indexData.map((idx) => {
                   const isUp = idx.diffPercent >= 0;
-                  const routeTarget = user ? `/panel/endeksler/${idx.id}` : `/endeksler`;
+                  const routeTarget = `/endeksler/${idx.id}`;
                   
                   return (
                     <Link
