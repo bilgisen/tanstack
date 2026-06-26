@@ -2,7 +2,6 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import useEmblaCarousel from 'embla-carousel-react'
-import Autoplay from 'embla-carousel-autoplay'
 import { 
   Sparkles, 
   ArrowUp,
@@ -56,15 +55,6 @@ type StockRow = {
   volume?: number;
 }
 
-const BIST30_TICKERS = [
-  'THYAO', 'ASELS', 'TUPRS', 'KCHOL', 'SAHOL',
-  'GARAN', 'EREGL', 'BIMAS', 'AKBNK', 'SISE',
-  'TCELL', 'TOASO', 'SASA', 'PETKM', 'PGSUS',
-  'FROTO', 'YKBNK', 'ISCTR', 'HALKB', 'VAKBN',
-  'TAVHL', 'ARCLK', 'EKGYO', 'ENKAI', 'KOZAA',
-  'MGROS', 'TTKOM', 'KOZAL', 'DOHOL', 'TRALT'
-]
-
 function LandingPage() {
   const { user, login: handleLogin } = useAuth()
   const { isChatMaximized } = useUIStore()
@@ -72,15 +62,8 @@ function LandingPage() {
   const [isChatSheetOpen, setIsChatSheetOpen] = useState(false)
   
   const [emblaRef] = useEmblaCarousel(
-    { loop: true, slidesToScroll: 1, align: 'start' },
-    [Autoplay({ delay: 3000, stopOnInteraction: false, playOnInit: true })]
+    { align: 'start', slidesToScroll: 1 }
   )
-
-  const [emblaRef2] = useEmblaCarousel({
-    align: 'start',
-    slidesToScroll: 1,
-    containScroll: 'trimSnaps',
-  })
 
   const [indexData, setIndexDisplay] = useState<IndexDisplay[]>([
     { id: 'bist100', name: "BIST 100", code: "XU100", price: 10240.20, diffPercent: 1.15 },
@@ -88,7 +71,6 @@ function LandingPage() {
     { id: 'bist500', name: "BIST 500", code: "XU500", price: 12540.80, diffPercent: 0.95 },
   ])
 
-  const [bist30Stocks, setBist30Stocks] = useState<StockRow[]>([])
   const [topGainers, setTopGainers] = useState<StockRow[]>([])
   const [topLosers, setTopLosers] = useState<StockRow[]>([])
   const [topVolume, setTopVolume] = useState<StockRow[]>([])
@@ -135,19 +117,6 @@ function LandingPage() {
                 diffPercent: Number(s.diff_percent || 0),
                 volume: Number(s.volume || 0),
               }))
-
-            // BIST 30
-            const bist30 = BIST30_TICKERS.map(ticker => {
-              const found = allStocks.find(s => s.ticker === ticker)
-              return found || {
-                ticker,
-                name: (companyNames as Record<string, string>)[ticker] || ticker,
-                price: 0,
-                diffPercent: 0,
-                volume: 0,
-              }
-            }).filter(s => s.price > 0)
-            setBist30Stocks(bist30)
 
             // Top 5 gainers
             const gainers = [...allStocks]
@@ -330,49 +299,6 @@ function LandingPage() {
               </TabsContent>
             </Tabs>
           </section>
-
-          {/* BIST 30 Carousel */}
-          {bist30Stocks.length > 0 && (
-            <section className="px-4 md:px-6 py-4">
-              <div className="overflow-hidden" ref={emblaRef2}>
-                <div className="flex gap-3">
-                  {bist30Stocks.map((stock) => {
-                    const isUp = stock.diffPercent >= 0;
-                    const logoFile = companyLogos[stock.ticker as keyof typeof companyLogos]
-                    
-                    return (
-                      <div
-                        key={stock.ticker}
-                        onClick={() => navigate({ to: `/panel/sirketler/$id`, params: { id: stock.ticker.toLowerCase() } })}
-                        className="flex-none w-[180px] md:w-[200px] rounded-2xl p-4 bg-card/50 border border-white/5 hover:border-white/10 transition-all cursor-pointer group"
-                      >
-                        <div className="flex items-center gap-2 mb-3">
-                          {logoFile ? (
-                            <div className="h-6 w-6 rounded bg-white overflow-hidden flex items-center justify-center shrink-0">
-                              <img src={`/logos/${logoFile}`} alt={stock.ticker} className="h-full w-full object-cover" />
-                            </div>
-                          ) : (
-                            <div className="h-6 w-6 rounded bg-primary/10 flex items-center justify-center text-primary font-bold text-[8px] shrink-0">
-                              {stock.ticker.slice(0, 2)}
-                            </div>
-                          )}
-                          <span className="text-sm font-bold text-foreground truncate">{stock.ticker}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-base font-bold text-foreground font-mono truncate">
-                            ₺{stock.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                          </span>
-                          <span className={`text-xs font-bold ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
-                            %{isUp ? '+' : ''}{stock.diffPercent.toFixed(2).replace('.', ',')}
-                          </span>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </section>
-          )}
         </div>
 
         {/* Mobile floating chat trigger */}
