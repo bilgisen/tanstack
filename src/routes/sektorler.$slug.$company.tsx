@@ -207,22 +207,27 @@ function CompanyDetailPage() {
       } catch (e) { console.error('ta/summary fetch failed', e); }
 
       // 4. Fundamental detail
+      let fk = '-';
+      let pddf = '-';
+      let halkaAciklik = '-';
+      let ozsermayeKari = '-';
+
       try {
         const res = await fetch(`${apiUrl}/api/market/symbol/${tickerUpper}/detail`);
         if (res.ok) {
           const json = await res.json();
           if (json.success && json.data) {
-            if (isMounted) {
-              setFundamental({
-                fk: json.data.fk || json.data.FK || '-',
-                pddf: json.data.pddf || json.data.PD_DD || '-',
-                halkaAciklik: json.data.halka_aciklik_orani || json.data.halka_aciklik || '-',
-                ozsermayeKari: json.data.ozsermaye_karliligi || json.data.ozsermayekari || '-',
-              });
-            }
+            fk = json.data.fk || json.data.FK || fk;
+            pddf = json.data.pddf || json.data.PD_DD || pddf;
+            halkaAciklik = json.data.halka_aciklik_orani || json.data.halka_aciklik || halkaAciklik;
+            ozsermayeKari = json.data.ozsermaye_karliligi || json.data.ozsermayekari || ozsermayeKari;
           }
         }
       } catch (e) { console.error('detail fetch failed', e); }
+
+      if (isMounted) {
+        setFundamental({ fk, pddf, halkaAciklik, ozsermayeKari });
+      }
 
       if (isMounted) setLoading(false);
     }
