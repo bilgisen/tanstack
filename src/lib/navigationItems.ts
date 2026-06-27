@@ -28,4 +28,11 @@ export const navigationItems: MenuItem[] = [
     path: "/sektorler",
     showAsIconOnMobile: true,
   },
+  {
+    id: "upgrade",
+    label: "Premium",
+    icon: Sparkles,
+    path: "/panel",
+    showAsIconOnMobile: false,
+  },
 ];
