@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { Sparkles, HelpCircle, ArrowLeft, Factory, Loader2 } from 'lucide-react'
+import { ArrowLeft, TrendingUp, TrendingDown, Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import companyNames from '../constants/companyNames.json'
 import companyLogos from '../constants/companyLogos.json'
@@ -23,135 +23,6 @@ type CompanyStats = {
   sector: string;
 };
 
-function CompanyDetailPage() {
-  const { slug, company } = Route.useParams()
-  const [companyStats, setCompanyStats] = useState<CompanyStats | null>(null)
-  const [loading, setLoading] = useState(true)
-  const { sendMessage } = useChatStore()
-
-  const chatContext = `sirket:${company.toUpperCase()}`
-  const sectorName = SLUG_TO_NAME[slug] || slug
-
-  const baseUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev"
-
-  useEffect(() => {
-    let isMounted = true;
-    setLoading(true);
-
-    async function fetchCompanyDetails() {
-      try {
-        const res = await fetch(`${baseUrl}/api/market/symbol/${company.toUpperCase()}`)
-        if (res.ok) {
-          const data = await res.json()
-          if (data && data.success && data.data) {
-            const item = data.data
-            const lastPrice = typeof item.last_price === 'number' ? item.last_price : parseFloat(item.last_price) || 0
-            const diffPercent = typeof item.diff_percent === 'number' ? item.diff_percent : parseFloat(item.diff_percent) || 0
-
-            if (isMounted) {
-              setCompanyStats({
-                name: (companyNames as Record<string, string>)[company.toUpperCase()] || company,
-                code: company.toUpperCase(),
-                price: lastPrice,
-                diffPercent: diffPercent,
-                high: typeof item.high === 'number' ? item.high : lastPrice * 1.02,
-                low: typeof item.low === 'number' ? item.low : lastPrice * 0.98,
-                open: typeof item.open === 'number' ? item.open : lastPrice * 0.99,
-                close: typeof item.close === 'number' ? item.close : lastPrice,
-                volume: item.volume || "50.0M ₺",
-                sector: sectorName
-              })
-            }
-          }
-        }
-      } catch (e) {
-        console.error('Company detail: failed fetching data', e)
-        if (isMounted) {
-          setCompanyStats({
-            name: (companyNames as Record<string, string>)[company.toUpperCase()] || company,
-            code: company.toUpperCase(),
-            price: 120.50,
-            diffPercent: 1.85,
-            high: 122.30,
-            low: 119.10,
-            open: 119.80,
-            close: 120.20,
-            volume: "45.2M ₺",
-            sector: sectorName
-          })
-        }
-      }
-
-      if (isMounted) setLoading(false)
-    }
-
-    fetchCompanyDetails()
-    return () => { isMounted = false }
-  }, [slug, company])
-
-  if (loading || !companyStats) {
-    return (
-      <PublicPageLayout context={chatContext} placeholder={`${companyStats?.code || company} hakkında bir soru sorun...`}>
-        <div className="flex h-[360px] items-center justify-center text-muted-foreground font-medium text-xs gap-2 animate-pulse">
-          <Loader2 className="animate-spin text-primary" size={16} />
-          <span>Veriler yükleniyor, lütfen bekleyin...</span>
-        </div>
-      </PublicPageLayout>
-    )
-  }
-
-  const isUp = companyStats.diffPercent >= 0
-
-  return (
-    <PublicPageLayout context={chatContext} placeholder={`${companyStats.code} hakkında bir soru sorun...`}>
-      <div className="space-y-6 animate-in fade-in duration-400 flex flex-col min-h-fit pb-32">
-
-        {/* Back */}
-        <Link to={`/sektorler/${slug}`} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft size={14} />
-          {sectorName} Sektörüne Dön
-        </Link>
-
-        {/* SECTION A: Company Heading Block */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between border border-border/45 bg-card/25 rounded-2xl p-5 gap-4 relative overflow-hidden shrink-0 transition-all hover:border-border/60">
-          <div className="flex items-center gap-3.5 min-w-0">
-            <div className="h-12 w-12 rounded-full bg-primary/10 border border-primary/15 flex items-center justify-center text-primary shrink-0">
-              <Factory size={20} />
-            </div>
-            <div className="min-w-0">
-              <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Şirketler</span>
-              <h1 className="text-base md:text-2xl font-bold text-foreground tracking-tight leading-none mt-1">{companyStats.code}</h1>
-              <p className="text-xs text-muted-foreground mt-1 truncate max-w-md">{companyStats.name}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-6 shrink-0">
-            <div className="text-right">
-              <span className="text-[10px] text-muted-foreground font-medium uppercase">Sektör</span>
-              <div className="text-sm font-semibold text-foreground mt-0.5">{companyStats.sector}</div>
-            </div>
-            <div className="text-right">
-              <span className="text-[10px] text-muted-foreground font-medium uppercase">Fiyat</span>
-              <div className="text-2xl font-bold text-foreground tracking-tight mt-0.5">{companyStats.price.toFixed(2)} ₺</div>
-            </div>
-            <div className="text-right">
-              <span className="text-[10px] text-muted-foreground font-medium uppercase">Değişim</span>
-              <div className={`text-sm font-bold mt-0.5 ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>{isUp ? '+' : ''}{companyStats.diffPercent.toFixed(2)}%</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="text-center py-12 text-muted-foreground bg-card/20 rounded-2xl border border-border/40">
-          <Factory size={48} className="mx-auto mb-4 text-muted-foreground/40" />
-          <h3 className="text-lg font-semibold mb-2">Şirket Detay Sayfası</h3>
-          <p className="text-sm mb-4">Tekil şirket bilgileri burada görüntülenecek.</p>
-          <p className="text-xs text-muted-foreground/60">Slug: {slug} | Şirket: {company}</p>
-        </div>
-
-      </div>
-    </PublicPageLayout>
-  )
-}
-
 const SLUG_TO_NAME: Record<string, string> = {
   'saglik-ilac': 'Sağlık & İlaç',
   'gida-icecek-tarim': 'Gıda & İçecek & Tarım',
@@ -170,3 +41,159 @@ const SLUG_TO_NAME: Record<string, string> = {
   'enerji-uretim-dagitim-petrol': 'Enerji (Üretim + Dağıtım + Petrol)',
   'teknoloji-iletisim': 'Teknoloji & İletişim',
 };
+
+function CompanyDetailPage() {
+  const { slug, company } = Route.useParams()
+  const tickerUpper = company.toUpperCase()
+  const [companyStats, setCompanyStats] = useState<CompanyStats | null>(null)
+  const [loading, setLoading] = useState(true)
+  const { sendMessage } = useChatStore()
+
+  const chatContext = `sirket:${tickerUpper}`
+  const sectorName = SLUG_TO_NAME[slug] || slug
+
+  const fallbackData: CompanyStats = {
+    name: (companyNames as Record<string, string>)[tickerUpper] || tickerUpper,
+    code: tickerUpper,
+    price: 0,
+    diffPercent: 0,
+    high: 0,
+    low: 0,
+    open: 0,
+    close: 0,
+    volume: '-',
+    sector: sectorName,
+  }
+
+  useEffect(() => {
+    let isMounted = true;
+    setLoading(true);
+
+    async function fetchCompanyDetails() {
+      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev";
+      const officialName = (companyNames as Record<string, string>)[tickerUpper] || tickerUpper;
+      let lastPrice = 0;
+      let diffPercent = 0;
+      let high = 0;
+      let low = 0;
+      let open = 0;
+      let close = 0;
+      let volume = '-';
+
+      try {
+        const res = await fetch(`${apiUrl}/api/market/symbol/${tickerUpper}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data) {
+            lastPrice = typeof json.data.last_price === 'number' ? json.data.last_price : parseFloat(json.data.last_price) || 0;
+            diffPercent = typeof json.data.diff_percent === 'number' ? json.data.diff_percent : parseFloat(json.data.diff_percent) || 0;
+          }
+        }
+      } catch (e) {
+        console.error('Company detail: symbol fetch failed', e);
+      }
+
+      try {
+        const res = await fetch(`${apiUrl}/api/market/symbol/${tickerUpper}/summary-card`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json && !json.error) {
+            lastPrice = json.last_price || lastPrice;
+            diffPercent = json.diff_percent !== undefined ? json.diff_percent : diffPercent;
+            high = json.high || lastPrice * 1.02;
+            low = json.low || lastPrice * 0.98;
+            open = json.open || lastPrice * 0.99;
+            close = json.close || lastPrice;
+            volume = json.volume || volume;
+          }
+        }
+      } catch (e) {
+        console.error('Company detail: summary-card fetch failed', e);
+      }
+
+      if (isMounted) {
+        setCompanyStats({
+          name: officialName,
+          code: tickerUpper,
+          price: lastPrice,
+          diffPercent,
+          high,
+          low,
+          open,
+          close,
+          volume,
+          sector: sectorName,
+        });
+        setLoading(false);
+      }
+    }
+
+    fetchCompanyDetails();
+    return () => { isMounted = false };
+  }, [slug, company]);
+
+  if (loading || !companyStats) {
+    return (
+      <PublicPageLayout context={chatContext} placeholder={`${tickerUpper} hakkında bir soru sorun...`}>
+        <div className="flex h-[360px] items-center justify-center text-muted-foreground font-medium text-xs gap-2 animate-pulse">
+          <Loader2 className="animate-spin text-primary" size={16} />
+          <span>Veriler yükleniyor, lütfen bekleyin...</span>
+        </div>
+      </PublicPageLayout>
+    )
+  }
+
+  const isUp = companyStats.diffPercent >= 0
+  const logoFile = companyLogos[tickerUpper as keyof typeof companyLogos];
+
+  return (
+    <PublicPageLayout context={chatContext} placeholder={`${tickerUpper} hakkında bir soru sorun...`}>
+      <div className="space-y-5 pb-8 animate-in fade-in duration-400">
+
+        {/* Back */}
+        <Link to={`/sektorler/${slug}`} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <ArrowLeft size={14} />
+          {sectorName}
+        </Link>
+
+        {/* Heading Card */}
+        <div className="border border-border/40 bg-card/30 rounded-2xl p-4 md:p-5 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5 min-w-0">
+            {logoFile ? (
+              <img
+                src={`/logos/${logoFile}`}
+                alt={tickerUpper}
+                className="h-11 w-11 rounded-xl object-contain bg-white p-1.5 border border-border/30 shadow-3xs shrink-0"
+              />
+            ) : (
+              <div className="h-11 w-11 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center text-primary font-bold text-sm shrink-0">
+                {tickerUpper.slice(0, 2)}
+              </div>
+            )}
+            <div className="min-w-0">
+              <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider block">{tickerUpper}</span>
+              <h1 className="text-base md:text-xl font-bold text-foreground tracking-tight leading-tight truncate mt-0.5">{companyStats.name}</h1>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 shrink-0">
+            <div className="text-right">
+              <span className="text-xl md:text-2xl font-bold text-foreground tracking-tight block leading-none">
+                {companyStats.price > 0
+                  ? companyStats.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                  : '-'}
+              </span>
+              <span className={`text-xs md:text-sm font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-0.5 mt-1.5 ${
+                isUp ? 'bg-emerald-500/10 text-emerald-500' : 'bg-destructive/10 text-destructive'
+              }`}>
+                {isUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                {isUp ? '+' : ''}{companyStats.diffPercent.toFixed(2)}%
+              </span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </PublicPageLayout>
+  )
+}
