@@ -6,6 +6,7 @@ interface ResponsiveLogoProps {
   mobileSize?: number;
   desktopSize?: number;
   className?: string;
+  forceFull?: boolean;
 }
 
 function ResponsiveLogo({ 
@@ -13,6 +14,7 @@ function ResponsiveLogo({
   mobileSize, 
   desktopSize,
   className, 
+  forceFull = false,
 }: ResponsiveLogoProps) {
   const [isMobile, setIsMobile] = useState<boolean>(() => {
     if (typeof window === 'undefined') {
@@ -48,12 +50,12 @@ function ResponsiveLogo({
     };
   }, [handleResize]);
 
-  // Mobile: icon only, Desktop: icon + "borsa" text
-  if (isMobile) {
+  // Always show full logo (with site name) on mobile too
+  if (isMobile && !forceFull) {
     const effectiveSize = mobileSize ?? size;
     return (
       <Logo
-        variant="icon"
+        variant="full"
         size={effectiveSize}
         className={className}
         role="img"

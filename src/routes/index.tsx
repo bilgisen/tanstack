@@ -157,7 +157,7 @@ function LandingPage() {
           return (
             <div
               key={stock.ticker}
-              onClick={() => navigate({ to: `/panel/sirketler/$id`, params: { id: stock.ticker.toLowerCase() } })}
+              onClick={() => navigate({ to: `/sirketler/$ticker`, params: { ticker: stock.ticker.toLowerCase() } })}
               className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
             >
               <div className="flex items-center gap-3 min-w-0">

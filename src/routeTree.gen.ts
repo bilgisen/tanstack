@@ -23,6 +23,7 @@ import { Route as EndekslerRouteImport } from './routes/endeksler'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfilIndexRouteImport } from './routes/profil.index'
 import { Route as PanelIndexRouteImport } from './routes/panel.index'
+import { Route as SirketlerTickerRouteImport } from './routes/sirketler.$ticker'
 import { Route as SektorlerSlugRouteImport } from './routes/sektorler.$slug'
 import { Route as PanelProfilRouteImport } from './routes/panel.profil'
 import { Route as PanelBorsaRouteImport } from './routes/panel.borsa'
@@ -107,6 +108,11 @@ const PanelIndexRoute = PanelIndexRouteImport.update({
   path: '/',
   getParentRoute: () => PanelRoute,
 } as any)
+const SirketlerTickerRoute = SirketlerTickerRouteImport.update({
+  id: '/$ticker',
+  path: '/$ticker',
+  getParentRoute: () => SirketlerRoute,
+} as any)
 const SektorlerSlugRoute = SektorlerSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -184,13 +190,14 @@ export interface FileRoutesByFullPath {
   '/panel': typeof PanelRouteWithChildren
   '/profil': typeof ProfilRouteWithChildren
   '/sektorler': typeof SektorlerRouteWithChildren
-  '/sirketler': typeof SirketlerRoute
+  '/sirketler': typeof SirketlerRouteWithChildren
   '/takip-listesi': typeof TakipListesiRoute
   '/api/checkout': typeof ApiCheckoutRoute
   '/endeksler/$id': typeof EndekslerIdRoute
   '/panel/borsa': typeof PanelBorsaRoute
   '/panel/profil': typeof PanelProfilRoute
   '/sektorler/$slug': typeof SektorlerSlugRouteWithChildren
+  '/sirketler/$ticker': typeof SirketlerTickerRoute
   '/panel/': typeof PanelIndexRoute
   '/profil/': typeof ProfilIndexRoute
   '/api/ai/charge': typeof ApiAiChargeRoute
@@ -211,13 +218,14 @@ export interface FileRoutesByTo {
   '/nasil-calisir': typeof NasilCalisirRoute
   '/neden-jetborsa': typeof NedenJetborsaRoute
   '/sektorler': typeof SektorlerRouteWithChildren
-  '/sirketler': typeof SirketlerRoute
+  '/sirketler': typeof SirketlerRouteWithChildren
   '/takip-listesi': typeof TakipListesiRoute
   '/api/checkout': typeof ApiCheckoutRoute
   '/endeksler/$id': typeof EndekslerIdRoute
   '/panel/borsa': typeof PanelBorsaRoute
   '/panel/profil': typeof PanelProfilRoute
   '/sektorler/$slug': typeof SektorlerSlugRouteWithChildren
+  '/sirketler/$ticker': typeof SirketlerTickerRoute
   '/panel': typeof PanelIndexRoute
   '/profil': typeof ProfilIndexRoute
   '/api/ai/charge': typeof ApiAiChargeRoute
@@ -241,13 +249,14 @@ export interface FileRoutesById {
   '/panel': typeof PanelRouteWithChildren
   '/profil': typeof ProfilRouteWithChildren
   '/sektorler': typeof SektorlerRouteWithChildren
-  '/sirketler': typeof SirketlerRoute
+  '/sirketler': typeof SirketlerRouteWithChildren
   '/takip-listesi': typeof TakipListesiRoute
   '/api/checkout': typeof ApiCheckoutRoute
   '/endeksler/$id': typeof EndekslerIdRoute
   '/panel/borsa': typeof PanelBorsaRoute
   '/panel/profil': typeof PanelProfilRoute
   '/sektorler/$slug': typeof SektorlerSlugRouteWithChildren
+  '/sirketler/$ticker': typeof SirketlerTickerRoute
   '/panel/': typeof PanelIndexRoute
   '/profil/': typeof ProfilIndexRoute
   '/api/ai/charge': typeof ApiAiChargeRoute
@@ -279,6 +288,7 @@ export interface FileRouteTypes {
     | '/panel/borsa'
     | '/panel/profil'
     | '/sektorler/$slug'
+    | '/sirketler/$ticker'
     | '/panel/'
     | '/profil/'
     | '/api/ai/charge'
@@ -306,6 +316,7 @@ export interface FileRouteTypes {
     | '/panel/borsa'
     | '/panel/profil'
     | '/sektorler/$slug'
+    | '/sirketler/$ticker'
     | '/panel'
     | '/profil'
     | '/api/ai/charge'
@@ -335,6 +346,7 @@ export interface FileRouteTypes {
     | '/panel/borsa'
     | '/panel/profil'
     | '/sektorler/$slug'
+    | '/sirketler/$ticker'
     | '/panel/'
     | '/profil/'
     | '/api/ai/charge'
@@ -358,7 +370,7 @@ export interface RootRouteChildren {
   PanelRoute: typeof PanelRouteWithChildren
   ProfilRoute: typeof ProfilRouteWithChildren
   SektorlerRoute: typeof SektorlerRouteWithChildren
-  SirketlerRoute: typeof SirketlerRoute
+  SirketlerRoute: typeof SirketlerRouteWithChildren
   TakipListesiRoute: typeof TakipListesiRoute
   ApiCheckoutRoute: typeof ApiCheckoutRoute
   ApiAiChargeRoute: typeof ApiAiChargeRoute
@@ -468,6 +480,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/panel/'
       preLoaderRoute: typeof PanelIndexRouteImport
       parentRoute: typeof PanelRoute
+    }
+    '/sirketler/$ticker': {
+      id: '/sirketler/$ticker'
+      path: '/$ticker'
+      fullPath: '/sirketler/$ticker'
+      preLoaderRoute: typeof SirketlerTickerRouteImport
+      parentRoute: typeof SirketlerRoute
     }
     '/sektorler/$slug': {
       id: '/sektorler/$slug'
@@ -626,6 +645,18 @@ const SektorlerRouteWithChildren = SektorlerRoute._addFileChildren(
   SektorlerRouteChildren,
 )
 
+interface SirketlerRouteChildren {
+  SirketlerTickerRoute: typeof SirketlerTickerRoute
+}
+
+const SirketlerRouteChildren: SirketlerRouteChildren = {
+  SirketlerTickerRoute: SirketlerTickerRoute,
+}
+
+const SirketlerRouteWithChildren = SirketlerRoute._addFileChildren(
+  SirketlerRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   EndekslerRoute: EndekslerRouteWithChildren,
@@ -637,7 +668,7 @@ const rootRouteChildren: RootRouteChildren = {
   PanelRoute: PanelRouteWithChildren,
   ProfilRoute: ProfilRouteWithChildren,
   SektorlerRoute: SektorlerRouteWithChildren,
-  SirketlerRoute: SirketlerRoute,
+  SirketlerRoute: SirketlerRouteWithChildren,
   TakipListesiRoute: TakipListesiRoute,
   ApiCheckoutRoute: ApiCheckoutRoute,
   ApiAiChargeRoute: ApiAiChargeRoute,

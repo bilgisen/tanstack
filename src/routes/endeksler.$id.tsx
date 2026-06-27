@@ -366,7 +366,7 @@ function EndeksDetailPage() {
               return (
                 <div
                   key={row.code}
-                  onClick={() => navigate({ to: `/panel/sirketler/${row.code.toLowerCase()}` })}
+                  onClick={() => navigate({ to: `/sirketler/${row.code.toLowerCase()}` })}
                   className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
                 >
                   <div className="flex items-center gap-3 min-w-0">
@@ -404,7 +404,7 @@ function EndeksDetailPage() {
               return (
                 <div
                   key={row.code}
-                  onClick={() => navigate({ to: `/panel/sirketler/${row.code.toLowerCase()}` })}
+                  onClick={() => navigate({ to: `/sirketler/${row.code.toLowerCase()}` })}
                   className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
                 >
                   <div className="flex items-center gap-3 min-w-0">
