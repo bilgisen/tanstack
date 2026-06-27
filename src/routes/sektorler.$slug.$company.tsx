@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowLeft, TrendingUp, TrendingDown, Loader2 } from 'lucide-react'
+import { ArrowLeft, TrendingUp, TrendingDown } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import companyNames from '../constants/companyNames.json'
 import companyLogos from '../constants/companyLogos.json'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
+import { Skeleton } from '../components/ui/skeleton'
 import { useChatStore } from '../store/chat'
 
 export const Route = createFileRoute('/sektorler/$slug/$company')({
@@ -135,9 +136,9 @@ function CompanyDetailPage() {
   if (loading || !companyStats) {
     return (
       <PublicPageLayout context={chatContext} placeholder={`${tickerUpper} hakkında bir soru sorun...`}>
-        <div className="flex h-[360px] items-center justify-center text-muted-foreground font-medium text-xs gap-2 animate-pulse">
-          <Loader2 className="animate-spin text-primary" size={16} />
-          <span>Veriler yükleniyor, lütfen bekleyin...</span>
+        <div className="space-y-5 pb-8">
+          <Skeleton className="h-5 w-32 rounded-lg" />
+          <Skeleton className="h-24 w-full rounded-2xl" />
         </div>
       </PublicPageLayout>
     )
