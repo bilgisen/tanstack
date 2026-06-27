@@ -28,11 +28,4 @@ export const navigationItems: MenuItem[] = [
     path: "/sektorler",
     showAsIconOnMobile: true,
   },
-  {
-    id: "sirketler",
-    label: "Şirketler",
-    icon: Building2,
-    path: "/sirketler",
-    showAsIconOnMobile: true,
-  },
 ];
