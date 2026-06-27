@@ -2,7 +2,8 @@ import type { ElementType } from "react";
 import { 
   ChartNoAxesCombined, 
   Factory, 
-  Building2
+  Building2,
+  Sparkles
 } from "lucide-react";
 
 export interface MenuItem {
