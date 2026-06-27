@@ -63,13 +63,13 @@ export function Topbar() {
              </button>
            )}
 
-            {/* Premium Upgrade Button */}
+            {/* Upgrade Button */}
             <Link
-              to="/panel"
+              to="/profil"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-primary/90 to-primary/70 text-primary-foreground hover:opacity-90 transition-all cursor-pointer text-xs font-medium shrink-0"
-              title="Premium Üyeliğe Yükselt"
+              title="Yükselt"
             >
-              <span>Premium</span>
+              <span>Yükselt</span>
             </Link>
 
            {/* Hamburger Menu */}

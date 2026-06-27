@@ -253,7 +253,7 @@ function SektorDetailPage() {
                       return (
                         <tr
                           key={company.ticker}
-                          onClick={() => navigate({ to: `/panel/sirketler/${company.ticker.toLowerCase()}` as any })}
+                          onClick={() => navigate({ to: `/sektorler/${slug}/${company.ticker.toLowerCase()}` })}
                           className="group hover:bg-muted/40 cursor-pointer transition-colors"
                         >
                           <td className="p-3 flex items-center gap-2 min-w-0">

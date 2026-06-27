@@ -34,6 +34,7 @@ import { useUIStore } from '../store/ui'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs'
 import companyLogos from '../constants/companyLogos.json'
 import companyNames from '../constants/companyNames.json'
+import tickerToSectorSlug from '../constants/tickerToSectorSlug'
 
 export const Route = createFileRoute('/')({
   component: LandingPage,
@@ -157,7 +158,7 @@ function LandingPage() {
           return (
             <div
               key={stock.ticker}
-              onClick={() => navigate({ to: `/sirketler/$ticker`, params: { ticker: stock.ticker.toLowerCase() } })}
+              onClick={() => navigate({ to: `/sektorler/${tickerToSectorSlug[stock.ticker] || 'diger'}/${stock.ticker.toLowerCase()}` })}
               className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
             >
               <div className="flex items-center gap-3 min-w-0">

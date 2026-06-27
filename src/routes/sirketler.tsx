@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Loader2, Building2, Search, ArrowUpCircle, ArrowDownCircle } from 'lucide-react'
 import companyNames from '../constants/companyNames.json'
 import companyLogos from '../constants/companyLogos.json'
+import tickerToSectorSlug from '../constants/tickerToSectorSlug'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
 
 export const Route = createFileRoute('/sirketler')({
@@ -126,7 +127,7 @@ function SirketlerPage() {
                     {topGainers.map((row) => (
                       <tr 
                         key={row.ticker}
-                        onClick={() => navigate({ to: `/panel/sirketler/${row.ticker.toLowerCase()}` })}
+                        onClick={() => navigate({ to: `/sektorler/${tickerToSectorSlug[row.ticker] || 'diger'}/${row.ticker.toLowerCase()}` })}
                         className="group hover:bg-emerald-500/5 cursor-pointer transition-colors"
                       >
                         <td className="py-2.5 px-4 font-bold font-mono text-[11px] tracking-tight text-foreground">
@@ -182,7 +183,7 @@ function SirketlerPage() {
                     {topLosers.map((row) => (
                       <tr 
                         key={row.ticker}
-                        onClick={() => navigate({ to: `/panel/sirketler/${row.ticker.toLowerCase()}` })}
+                        onClick={() => navigate({ to: `/sektorler/${tickerToSectorSlug[row.ticker] || 'diger'}/${row.ticker.toLowerCase()}` })}
                         className="group hover:bg-destructive/5 cursor-pointer transition-colors"
                       >
                         <td className="py-2.5 px-4 font-bold font-mono text-[11px] tracking-tight text-foreground">
@@ -244,8 +245,8 @@ function SirketlerPage() {
                 return (
                   <Link
                     key={company.ticker}
-                    to="/panel/sirketler/$id"
-                    params={{ id: company.ticker.toLowerCase() }}
+                    to="/sektorler/$slug/$company"
+                    params={{ slug: tickerToSectorSlug[company.ticker] || 'diger', company: company.ticker.toLowerCase() }}
                     className="flex items-center justify-between p-4 hover:bg-muted/30 transition-colors group"
                   >
                     <div className="flex items-center gap-3 min-w-0">

@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { TrendingUp, TrendingDown, Info, AlertCircle, Sliders } from 'lucide-react'
+import tickerToSectorSlug from '../constants/tickerToSectorSlug'
 
 const TriangleUp = ({ size = 14, className = "" }: { size?: number; className?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -366,7 +367,7 @@ function EndeksDetailPage() {
               return (
                 <div
                   key={row.code}
-                  onClick={() => navigate({ to: `/sirketler/${row.code.toLowerCase()}` })}
+                  onClick={() => navigate({ to: `/sektorler/${tickerToSectorSlug[row.code] || 'diger'}/${row.code.toLowerCase()}` })}
                   className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
                 >
                   <div className="flex items-center gap-3 min-w-0">
@@ -404,7 +405,7 @@ function EndeksDetailPage() {
               return (
                 <div
                   key={row.code}
-                  onClick={() => navigate({ to: `/sirketler/${row.code.toLowerCase()}` })}
+                  onClick={() => navigate({ to: `/sektorler/${tickerToSectorSlug[row.code] || 'diger'}/${row.code.toLowerCase()}` })}
                   className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
                 >
                   <div className="flex items-center gap-3 min-w-0">
@@ -443,7 +444,7 @@ function EndeksDetailPage() {
               return (
                 <div
                   key={row.code}
-                  onClick={() => navigate({ to: `/panel/sirketler/${row.code.toLowerCase()}` })}
+                  onClick={() => navigate({ to: `/sektorler/${tickerToSectorSlug[row.code] || 'diger'}/${row.code.toLowerCase()}` })}
                   className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
                 >
                   <div className="flex items-center gap-3 min-w-0">
