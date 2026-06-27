@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowLeft, TrendingUp, TrendingDown, Activity, BarChart3, Target, AlertTriangle, CandlestickChart, HelpCircle, Compass, Shield } from 'lucide-react'
+import { ArrowLeft, TrendingUp, TrendingDown, Activity, BarChart3, Target, AlertTriangle, CandlestickChart, HelpCircle, Compass, Shield, TrendingDown as TrendDownIcon, Zap, Gauge, LineChart } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import companyNames from '../constants/companyNames.json'
 import companyLogos from '../constants/companyLogos.json'
@@ -47,9 +47,10 @@ type TaData = {
 
 type FundamentalData = {
   fk: string;
-  pddf: string;
-  halkaAciklik: string;
-  ozsermayeKari: string;
+  roe: string;
+  currentRatio: string;
+  debtToEquity: string;
+  sector: string;
 };
 
 const SLUG_TO_NAME: Record<string, string> = {
@@ -70,6 +71,41 @@ const SLUG_TO_NAME: Record<string, string> = {
   'enerji-uretim-dagitim-petrol': 'Enerji (Üretim + Dağıtım + Petrol)',
   'teknoloji-iletisim': 'Teknoloji & İletişim',
 };
+
+function ScoreGauge({ score, size = 64 }: { score: number; size?: number }) {
+  const r = (size - 8) / 2;
+  const circ = 2 * Math.PI * r;
+  const pct = Math.min(Math.max(score, 0), 100);
+  const offset = circ - (pct / 100) * circ;
+  const color = pct >= 70 ? '#22c55e' : pct >= 40 ? '#eab308' : '#ef4444';
+
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="-rotate-90">
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="currentColor" className="text-muted/20" strokeWidth={5} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={5} strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={offset} className="transition-all duration-1000" />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-base font-black text-foreground leading-none">{score}</span>
+        <span className="text-[8px] text-muted-foreground font-medium mt-0.5">/100</span>
+      </div>
+    </div>
+  );
+}
+
+function SignalBadge({ signal }: { signal: string }) {
+  const isPositive = signal.startsWith('✓');
+  const isNegative = signal.startsWith('✗');
+  return (
+    <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-lg ${
+      isPositive ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
+      : isNegative ? 'bg-destructive/10 text-destructive border border-destructive/20'
+      : 'bg-muted/30 text-muted-foreground border border-border/30'
+    }`}>
+      {signal}
+    </span>
+  );
+}
 
 function CompanyDetailPage() {
   const { slug, company } = Route.useParams()
@@ -105,6 +141,7 @@ function CompanyDetailPage() {
 
     async function fetchAll() {
       const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev";
+      const compUrl = import.meta.env.VITE_COMP_API_URL || "https://comp-ef958063.fastapicloud.dev";
       const officialName = (companyNames as Record<string, string>)[tickerUpper] || tickerUpper;
       let lastPrice = 0;
       let diffPercent = 0;
@@ -164,7 +201,7 @@ function CompanyDetailPage() {
                 score: json.score ?? 50,
                 confidence: json.confidence || 'Veri yok',
                 rsi: rsiData,
-                macd: json.macd || json.macd_status || 'Nötr',
+                macd: json.macd_status || json.macd || 'Nötr',
                 bollinger_status: json.bollinger_status || 'Orta Bantta',
                 sma: {
                   sma_20: json.sma?.sma_20 || lastPrice,
@@ -206,27 +243,27 @@ function CompanyDetailPage() {
         }
       } catch (e) { console.error('ta/summary fetch failed', e); }
 
-      // 4. Fundamental detail
-      let fk = '-';
-      let pddf = '-';
-      let halkaAciklik = '-';
-      let ozsermayeKari = '-';
-
+      // 4. Fundamental from comp API
       try {
-        const res = await fetch(`${apiUrl}/api/market/symbol/${tickerUpper}/detail`);
+        const res = await fetch(`${compUrl}/api/v1/companies/${tickerUpper}/profile`);
         if (res.ok) {
           const json = await res.json();
-          if (json.success && json.data) {
-            fk = json.data.fk || json.data.FK || fk;
-            pddf = json.data.pddf || json.data.PD_DD || pddf;
-            halkaAciklik = json.data.halka_aciklik_orani || json.data.halka_aciklik || halkaAciklik;
-            ozsermayeKari = json.data.ozsermaye_karliligi || json.data.ozsermayekari || ozsermayeKari;
+          const ratios = json.key_ratios || {};
+          if (isMounted) {
+            setFundamental({
+              fk: ratios.pe_ratio?.value != null ? ratios.pe_ratio.value.toFixed(2) : '-',
+              roe: ratios.roe?.value != null ? (ratios.roe.value * 100).toFixed(1) + '%' : '-',
+              currentRatio: ratios.current_ratio?.value != null ? ratios.current_ratio.value.toFixed(2) : '-',
+              debtToEquity: ratios.debt_to_equity?.value != null ? ratios.debt_to_equity.value.toFixed(2) : '-',
+              sector: json.sector_main || sectorName,
+            });
           }
         }
-      } catch (e) { console.error('detail fetch failed', e); }
+      } catch (e) { console.error('comp profile fetch failed', e); }
 
-      if (isMounted) {
-        setFundamental({ fk, pddf, halkaAciklik, ozsermayeKari });
+      // Fallback if comp API failed
+      if (isMounted && !fundamental) {
+        setFundamental({ fk: '-', roe: '-', currentRatio: '-', debtToEquity: '-', sector: sectorName });
       }
 
       if (isMounted) setLoading(false);
@@ -268,15 +305,9 @@ function CompanyDetailPage() {
         <div className="border border-border/40 bg-card/30 rounded-2xl p-4 md:p-5 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3.5 min-w-0">
             {logoFile ? (
-              <img
-                src={`/logos/${logoFile}`}
-                alt={tickerUpper}
-                className="h-11 w-11 rounded-xl object-cover bg-white p-0 border border-border/30 shadow-3xs shrink-0"
-              />
+              <img src={`/logos/${logoFile}`} alt={tickerUpper} className="h-11 w-11 rounded-xl object-cover bg-white p-0 border border-border/30 shadow-3xs shrink-0" />
             ) : (
-              <div className="h-11 w-11 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center text-primary font-bold text-sm shrink-0">
-                {tickerUpper.slice(0, 2)}
-              </div>
+              <div className="h-11 w-11 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center text-primary font-bold text-sm shrink-0">{tickerUpper.slice(0, 2)}</div>
             )}
             <div className="min-w-0">
               <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider block">{tickerUpper}</span>
@@ -286,13 +317,9 @@ function CompanyDetailPage() {
           <div className="flex items-center gap-4 shrink-0">
             <div className="text-right">
               <span className="text-xl md:text-2xl font-bold text-foreground tracking-tight block leading-none">
-                {companyStats.price > 0
-                  ? companyStats.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                  : '-'}
+                {companyStats.price > 0 ? companyStats.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}
               </span>
-              <span className={`text-xs md:text-sm font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-0.5 mt-1.5 ${
-                isUp ? 'bg-emerald-500/10 text-emerald-500' : 'bg-destructive/10 text-destructive'
-              }`}>
+              <span className={`text-xs md:text-sm font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-0.5 mt-1.5 ${isUp ? 'bg-emerald-500/10 text-emerald-500' : 'bg-destructive/10 text-destructive'}`}>
                 {isUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                 {isUp ? '+' : ''}{companyStats.diffPercent.toFixed(2)}%
               </span>
@@ -303,93 +330,71 @@ function CompanyDetailPage() {
         {/* Chart */}
         <TradingViewChart symbol={tickerUpper} lastPrice={companyStats.price} />
 
-        {/* Teknik Analiz */}
+        {/* TEKNİK ANALİZ */}
         {taAvailable && taData && (
-          <div className="border border-border/45 bg-card/20 rounded-2xl p-5 md:p-6 space-y-5">
-            <div className="flex items-center gap-2 pb-3 border-b border-border/30">
-              <div className="w-6 h-6 rounded-md bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-                <Activity size={12} />
+          <div className="border border-border/45 bg-card/20 rounded-2xl p-5 md:p-6 space-y-6">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-border/30">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                  <Activity size={14} />
+                </div>
+                <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Teknik Analiz</h3>
               </div>
-              <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Teknik Analiz</h3>
-              <span className={`ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                taData.score >= 70 ? 'bg-emerald-500/10 text-emerald-500' : taData.score >= 40 ? 'bg-yellow-500/10 text-yellow-500' : 'bg-destructive/10 text-destructive'
-              }`}>
-                Skor: {taData.score}/100
-              </span>
+              <ScoreGauge score={taData.score} />
             </div>
 
-            {/* Trend & Regime Row */}
+            {/* Trend Row */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div className="p-3 border border-border/40 rounded-xl bg-muted/10">
-                <span className="text-[10px] text-muted-foreground font-medium uppercase block">Günlük Trend</span>
-                <span className={`text-sm font-bold mt-1 block ${taData.trend.toLowerCase().includes('bull') || taData.trend.toLowerCase().includes('yükseliş') ? 'text-emerald-500' : taData.trend.toLowerCase().includes('bear') || taData.trend.toLowerCase().includes('düşüş') ? 'text-destructive' : 'text-foreground'}`}>{taData.trend}</span>
-              </div>
-              <div className="p-3 border border-border/40 rounded-xl bg-muted/10">
-                <span className="text-[10px] text-muted-foreground font-medium uppercase block">Haftalık Trend</span>
-                <span className={`text-sm font-bold mt-1 block ${taData.weekly_trend.toLowerCase().includes('bull') || taData.weekly_trend.toLowerCase().includes('yükseliş') ? 'text-emerald-500' : taData.weekly_trend.toLowerCase().includes('bear') || taData.weekly_trend.toLowerCase().includes('düşüş') ? 'text-destructive' : 'text-foreground'}`}>{taData.weekly_trend}</span>
-              </div>
-              <div className="p-3 border border-border/40 rounded-xl bg-muted/10">
-                <span className="text-[10px] text-muted-foreground font-medium uppercase block">Piyasa Rejimi</span>
-                <span className="text-sm font-bold text-foreground mt-1 block">{taData.market_regime.regime}</span>
-              </div>
-              <div className="p-3 border border-border/40 rounded-xl bg-muted/10">
-                <span className="text-[10px] text-muted-foreground font-medium uppercase block">Güven</span>
-                <span className="text-sm font-bold text-foreground mt-1 block">{taData.confidence}</span>
-              </div>
+              {[
+                { label: 'Günlük Trend', value: taData.trend, icon: <TrendingUp size={13} />, bull: taData.trend.toLowerCase().includes('bull') || taData.trend.toLowerCase().includes('yükseliş') },
+                { label: 'Haftalık Trend', value: taData.weekly_trend, icon: <LineChart size={13} />, bull: taData.weekly_trend.toLowerCase().includes('bull') || taData.weekly_trend.toLowerCase().includes('yükseliş') },
+                { label: 'Piyasa Rejimi', value: taData.market_regime.regime, icon: <Gauge size={13} />, bull: null },
+                { label: 'Güven Seviyesi', value: taData.confidence, icon: <Shield size={13} />, bull: null },
+              ].map((item) => (
+                <div key={item.label} className="p-3.5 border border-border/40 rounded-xl bg-muted/10">
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <span className="text-muted-foreground">{item.icon}</span>
+                    <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">{item.label}</span>
+                  </div>
+                  <span className={`text-sm font-bold ${item.bull === true ? 'text-emerald-500' : item.bull === false ? 'text-destructive' : 'text-foreground'}`}>{item.value}</span>
+                </div>
+              ))}
             </div>
 
-            {/* Indicators Grid */}
+            {/* Main Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-              {/* Left: Indicator Table */}
-              <div className="overflow-hidden border border-border/40 rounded-xl bg-muted/10 divide-y divide-border/30">
-                <div className="flex justify-between items-center p-3 text-xs">
-                  <span className="text-muted-foreground font-medium flex items-center gap-1.5"><BarChart3 size={12} /> RSI (14)</span>
-                  <span className="font-semibold text-foreground">{taData.rsi.value.toFixed(1)} — {taData.rsi.status}</span>
-                </div>
-                <div className="flex justify-between items-center p-3 text-xs">
-                  <span className="text-muted-foreground font-medium flex items-center gap-1.5"><Activity size={12} /> MACD</span>
-                  <span className="font-semibold text-foreground">{taData.macd}</span>
-                </div>
-                <div className="flex justify-between items-center p-3 text-xs">
-                  <span className="text-muted-foreground font-medium">Bollinger</span>
-                  <span className="font-semibold text-foreground">{taData.bollinger_status}</span>
-                </div>
-                <div className="flex justify-between items-center p-3 text-xs">
-                  <span className="text-muted-foreground font-medium">SMA 20 / 50 / 200</span>
-                  <span className="font-semibold text-foreground font-mono text-[11px]">
-                    {taData.sma.sma_20.toFixed(2)} / {taData.sma.sma_50.toFixed(2)} / {taData.sma.sma_200.toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center p-3 text-xs">
-                  <span className="text-muted-foreground font-medium flex items-center gap-1.5"><Target size={12} /> Destek / Direnç</span>
-                  <span className="font-semibold text-foreground font-mono text-[11px]">
-                    {taData.support_resistance.support.toFixed(2)} / {taData.support_resistance.resistance.toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center p-3 text-xs">
-                  <span className="text-muted-foreground font-medium flex items-center gap-1.5"><Shield size={12} /> Stop-Loss (ATR)</span>
-                  <span className="font-semibold text-primary font-mono text-[11px]">{taData.atr_stop_loss.toFixed(2)} ₺</span>
-                </div>
-                <div className="flex justify-between items-center p-3 text-xs">
-                  <span className="text-muted-foreground font-medium">Risk/Ödül</span>
-                  <span className="font-semibold text-foreground">{taData.rr_ratio.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between items-center p-3 text-xs">
-                  <span className="text-muted-foreground font-medium">Beta</span>
-                  <span className="font-semibold text-foreground">{taData.beta.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between items-center p-3 text-xs">
-                  <span className="text-muted-foreground font-medium">ADX</span>
-                  <span className="font-semibold text-foreground">{taData.market_regime.adx.toFixed(1)}</span>
-                </div>
-                <div className="flex justify-between items-center p-3 text-xs">
-                  <span className="text-muted-foreground font-medium">Genişlik</span>
-                  <span className="font-semibold text-foreground">{taData.market_breadth.breadth.toFixed(1)}% — {taData.market_breadth.status}</span>
-                </div>
+
+              {/* Left: Indicators */}
+              <div className="border border-border/40 rounded-xl bg-muted/10 overflow-hidden divide-y divide-border/20">
+                {[
+                  { label: 'RSI (14)', value: `${taData.rsi.value.toFixed(1)} — ${taData.rsi.status}`, icon: <BarChart3 size={12} /> },
+                  { label: 'MACD', value: taData.macd, icon: <Activity size={12} /> },
+                  { label: 'Bollinger', value: taData.bollinger_status, icon: <Target size={12} /> },
+                  { label: 'SMA 20', value: `₺${taData.sma.sma_20.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`, icon: null },
+                  { label: 'SMA 50', value: `₺${taData.sma.sma_50.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`, icon: null },
+                  { label: 'SMA 200', value: `₺${taData.sma.sma_200.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`, icon: null },
+                  { label: 'Destek', value: `₺${taData.support_resistance.support.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`, icon: <Shield size={12} /> },
+                  { label: 'Direnç', value: `₺${taData.support_resistance.resistance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`, icon: <AlertTriangle size={12} /> },
+                  { label: 'Stop-Loss (ATR)', value: `₺${taData.atr_stop_loss.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`, icon: <Shield size={12} /> },
+                  { label: 'Risk/Ödül', value: taData.rr_ratio.toFixed(2), icon: null },
+                  { label: 'Beta', value: taData.beta.toFixed(2), icon: null },
+                  { label: 'ADX', value: taData.market_regime.adx.toFixed(1), icon: null },
+                  { label: 'Piyasa Genişliği', value: `${taData.market_breadth.breadth.toFixed(1)}% — ${taData.market_breadth.status}`, icon: null },
+                ].map((row) => (
+                  <div key={row.label} className="flex justify-between items-center px-4 py-3">
+                    <span className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
+                      {row.icon}
+                      {row.label}
+                    </span>
+                    <span className="text-sm font-bold text-foreground font-mono">{row.value}</span>
+                  </div>
+                ))}
               </div>
 
-              {/* Right: Signals + Patterns */}
+              {/* Right: Score + Signals + Patterns */}
               <div className="space-y-4">
+
                 {/* Score Components */}
                 <div className="border border-border/40 rounded-xl bg-muted/10 p-4 space-y-3">
                   <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block">Skor Bileşenleri</span>
@@ -399,11 +404,11 @@ function CompanyDetailPage() {
                     { label: 'Hacim', value: taData.score_components.volume, max: 20, color: 'bg-primary' },
                   ].map((bar) => (
                     <div key={bar.label}>
-                      <div className="flex justify-between text-[10px] mb-1">
-                        <span className="text-muted-foreground font-medium">{bar.label}</span>
-                        <span className="text-foreground font-semibold">{bar.value}/{bar.max}</span>
+                      <div className="flex justify-between text-[11px] mb-1.5">
+                        <span className="text-muted-foreground font-semibold">{bar.label}</span>
+                        <span className="text-foreground font-bold">{bar.value}/{bar.max}</span>
                       </div>
-                      <div className="h-1.5 bg-muted/30 rounded-full overflow-hidden">
+                      <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
                         <div className={`h-full ${bar.color} rounded-full transition-all`} style={{ width: `${Math.min((bar.value / bar.max) * 100, 100)}%` }} />
                       </div>
                     </div>
@@ -412,7 +417,7 @@ function CompanyDetailPage() {
 
                 {/* Divergences */}
                 <div className="border border-border/40 rounded-xl bg-muted/10 p-4">
-                  <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-2">Uyumsuzluklar</span>
+                  <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-2.5">Uyumsuzluklar</span>
                   <div className="grid grid-cols-2 gap-2">
                     {[
                       { label: 'RSI Yükseliş', active: taData.divergences.rsi.bullish, color: 'text-emerald-500' },
@@ -421,8 +426,8 @@ function CompanyDetailPage() {
                       { label: 'MACD Düşüş', active: taData.divergences.macd.bearish, color: 'text-destructive' },
                     ].map((d) => (
                       <div key={d.label} className="flex items-center gap-2 text-xs">
-                        <div className={`w-2 h-2 rounded-full ${d.active ? d.color : 'bg-muted/40'}`} />
-                        <span className={`${d.active ? d.color : 'text-muted-foreground'} font-medium`}>{d.label}</span>
+                        <div className={`w-2.5 h-2.5 rounded-full ${d.active ? d.color : 'bg-muted/40'}`} />
+                        <span className={`${d.active ? d.color : 'text-muted-foreground'} font-semibold`}>{d.label}</span>
                       </div>
                     ))}
                   </div>
@@ -434,19 +439,7 @@ function CompanyDetailPage() {
                     <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-2 flex items-center gap-1.5"><CandlestickChart size={11} /> Mum Formasyonları</span>
                     <div className="flex flex-wrap gap-1.5">
                       {taData.candlestick_patterns.map((p, i) => (
-                        <span key={i} className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary">{p}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Signals */}
-                {taData.signals.length > 0 && (
-                  <div className="border border-border/40 rounded-xl bg-muted/10 p-4">
-                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-2 flex items-center gap-1.5"><AlertTriangle size={11} /> Sinyaller</span>
-                    <div className="flex flex-col gap-1">
-                      {taData.signals.map((s, i) => (
-                        <span key={i} className="text-xs text-foreground/80 font-medium">• {s}</span>
+                        <span key={i} className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-primary/10 text-primary border border-primary/20">{p}</span>
                       ))}
                     </div>
                   </div>
@@ -455,15 +448,27 @@ function CompanyDetailPage() {
                 {/* Strategy */}
                 {taData.market_regime.recommended_strategy && (
                   <div className="border border-primary/20 rounded-xl bg-primary/5 p-4">
-                    <span className="text-[10px] text-primary font-bold uppercase tracking-wider block mb-1">Önerilen Strateji</span>
+                    <span className="text-[10px] text-primary font-bold uppercase tracking-wider block mb-1.5 flex items-center gap-1.5"><Zap size={11} /> Önerilen Strateji</span>
                     <p className="text-xs text-foreground/80 font-medium leading-relaxed">{taData.market_regime.recommended_strategy}</p>
                   </div>
                 )}
               </div>
             </div>
 
+            {/* Signals */}
+            {taData.signals.length > 0 && (
+              <div>
+                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-2.5">Aktif Sinyaller</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {taData.signals.map((s, i) => (
+                    <SignalBadge key={i} signal={s} />
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* TA Questions */}
-            <div className="space-y-2">
+            <div className="space-y-2.5 pt-2 border-t border-border/30">
               <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
                 <HelpCircle size={11} />
                 <span>Önerilen Teknik Analiz Soruları</span>
@@ -473,9 +478,7 @@ function CompanyDetailPage() {
                   <button
                     key={idx}
                     onClick={async () => {
-                      if (window.innerWidth < 1024) {
-                        window.dispatchEvent(new CustomEvent('open-mobile-chat'));
-                      }
+                      if (window.innerWidth < 1024) window.dispatchEvent(new CustomEvent('open-mobile-chat'));
                       await sendMessage(q, chatContext);
                     }}
                     className="text-left text-xs text-muted-foreground hover:text-foreground bg-muted/20 hover:bg-muted/50 border border-border/30 hover:border-border/60 rounded-xl p-3 transition-colors cursor-pointer leading-normal active:scale-[0.99] font-medium"
@@ -488,37 +491,33 @@ function CompanyDetailPage() {
           </div>
         )}
 
-        {/* Temel Analiz */}
+        {/* TEMEL ANALİZ */}
         {fundamental && (
           <div className="border border-border/45 bg-card/20 rounded-2xl p-5 md:p-6 space-y-5">
-            <div className="flex items-center gap-2 pb-3 border-b border-border/30">
-              <div className="w-6 h-6 rounded-md bg-blue-500/10 text-blue-500 flex items-center justify-center">
-                <Compass size={12} />
+            <div className="flex items-center gap-2.5 pb-4 border-b border-border/30">
+              <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                <Compass size={14} />
               </div>
-              <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Temel Analiz Rasyoları</h3>
+              <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Temel Analiz Rasyoları</h3>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div className="p-4 border border-border/40 rounded-xl bg-muted/10 flex flex-col">
-                <span className="text-[10px] text-muted-foreground font-medium uppercase">Fiyat / Kazanç (F/K)</span>
-                <span className="text-lg md:text-xl font-bold text-foreground mt-1.5">{fundamental.fk}</span>
-              </div>
-              <div className="p-4 border border-border/40 rounded-xl bg-muted/10 flex flex-col">
-                <span className="text-[10px] text-muted-foreground font-medium uppercase">Piyasa Değeri / Defter (PD/DD)</span>
-                <span className="text-lg md:text-xl font-bold text-foreground mt-1.5">{fundamental.pddf}</span>
-              </div>
-              <div className="p-4 border border-border/40 rounded-xl bg-muted/10 flex flex-col">
-                <span className="text-[10px] text-muted-foreground font-medium uppercase">Halka Açıklık Oranı</span>
-                <span className="text-lg md:text-xl font-bold text-foreground mt-1.5">{fundamental.halkaAciklik}</span>
-              </div>
-              <div className="p-4 border border-border/40 rounded-xl bg-muted/10 flex flex-col">
-                <span className="text-[10px] text-muted-foreground font-medium uppercase">Özsermaye Karlılığı (ROE)</span>
-                <span className="text-lg md:text-xl font-bold text-foreground mt-1.5">{fundamental.ozsermayeKari}</span>
-              </div>
+              {[
+                { label: 'Fiyat / Kazanç (F/K)', value: fundamental.fk, desc: 'P/E Ratio' },
+                { label: 'Özsermaye Karlılığı', value: fundamental.roe, desc: 'ROE' },
+                { label: 'Cari Oran', value: fundamental.currentRatio, desc: 'Current Ratio' },
+                { label: 'Borç / Özsermaye', value: fundamental.debtToEquity, desc: 'D/E Ratio' },
+              ].map((item) => (
+                <div key={item.label} className="p-4 border border-border/40 rounded-xl bg-muted/10 flex flex-col">
+                  <span className="text-[10px] text-muted-foreground font-semibold uppercase">{item.label}</span>
+                  <span className="text-[10px] text-muted-foreground/60 font-medium mt-0.5">{item.desc}</span>
+                  <span className="text-lg md:text-xl font-black text-foreground mt-2">{item.value}</span>
+                </div>
+              ))}
             </div>
 
             {/* Fundamental Questions */}
-            <div className="space-y-2">
+            <div className="space-y-2.5 pt-2 border-t border-border/30">
               <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
                 <HelpCircle size={11} />
                 <span>Önerilen Temel Analiz Soruları</span>
@@ -528,9 +527,7 @@ function CompanyDetailPage() {
                   <button
                     key={idx}
                     onClick={async () => {
-                      if (window.innerWidth < 1024) {
-                        window.dispatchEvent(new CustomEvent('open-mobile-chat'));
-                      }
+                      if (window.innerWidth < 1024) window.dispatchEvent(new CustomEvent('open-mobile-chat'));
                       await sendMessage(q, chatContext);
                     }}
                     className="text-left text-xs text-muted-foreground hover:text-foreground bg-muted/20 hover:bg-muted/50 border border-border/30 hover:border-border/60 rounded-xl p-3 transition-colors cursor-pointer leading-normal active:scale-[0.99] font-medium"

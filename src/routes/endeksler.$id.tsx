@@ -14,15 +14,9 @@ const TriangleDown = ({ size = 14, className = "" }: { size?: number; className?
   </svg>
 )
 
-const SquareIcon = ({ size = 14, className = "" }: { size?: number; className?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
-    <rect x="3" y="3" width="18" height="18" rx="2" />
-  </svg>
-)
 import { useState, useEffect, useMemo } from 'react'
 import { TradingViewChart } from '../components/dashboard/TradingViewChart'
 import { Skeleton } from '../components/ui/skeleton'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs'
 import companyLogos from '../constants/companyLogos.json'
 
 export const Route = createFileRoute('/endeksler/$id')({
@@ -101,17 +95,6 @@ const indexMetadataFallbacks: Record<string, IndexMeta> = {
   }
 };
 
-function parseVolume(vol: unknown): number {
-  if (typeof vol === 'number') return vol;
-  if (typeof vol !== 'string') return 0;
-  const cleaned = vol.replace(/[^\d.]/g, '');
-  const num = parseFloat(cleaned);
-  if (isNaN(num)) return 0;
-  if (vol.includes('B')) return num * 1_000_000_000;
-  if (vol.includes('M')) return num * 1_000_000;
-  if (vol.includes('K')) return num * 1_000;
-  return num;
-}
 
 type TaData = {
   trend: string;
@@ -288,11 +271,6 @@ function EndeksDetailPage() {
     return [...priceDetails.components].sort((a, b) => a.diff - b.diff).slice(0, 5);
   }, [priceDetails]);
 
-  const topVolume = useMemo(() => {
-    if (!priceDetails) return [];
-    return [...priceDetails.components].sort((a, b) => parseVolume(b.volume) - parseVolume(a.volume)).slice(0, 5);
-  }, [priceDetails]);
-
   if (loading || !priceDetails) {
     return (
       <div className="space-y-5 pb-8">
@@ -342,139 +320,6 @@ function EndeksDetailPage() {
 
       {/* Chart */}
       <TradingViewChart symbol={priceDetails.code} lastPrice={priceDetails.price} />
-
-      {/* Yükselenler / Düşenler / Hacim Tabs */}
-      <Tabs defaultValue="gainers">
-        <TabsList className="mb-1">
-          <TabsTrigger value="gainers" className="gap-1.5">
-            <TriangleUp size={12} className="text-emerald-500" />
-            <span>Yükselenler</span>
-          </TabsTrigger>
-          <TabsTrigger value="losers" className="gap-1.5">
-            <TriangleDown size={12} className="text-destructive" />
-            <span>Düşenler</span>
-          </TabsTrigger>
-          <TabsTrigger value="volume" className="gap-1.5">
-            <SquareIcon size={12} className="text-primary" />
-            <span>Hacim</span>
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="gainers">
-          <div className="divide-y divide-white/5">
-            {topGainers.map((row) => {
-              const logoFile = companyLogos[row.code as keyof typeof companyLogos];
-              return (
-                <div
-                  key={row.code}
-                  onClick={() => navigate({ to: `/sektorler/${tickerToSectorSlug[row.code] || 'diger'}/${row.code.toLowerCase()}` })}
-                  className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    {logoFile ? (
-                      <div className="h-8 w-8 rounded-lg bg-white overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
-                        <img src={`/logos/${logoFile}`} alt={row.code} className="h-full w-full object-cover p-0.5" />
-                      </div>
-                    ) : (
-                      <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-bold text-[10px] shrink-0 border border-emerald-500/10">
-                        {row.code.slice(0, 2)}
-                      </div>
-                    )}
-                    <div className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
-                      {row.code}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4 shrink-0">
-                    <span className="text-base font-bold font-mono text-emerald-500">
-                      +{row.diff.toFixed(2).replace('.', ',')}%
-                    </span>
-                    <span className="text-base font-semibold font-mono text-foreground">
-                      ₺{row.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="losers">
-          <div className="divide-y divide-white/5">
-            {topLosers.map((row) => {
-              const logoFile = companyLogos[row.code as keyof typeof companyLogos];
-              return (
-                <div
-                  key={row.code}
-                  onClick={() => navigate({ to: `/sektorler/${tickerToSectorSlug[row.code] || 'diger'}/${row.code.toLowerCase()}` })}
-                  className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    {logoFile ? (
-                      <div className="h-8 w-8 rounded-lg bg-white overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
-                        <img src={`/logos/${logoFile}`} alt={row.code} className="h-full w-full object-cover p-0.5" />
-                      </div>
-                    ) : (
-                      <div className="h-8 w-8 rounded-lg bg-destructive/10 flex items-center justify-center text-destructive font-bold text-[10px] shrink-0 border border-destructive/10">
-                        {row.code.slice(0, 2)}
-                      </div>
-                    )}
-                    <div className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
-                      {row.code}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4 shrink-0">
-                    <span className="text-base font-bold font-mono text-destructive">
-                      {row.diff.toFixed(2).replace('.', ',')}%
-                    </span>
-                    <span className="text-base font-semibold font-mono text-foreground">
-                      ₺{row.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="volume">
-          <div className="divide-y divide-white/5">
-            {topVolume.map((row) => {
-              const logoFile = companyLogos[row.code as keyof typeof companyLogos];
-              const volNum = parseVolume(row.volume);
-              return (
-                <div
-                  key={row.code}
-                  onClick={() => navigate({ to: `/sektorler/${tickerToSectorSlug[row.code] || 'diger'}/${row.code.toLowerCase()}` })}
-                  className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    {logoFile ? (
-                      <div className="h-8 w-8 rounded-lg bg-white overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
-                        <img src={`/logos/${logoFile}`} alt={row.code} className="h-full w-full object-cover p-0.5" />
-                      </div>
-                    ) : (
-                      <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] shrink-0 border border-primary/10">
-                        {row.code.slice(0, 2)}
-                      </div>
-                    )}
-                    <div className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
-                      {row.code}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4 shrink-0">
-                    <span className="text-base font-bold font-mono text-primary">
-                      {volNum >= 1_000_000 ? `${(volNum / 1_000_000).toFixed(1)}M` : volNum >= 1_000 ? `${(volNum / 1_000).toFixed(1)}K` : volNum.toLocaleString('tr-TR')}
-                    </span>
-                    <span className="text-base font-semibold font-mono text-foreground">
-                      ₺{row.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </TabsContent>
-      </Tabs>
 
       {/* Teknik Sinyaller - Rich TA Data */}
       {taAvailable && taData && (
@@ -736,6 +581,84 @@ function EndeksDetailPage() {
           )}
         </div>
       )}
+
+      {/* Yükselenler / Düşenler */}
+      <div className="border border-border/40 bg-card/20 rounded-2xl p-4 md:p-5 space-y-3">
+        <div className="flex items-center gap-2 pb-2.5 border-b border-border/25">
+          <div className="w-6 h-6 rounded-lg bg-muted/30 flex items-center justify-center">
+            <TriangleUp size={12} className="text-emerald-500" />
+          </div>
+          <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Hisse Performansı</h3>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <div className="flex items-center gap-1.5 mb-2">
+              <div className="w-1.5 h-3 rounded-full bg-emerald-500" />
+              <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Yükselenler</span>
+            </div>
+            <div className="divide-y divide-white/5 border border-border/30 rounded-xl overflow-hidden">
+              {topGainers.map((row) => {
+                const logoFile = companyLogos[row.code as keyof typeof companyLogos];
+                return (
+                  <div
+                    key={row.code}
+                    onClick={() => navigate({ to: `/sektorler/${tickerToSectorSlug[row.code] || 'diger'}/${row.code.toLowerCase()}` })}
+                    className="flex items-center justify-between py-2.5 px-3 hover:bg-muted/30 transition-colors cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      {logoFile ? (
+                        <div className="h-7 w-7 rounded-lg bg-white overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
+                          <img src={`/logos/${logoFile}`} alt={row.code} className="h-full w-full object-cover p-0.5" />
+                        </div>
+                      ) : (
+                        <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-bold text-[9px] shrink-0">{row.code.slice(0, 2)}</div>
+                      )}
+                      <span className="text-xs font-bold text-foreground truncate group-hover:text-primary transition-colors">{row.code}</span>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="text-xs font-bold font-mono text-emerald-500">+{row.diff.toFixed(2).replace('.', ',')}%</span>
+                      <span className="text-xs font-semibold font-mono text-foreground">₺{row.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5 mb-2">
+              <div className="w-1.5 h-3 rounded-full bg-destructive" />
+              <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Düşenler</span>
+            </div>
+            <div className="divide-y divide-white/5 border border-border/30 rounded-xl overflow-hidden">
+              {topLosers.map((row) => {
+                const logoFile = companyLogos[row.code as keyof typeof companyLogos];
+                return (
+                  <div
+                    key={row.code}
+                    onClick={() => navigate({ to: `/sektorler/${tickerToSectorSlug[row.code] || 'diger'}/${row.code.toLowerCase()}` })}
+                    className="flex items-center justify-between py-2.5 px-3 hover:bg-muted/30 transition-colors cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      {logoFile ? (
+                        <div className="h-7 w-7 rounded-lg bg-white overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
+                          <img src={`/logos/${logoFile}`} alt={row.code} className="h-full w-full object-cover p-0.5" />
+                        </div>
+                      ) : (
+                        <div className="h-7 w-7 rounded-lg bg-destructive/10 flex items-center justify-center text-destructive font-bold text-[9px] shrink-0">{row.code.slice(0, 2)}</div>
+                      )}
+                      <span className="text-xs font-bold text-foreground truncate group-hover:text-primary transition-colors">{row.code}</span>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="text-xs font-bold font-mono text-destructive">{row.diff.toFixed(2).replace('.', ',')}%</span>
+                      <span className="text-xs font-semibold font-mono text-foreground">₺{row.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
 
     </div>
   )
