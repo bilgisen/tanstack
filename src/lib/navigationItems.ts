@@ -1,7 +1,6 @@
 import type { ElementType } from "react";
 import { 
-  ChartNoAxesCombined, 
-  Factory 
+  ChartNoAxesCombined
 } from "lucide-react";
 
 export interface MenuItem {
@@ -18,13 +17,6 @@ export const navigationItems: MenuItem[] = [
     label: "Endeksler",
     icon: ChartNoAxesCombined,
     path: "/endeksler",
-    showAsIconOnMobile: true,
-  },
-  {
-    id: "sektorler",
-    label: "Sektörler",
-    icon: Factory,
-    path: "/sektorler",
     showAsIconOnMobile: true,
   },
 ];

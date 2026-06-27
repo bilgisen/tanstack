@@ -9,7 +9,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const isLanding = location.pathname === "/";
   const isPanel = location.pathname.startsWith("/panel");
   const isProfile = location.pathname.startsWith("/profil");
-  const isPublicChat = location.pathname.startsWith("/sektorler") || location.pathname.startsWith("/sirketler") || location.pathname.startsWith("/endeksler");
+  const isPublicChat = location.pathname.startsWith("/sektorler") || location.pathname.startsWith("/endeksler");
 
   return (
     <div className="h-screen w-full flex flex-col bg-background text-foreground overflow-hidden font-sans transition-colors">

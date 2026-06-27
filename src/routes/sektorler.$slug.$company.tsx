@@ -5,6 +5,7 @@ import companyNames from '../constants/companyNames.json'
 import companyLogos from '../constants/companyLogos.json'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
 import { Skeleton } from '../components/ui/skeleton'
+import { TradingViewChart } from '../components/dashboard/TradingViewChart'
 import { useChatStore } from '../store/chat'
 
 export const Route = createFileRoute('/sektorler/$slug/$company')({
@@ -139,6 +140,7 @@ function CompanyDetailPage() {
         <div className="space-y-5 pb-8">
           <Skeleton className="h-5 w-32 rounded-lg" />
           <Skeleton className="h-24 w-full rounded-2xl" />
+          <Skeleton className="h-[360px] w-full rounded-2xl" />
         </div>
       </PublicPageLayout>
     )
@@ -164,7 +166,7 @@ function CompanyDetailPage() {
               <img
                 src={`/logos/${logoFile}`}
                 alt={tickerUpper}
-                className="h-11 w-11 rounded-xl object-contain bg-white p-1.5 border border-border/30 shadow-3xs shrink-0"
+                className="h-11 w-11 rounded-xl object-cover bg-white p-0 border border-border/30 shadow-3xs shrink-0"
               />
             ) : (
               <div className="h-11 w-11 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center text-primary font-bold text-sm shrink-0">
@@ -193,6 +195,9 @@ function CompanyDetailPage() {
             </div>
           </div>
         </div>
+
+        {/* Chart */}
+        <TradingViewChart symbol={tickerUpper} lastPrice={companyStats.price} />
 
       </div>
     </PublicPageLayout>
