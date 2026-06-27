@@ -7,17 +7,18 @@ import { PublicPageLayout } from '../components/layout/PublicPageLayout'
 import { useChatStore } from '../store/chat'
 
 export const Route = createFileRoute('/sektorler/$slug')({
-  component: () => {
-    const { slug } = Route.useParams()
-    const matches = useMatches()
-    const hasCompanyDetail = matches.some(m => m.routeId === '/sektorler/$slug/$company')
-    
-    if (hasCompanyDetail) {
-      return <Outlet />
-    }
-    return <SektorDetailPage />
-  },
+  component: SektorSlugLayout,
 })
+
+function SektorSlugLayout() {
+  const matches = useMatches()
+  const hasCompanyDetail = matches.some(m => m.routeId === '/sektorler/$slug/$company')
+
+  if (hasCompanyDetail) {
+    return <Outlet />
+  }
+  return <SektorDetailPage />
+}
 
 const SLUG_TO_NAME: Record<string, string> = {
   'saglik-ilac': 'Sağlık & İlaç',
