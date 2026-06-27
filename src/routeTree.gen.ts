@@ -17,7 +17,7 @@ import { Route as NedenJetborsaRouteImport } from './routes/neden-jetborsa'
 import { Route as NasilCalisirRouteImport } from './routes/nasil-calisir'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as KurumsalRouteImport } from './routes/kurumsal'
-import { Route as Endeksler_indexRouteImport } from './routes/endeksler_index'
+import { Route as EndekslerIndexRouteImport } from './routes/endeksler.index'
 import { Route as EndekslerRouteImport } from './routes/endeksler'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfilIndexRouteImport } from './routes/profil.index'
@@ -76,10 +76,10 @@ const KurumsalRoute = KurumsalRouteImport.update({
   path: '/kurumsal',
   getParentRoute: () => rootRouteImport,
 } as any)
-const Endeksler_indexRoute = Endeksler_indexRouteImport.update({
-  id: '/endeksler_index',
-  path: '/endeksler_index',
-  getParentRoute: () => rootRouteImport,
+const EndekslerIndexRoute = EndekslerIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => EndekslerRoute,
 } as any)
 const EndekslerRoute = EndekslerRouteImport.update({
   id: '/endeksler',
@@ -170,7 +170,7 @@ const ApiAiChargeRoute = ApiAiChargeRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/endeksler': typeof EndekslerRouteWithChildren
-  '/endeksler_index': typeof Endeksler_indexRoute
+  '/endeksler/': typeof EndekslerIndexRoute
   '/kurumsal': typeof KurumsalRoute
   '/login': typeof LoginRoute
   '/nasil-calisir': typeof NasilCalisirRoute
@@ -198,7 +198,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/endeksler': typeof EndekslerRouteWithChildren
-  '/endeksler_index': typeof Endeksler_indexRoute
+  '/endeksler/': typeof EndekslerIndexRoute
   '/kurumsal': typeof KurumsalRoute
   '/login': typeof LoginRoute
   '/nasil-calisir': typeof NasilCalisirRoute
@@ -225,7 +225,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/endeksler': typeof EndekslerRouteWithChildren
-  '/endeksler_index': typeof Endeksler_indexRoute
+  '/endeksler/': typeof EndekslerIndexRoute
   '/kurumsal': typeof KurumsalRoute
   '/login': typeof LoginRoute
   '/nasil-calisir': typeof NasilCalisirRoute
@@ -255,7 +255,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/endeksler'
-    | '/endeksler_index'
+    | '/endeksler/'
     | '/kurumsal'
     | '/login'
     | '/nasil-calisir'
@@ -283,7 +283,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/endeksler'
-    | '/endeksler_index'
+    | '/endeksler/'
     | '/kurumsal'
     | '/login'
     | '/nasil-calisir'
@@ -309,7 +309,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/endeksler'
-    | '/endeksler_index'
+    | '/endeksler/'
     | '/kurumsal'
     | '/login'
     | '/nasil-calisir'
@@ -338,7 +338,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   EndekslerRoute: typeof EndekslerRouteWithChildren
-  Endeksler_indexRoute: typeof Endeksler_indexRoute
+  EndekslerIndexRoute: typeof EndekslerIndexRoute
   KurumsalRoute: typeof KurumsalRoute
   LoginRoute: typeof LoginRoute
   NasilCalisirRoute: typeof NasilCalisirRoute
@@ -414,12 +414,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KurumsalRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/endeksler_index': {
-      id: '/endeksler_index'
-      path: '/endeksler_index'
-      fullPath: '/endeksler_index'
-      preLoaderRoute: typeof Endeksler_indexRouteImport
-      parentRoute: typeof rootRouteImport
+    '/endeksler/': {
+      id: '/endeksler/'
+      path: '/'
+      fullPath: '/endeksler/'
+      preLoaderRoute: typeof EndekslerIndexRouteImport
+      parentRoute: typeof EndekslerRoute
     }
     '/endeksler': {
       id: '/endeksler'
@@ -544,10 +544,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface EndekslerRouteChildren {
+  EndekslerIndexRoute: typeof EndekslerIndexRoute
   EndekslerIdRoute: typeof EndekslerIdRoute
 }
 
 const EndekslerRouteChildren: EndekslerRouteChildren = {
+  EndekslerIndexRoute: EndekslerIndexRoute,
   EndekslerIdRoute: EndekslerIdRoute,
 }
 
@@ -609,7 +611,7 @@ const SektorlerRouteWithChildren = SektorlerRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   EndekslerRoute: EndekslerRouteWithChildren,
-  Endeksler_indexRoute: Endeksler_indexRoute,
+  EndekslerIndexRoute: EndekslerIndexRoute,
   KurumsalRoute: KurumsalRoute,
   LoginRoute: LoginRoute,
   NasilCalisirRoute: NasilCalisirRoute,

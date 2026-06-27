@@ -11,7 +11,7 @@ import {
 import companyNames from '../constants/companyNames.json'
 import companyLogos from '../constants/companyLogos.json'
 
-export const Route = createFileRoute('/endeksler_index')({
+export const Route = createFileRoute('/endeksler/')({
   component: EndekslerPage,
 })
 
