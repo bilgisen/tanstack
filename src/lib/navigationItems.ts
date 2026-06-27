@@ -1,9 +1,7 @@
 import type { ElementType } from "react";
 import { 
   ChartNoAxesCombined, 
-  Factory, 
-  Building2,
-  Sparkles
+  Factory 
 } from "lucide-react";
 
 export interface MenuItem {
@@ -28,12 +26,5 @@ export const navigationItems: MenuItem[] = [
     icon: Factory,
     path: "/sektorler",
     showAsIconOnMobile: true,
-  },
-  {
-    id: "upgrade",
-    label: "Premium",
-    icon: Sparkles,
-    path: "/panel",
-    showAsIconOnMobile: false,
   },
 ];

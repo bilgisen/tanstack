@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ResponsiveLogo } from "./ResponsiveLogo";
-import { Menu, Sparkles } from "lucide-react";
+import { Menu } from "lucide-react";
 import { MobileDrawer } from "./MobileDrawer";
 import { navigationItems } from "@/lib/navigationItems";
 import { useAuth } from "../../hooks/useAuth";
@@ -63,15 +63,14 @@ export function Topbar() {
              </button>
            )}
 
-           {/* Premium Upgrade Button */}
-           <Link
-             to="/panel"
-             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-primary/90 to-primary/70 text-primary-foreground hover:opacity-90 transition-all cursor-pointer text-xs font-medium shrink-0"
-             title="Premium Üyeliğe Yükselt"
-           >
-             <Sparkles size={14} className="shrink-0" />
-             <span className="hidden sm:inline">Premium</span>
-           </Link>
+            {/* Premium Upgrade Button */}
+            <Link
+              to="/panel"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-primary/90 to-primary/70 text-primary-foreground hover:opacity-90 transition-all cursor-pointer text-xs font-medium shrink-0"
+              title="Premium Üyeliğe Yükselt"
+            >
+              <span>Premium</span>
+            </Link>
 
            {/* Hamburger Menu */}
            <button
