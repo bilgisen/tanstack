@@ -30,7 +30,7 @@ function SektorlerPage() {
   const { sendMessage } = useChatStore()
 
   // If there's a child route (e.g., /sektorler/holdingler), render the Outlet
-  const hasChildRoute = matches.some(m => m.routeId === '/sektorler/$slug')
+  const hasChildRoute = matches.some(m => m.routeId === '/sektorler/$slug' || m.routeId === '/sektorler/$slug/$company')
 
   useEffect(() => {
     if (hasChildRoute) return // Don't fetch if showing child route

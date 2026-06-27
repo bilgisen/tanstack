@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate, Outlet, useMatches } from '@tanstack/react-router'
 import { Sparkles, HelpCircle, ArrowLeft, Factory, Loader2, TrendingUp, Globe } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import companyNames from '../constants/companyNames.json'
@@ -7,7 +7,16 @@ import { PublicPageLayout } from '../components/layout/PublicPageLayout'
 import { useChatStore } from '../store/chat'
 
 export const Route = createFileRoute('/sektorler/$slug')({
-  component: SektorDetailPage,
+  component: () => {
+    const { slug } = Route.useParams()
+    const matches = useMatches()
+    const hasCompanyDetail = matches.some(m => m.routeId === '/sektorler/$slug/$company')
+    
+    if (hasCompanyDetail) {
+      return <Outlet />
+    }
+    return <SektorDetailPage />
+  },
 })
 
 const SLUG_TO_NAME: Record<string, string> = {

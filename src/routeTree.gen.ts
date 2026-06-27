@@ -28,6 +28,7 @@ import { Route as PanelProfilRouteImport } from './routes/panel.profil'
 import { Route as PanelBorsaRouteImport } from './routes/panel.borsa'
 import { Route as EndekslerIdRouteImport } from './routes/endeksler.$id'
 import { Route as ApiCheckoutRouteImport } from './routes/api/checkout'
+import { Route as SektorlerSlugCompanyRouteImport } from './routes/sektorler.$slug.$company'
 import { Route as PanelSirketlerIdRouteImport } from './routes/panel.sirketler.$id'
 import { Route as ApiWebhooksPolarRouteImport } from './routes/api/webhooks/polar'
 import { Route as ApiUserCreditsRouteImport } from './routes/api/user/credits'
@@ -131,6 +132,11 @@ const ApiCheckoutRoute = ApiCheckoutRouteImport.update({
   path: '/api/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SektorlerSlugCompanyRoute = SektorlerSlugCompanyRouteImport.update({
+  id: '/$company',
+  path: '/$company',
+  getParentRoute: () => SektorlerSlugRoute,
+} as any)
 const PanelSirketlerIdRoute = PanelSirketlerIdRouteImport.update({
   id: '/sirketler/$id',
   path: '/sirketler/$id',
@@ -184,7 +190,7 @@ export interface FileRoutesByFullPath {
   '/endeksler/$id': typeof EndekslerIdRoute
   '/panel/borsa': typeof PanelBorsaRoute
   '/panel/profil': typeof PanelProfilRoute
-  '/sektorler/$slug': typeof SektorlerSlugRoute
+  '/sektorler/$slug': typeof SektorlerSlugRouteWithChildren
   '/panel/': typeof PanelIndexRoute
   '/profil/': typeof ProfilIndexRoute
   '/api/ai/charge': typeof ApiAiChargeRoute
@@ -194,6 +200,7 @@ export interface FileRoutesByFullPath {
   '/api/user/credits': typeof ApiUserCreditsRoute
   '/api/webhooks/polar': typeof ApiWebhooksPolarRoute
   '/panel/sirketler/$id': typeof PanelSirketlerIdRoute
+  '/sektorler/$slug/$company': typeof SektorlerSlugCompanyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -210,7 +217,7 @@ export interface FileRoutesByTo {
   '/endeksler/$id': typeof EndekslerIdRoute
   '/panel/borsa': typeof PanelBorsaRoute
   '/panel/profil': typeof PanelProfilRoute
-  '/sektorler/$slug': typeof SektorlerSlugRoute
+  '/sektorler/$slug': typeof SektorlerSlugRouteWithChildren
   '/panel': typeof PanelIndexRoute
   '/profil': typeof ProfilIndexRoute
   '/api/ai/charge': typeof ApiAiChargeRoute
@@ -220,6 +227,7 @@ export interface FileRoutesByTo {
   '/api/user/credits': typeof ApiUserCreditsRoute
   '/api/webhooks/polar': typeof ApiWebhooksPolarRoute
   '/panel/sirketler/$id': typeof PanelSirketlerIdRoute
+  '/sektorler/$slug/$company': typeof SektorlerSlugCompanyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -239,7 +247,7 @@ export interface FileRoutesById {
   '/endeksler/$id': typeof EndekslerIdRoute
   '/panel/borsa': typeof PanelBorsaRoute
   '/panel/profil': typeof PanelProfilRoute
-  '/sektorler/$slug': typeof SektorlerSlugRoute
+  '/sektorler/$slug': typeof SektorlerSlugRouteWithChildren
   '/panel/': typeof PanelIndexRoute
   '/profil/': typeof ProfilIndexRoute
   '/api/ai/charge': typeof ApiAiChargeRoute
@@ -249,6 +257,7 @@ export interface FileRoutesById {
   '/api/user/credits': typeof ApiUserCreditsRoute
   '/api/webhooks/polar': typeof ApiWebhooksPolarRoute
   '/panel/sirketler/$id': typeof PanelSirketlerIdRoute
+  '/sektorler/$slug/$company': typeof SektorlerSlugCompanyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -279,6 +288,7 @@ export interface FileRouteTypes {
     | '/api/user/credits'
     | '/api/webhooks/polar'
     | '/panel/sirketler/$id'
+    | '/sektorler/$slug/$company'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -305,6 +315,7 @@ export interface FileRouteTypes {
     | '/api/user/credits'
     | '/api/webhooks/polar'
     | '/panel/sirketler/$id'
+    | '/sektorler/$slug/$company'
   id:
     | '__root__'
     | '/'
@@ -333,6 +344,7 @@ export interface FileRouteTypes {
     | '/api/user/credits'
     | '/api/webhooks/polar'
     | '/panel/sirketler/$id'
+    | '/sektorler/$slug/$company'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -492,6 +504,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sektorler/$slug/$company': {
+      id: '/sektorler/$slug/$company'
+      path: '/$company'
+      fullPath: '/sektorler/$slug/$company'
+      preLoaderRoute: typeof SektorlerSlugCompanyRouteImport
+      parentRoute: typeof SektorlerSlugRoute
+    }
     '/panel/sirketler/$id': {
       id: '/panel/sirketler/$id'
       path: '/sirketler/$id'
@@ -583,12 +602,24 @@ const ProfilRouteChildren: ProfilRouteChildren = {
 const ProfilRouteWithChildren =
   ProfilRoute._addFileChildren(ProfilRouteChildren)
 
+interface SektorlerSlugRouteChildren {
+  SektorlerSlugCompanyRoute: typeof SektorlerSlugCompanyRoute
+}
+
+const SektorlerSlugRouteChildren: SektorlerSlugRouteChildren = {
+  SektorlerSlugCompanyRoute: SektorlerSlugCompanyRoute,
+}
+
+const SektorlerSlugRouteWithChildren = SektorlerSlugRoute._addFileChildren(
+  SektorlerSlugRouteChildren,
+)
+
 interface SektorlerRouteChildren {
-  SektorlerSlugRoute: typeof SektorlerSlugRoute
+  SektorlerSlugRoute: typeof SektorlerSlugRouteWithChildren
 }
 
 const SektorlerRouteChildren: SektorlerRouteChildren = {
-  SektorlerSlugRoute: SektorlerSlugRoute,
+  SektorlerSlugRoute: SektorlerSlugRouteWithChildren,
 }
 
 const SektorlerRouteWithChildren = SektorlerRoute._addFileChildren(
