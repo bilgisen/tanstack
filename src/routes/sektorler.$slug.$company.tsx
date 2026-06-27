@@ -26,7 +26,6 @@ type CompanyStats = {
 
 type TaData = {
   trend: string;
-  weekly_trend: string;
   score: number;
   confidence: string;
   rsi: { value: number; status: string };
@@ -197,7 +196,6 @@ function CompanyDetailPage() {
             if (isMounted) {
               setTaData({
                 trend: json.trend || 'Nötr',
-                weekly_trend: json.weekly_trend || 'Veri yok',
                 score: json.score ?? 50,
                 confidence: json.confidence || 'Veri yok',
                 rsi: rsiData,
@@ -348,7 +346,7 @@ function CompanyDetailPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
                 { label: 'Günlük Trend', value: taData.trend, icon: <TrendingUp size={13} />, bull: taData.trend.toLowerCase().includes('bull') || taData.trend.toLowerCase().includes('yükseliş') },
-                { label: 'Haftalık Trend', value: taData.weekly_trend, icon: <LineChart size={13} />, bull: taData.weekly_trend.toLowerCase().includes('bull') || taData.weekly_trend.toLowerCase().includes('yükseliş') },
+                { label: 'ADX Trend Gücü', value: taData.market_regime.adx.toString(), icon: <LineChart size={13} />, bull: taData.market_regime.adx >= 25 ? true : null },
                 { label: 'Piyasa Rejimi', value: taData.market_regime.regime, icon: <Gauge size={13} />, bull: null },
                 { label: 'Güven Seviyesi', value: taData.confidence, icon: <Shield size={13} />, bull: null },
               ].map((item) => (

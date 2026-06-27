@@ -98,7 +98,6 @@ const indexMetadataFallbacks: Record<string, IndexMeta> = {
 
 type TaData = {
   trend: string;
-  weekly_trend: string;
   score: number;
   confidence: string;
   rsi: { value: number; status: string };
@@ -198,7 +197,6 @@ function EndeksDetailPage() {
 
             setTaData({
               trend: tJson.trend || "Nötr",
-              weekly_trend: tJson.weekly_trend || "Veri yok",
               score: tJson.score ?? 50,
               confidence: tJson.confidence || "Veri yok",
               rsi: rsiData,
@@ -341,7 +339,7 @@ function EndeksDetailPage() {
             </div>
           </div>
 
-          {/* Trend & Weekly Trend */}
+          {/* Trend & ADX */}
           <div className="bg-muted/30 p-4 border border-border/80 rounded-xl flex items-center justify-between">
             <div>
               <span className="text-[11px] text-muted-foreground font-bold uppercase block mb-1">Günlük Trend</span>
@@ -355,13 +353,12 @@ function EndeksDetailPage() {
               </span>
             </div>
             <div className="text-right">
-              <span className="text-[11px] text-muted-foreground font-bold uppercase block mb-1">Haftalık Trend</span>
+              <span className="text-[11px] text-muted-foreground font-bold uppercase block mb-1">ADX Trend Gücü</span>
               <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold ${
-                taData.weekly_trend.includes("Bullish") ? "bg-teal-500/10 text-teal-600 dark:text-teal-400" 
-                : taData.weekly_trend.includes("Bearish") ? "bg-destructive/10 text-destructive" 
+                taData.market_regime.adx >= 25 ? "bg-teal-500/10 text-teal-600 dark:text-teal-400" 
                 : "bg-muted text-muted-foreground"
               }`}>
-                {taData.weekly_trend}
+                {taData.market_regime.adx}
               </span>
             </div>
           </div>
