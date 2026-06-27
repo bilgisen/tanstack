@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ResponsiveLogo } from "./ResponsiveLogo";
-import { Menu } from "lucide-react";
+import { Menu, Sparkles } from "lucide-react";
 import { MobileDrawer } from "./MobileDrawer";
 import { navigationItems } from "@/lib/navigationItems";
 import { useAuth } from "../../hooks/useAuth";
@@ -49,29 +49,39 @@ export function Topbar() {
           </nav>
         </div>
 
-        {/* Right: Actions */}
-        <div className="flex items-center gap-2">
-          
-          {/* Avatar (logged in only) */}
-          {user && (
-            <button
-              onClick={handleAvatarClick}
-              className="w-8 h-8 rounded-full cursor-pointer hover:opacity-80 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              title="Profil"
-            >
-              <ProfileAvatar user={user} size="sm" />
-            </button>
-          )}
+          {/* Right: Actions */}
+         <div className="flex items-center gap-2">
+           
+           {/* Avatar (logged in only) */}
+           {user && (
+             <button
+               onClick={handleAvatarClick}
+               className="w-8 h-8 rounded-full cursor-pointer hover:opacity-80 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+               title="Profil"
+             >
+               <ProfileAvatar user={user} size="sm" />
+             </button>
+           )}
 
-          {/* Hamburger Menu */}
-          <button
-            onClick={() => setDrawerOpen(true)}
-            className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-muted transition-colors cursor-pointer"
-            aria-label="Menüyü aç"
-          >
-            <Menu size={22} className="text-muted-foreground" />
-          </button>
-        </div>
+           {/* Premium Upgrade Button */}
+           <Link
+             to="/panel"
+             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-primary/90 to-primary/70 text-primary-foreground hover:opacity-90 transition-all cursor-pointer text-xs font-medium shrink-0"
+             title="Premium Üyeliğe Yükselt"
+           >
+             <Sparkles size={14} className="shrink-0" />
+             <span className="hidden sm:inline">Premium</span>
+           </Link>
+
+           {/* Hamburger Menu */}
+           <button
+             onClick={() => setDrawerOpen(true)}
+             className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-muted transition-colors cursor-pointer"
+             aria-label="Menüyü aç"
+           >
+             <Menu size={22} className="text-muted-foreground" />
+           </button>
+         </div>
       </header>
 
       {/* Mobile Drawer - rendered outside header to avoid z-index issues */}
