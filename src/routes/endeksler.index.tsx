@@ -2,14 +2,9 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { 
   Loader2, 
-  TrendingUp, 
-  TrendingDown, 
-  ChevronRight,
   ExternalLink,
   Info
 } from 'lucide-react'
-import companyNames from '../constants/companyNames.json'
-import companyLogos from '../constants/companyLogos.json'
 
 export const Route = createFileRoute('/endeksler/')({
   component: EndekslerPage,

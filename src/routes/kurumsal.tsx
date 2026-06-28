@@ -1,5 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useAuth } from '../hooks/useAuth'
 import { 
   Building2, 
   Users, 
@@ -17,7 +16,6 @@ export const Route = createFileRoute('/kurumsal')({
 })
 
 function KurumsalPage() {
-  const { login: handleLogin } = useAuth()
 
   return (
     <div className="min-h-full bg-background text-foreground select-none overflow-x-hidden font-sans">

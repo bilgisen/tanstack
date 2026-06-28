@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate, Outlet, useMatches } from '@tanstack/react-router'
-import { Sparkles, HelpCircle, ArrowLeft, Factory, Loader2, TrendingUp, Globe } from 'lucide-react'
+import { Sparkles, ArrowLeft, Factory, Loader2, TrendingUp, Globe } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import companyNames from '../constants/companyNames.json'
 import companyLogos from '../constants/companyLogos.json'

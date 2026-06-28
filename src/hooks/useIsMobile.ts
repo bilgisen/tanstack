@@ -48,7 +48,7 @@ export function useIsMobile(): boolean {
     setIsMobile(mediaQueryList.matches);
 
     // Use addEventListener for modern browsers
-    const handleChange = (event: MediaQueryListEvent) => {
+    const handleChange = (_event: MediaQueryListEvent) => {
       handleResize();
     };
 

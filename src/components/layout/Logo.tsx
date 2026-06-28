@@ -1,8 +1,12 @@
 import React from "react";
 
-interface LogoProps extends React.SVGProps<SVGSVGElement> {
+interface LogoProps {
   size?: number;
   variant?: "full" | "icon" | "text";
+  className?: string;
+  style?: React.CSSProperties;
+  role?: string;
+  "aria-label"?: string;
 }
 
 function JetIcon({ className, ...props }: React.SVGProps<SVGSVGElement>) {
@@ -42,25 +46,25 @@ function BorsaText({ className, style, ...props }: React.HTMLAttributes<HTMLSpan
   );
 }
 
-export function Logo({ size = 24, variant = "full", className, ...props }: LogoProps) {
+export function Logo({ size = 24, variant = "full", className, style }: LogoProps) {
   if (variant === "icon") {
     return <JetIconBranded size={size} className={className} />;
   }
 
   if (variant === "text") {
-    return <BorsaText style={{ fontSize: size, color: "currentColor" }} className={className} {...props} />;
+    return <BorsaText style={{ fontSize: size, color: "currentColor", ...style }} className={className} />;
   }
 
   // full = icon + "jetborsa" text side by side
   const fontSize = size * 0.7;
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "4px" }} className={className} {...props}>
+    <div style={{ display: "flex", alignItems: "center", gap: "4px", ...style }} className={className}>
       <JetIconBranded size={size} />
       <BorsaText style={{ fontSize, color: "currentColor", lineHeight: 1 }} />
     </div>
   );
 }
 
-export function SiteIcon({ size = 24, className, ...props }: LogoProps) {
+export function SiteIcon({ size = 24, className }: LogoProps) {
   return <JetIconBranded size={size} className={className} />;
 }

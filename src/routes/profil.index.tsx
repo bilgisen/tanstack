@@ -5,7 +5,6 @@ import {
   User, 
   Mail, 
   Calendar, 
-  Shield, 
   CreditCard, 
   Zap, 
   Check, 
@@ -18,16 +17,12 @@ export const Route = createFileRoute('/profil/')({
 })
 
 function ProfilePage() {
-  const { user, logout } = useAuth()
+  const { user } = useAuth()
   const navigate = useNavigate()
 
   const userTier: Tier = (user as any)?.tier || 'free'
   const tierConfig = TIER_CONFIG[userTier]
 
-  const handleLogout = async () => {
-    await logout()
-    navigate({ to: '/' })
-  }
 
   return (
     <div className="min-h-full bg-background">

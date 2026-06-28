@@ -1,14 +1,11 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import useEmblaCarousel from 'embla-carousel-react'
 import { 
   Sparkles, 
   ArrowUp,
   ArrowDown,
-  SquareChevronUp,
-  SquareChevronDown,
-  SquareKanban
 } from 'lucide-react'
 
 const TriangleUp = ({ size = 14, className = "" }: { size?: number; className?: string }) => (

@@ -8,11 +8,8 @@ import {
   Check, 
   X, 
   Sparkles,
-  TrendingUp,
-  BarChart3,
   AlertTriangle
 } from 'lucide-react'
-import { Logo } from '../components/layout/Logo'
 
 export const Route = createFileRoute('/neden-jetborsa')({
   component: NedenJetborsaPage,

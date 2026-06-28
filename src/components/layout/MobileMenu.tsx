@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
 import { useIsMobile } from "@/hooks/useIsMobile";
-import { Button } from "@/components/ui/button";
 
 export interface MobileMenuProps {
   items: Array<{

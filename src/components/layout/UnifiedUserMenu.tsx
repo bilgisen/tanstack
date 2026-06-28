@@ -40,6 +40,10 @@ export function UnifiedUserMenu({
   const [activeIndex, setActiveIndex] = useState<number>(-1);
   const menuItemsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
+  const setMenuItemRef = useCallback((index: number) => (el: HTMLButtonElement | null) => {
+    menuItemsRef.current[index] = el;
+  }, []);
+
   // Outside click detection
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
@@ -182,7 +186,7 @@ export function UnifiedUserMenu({
             <>
               {/* Profil */}
               <button
-                ref={(el) => (menuItemsRef.current[0] = el)}
+                ref={setMenuItemRef(0)}
                 onClick={handleProfileNavigate}
                 role="menuitem"
                 tabIndex={activeIndex === 0 ? 0 : -1}
@@ -194,7 +198,7 @@ export function UnifiedUserMenu({
 
               {/* Yükselt */}
               <button
-                ref={(el) => (menuItemsRef.current[1] = el)}
+                ref={setMenuItemRef(1)}
                 onClick={() => {
                   setActiveIndex(-1);
                   onClose();
@@ -210,7 +214,7 @@ export function UnifiedUserMenu({
 
               {/* Takip Listesi */}
               <button
-                ref={(el) => (menuItemsRef.current[2] = el)}
+                ref={setMenuItemRef(2)}
                 onClick={() => {
                   setActiveIndex(-1);
                   onClose();
@@ -239,7 +243,7 @@ export function UnifiedUserMenu({
             return (
               <button
                 key={themeOption.id}
-                ref={(el) => (menuItemsRef.current[menuIndex] = el)}
+                ref={setMenuItemRef(menuIndex)}
                 onClick={() => handleThemeChange(themeOption.theme)}
                 role="menuitem"
                 tabIndex={activeIndex === menuIndex ? 0 : -1}
@@ -264,7 +268,7 @@ export function UnifiedUserMenu({
 
           {showAnonymousActions && onAnonymousLogin && (
             <button
-              ref={(el) => (menuItemsRef.current[themeOptions.length + (showAnonymousActions ? 1 : 0)] = el)}
+              ref={setMenuItemRef(themeOptions.length + (showAnonymousActions ? 1 : 0))}
               onClick={() => {
                 setActiveIndex(-1);
                 onClose();
@@ -274,7 +278,7 @@ export function UnifiedUserMenu({
               tabIndex={activeIndex === themeOptions.length + (showAnonymousActions ? 1 : 0) ? 0 : -1}
               className="w-full flex items-center gap-2 px-3 py-2 text-xs rounded-xl transition-all font-medium text-left cursor-pointer text-primary hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
-              <svg size={14} className="shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width={14} height={14} className="shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
                 <polyline points="10 17 15 12 10 7"/>
                 <line x1="15" x2="3" y1="12" y2="12"/>
@@ -290,7 +294,7 @@ export function UnifiedUserMenu({
           {/* Çıkış Yap */}
           {!showAnonymousActions && (
             <button
-              ref={(el) => (menuItemsRef.current[themeOptions.length + 3] = el)}
+              ref={setMenuItemRef(themeOptions.length + 3)}
               onClick={handleLogout}
               role="menuitem"
               tabIndex={activeIndex === themeOptions.length + 3 ? 0 : -1}

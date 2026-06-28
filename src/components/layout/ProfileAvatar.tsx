@@ -77,7 +77,7 @@ export function ProfileAvatar({
       onKeyDown={(e) => {
         if (onClick && (e.key === "Enter" || e.key === " ")) {
           e.preventDefault();
-          onClick();
+          onClick(e as unknown as React.MouseEvent<HTMLDivElement>);
         }
       }}
       {...props}

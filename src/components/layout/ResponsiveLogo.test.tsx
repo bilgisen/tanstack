@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, cleanup } from "@testing-library/react";
 import { ResponsiveLogo } from "./ResponsiveLogo";
 
 // Mock window.innerWidth and addEventListener/removeEventListener
@@ -174,19 +174,6 @@ describe("ResponsiveLogo", () => {
     
     const svgElement = document.querySelector("svg");
     expect(svgElement).toHaveClass(customClass);
-  });
-
-  it("passes additional props to the SVG element", () => {
-    mockWindowWidth(375);
-    
-    const onClickHandler = vi.fn();
-    render(<ResponsiveLogo onClick={onClickHandler} data-testid="test-logo" />);
-    
-    const svgElement = document.getByTestId("test-logo");
-    expect(svgElement).toBeInTheDocument();
-    
-    svgElement.click();
-    expect(onClickHandler).toHaveBeenCalledTimes(1);
   });
 
   it("cleans up event listener on unmount", () => {

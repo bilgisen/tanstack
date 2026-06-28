@@ -59,7 +59,7 @@ export function Topbar() {
                className="w-8 h-8 rounded-full cursor-pointer hover:opacity-80 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                title="Profil"
              >
-               <ProfileAvatar user={user} size="sm" />
+                <ProfileAvatar user={{ ...user, user_metadata: { ...user.user_metadata, avatar_url: user.user_metadata.avatar_url ?? undefined } }} size="sm" />
              </button>
            )}
 

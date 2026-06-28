@@ -8,12 +8,6 @@ const TriangleUp = ({ size = 14, className = "" }: { size?: number; className?: 
   </svg>
 )
 
-const TriangleDown = ({ size = 14, className = "" }: { size?: number; className?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
-    <polygon points="12,20 2,4 22,4" />
-  </svg>
-)
-
 import { useState, useEffect, useMemo } from 'react'
 import { TradingViewChart } from '../components/dashboard/TradingViewChart'
 import { Skeleton } from '../components/ui/skeleton'
