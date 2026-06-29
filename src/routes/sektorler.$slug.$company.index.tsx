@@ -47,17 +47,17 @@ function CompanyOverviewPage() {
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { label: 'En Yüksek', value: `₺${stats.high.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`, icon: <TrendingUp size={12} /> },
-            { label: 'En Düşük', value: `₺${stats.low.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`, icon: <TrendingDown size={12} /> },
-            { label: 'Açılış', value: `₺${stats.open.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`, icon: <BarChart3 size={12} /> },
-            { label: 'Hacim', value: stats.volume, icon: <Activity size={12} /> },
+            { label: 'En Yüksek', value: `₺${stats.high.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`, icon: <TrendingUp size={14} /> },
+            { label: 'En Düşük', value: `₺${stats.low.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`, icon: <TrendingDown size={14} /> },
+            { label: 'Açılış', value: `₺${stats.open.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`, icon: <BarChart3 size={14} /> },
+            { label: 'Hacim', value: stats.volume, icon: <Activity size={14} /> },
           ].map((item) => (
             <div key={item.label} className="p-3.5 border border-border/40 rounded-xl bg-muted/10">
               <div className="flex items-center gap-1.5 mb-1.5">
                 <span className="text-muted-foreground">{item.icon}</span>
-                <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">{item.label}</span>
+                <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">{item.label}</span>
               </div>
-              <span className="text-sm font-bold text-foreground font-mono">{item.value}</span>
+              <span className="text-base font-bold text-foreground font-mono">{item.value}</span>
             </div>
           ))}
         </div>
@@ -68,9 +68,9 @@ function CompanyOverviewPage() {
         <div className="border border-border/40 bg-card/20 rounded-2xl p-5 space-y-4">
           <div className="flex items-center gap-2.5 pb-3 border-b border-border/30">
             <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-              <Activity size={14} />
+              <Activity size={16} />
             </div>
-            <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Teknik Analiz Özeti</h3>
+            <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Teknik Analiz Özeti</h3>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
@@ -93,9 +93,9 @@ function CompanyOverviewPage() {
         <div className="border border-border/40 bg-card/20 rounded-2xl p-5 space-y-4">
           <div className="flex items-center gap-2.5 pb-3 border-b border-border/30">
             <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
-              <Compass size={14} />
+              <Compass size={16} />
             </div>
-            <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Temel Analiz Özeti</h3>
+            <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Temel Analiz Özeti</h3>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
@@ -105,8 +105,8 @@ function CompanyOverviewPage() {
               { label: 'Borç/Özsermaye', value: fundamental.debtToEquity },
             ].map((item) => (
               <div key={item.label} className="p-3 border border-border/40 rounded-xl bg-muted/10">
-                <span className="text-[10px] text-muted-foreground font-semibold uppercase block mb-1">{item.label}</span>
-                <span className="text-sm font-bold text-foreground">{item.value}</span>
+                <span className="text-xs text-muted-foreground font-semibold uppercase block mb-1">{item.label}</span>
+                <span className="text-base font-bold text-foreground">{item.value}</span>
               </div>
             ))}
           </div>
