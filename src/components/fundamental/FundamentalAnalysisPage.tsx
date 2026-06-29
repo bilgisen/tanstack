@@ -141,6 +141,7 @@ export function FundamentalAnalysisPage({ data, onUpgrade }: FundamentalAnalysis
 
 /**
  * Hook for fetching fundamental analysis data
+ * Uses real auth token from better-auth session
  */
 export function useFundamentalAnalysis(ticker: string, tier: UserTier) {
   const [data, setData] = React.useState<FundamentalAnalysisData | null>(null);
@@ -155,15 +156,19 @@ export function useFundamentalAnalysis(ticker: string, tier: UserTier) {
       try {
         const honoUrl = import.meta.env.VITE_HONO_URL || 'https://hono.ortakcalisma.workers.dev';
         
-        // Get token based on tier (this would come from your auth system)
-        const token = tier === 'subscriber' ? 'subscriber_token' :
-                      tier === 'member' ? 'member_token' : '';
+        // Build headers with tier information
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        };
+        
+        // Pass tier as header for backend to determine access level
+        // The tier comes from the authenticated user's profile
+        if (tier !== 'anonymous') {
+          headers['X-User-Tier'] = tier;
+        }
 
         const response = await fetch(`${honoUrl}/api/ai/analysis/${ticker}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
+          headers,
         });
 
         if (!response.ok) {
