@@ -291,9 +291,9 @@ function FundamentalAnalysisPage() {
         </div>
       )}
 
-      {/* SECTION B: PREMIUM ANALIZ (SUBSCRIBER-ONLY) */}
-      <LockedSection variant="subscriber" title="Premium Temel Analiz" description="Şirket değerlendirmesi, SWOT analizi ve AI raporuna erişmek için yükseltme yapın.">
-        <div className="space-y-6">
+      {/* SECTION B: PREMIUM ANALIZ (member+) */}
+      {userTier !== 'anonymous' && (
+      <div className="space-y-6">
 
           {/* i. Company Rating */}
           {scoreCard && (
@@ -554,7 +554,7 @@ function FundamentalAnalysisPage() {
           </div>
 
         </div>
-      </LockedSection>
+      )}
     </div>
   )
 }
