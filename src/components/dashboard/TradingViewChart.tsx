@@ -143,7 +143,8 @@ export function TradingViewChart({
 
       // Initialize the lightweight chart container
       const containerWidth = chartContainerRef.current!.clientWidth;
-      const chartHeight = Math.max(Math.floor(containerWidth * 9 / 16), 250); // 16:9 aspect ratio, min 250px
+      const isMobile = containerWidth < 768;
+      const chartHeight = isMobile ? 300 : Math.floor(containerWidth * 9 / 16);
 
       chart = createChart(chartContainerRef.current!, {
         width: containerWidth,
@@ -243,7 +244,8 @@ export function TradingViewChart({
       for (const entry of entries) {
         const { width } = entry.contentRect;
         if (chartRef.current && width > 0) {
-          const newHeight = Math.max(Math.floor(width * 9 / 16), 250);
+          const isMob = width < 768;
+          const newHeight = isMob ? 300 : Math.floor(width * 9 / 16);
           chartRef.current.resize(width, newHeight);
         }
       }
@@ -266,7 +268,7 @@ export function TradingViewChart({
     <div className="border border-border/40 rounded-2xl bg-card/15 p-4 md:p-5 flex flex-col relative overflow-hidden group select-none transition-all duration-300 hover:border-border/60">
       
       {/* Main Canvas Body */}
-      <div className="relative flex-1 w-full aspect-video min-h-[250px] md:min-h-[300px]">
+      <div className="relative flex-1 w-full min-h-[300px] md:aspect-video md:min-h-0">
         {loading && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/55 backdrop-blur-xs z-20 gap-3 animate-in fade-in duration-200">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
