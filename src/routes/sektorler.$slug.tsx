@@ -161,7 +161,7 @@ function SektorDetailPage() {
           </div>
         </div>
 
-        {/* Companies Table - Full Width, Sorted by Performance */}
+        {/* Companies List - Günün Yıldızları style, sorted by performance */}
         <div className="border border-border/45 bg-card/20 rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/30">
             <div className="w-6 h-6 rounded-md bg-primary/10 text-primary flex items-center justify-center">
@@ -171,57 +171,50 @@ function SektorDetailPage() {
             <span className="text-[10px] text-muted-foreground ml-auto">Performansa göre sıralanmış</span>
           </div>
 
-          <div className="overflow-hidden border border-border/40 rounded-xl bg-muted/10 max-h-[600px] overflow-y-auto custom-scrollbar">
-            <table className="w-full border-collapse text-left text-xs">
-              <thead className="sticky top-0 z-10">
-                <tr className="bg-muted/50 text-[10px] text-muted-foreground uppercase font-semibold tracking-wider border-b border-border/45">
-                  <th className="p-3 w-8">#</th>
-                  <th className="p-3">Şirket</th>
-                  <th className="p-3 text-right">Son Fiyat</th>
-                  <th className="p-3 text-right">Değişim</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/30">
-                {companies.map((company, idx) => {
-                  const compUp = (company.diff_percent || 0) >= 0;
-                  const logoFile = companyLogos[company.ticker as keyof typeof companyLogos];
-                  return (
-                    <tr
-                      key={company.ticker}
-                      onClick={() => navigate({ to: `/sektorler/${slug}/${company.ticker.toLowerCase()}` })}
-                      className="group hover:bg-muted/40 cursor-pointer transition-colors"
-                    >
-                      <td className="p-3 text-[10px] text-muted-foreground font-mono">{idx + 1}</td>
-                      <td className="p-3 flex items-center gap-2 min-w-0">
-                        {logoFile ? (
-                          <img src={`/logos/${logoFile}`} className="w-4 h-4 object-contain rounded-full bg-white p-0.5 border border-border/40 shrink-0 shadow-3xs" alt="" />
-                        ) : null}
-                        <div className="flex flex-col min-w-0">
-                          <span className="font-bold text-foreground group-hover:text-primary transition-colors">{company.ticker}</span>
-                          <span className="text-[10px] text-muted-foreground truncate max-w-[200px]">{company.name}</span>
-                        </div>
-                      </td>
-                      <td className="p-3 font-semibold text-foreground text-right">
-                        {company.last_price !== undefined
-                          ? `${company.last_price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺`
-                          : '-'}
-                      </td>
-                      <td className="p-3 text-right">
-                        {company.last_price !== undefined ? (
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                            compUp ? 'bg-emerald-500/10 text-emerald-500' : 'bg-destructive/10 text-destructive'
-                          }`}>
-                            {compUp ? '+' : ''}{(company.diff_percent || 0).toFixed(2)}%
-                          </span>
-                        ) : (
-                          <span className="text-[10px] text-muted-foreground">-</span>
-                        )}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+          <div className="divide-y divide-white/5 max-h-[600px] overflow-y-auto custom-scrollbar">
+            {companies.map((company) => {
+              const compUp = (company.diff_percent || 0) >= 0;
+              const logoFile = companyLogos[company.ticker as keyof typeof companyLogos];
+              return (
+                <div
+                  key={company.ticker}
+                  onClick={() => navigate({ to: `/sektorler/${slug}/${company.ticker.toLowerCase()}` })}
+                  className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    {logoFile ? (
+                      <div className="h-8 w-8 rounded-lg bg-white overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
+                        <img src={`/logos/${logoFile}`} alt={company.ticker} className="h-full w-full object-cover p-0.5" />
+                      </div>
+                    ) : (
+                      <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] shrink-0 border border-primary/10">
+                        {company.ticker.slice(0, 2)}
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                        {company.ticker}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground truncate max-w-[180px]">{company.name}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 shrink-0">
+                    {company.last_price !== undefined ? (
+                      <>
+                        <span className={`text-base font-bold font-mono ${compUp ? 'text-emerald-500' : 'text-destructive'}`}>
+                          {compUp ? '+' : ''}{(company.diff_percent || 0).toFixed(2).replace('.', ',')}%
+                        </span>
+                        <span className="text-base font-semibold font-mono text-foreground">
+                          ₺{company.last_price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">-</span>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </div>
 
