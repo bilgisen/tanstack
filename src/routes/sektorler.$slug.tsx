@@ -90,6 +90,7 @@ function SektorDetailPage() {
             if (isMounted) {
               setCompanies(scored)
               setHasScoreData(true)
+              setLoading(false)
             }
             return
           }
