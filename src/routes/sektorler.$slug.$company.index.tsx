@@ -12,6 +12,7 @@ export const Route = createFileRoute('/sektorler/$slug/$company/')({
 function CompanyOverviewPage() {
   const { slug, company } = Route.useParams()
   const tickerUpper = company.toUpperCase()
+  const basePath = `/sektorler/${slug}/${company.toLowerCase()}`
   const [stats, setStats] = useState<CompanyStats | null>(null)
   const [taData, setTaData] = useState<TaData>(null)
   const [fundamental, setFundamental] = useState<FundamentalData | null>(null)
