@@ -6,32 +6,10 @@ import {
   Sparkles, 
   ArrowUp,
   ArrowDown,
+  Factory,
+  ChevronRight,
+  Star,
 } from 'lucide-react'
-
-const TriangleUp = ({ size = 14, className = "" }: { size?: number; className?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
-    <polygon points="12,4 22,20 2,20" />
-  </svg>
-)
-
-const TriangleDown = ({ size = 14, className = "" }: { size?: number; className?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
-    <polygon points="12,20 2,4 22,4" />
-  </svg>
-)
-
-const SquareIcon = ({ size = 14, className = "" }: { size?: number; className?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
-    <rect x="3" y="3" width="18" height="18" rx="2" />
-  </svg>
-)
-import { ChatPanel } from '../components/chat/ChatPanel'
-import { ChatSheet } from '../components/chat/ChatSheet'
-import { useUIStore } from '../store/ui'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs'
-import companyLogos from '../constants/companyLogos.json'
-import companyNames from '../constants/companyNames.json'
-import tickerToSectorSlug from '../constants/tickerToSectorSlug'
 
 export const Route = createFileRoute('/')({
   component: LandingPage,
@@ -70,8 +48,7 @@ function LandingPage() {
   ])
 
   const [topGainers, setTopGainers] = useState<StockRow[]>([])
-  const [topLosers, setTopLosers] = useState<StockRow[]>([])
-  const [topVolume, setTopVolume] = useState<StockRow[]>([])
+  const [sectors, setSectors] = useState<{ slug: string; name: string; companyCount: number }[]>([])
 
   useEffect(() => {
     async function fetchData() {
@@ -116,76 +93,44 @@ function LandingPage() {
                 volume: Number(s.volume || 0),
               }))
 
-            // Top 5 gainers
+            // Top 10 gainers
             const gainers = [...allStocks]
               .sort((a, b) => b.diffPercent - a.diffPercent)
-              .slice(0, 5)
+              .slice(0, 10)
             setTopGainers(gainers)
-
-            // Top 5 losers
-            const losers = [...allStocks]
-              .sort((a, b) => a.diffPercent - b.diffPercent)
-              .slice(0, 5)
-            setTopLosers(losers)
-
-            // Top 5 volume
-            const volume = [...allStocks]
-              .sort((a, b) => (b.volume || 0) - (a.volume || 0))
-              .slice(0, 5)
-            setTopVolume(volume)
           }
         }
       } catch (e) {
         console.error("Failed fetching stocks:", e)
       }
+
+      // Fetch sectors
+      try {
+        const compUrl = import.meta.env.VITE_COMP_API_URL || "https://comp-ef958063.fastapicloud.dev"
+        const res = await fetch(`${compUrl}/api/v1/sectors`)
+        if (res.ok) {
+          const data = await res.json()
+          if (data && data.sectors) {
+            const sectorList = data.sectors
+              .filter((s: any) => s.name)
+              .map((s: any) => ({
+                slug: s.name.toLowerCase()
+                  .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
+                  .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
+                  .replace(/[^a-z0-9]+/g, '-')
+                  .replace(/^-|-$/g, ''),
+                name: s.name,
+                companyCount: s.total_companies || s.active_companies || 0,
+              }))
+            setSectors(sectorList)
+          }
+        }
+      } catch (e) {
+        console.error("Failed fetching sectors:", e)
+      }
     }
     fetchData()
   }, [])
-
-  const renderStockList = (stocks: StockRow[], color: 'emerald' | 'destructive' | 'primary') => {
-    const colorClasses = {
-      emerald: 'text-emerald-500',
-      destructive: 'text-destructive',
-      primary: 'text-primary',
-    }
-    return (
-      <div className="divide-y divide-white/5">
-        {stocks.map((stock) => {
-          const logoFile = companyLogos[stock.ticker as keyof typeof companyLogos]
-          return (
-            <div
-              key={stock.ticker}
-              onClick={() => navigate({ to: `/sektorler/${tickerToSectorSlug[stock.ticker] || 'diger'}/${stock.ticker.toLowerCase()}` })}
-              className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                {logoFile ? (
-                  <div className="h-8 w-8 rounded-lg bg-white overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
-                    <img src={`/logos/${logoFile}`} alt={stock.ticker} className="h-full w-full object-cover p-0.5" />
-                  </div>
-                ) : (
-                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] shrink-0 border border-primary/10">
-                    {stock.ticker.slice(0, 2)}
-                  </div>
-                )}
-                <div className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
-                  {stock.ticker}
-                </div>
-              </div>
-              <div className="flex items-center gap-4 shrink-0">
-                <span className={`text-base font-bold font-mono ${colorClasses[color]}`}>
-                  {color === 'emerald' ? '+' : color === 'destructive' ? '' : ''}{stock.diffPercent.toFixed(2).replace('.', ',')}%
-                </span>
-                <span className="text-base font-semibold font-mono text-foreground">
-                  ₺{stock.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                </span>
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    )
-  }
 
   return (
     <div className="flex-1 flex flex-row min-w-0 h-full overflow-hidden">
@@ -266,36 +211,99 @@ function LandingPage() {
             </div>
           </section>
 
-          {/* Tabs: Yükselenler / Düşenler / Hacim */}
+          {/* Günün Yıldızları */}
           <section className="px-4 md:px-6 py-4">
-            <Tabs defaultValue="gainers">
-              <TabsList className="mb-4">
-                <TabsTrigger value="gainers" className="gap-1.5">
-                  <TriangleUp size={12} className="text-emerald-500" />
-                  <span>Yükselenler</span>
-                </TabsTrigger>
-                <TabsTrigger value="losers" className="gap-1.5">
-                  <TriangleDown size={12} className="text-destructive" />
-                  <span>Düşenler</span>
-                </TabsTrigger>
-                <TabsTrigger value="volume" className="gap-1.5">
-                  <SquareIcon size={12} className="text-primary" />
-                  <span>Hacim</span>
-                </TabsTrigger>
-              </TabsList>
+            <div className="border border-border/45 bg-card/20 rounded-2xl p-5 md:p-6">
+              <div className="flex items-center gap-2.5 pb-4 border-b border-border/30">
+                <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center">
+                  <Star size={14} />
+                </div>
+                <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Günün Yıldızları</h3>
+              </div>
+              <div className="divide-y divide-white/5">
+                {topGainers.map((stock) => {
+                  const logoFile = companyLogos[stock.ticker as keyof typeof companyLogos]
+                  return (
+                    <div
+                      key={stock.ticker}
+                      onClick={() => navigate({ to: `/sektorler/${tickerToSectorSlug[stock.ticker] || 'diger'}/${stock.ticker.toLowerCase()}` })}
+                      className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        {logoFile ? (
+                          <div className="h-8 w-8 rounded-lg bg-white overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
+                            <img src={`/logos/${logoFile}`} alt={stock.ticker} className="h-full w-full object-cover p-0.5" />
+                          </div>
+                        ) : (
+                          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] shrink-0 border border-primary/10">
+                            {stock.ticker.slice(0, 2)}
+                          </div>
+                        )}
+                        <div className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                          {stock.ticker}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4 shrink-0">
+                        <span className="text-base font-bold font-mono text-emerald-500">
+                          +{stock.diffPercent.toFixed(2).replace('.', ',')}%
+                        </span>
+                        <span className="text-base font-semibold font-mono text-foreground">
+                          ₺{stock.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })}
+                {topGainers.length === 0 && (
+                  <div className="py-8 text-center text-sm text-muted-foreground">Veriler yükleniyor...</div>
+                )}
+              </div>
+            </div>
+          </section>
 
-              <TabsContent value="gainers">
-                {renderStockList(topGainers, 'emerald')}
-              </TabsContent>
-
-              <TabsContent value="losers">
-                {renderStockList(topLosers, 'destructive')}
-              </TabsContent>
-
-              <TabsContent value="volume">
-                {renderStockList(topVolume, 'primary')}
-              </TabsContent>
-            </Tabs>
+          {/* Sektörler */}
+          <section className="px-4 md:px-6 py-4">
+            <div className="border border-border/45 bg-card/20 rounded-2xl p-5 md:p-6">
+              <div className="flex items-center justify-between pb-4 border-b border-border/30">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                    <Factory size={14} />
+                  </div>
+                  <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Sektörler</h3>
+                </div>
+                <Link
+                  to="/sektorler"
+                  className="flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
+                >
+                  Tümünü Gör
+                  <ChevronRight size={12} />
+                </Link>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
+                {sectors.slice(0, 6).map((sector) => (
+                  <Link
+                    key={sector.slug}
+                    to="/sektorler/$slug"
+                    params={{ slug: sector.slug }}
+                    className="group flex items-center justify-between border border-border/40 bg-muted/10 rounded-xl p-4 transition-all hover:border-primary/30 hover:bg-muted/20 cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
+                        <Factory size={16} />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">{sector.name}</h3>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">{sector.companyCount} şirket</p>
+                      </div>
+                    </div>
+                    <ChevronRight size={14} className="text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0" />
+                  </Link>
+                ))}
+              </div>
+              {sectors.length === 0 && (
+                <div className="py-8 text-center text-sm text-muted-foreground">Sektör verisi yükleniyor...</div>
+              )}
+            </div>
           </section>
         </div>
 
