@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 interface TradingViewChartProps {
   symbol: string;
   lastPrice?: number;
+  lazy?: boolean; // Lazy loading option
 }
 
 interface HistoricalDataPoint {
@@ -20,11 +21,14 @@ interface HistoricalDataPoint {
 export function TradingViewChart({
   symbol,
   lastPrice = 100.0,
+  lazy = true,
 }: TradingViewChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [isVisible, setIsVisible] = useState(!lazy);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   // High fidelity random walk generator for realistic historical candles fallback
   const generateMockHistory = (basePrice: number, days: number = 90): HistoricalDataPoint[] => {
@@ -76,8 +80,31 @@ export function TradingViewChart({
     }));
   };
 
+  // Intersection Observer for lazy loading
   useEffect(() => {
-    if (!chartContainerRef.current) return;
+    if (!lazy || !chartContainerRef.current) return;
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observerRef.current?.disconnect();
+        }
+      },
+      { threshold: 0.1, rootMargin: '100px' }
+    );
+
+    observerRef.current.observe(chartContainerRef.current);
+
+    return () => {
+      observerRef.current?.disconnect();
+    };
+  }, [lazy]);
+
+  // Main chart effect - only runs when visible
+  useEffect(() => {
+    if (!chartContainerRef.current || !isVisible) return;
 
     let isMounted = true;
     let chart: IChartApi | null = null;
@@ -262,7 +289,23 @@ export function TradingViewChart({
         chart.remove();
       }
     };
-  }, [symbol, lastPrice]);
+  }, [symbol, lastPrice, isVisible]);
+
+  // Lazy loading placeholder
+  if (!isVisible) {
+    return (
+      <div className="border border-border/40 rounded-2xl bg-card/15 p-4 md:p-5">
+        <div className="w-full aspect-video bg-muted/20 rounded-xl animate-pulse flex items-center justify-center">
+          <div className="flex flex-col items-center gap-2 text-muted-foreground">
+            <div className="w-12 h-12 rounded-full bg-muted/30 flex items-center justify-center">
+              <Loader2 size={20} className="animate-spin" />
+            </div>
+            <span className="text-xs font-medium">Grafik hazırlanıyor...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="border border-border/40 rounded-2xl bg-card/15 p-4 md:p-5 flex flex-col relative overflow-hidden group select-none transition-all duration-300 hover:border-border/60">

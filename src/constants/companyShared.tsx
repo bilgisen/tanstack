@@ -124,10 +124,29 @@ export function SignalBadge({ signal }: { signal: string }) {
 
 export async function fetchCompanyData(tickerUpper: string, slug: string) {
   const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev"
-  const compUrl = import.meta.env.VITE_COMP_API_URL || "https://comp-ef958063.fastapicloud.dev"
   const officialName = (companyNames as Record<string, string>)[tickerUpper] || tickerUpper
   const sectorName = SLUG_TO_NAME[slug] || slug
 
+  // Try batch endpoint first (single request for all data)
+  try {
+    const res = await fetch(`${apiUrl}/api/market/symbol/${tickerUpper}/company-data`)
+    if (res.ok) {
+      const json = await res.json()
+      if (json.success && json.stats) {
+        return {
+          stats: { ...json.stats, name: officialName },
+          taData: json.taData,
+          fundamental: json.fundamental || { fk: '-', roe: '-', currentRatio: '-', debtToEquity: '-', sector: sectorName },
+          fundamentalDetail: json.fundamentalDetail,
+          sectorName
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Batch company-data failed, falling back to individual endpoints:', e)
+  }
+
+  // Fallback: Individual endpoints (legacy)
   let lastPrice = 0
   let diffPercent = 0
   let high = 0
@@ -202,15 +221,14 @@ export async function fetchCompanyData(tickerUpper: string, slug: string) {
     }
   } catch (e) { console.error('ta/summary fetch failed', e) }
 
+  const compUrl = import.meta.env.VITE_COMP_API_URL || "https://comp-ef958063.fastapicloud.dev"
   let fundamental: FundamentalData = { fk: '-', roe: '-', currentRatio: '-', debtToEquity: '-', sector: sectorName }
   try {
-    // Fetch from company_ratios via COMP API - using ratios that exist in the database
     const res = await fetch(`${compUrl}/api/v1/companies/${tickerUpper}/ratios`)
     if (res.ok) {
       const json = await res.json()
       const ratios = json.ratios || {}
       fundamental = {
-        // F/K (pe_ratio) comes from CompanyMetrics table, not company_ratios
         fk: '-',
         roe: ratios.roe?.value != null ? (ratios.roe.value * 100).toFixed(1) + '%' : '-',
         currentRatio: ratios.current_ratio?.value != null ? ratios.current_ratio.value.toFixed(2) : '-',
@@ -220,7 +238,6 @@ export async function fetchCompanyData(tickerUpper: string, slug: string) {
     }
   } catch (e) { console.error('comp ratios fetch failed', e) }
   
-  // Fetch from FINVERI API: /instruments/stocks/{code}/detail
   const finveriUrl = "https://finveri-cbe8c089.fastapicloud.dev"
   let fundamentalDetail: FundamentalDetail | null = null
   try {
@@ -244,7 +261,6 @@ export async function fetchCompanyData(tickerUpper: string, slug: string) {
         capital: d.capital || 0,
         circulationShare: d.circulation_share || 0,
       }
-      // Use detail data for stats if summary-card failed
       if (lastPrice === 0 && d.last) {
         lastPrice = d.last
         open = d.open || 0
@@ -258,7 +274,6 @@ export async function fetchCompanyData(tickerUpper: string, slug: string) {
     }
   } catch (e) { console.error('finveri detail fetch failed', e) }
 
-  // Also try fundamental for pe_ratio, roe etc
   try {
     const fundRes = await fetch(`${finveriUrl}/instruments/stocks/${tickerUpper}/fundamental`)
     if (fundRes.ok) {
