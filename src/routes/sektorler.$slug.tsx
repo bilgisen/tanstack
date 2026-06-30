@@ -1,7 +1,6 @@
 import { createFileRoute, Link, Outlet, useNavigate, useMatches } from '@tanstack/react-router'
-import { Sparkles, ArrowLeft, Factory, Loader2 } from 'lucide-react'
+import { ArrowLeft, Factory, Loader2, Trophy } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import companyNames from '../constants/companyNames.json'
 import companyLogos from '../constants/companyLogos.json'
 import { SLUG_TO_NAME } from '../constants/companyShared'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
@@ -20,18 +19,30 @@ function SektorSlugLayout() {
   return <SektorDetailPage />
 }
 
-type SectorCompany = {
+type ScoredCompany = {
+  rank: number;
   ticker: string;
   name: string;
-  last_price?: number;
-  diff_percent?: number;
-  volume?: string;
+  score: number;
+  reliability: string;
 };
+
+function getScoreColor(score: number) {
+  if (score >= 70) return 'text-emerald-500'
+  if (score >= 50) return 'text-amber-500'
+  return 'text-red-500'
+}
+
+function getScoreBg(score: number) {
+  if (score >= 70) return 'bg-emerald-500/10'
+  if (score >= 50) return 'bg-amber-500/10'
+  return 'bg-red-500/10'
+}
 
 function SektorDetailPage() {
   const { slug } = Route.useParams()
   const navigate = useNavigate()
-  const [companies, setCompanies] = useState<SectorCompany[]>([])
+  const [companies, setCompanies] = useState<ScoredCompany[]>([])
   const [sectorName, setSectorName] = useState('')
   const [loading, setLoading] = useState(true)
 
@@ -44,57 +55,45 @@ function SektorDetailPage() {
     const name = SLUG_TO_NAME[slug] || slug
     setSectorName(name)
 
-    async function fetchSectorCompanies() {
+    async function fetchScores() {
       const compUrl = import.meta.env.VITE_COMP_API_URL || "https://comp-ef958063.fastapicloud.dev"
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev"
 
       try {
-        const res = await fetch(`${compUrl}/api/v1/sectors/${encodeURIComponent(name)}/companies`)
+        const res = await fetch(`${compUrl}/api/v1/scores/leaderboard/sektor`)
         if (res.ok) {
           const data = await res.json()
-          if (data && data.companies) {
-            const tickerList: string[] = data.companies
-              .map((c: any) => c.ticker?.toUpperCase())
-              .filter(Boolean)
+          const sectors = Array.isArray(data) ? data : (data.sectors || [])
 
-            const enriched: SectorCompany[] = tickerList.map(ticker => ({
-              ticker,
-              name: (companyNames as Record<string, string>)[ticker] || ticker,
+          // Find matching sector
+          const matchSector = sectors.find((s: any) => {
+            const sectorSlug = s.sector?.toLowerCase()
+              .replace(/i̇/g, 'i')
+              .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
+              .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/^-|-$/g, '')
+            return sectorSlug === slug
+          })
+
+          if (matchSector && matchSector.companies) {
+            const scored: ScoredCompany[] = matchSector.companies.map((c: any) => ({
+              rank: c.rank,
+              ticker: c.ticker?.toUpperCase(),
+              name: c.name || c.ticker,
+              score: c.score || 0,
+              reliability: c.reliability || 'LOW',
             }))
-
-            try {
-              const priceRes = await fetch(`${apiUrl}/api/market/stocks`)
-              if (priceRes.ok) {
-                const priceData = await priceRes.json()
-                if (priceData && Array.isArray(priceData.data)) {
-                  for (const stock of priceData.data) {
-                    const item = enriched.find(e => e.ticker === stock.code)
-                    if (item) {
-                      item.last_price = stock.last_price
-                      item.diff_percent = stock.diff_percent
-                      item.volume = stock.volume
-                    }
-                  }
-                }
-              }
-            } catch (e) {
-              console.error('Sector detail: price fetch failed:', e)
-            }
-
-            // Sort by diff_percent (best performers first)
-            enriched.sort((a, b) => (b.diff_percent || 0) - (a.diff_percent || 0))
-
-            if (isMounted) setCompanies(enriched)
+            if (isMounted) setCompanies(scored)
           }
         }
       } catch (e) {
-        console.error('Sector detail: fetch failed:', e)
+        console.error('Sector scores fetch failed:', e)
       }
 
       if (isMounted) setLoading(false)
     }
 
-    fetchSectorCompanies()
+    fetchScores()
     return () => { isMounted = false }
   }, [slug])
 
@@ -108,10 +107,6 @@ function SektorDetailPage() {
       </PublicPageLayout>
     )
   }
-
-  const upCount = companies.filter(c => (c.diff_percent || 0) > 0).length
-  const downCount = companies.filter(c => (c.diff_percent || 0) < 0).length
-  const flatCount = companies.length - upCount - downCount
 
   return (
     <PublicPageLayout
@@ -142,39 +137,22 @@ function SektorDetailPage() {
               <div className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">{companies.length}</div>
               <div className="text-[10px] text-muted-foreground font-medium uppercase">Şirket</div>
             </div>
-            <div className="flex gap-2">
-              <div className="text-center px-3 py-1 rounded-lg bg-emerald-500/10">
-                <div className="text-sm font-bold text-emerald-500">{upCount}</div>
-                <div className="text-[8px] text-emerald-500/70 font-medium">Yükselen</div>
-              </div>
-              <div className="text-center px-3 py-1 rounded-lg bg-destructive/10">
-                <div className="text-sm font-bold text-destructive">{downCount}</div>
-                <div className="text-[8px] text-destructive/70 font-medium">Düşen</div>
-              </div>
-              {flatCount > 0 && (
-                <div className="text-center px-3 py-1 rounded-lg bg-muted/30">
-                  <div className="text-sm font-bold text-muted-foreground">{flatCount}</div>
-                  <div className="text-[8px] text-muted-foreground/70 font-medium">Düz</div>
-                </div>
-              )}
-            </div>
           </div>
         </div>
 
-        {/* Companies List - Günün Yıldızları style, sorted by performance */}
+        {/* Companies - Score List */}
         <div className="border border-border/45 bg-card/20 rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/30">
             <div className="w-6 h-6 rounded-md bg-primary/10 text-primary flex items-center justify-center">
-              <Factory size={12} />
+              <Trophy size={12} />
             </div>
-            <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Sektör Şirketleri</h3>
-            <span className="text-[10px] text-muted-foreground ml-auto">Performansa göre sıralanmış</span>
+            <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Temel Analiz Puanı</h3>
+            <span className="text-[10px] text-muted-foreground ml-auto">Puana göre sıralanmış</span>
           </div>
 
           <div className="divide-y divide-white/5 max-h-[600px] overflow-y-auto custom-scrollbar">
             {companies.map((company) => {
-              const compUp = (company.diff_percent || 0) >= 0;
-              const logoFile = companyLogos[company.ticker as keyof typeof companyLogos];
+              const logoFile = companyLogos[company.ticker as keyof typeof companyLogos]
               return (
                 <div
                   key={company.ticker}
@@ -182,6 +160,7 @@ function SektorDetailPage() {
                   className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
                 >
                   <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-xs font-mono text-muted-foreground w-5 text-right shrink-0">{company.rank}</span>
                     {logoFile ? (
                       <div className="h-8 w-8 rounded-lg bg-white overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
                         <img src={`/logos/${logoFile}`} alt={company.ticker} className="h-full w-full object-cover p-0.5" />
@@ -198,23 +177,20 @@ function SektorDetailPage() {
                       <div className="text-[10px] text-muted-foreground truncate max-w-[180px]">{company.name}</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 shrink-0">
-                    {company.last_price !== undefined ? (
-                      <>
-                        <span className={`text-base font-bold font-mono ${compUp ? 'text-emerald-500' : 'text-destructive'}`}>
-                          {compUp ? '+' : ''}{(company.diff_percent || 0).toFixed(2).replace('.', ',')}%
-                        </span>
-                        <span className="text-base font-semibold font-mono text-foreground">
-                          ₺{company.last_price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                        </span>
-                      </>
-                    ) : (
-                      <span className="text-sm text-muted-foreground">-</span>
-                    )}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`text-lg font-black font-mono ${getScoreColor(company.score)} ${getScoreBg(company.score)} px-2.5 py-0.5 rounded-lg`}>
+                      {company.score.toFixed(1)}
+                    </span>
                   </div>
                 </div>
               )
             })}
+
+            {companies.length === 0 && (
+              <div className="py-8 text-center text-sm text-muted-foreground">
+                Bu sektör için puan verisi bulunamadı.
+              </div>
+            )}
           </div>
         </div>
 
