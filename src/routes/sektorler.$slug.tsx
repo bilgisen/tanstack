@@ -2,6 +2,7 @@ import { createFileRoute, Link, Outlet, useNavigate, useMatches } from '@tanstac
 import { ArrowLeft, Factory, Loader2, Trophy } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import companyLogos from '../constants/companyLogos.json'
+import companyNames from '../constants/companyNames.json'
 import { SLUG_TO_NAME } from '../constants/companyShared'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
 
@@ -23,17 +24,19 @@ type ScoredCompany = {
   rank: number;
   ticker: string;
   name: string;
-  score: number;
+  score: number | null;
   reliability: string;
 };
 
-function getScoreColor(score: number) {
+function getScoreColor(score: number | null) {
+  if (score === null) return 'text-muted-foreground'
   if (score >= 70) return 'text-emerald-500'
   if (score >= 50) return 'text-amber-500'
   return 'text-red-500'
 }
 
-function getScoreBg(score: number) {
+function getScoreBg(score: number | null) {
+  if (score === null) return 'bg-muted/20'
   if (score >= 70) return 'bg-emerald-500/10'
   if (score >= 50) return 'bg-amber-500/10'
   return 'bg-red-500/10'
@@ -44,6 +47,7 @@ function SektorDetailPage() {
   const navigate = useNavigate()
   const [companies, setCompanies] = useState<ScoredCompany[]>([])
   const [sectorName, setSectorName] = useState('')
+  const [hasScoreData, setHasScoreData] = useState(true)
   const [loading, setLoading] = useState(true)
 
   const chatContext = `sektor:${slug}`
@@ -55,16 +59,16 @@ function SektorDetailPage() {
     const name = SLUG_TO_NAME[slug] || slug
     setSectorName(name)
 
-    async function fetchScores() {
+    async function fetchData() {
       const compUrl = import.meta.env.VITE_COMP_API_URL || "https://comp-ef958063.fastapicloud.dev"
 
       try {
-        const res = await fetch(`${compUrl}/api/v1/scores/leaderboard/sektor`)
-        if (res.ok) {
-          const data = await res.json()
-          const sectors = Array.isArray(data) ? data : (data.sectors || [])
+        // 1. Try leaderboard scores first
+        const scoreRes = await fetch(`${compUrl}/api/v1/scores/leaderboard/sektor?top_n=50`)
+        if (scoreRes.ok) {
+          const data = await scoreRes.json()
+          const sectors = Array.isArray(data) ? data : []
 
-          // Find matching sector
           const matchSector = sectors.find((s: any) => {
             const sectorSlug = s.sector?.toLowerCase()
               .replace(/i̇/g, 'i')
@@ -75,25 +79,48 @@ function SektorDetailPage() {
             return sectorSlug === slug
           })
 
-          if (matchSector && matchSector.companies) {
+          if (matchSector && matchSector.companies?.length > 0) {
             const scored: ScoredCompany[] = matchSector.companies.map((c: any) => ({
               rank: c.rank,
               ticker: c.ticker?.toUpperCase(),
               name: c.name || c.ticker,
-              score: c.score || 0,
+              score: c.score ?? null,
               reliability: c.reliability || 'LOW',
             }))
-            if (isMounted) setCompanies(scored)
+            if (isMounted) {
+              setCompanies(scored)
+              setHasScoreData(true)
+            }
+            return
+          }
+        }
+
+        // 2. Fallback: fetch companies from sector API (no scores)
+        setHasScoreData(false)
+        const compRes = await fetch(`${compUrl}/api/v1/sectors/${encodeURIComponent(name)}/companies`)
+        if (compRes.ok) {
+          const compData = await compRes.json()
+          if (compData?.companies) {
+            const list: ScoredCompany[] = compData.companies
+              .filter((c: any) => c.ticker)
+              .map((c: any, i: number) => ({
+                rank: i + 1,
+                ticker: c.ticker.toUpperCase(),
+                name: (companyNames as Record<string, string>)[c.ticker.toUpperCase()] || c.name || c.ticker,
+                score: null,
+                reliability: 'LOW',
+              }))
+            if (isMounted) setCompanies(list)
           }
         }
       } catch (e) {
-        console.error('Sector scores fetch failed:', e)
+        console.error('Sector data fetch failed:', e)
       }
 
       if (isMounted) setLoading(false)
     }
 
-    fetchScores()
+    fetchData()
     return () => { isMounted = false }
   }, [slug])
 
@@ -140,14 +167,18 @@ function SektorDetailPage() {
           </div>
         </div>
 
-        {/* Companies - Score List */}
+        {/* Companies */}
         <div className="border border-border/45 bg-card/20 rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/30">
             <div className="w-6 h-6 rounded-md bg-primary/10 text-primary flex items-center justify-center">
               <Trophy size={12} />
             </div>
-            <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Temel Analiz Puanı</h3>
-            <span className="text-[10px] text-muted-foreground ml-auto">Puana göre sıralanmış</span>
+            <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">
+              {hasScoreData ? 'Temel Analiz Puanı' : 'Sektör Şirketleri'}
+            </h3>
+            <span className="text-[10px] text-muted-foreground ml-auto">
+              {hasScoreData ? 'Puana göre sıralanmış' : 'Alfabetik'}
+            </span>
           </div>
 
           <div className="divide-y divide-white/5 max-h-[600px] overflow-y-auto custom-scrollbar">
@@ -177,18 +208,20 @@ function SektorDetailPage() {
                       <div className="text-[10px] text-muted-foreground truncate max-w-[180px]">{company.name}</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className={`text-lg font-black font-mono ${getScoreColor(company.score)} ${getScoreBg(company.score)} px-2.5 py-0.5 rounded-lg`}>
-                      {company.score.toFixed(1)}
-                    </span>
-                  </div>
+                  {hasScoreData && (
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className={`text-lg font-black font-mono ${getScoreColor(company.score)} ${getScoreBg(company.score)} px-2.5 py-0.5 rounded-lg`}>
+                        {company.score !== null ? company.score.toFixed(1) : '-'}
+                      </span>
+                    </div>
+                  )}
                 </div>
               )
             })}
 
             {companies.length === 0 && (
               <div className="py-8 text-center text-sm text-muted-foreground">
-                Bu sektör için puan verisi bulunamadı.
+                Bu sektör için veri bulunamadı.
               </div>
             )}
           </div>
