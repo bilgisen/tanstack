@@ -6,7 +6,6 @@ import { Loader2 } from "lucide-react";
 interface TradingViewChartProps {
   symbol: string;
   lastPrice?: number;
-  height?: number;
 }
 
 interface HistoricalDataPoint {
@@ -21,7 +20,6 @@ interface HistoricalDataPoint {
 export function TradingViewChart({
   symbol,
   lastPrice = 100.0,
-  height = 360,
 }: TradingViewChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
@@ -144,9 +142,12 @@ export function TradingViewChart({
       const volumeDownColor = isDark ? "rgba(239, 68, 68, 0.18)" : "rgba(239, 68, 68, 0.22)";
 
       // Initialize the lightweight chart container
+      const containerWidth = chartContainerRef.current!.clientWidth;
+      const chartHeight = Math.floor(containerWidth * 9 / 16); // 16:9 aspect ratio
+
       chart = createChart(chartContainerRef.current!, {
-        width: chartContainerRef.current!.clientWidth,
-        height: height,
+        width: containerWidth,
+        height: chartHeight,
         layout: {
           background: { type: ColorType.Solid, color: "transparent" },
           textColor: textColor,
@@ -237,36 +238,44 @@ export function TradingViewChart({
 
     initChart();
 
-    // Listen to container resizing for continuous scaling
-    const handleResize = () => {
-      if (chartRef.current && chartContainerRef.current) {
-        chartRef.current.resize(
-          chartContainerRef.current.clientWidth,
-          height
-        );
+    // ResizeObserver ile container boyutunu izle
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width } = entry.contentRect;
+        if (chartRef.current && width > 0) {
+          const newHeight = Math.floor(width * 9 / 16);
+          chartRef.current.resize(width, newHeight);
+        }
       }
-    };
+    });
 
-    window.addEventListener("resize", handleResize);
+    if (chartContainerRef.current) {
+      resizeObserver.observe(chartContainerRef.current);
+    }
 
     return () => {
       isMounted = false;
-      window.removeEventListener("resize", handleResize);
+      resizeObserver.disconnect();
       if (chart) {
         chart.remove();
       }
     };
-  }, [symbol, lastPrice, height]);
+  }, [symbol, lastPrice]);
 
   return (
     <div className="border border-border/40 rounded-2xl bg-card/15 p-4 md:p-5 flex flex-col relative overflow-hidden group select-none transition-all duration-300 hover:border-border/60">
       
       {/* Main Canvas Body */}
-      <div className="relative flex-1 w-full min-h-[300px]">
+      <div className="relative flex-1 w-full aspect-video min-h-[200px]">
         {loading && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/55 backdrop-blur-xs z-20 gap-2.5 animate-in fade-in duration-200">
-            <Loader2 className="animate-spin text-primary shrink-0" size={24} />
-            <span className="text-xs text-muted-foreground font-medium">Grafik verileri işleniyor...</span>
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/55 backdrop-blur-xs z-20 gap-3 animate-in fade-in duration-200">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <Loader2 className="animate-spin text-primary shrink-0" size={20} />
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-sm font-semibold text-foreground">Grafik Yükleniyor</span>
+              <span className="text-xs text-muted-foreground">Veriler işleniyor...</span>
+            </div>
           </div>
         )}
 
@@ -280,7 +289,7 @@ export function TradingViewChart({
         )}
 
         {/* Ref Canvas Node */}
-        <div ref={chartContainerRef} className="w-full h-full" style={{ height }} />
+        <div ref={chartContainerRef} className="w-full h-full" />
       </div>
     </div>
   );

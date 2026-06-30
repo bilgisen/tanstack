@@ -79,6 +79,7 @@ export function FundamentalAnalysisPage({ data, onUpgrade }: FundamentalAnalysis
             scoreKarlilik={scoreCardData.score_karlilik}
             scoreFinansal={scoreCardData.score_finansal}
             scoreVerimlilik={scoreCardData.score_verimlilik}
+            scoreDegerleme={scoreCardData.score_degerleme}
             reliability={scoreCardData.reliability}
             percentileSector={scoreCardData.percentile_sector}
             rankSector={scoreCardData.rank_sector}

@@ -69,6 +69,30 @@ export type FundamentalData = {
   sector: string
 }
 
+export type FundamentalDetail = {
+  weekLow: number
+  weekHigh: number
+  weekClose: number
+  monthLow: number
+  monthHigh: number
+  monthClose: number
+  yearClose: number
+  prevYearClose: number
+  volume: number
+  quantity: number
+  open: number
+  high: number
+  low: number
+  last: number
+  bid: number
+  ask: number
+  limitUp: number
+  limitDown: number
+  equity: number
+  capital: number
+  circulationShare: number
+}
+
 export function ScoreGauge({ score, size = 64 }: { score: number; size?: number }) {
   const r = (size - 8) / 2
   const circ = 2 * Math.PI * r
@@ -204,6 +228,7 @@ export async function fetchCompanyData(tickerUpper: string, slug: string) {
   
   // Fetch F/K (P/E) and other fundamentals from finveri service
   // Finveri combines İş Yatırım price data + COMP API ratios
+  let fundamentalDetail: FundamentalDetail | null = null
   try {
     const fundRes = await fetch(`${apiUrl}/api/market/symbol/${tickerUpper}/fundamental`)
     if (fundRes.ok) {
@@ -224,8 +249,32 @@ export async function fetchCompanyData(tickerUpper: string, slug: string) {
       if (fund.sector) {
         fundamental.sector = fund.sector
       }
+      // Set detailed fundamental data
+      fundamentalDetail = {
+        weekLow: fund.weekLow || 0,
+        weekHigh: fund.weekHigh || 0,
+        weekClose: fund.weekClose || 0,
+        monthLow: fund.monthLow || 0,
+        monthHigh: fund.monthHigh || 0,
+        monthClose: fund.monthClose || 0,
+        yearClose: fund.yearClose || 0,
+        prevYearClose: fund.prevYearClose || 0,
+        volume: fund.volume || 0,
+        quantity: fund.quantity || 0,
+        open: fund.open || 0,
+        high: fund.high || 0,
+        low: fund.low || 0,
+        last: fund.last || 0,
+        bid: fund.bid || 0,
+        ask: fund.ask || 0,
+        limitUp: fund.limitUp || 0,
+        limitDown: fund.limitDown || 0,
+        equity: fund.equity || 0,
+        capital: fund.capital || 0,
+        circulationShare: fund.circulationShare || 0,
+      }
     }
   } catch (e) { console.error('finveri fundamental fetch failed', e) }
 
-  return { stats, taData, fundamental, sectorName }
+  return { stats, taData, fundamental, fundamentalDetail, sectorName }
 }

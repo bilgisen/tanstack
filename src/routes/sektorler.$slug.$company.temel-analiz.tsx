@@ -323,6 +323,7 @@ function FundamentalAnalysisPage() {
                   { key: 'score_karlilik', label: 'Kârlılık' },
                   { key: 'score_finansal', label: 'Finansal' },
                   { key: 'score_verimlilik', label: 'Verimlilik' },
+                  { key: 'score_degerleme', label: 'Değerleme' },
                 ].map((p) => {
                   const val = scoreCard[p.key]
                   return (

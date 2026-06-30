@@ -12,6 +12,7 @@ interface ScoreCardProps {
   scoreKarlilik: number | null;
   scoreFinansal: number | null;
   scoreVerimlilik: number | null;
+  scoreDegerleme: number | null;
   reliability: string | null;
   percentileSector: number | null;
   rankSector: number | null;
@@ -26,6 +27,7 @@ export function ScoreCard({
   scoreKarlilik,
   scoreFinansal,
   scoreVerimlilik,
+  scoreDegerleme,
   reliability,
   percentileSector,
   rankSector,
@@ -103,6 +105,7 @@ export function ScoreCard({
         <PillarBar label="Kârlılık" score={scoreKarlilik} isLocked={isLocked} />
         <PillarBar label="Finansal Sağlık" score={scoreFinansal} isLocked={isLocked} />
         <PillarBar label="Verimlilik" score={scoreVerimlilik} isLocked={isLocked} />
+        <PillarBar label="Değerleme" score={scoreDegerleme} isLocked={isLocked} />
       </div>
 
       {/* Sector Position */}

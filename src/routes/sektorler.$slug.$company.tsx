@@ -1,11 +1,12 @@
 import { createFileRoute, Link, Outlet } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-import { ArrowLeft, TrendingUp, TrendingDown, Activity, Compass } from 'lucide-react'
+import { ArrowLeft, TrendingUp, TrendingDown, Activity, Compass, Star } from 'lucide-react'
 import companyNames from '../constants/companyNames.json'
 import companyLogos from '../constants/companyLogos.json'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
 import { Skeleton } from '../components/ui/skeleton'
 import { SLUG_TO_NAME, type CompanyStats } from '../constants/companyShared'
+import { useWatchlistStore } from '../store/watchlist'
 
 export const Route = createFileRoute('/sektorler/$slug/$company')({
   component: CompanyLayout,
@@ -26,6 +27,19 @@ function CompanyLayout() {
 
   const [stats, setStats] = useState<CompanyStats | null>(null)
   const [loading, setLoading] = useState(true)
+
+  const { watchlists, addItem, removeItem } = useWatchlistStore()
+  const defaultWatchlist = watchlists.find(w => w.isDefault) || watchlists[0]
+  const isStarred = defaultWatchlist?.items.some(item => item.symbol === tickerUpper) ?? false
+
+  const toggleWatchlist = () => {
+    if (!defaultWatchlist) return
+    if (isStarred) {
+      removeItem(defaultWatchlist.id, tickerUpper)
+    } else {
+      addItem(defaultWatchlist.id, tickerUpper, 'stock')
+    }
+  }
 
   const chatContext = `sirket:${tickerUpper}`
   const basePath = `/sektorler/${slug}/${company.toLowerCase()}`
@@ -79,24 +93,37 @@ function CompanyLayout() {
         </Link>
 
         {/* Ticker Header */}
-        <div className="border border-border/40 bg-card/30 rounded-2xl p-4 md:p-5 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5 min-w-0">
+        <div className="border border-border/40 bg-card/30 rounded-2xl p-4 md:p-6 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4 min-w-0">
             {logoFile ? (
-              <img src={`/logos/${logoFile}`} alt={tickerUpper} className="h-11 w-11 rounded-lg object-cover bg-white p-0 border border-border/30 shadow-3xs shrink-0" />
+              <img src={`/logos/${logoFile}`} alt={tickerUpper} className="h-12 w-12 rounded-md object-cover bg-white p-0 border border-border/30 shadow-3xs shrink-0" />
             ) : (
-              <div className="h-11 w-11 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center text-primary font-bold text-sm shrink-0">{tickerUpper.slice(0, 2)}</div>
+              <div className="h-12 w-12 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center text-primary font-bold text-base shrink-0">{tickerUpper.slice(0, 2)}</div>
             )}
             <div className="min-w-0">
-              <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider block">{tickerUpper}</span>
-              <h1 className="text-lg md:text-xl font-bold text-foreground tracking-tight leading-tight truncate mt-0.5">{stats.name}</h1>
+              <span className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider block">{tickerUpper}</span>
+              <div className="flex items-center gap-2 mt-0.5">
+                <h1 className="text-xl md:text-2xl font-bold text-foreground tracking-tight leading-tight truncate">{stats.name}</h1>
+                <button
+                  onClick={toggleWatchlist}
+                  className={`shrink-0 p-1.5 rounded-lg transition-all duration-200 ${
+                    isStarred
+                      ? 'text-amber-500 hover:text-amber-400 bg-amber-500/10'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
+                  }`}
+                  title={isStarred ? 'Takip Listesinden Çıkar' : 'Takip Listeme Ekle'}
+                >
+                  <Star size={18} fill={isStarred ? 'currentColor' : 'none'} />
+                </button>
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-4 shrink-0">
             <div className="text-right">
-              <span className="text-xl md:text-2xl font-bold text-foreground tracking-tight block leading-none">
+              <span className="text-2xl md:text-3xl font-bold text-foreground tracking-tight block leading-none">
                 {stats.price > 0 ? stats.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}
               </span>
-              <span className={`text-sm md:text-base font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-0.5 mt-1.5 ${isUp ? 'bg-emerald-500/10 text-emerald-500' : 'bg-destructive/10 text-destructive'}`}>
+              <span className={`text-sm md:text-lg font-bold px-2.5 py-0.5 rounded-full inline-flex items-center gap-0.5 mt-1.5 ${isUp ? 'bg-emerald-500/10 text-emerald-500' : 'bg-destructive/10 text-destructive'}`}>
                 {isUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                 {isUp ? '+' : ''}{stats.diffPercent.toFixed(2)}%
               </span>
@@ -105,18 +132,18 @@ function CompanyLayout() {
         </div>
 
         {/* Tab Nav */}
-        <nav className="flex gap-1 overflow-x-auto pb-1 scrollbar-none">
+        <nav className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
           {TABS.map((tab) => {
             const to = tab.suffix === '' ? basePath : `${basePath}${tab.suffix}`
             return (
               <Link
                 key={to}
                 to={to}
-                activeProps={{ className: 'bg-primary/15 text-primary border border-primary/20' }}
-                inactiveProps={{ className: 'text-muted-foreground hover:text-foreground hover:bg-muted/30 border border-transparent' }}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all"
+                activeProps={{ className: 'bg-primary text-primary-foreground border border-primary shadow-sm' }}
+                inactiveProps={{ className: 'text-muted-foreground hover:text-foreground border border-border/40 hover:border-border/60 bg-transparent' }}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200"
               >
-                <tab.icon size={13} />
+                <tab.icon size={14} />
                 {tab.label}
               </Link>
             )
