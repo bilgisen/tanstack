@@ -192,16 +192,26 @@ export async function fetchCompanyData(tickerUpper: string, slug: string) {
     }
   } catch (e) { console.error('comp ratios fetch failed', e) }
   
-  // Fetch F/K (P/E) from company metrics/profile which includes market data
-  try {
-    const profileRes = await fetch(`${compUrl}/api/v1/companies/${tickerUpper}/profile`)
-    if (profileRes.ok) {
-      const profileJson = await profileRes.json()
-      if (profileJson.market_data?.pe_ratio != null) {
-        fundamental.fk = profileJson.market_data.pe_ratio.toFixed(2)
+  // Compute F/K (P/E) from available data: P/E = Price / EPS
+  // EPS ≈ (ROE × Equity) / Shares Outstanding
+  if (lastPrice > 0) {
+    try {
+      const detailRes = await fetch(`${apiUrl}/api/market/symbol/${tickerUpper}/detail`)
+      if (detailRes.ok) {
+        const detail = await detailRes.json()
+        const equity = detail.equity
+        const shares = detail.capital
+        const roeVal = fundamental.roe !== '-' ? parseFloat(fundamental.roe) / 100 : null
+        if (equity && shares && roeVal != null && shares > 0) {
+          const netIncome = roeVal * equity
+          const eps = netIncome / shares
+          if (eps > 0) {
+            fundamental.fk = (lastPrice / eps).toFixed(2)
+          }
+        }
       }
-    }
-  } catch (e) { console.error('comp profile fetch failed for P/E', e) }
+    } catch (e) { console.error('P/E computation failed', e) }
+  }
 
   return { stats, taData, fundamental, sectorName }
 }
