@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { Activity, Compass, TrendingUp, TrendingDown, BarChart3, Calendar, Clock, DollarSign } from 'lucide-react'
 import { TradingViewChart } from '../components/dashboard/TradingViewChart'

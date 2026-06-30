@@ -96,7 +96,7 @@ function CompanyLayout() {
         <div className="border border-border/40 bg-card/30 rounded-2xl p-4 md:p-6 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4 min-w-0">
             {logoFile ? (
-              <img src={`/logos/${logoFile}`} alt={tickerUpper} className="h-12 w-12 rounded-md object-cover bg-white p-0 border border-border/30 shadow-3xs shrink-0" />
+              <img src={`/logos/${logoFile}`} alt={tickerUpper} className="h-12 w-12 rounded-md object-cover bg-white p-0 shadow-3xs shrink-0" />
             ) : (
               <div className="h-12 w-12 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center text-primary font-bold text-base shrink-0">{tickerUpper.slice(0, 2)}</div>
             )}
