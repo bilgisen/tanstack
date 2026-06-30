@@ -192,26 +192,30 @@ export async function fetchCompanyData(tickerUpper: string, slug: string) {
     }
   } catch (e) { console.error('comp ratios fetch failed', e) }
   
-  // Compute F/K (P/E) from available data: P/E = Price / EPS
-  // EPS ≈ (ROE × Equity) / Shares Outstanding
-  if (lastPrice > 0) {
-    try {
-      const detailRes = await fetch(`${apiUrl}/api/market/symbol/${tickerUpper}/detail`)
-      if (detailRes.ok) {
-        const detail = await detailRes.json()
-        const equity = detail.equity
-        const shares = detail.capital
-        const roeVal = fundamental.roe !== '-' ? parseFloat(fundamental.roe) / 100 : null
-        if (equity && shares && roeVal != null && shares > 0) {
-          const netIncome = roeVal * equity
-          const eps = netIncome / shares
-          if (eps > 0) {
-            fundamental.fk = (lastPrice / eps).toFixed(2)
-          }
-        }
+  // Fetch F/K (P/E) and other fundamentals from finveri service
+  // Finveri combines İş Yatırım price data + COMP API ratios
+  try {
+    const fundRes = await fetch(`${apiUrl}/api/market/symbol/${tickerUpper}/fundamental`)
+    if (fundRes.ok) {
+      const fund = await fundRes.json()
+      if (fund.pe_ratio != null) {
+        fundamental.fk = fund.pe_ratio.toFixed(2)
       }
-    } catch (e) { console.error('P/E computation failed', e) }
-  }
+      // Update other ratios if available from finveri (more accurate)
+      if (fund.roe != null) {
+        fundamental.roe = (fund.roe * 100).toFixed(1) + '%'
+      }
+      if (fund.current_ratio != null) {
+        fundamental.currentRatio = fund.current_ratio.toFixed(2)
+      }
+      if (fund.debt_to_equity != null) {
+        fundamental.debtToEquity = fund.debt_to_equity.toFixed(2)
+      }
+      if (fund.sector) {
+        fundamental.sector = fund.sector
+      }
+    }
+  } catch (e) { console.error('finveri fundamental fetch failed', e) }
 
   return { stats, taData, fundamental, sectorName }
 }
