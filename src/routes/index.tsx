@@ -10,6 +10,12 @@ import {
   ChevronRight,
   Star,
 } from 'lucide-react'
+import { ChatPanel } from '../components/chat/ChatPanel'
+import { ChatSheet } from '../components/chat/ChatSheet'
+import { useUIStore } from '../store/ui'
+import companyLogos from '../constants/companyLogos.json'
+import companyNames from '../constants/companyNames.json'
+import tickerToSectorSlug from '../constants/tickerToSectorSlug'
 
 export const Route = createFileRoute('/')({
   component: LandingPage,
