@@ -1,4 +1,4 @@
-import { Lock, ArrowUpCircle } from 'lucide-react'
+import { Lock, ArrowUpCircle, Gift } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { type Tier } from '../../lib/tiers'
 
@@ -7,6 +7,7 @@ type LockedSectionProps = {
   variant?: 'anonymous' | 'subscriber'
   title?: string
   description?: string
+  showFreeTrial?: boolean
 }
 
 function hasRequiredTier(userTier: Tier | null, requiredVariant: 'anonymous' | 'subscriber'): boolean {
@@ -28,6 +29,7 @@ export function LockedSection({
   variant = 'anonymous',
   title,
   description,
+  showFreeTrial = false,
 }: LockedSectionProps) {
   const { user, loading: authLoading, login } = useAuth()
   
@@ -97,6 +99,12 @@ export function LockedSection({
               </>
             )}
           </button>
+          {showFreeTrial && isAnonymous && (
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Gift size={12} />
+              <span>7 gün ücretsiz deneme</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

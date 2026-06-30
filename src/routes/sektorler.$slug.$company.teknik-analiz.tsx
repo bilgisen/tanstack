@@ -58,7 +58,7 @@ function TechnicalAnalysisPage() {
             <ScoreGauge score={taData.score} />
           </div>
 
-          {/* Trend Row */}
+          {/* PUBLIC: Trend Row - first 4 overview cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               { label: 'Günlük Trend', value: taData.trend, icon: <TrendingUp size={13} />, bull: taData.trend.toLowerCase().includes('bull') || taData.trend.toLowerCase().includes('yükseliş') },
@@ -76,116 +76,95 @@ function TechnicalAnalysisPage() {
             ))}
           </div>
 
-          {/* Indicators Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            <div className="border border-border/40 rounded-xl bg-muted/10 overflow-hidden divide-y divide-border/20">
-              {[
-                { label: 'RSI (14)', value: `${taData.rsi.value.toFixed(1)} — ${taData.rsi.status}`, icon: <BarChart3 size={12} /> },
-                { label: 'MACD', value: taData.macd, icon: <Activity size={12} /> },
-                { label: 'Bollinger', value: taData.bollinger_status, icon: <Target size={12} /> },
-                { label: 'SMA 20', value: `₺${taData.sma.sma_20.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` },
-                { label: 'SMA 50', value: `₺${taData.sma.sma_50.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` },
-                { label: 'SMA 200', value: `₺${taData.sma.sma_200.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` },
-                { label: 'Destek', value: `₺${taData.support_resistance.support.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`, icon: <Shield size={12} /> },
-                { label: 'Direnç', value: `₺${taData.support_resistance.resistance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`, icon: <AlertTriangle size={12} /> },
-                { label: 'Stop-Loss (ATR)', value: `₺${taData.atr_stop_loss.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`, icon: <Shield size={12} /> },
-                { label: 'Risk/Ödül', value: taData.rr_ratio.toFixed(2) },
-                { label: 'Beta', value: taData.beta.toFixed(2) },
-                { label: 'ADX', value: taData.market_regime.adx.toFixed(1) },
-                { label: 'Piyasa Genişliği', value: `${taData.market_breadth.breadth.toFixed(1)}% — ${taData.market_breadth.status}` },
-              ].map((row) => (
-                <div key={row.label} className="flex justify-between items-center px-4 py-3">
-                  <span className="text-sm text-muted-foreground font-medium flex items-center gap-1.5">
-                    {row.icon}
-                    {row.label}
-                  </span>
-                  <span className="text-base font-bold text-foreground font-mono">{row.value}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="space-y-4">
-              <div className="border border-border/40 rounded-xl bg-muted/10 p-4 space-y-3">
-                <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider block">Skor Bileşenleri</span>
-                {[
-                  { label: 'Trend', value: taData.score_components.trend, max: 50, color: 'bg-emerald-500' },
-                  { label: 'Momentum', value: taData.score_components.momentum, max: 30, color: 'bg-blue-500' },
-                  { label: 'Hacim', value: taData.score_components.volume, max: 20, color: 'bg-primary' },
-                ].map((bar) => (
-                  <div key={bar.label}>
-                    <div className="flex justify-between text-xs mb-1.5">
-                      <span className="text-muted-foreground font-semibold">{bar.label}</span>
-                      <span className="text-foreground font-bold">{bar.value}/{bar.max}</span>
-                    </div>
-                    <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
-                      <div className={`h-full ${bar.color} rounded-full transition-all`} style={{ width: `${Math.min((bar.value / bar.max) * 100, 100)}%` }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="border border-border/40 rounded-xl bg-muted/10 p-4">
-                <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider block mb-2.5">Uyumsuzluklar</span>
-                <div className="grid grid-cols-2 gap-2">
+          {/* MEMBERS ONLY: Detailed Indicators */}
+          <LockedSection
+            variant="anonymous"
+            title="İncelemek İçin Ücretsiz Bağlanın"
+            description="Detaylı teknik göstergeleri, sinyalleri ve analiz bileşenlerini görüntülemek için giriş yapın."
+            showFreeTrial
+          >
+            <div className="space-y-6">
+              {/* Indicators Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                <div className="border border-border/40 rounded-xl bg-muted/10 overflow-hidden divide-y divide-border/20">
                   {[
-                    { label: 'RSI Yükseliş', active: taData.divergences.rsi.bullish, color: 'text-emerald-500' },
-                    { label: 'RSI Düşüş', active: taData.divergences.rsi.bearish, color: 'text-destructive' },
-                    { label: 'MACD Yükseliş', active: taData.divergences.macd.bullish, color: 'text-emerald-500' },
-                    { label: 'MACD Düşüş', active: taData.divergences.macd.bearish, color: 'text-destructive' },
-                  ].map((d) => (
-                    <div key={d.label} className="flex items-center gap-2 text-xs">
-                      <div className={`w-2.5 h-2.5 rounded-full ${d.active ? d.color : 'bg-muted/40'}`} />
-                      <span className={`${d.active ? d.color : 'text-muted-foreground'} font-semibold`}>{d.label}</span>
+                    { label: 'RSI (14)', value: `${taData.rsi.value.toFixed(1)} — ${taData.rsi.status}`, icon: <BarChart3 size={12} /> },
+                    { label: 'MACD', value: taData.macd, icon: <Activity size={12} /> },
+                    { label: 'Bollinger', value: taData.bollinger_status, icon: <Target size={12} /> },
+                    { label: 'SMA 20', value: `₺${taData.sma.sma_20.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` },
+                    { label: 'SMA 50', value: `₺${taData.sma.sma_50.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` },
+                    { label: 'SMA 200', value: `₺${taData.sma.sma_200.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` },
+                    { label: 'Destek', value: `₺${taData.support_resistance.support.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`, icon: <Shield size={12} /> },
+                    { label: 'Direnç', value: `₺${taData.support_resistance.resistance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`, icon: <AlertTriangle size={12} /> },
+                    { label: 'Stop-Loss (ATR)', value: `₺${taData.atr_stop_loss.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`, icon: <Shield size={12} /> },
+                    { label: 'Risk/Ödül', value: taData.rr_ratio.toFixed(2) },
+                    { label: 'Beta', value: taData.beta.toFixed(2) },
+                    { label: 'ADX', value: taData.market_regime.adx.toFixed(1) },
+                    { label: 'Piyasa Genişliği', value: `${taData.market_breadth.breadth.toFixed(1)}% — ${taData.market_breadth.status}` },
+                  ].map((row) => (
+                    <div key={row.label} className="flex justify-between items-center px-4 py-3">
+                      <span className="text-sm text-muted-foreground font-medium flex items-center gap-1.5">
+                        {row.icon}
+                        {row.label}
+                      </span>
+                      <span className="text-base font-bold text-foreground font-mono">{row.value}</span>
                     </div>
                   ))}
                 </div>
-              </div>
-            </div>
-          </div>
 
-          {taData.signals.length > 0 && (
-            <div>
-              <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider block mb-2.5">Aktif Sinyaller</span>
-              <div className="flex flex-wrap gap-1.5">
-                {taData.signals.map((s: any, i: any) => (
-                  <SignalBadge key={i} signal={s} />
-                ))}
+                <div className="space-y-4">
+                  <div className="border border-border/40 rounded-xl bg-muted/10 p-4 space-y-3">
+                    <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider block">Skor Bileşenleri</span>
+                    {[
+                      { label: 'Trend', value: taData.score_components.trend, max: 50, color: 'bg-emerald-500' },
+                      { label: 'Momentum', value: taData.score_components.momentum, max: 30, color: 'bg-blue-500' },
+                      { label: 'Hacim', value: taData.score_components.volume, max: 20, color: 'bg-primary' },
+                    ].map((bar) => (
+                      <div key={bar.label}>
+                        <div className="flex justify-between text-xs mb-1.5">
+                          <span className="text-muted-foreground font-semibold">{bar.label}</span>
+                          <span className="text-foreground font-bold">{bar.value}/{bar.max}</span>
+                        </div>
+                        <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
+                          <div className={`h-full ${bar.color} rounded-full transition-all`} style={{ width: `${Math.min((bar.value / bar.max) * 100, 100)}%` }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="border border-border/40 rounded-xl bg-muted/10 p-4">
+                    <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider block mb-2.5">Uyumsuzluklar</span>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { label: 'RSI Yükseliş', active: taData.divergences.rsi.bullish, color: 'text-emerald-500' },
+                        { label: 'RSI Düşüş', active: taData.divergences.rsi.bearish, color: 'text-destructive' },
+                        { label: 'MACD Yükseliş', active: taData.divergences.macd.bullish, color: 'text-emerald-500' },
+                        { label: 'MACD Düşüş', active: taData.divergences.macd.bearish, color: 'text-destructive' },
+                      ].map((d) => (
+                        <div key={d.label} className="flex items-center gap-2 text-xs">
+                          <div className={`w-2.5 h-2.5 rounded-full ${d.active ? d.color : 'bg-muted/40'}`} />
+                          <span className={`${d.active ? d.color : 'text-muted-foreground'} font-semibold`}>{d.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
+
+              {taData.signals.length > 0 && (
+                <div>
+                  <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider block mb-2.5">Aktif Sinyaller</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {taData.signals.map((s: any, i: any) => (
+                      <SignalBadge key={i} signal={s} />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </LockedSection>
         </div>
       )}
-
-      {/* MEMBERS ONLY: Advanced TA */}
-      <LockedSection variant="anonymous" title="Gelişmiş Teknik Analiz" description="Detaylı teknik analiz ve AI yorumlarına erişmek için giriş yapın.">
-        <div className="border border-border/45 bg-card/20 rounded-2xl p-5 md:p-6 space-y-6">
-          <div className="flex items-center gap-2.5 pb-4 border-b border-border/30">
-            <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-              <Sparkles size={14} />
-            </div>
-            <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Gelişmiş Teknik Analiz</h3>
-            <Lock size={12} className="text-muted-foreground ml-auto" />
-          </div>
-          <div className="border border-primary/20 rounded-xl bg-primary/5 p-4">
-            <span className="text-xs text-primary font-bold uppercase tracking-wider block mb-1.5 flex items-center gap-1.5">
-              <Sparkles size={13} /> AI Teknik Analiz Özeti
-            </span>
-            <p className="text-sm text-foreground/80 font-medium leading-relaxed">
-              AI destekli teknik analiz özeti burada görünecek. RSI, MACD, Bollinger ve hacim analizleriyle birlikte kapsamlı teknik değerlendirme.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="border border-border/40 rounded-xl bg-muted/10 p-4">
-              <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider block mb-2">Formasyon Analizi</span>
-              <p className="text-sm text-muted-foreground">Mum formasyonları ve grafik formasyonları detaylı analizi</p>
-            </div>
-            <div className="border border-border/40 rounded-xl bg-muted/10 p-4">
-              <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider block mb-2">Dalga Analizi</span>
-              <p className="text-sm text-muted-foreground">Elliott dalga prensibi ve dalga sayımları</p>
-            </div>
-          </div>
-        </div>
-      </LockedSection>
 
       {/* SUBSCRIBER ONLY: Premium TA */}
       <LockedSection variant="subscriber" title="Premium Teknik Analiz" description="Bu içeriğe erişmek için yükseltme yapın.">
