@@ -125,6 +125,7 @@ function FundamentalAnalysisPage() {
     async function load() {
       const compUrl = import.meta.env.VITE_COMP_API_URL || 'https://comp-ef958063.fastapicloud.dev'
 
+      try {
       const [companyResult, ratiosResult] = await Promise.all([
         fetchCompanyData(tickerUpper, slug),
         (async () => {
@@ -164,6 +165,7 @@ function FundamentalAnalysisPage() {
       }
 
       setRatios(items)
+      } catch (e) { console.error('fundamental data load failed', e) }
       setLoading(false)
     }
 
