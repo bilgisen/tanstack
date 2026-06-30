@@ -182,7 +182,7 @@ function SektorDetailPage() {
             </span>
           </div>
 
-          <div className="divide-y divide-white/5 max-h-[600px] overflow-y-auto custom-scrollbar">
+          <div className="divide-y divide-white/5">
             {companies.map((company) => {
               const logoFile = companyLogos[company.ticker as keyof typeof companyLogos]
               return (
