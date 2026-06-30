@@ -70,24 +70,18 @@ export type FundamentalData = {
 }
 
 export type FundamentalDetail = {
-  weekLow: number
-  weekHigh: number
-  weekClose: number
-  monthLow: number
-  monthHigh: number
-  monthClose: number
-  yearClose: number
-  prevYearClose: number
   volume: number
   quantity: number
-  open: number
-  high: number
-  low: number
-  last: number
-  bid: number
-  ask: number
-  limitUp: number
-  limitDown: number
+  weekClose: number
+  weekHigh: number
+  weekLow: number
+  monthClose: number
+  monthHigh: number
+  monthLow: number
+  yearClose: number
+  prevYearClose: number
+  dayClose: number
+  basePrice: number
   equity: number
   capital: number
   circulationShare: number
@@ -226,17 +220,52 @@ export async function fetchCompanyData(tickerUpper: string, slug: string) {
     }
   } catch (e) { console.error('comp ratios fetch failed', e) }
   
-  // Fetch F/K (P/E) and other fundamentals from finveri service
-  // Finveri combines İş Yatırım price data + COMP API ratios
+  // Fetch from FINVERI API: /instruments/stocks/{code}/detail
+  const finveriUrl = "https://finveri-cbe8c089.fastapicloud.dev"
   let fundamentalDetail: FundamentalDetail | null = null
   try {
-    const fundRes = await fetch(`${apiUrl}/api/market/symbol/${tickerUpper}/fundamental`)
+    const detailRes = await fetch(`${finveriUrl}/instruments/stocks/${tickerUpper}/detail`)
+    if (detailRes.ok) {
+      const d = await detailRes.json()
+      fundamentalDetail = {
+        volume: d.volume || 0,
+        quantity: d.quantity || 0,
+        weekClose: d.week_close || 0,
+        weekHigh: d.week_high || 0,
+        weekLow: d.week_low || 0,
+        monthClose: d.month_close || 0,
+        monthHigh: d.month_high || 0,
+        monthLow: d.month_low || 0,
+        yearClose: d.year_close || 0,
+        prevYearClose: d.prev_year_close || 0,
+        dayClose: d.day_close || 0,
+        basePrice: d.base_price || 0,
+        equity: d.equity || 0,
+        capital: d.capital || 0,
+        circulationShare: d.circulation_share || 0,
+      }
+      // Use detail data for stats if summary-card failed
+      if (lastPrice === 0 && d.last) {
+        lastPrice = d.last
+        open = d.open || 0
+        high = d.high || 0
+        low = d.low || 0
+        close = d.day_close || d.last
+      }
+      if (volume === '-' && d.volume) {
+        volume = d.volume
+      }
+    }
+  } catch (e) { console.error('finveri detail fetch failed', e) }
+
+  // Also try fundamental for pe_ratio, roe etc
+  try {
+    const fundRes = await fetch(`${finveriUrl}/instruments/stocks/${tickerUpper}/fundamental`)
     if (fundRes.ok) {
       const fund = await fundRes.json()
       if (fund.pe_ratio != null) {
         fundamental.fk = fund.pe_ratio.toFixed(2)
       }
-      // Update other ratios if available from finveri (more accurate)
       if (fund.roe != null) {
         fundamental.roe = (fund.roe * 100).toFixed(1) + '%'
       }
@@ -248,30 +277,6 @@ export async function fetchCompanyData(tickerUpper: string, slug: string) {
       }
       if (fund.sector) {
         fundamental.sector = fund.sector
-      }
-      // Set detailed fundamental data
-      fundamentalDetail = {
-        weekLow: fund.weekLow || 0,
-        weekHigh: fund.weekHigh || 0,
-        weekClose: fund.weekClose || 0,
-        monthLow: fund.monthLow || 0,
-        monthHigh: fund.monthHigh || 0,
-        monthClose: fund.monthClose || 0,
-        yearClose: fund.yearClose || 0,
-        prevYearClose: fund.prevYearClose || 0,
-        volume: fund.volume || 0,
-        quantity: fund.quantity || 0,
-        open: fund.open || 0,
-        high: fund.high || 0,
-        low: fund.low || 0,
-        last: fund.last || 0,
-        bid: fund.bid || 0,
-        ask: fund.ask || 0,
-        limitUp: fund.limitUp || 0,
-        limitDown: fund.limitDown || 0,
-        equity: fund.equity || 0,
-        capital: fund.capital || 0,
-        circulationShare: fund.circulationShare || 0,
       }
     }
   } catch (e) { console.error('finveri fundamental fetch failed', e) }
