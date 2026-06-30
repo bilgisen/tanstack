@@ -6,12 +6,6 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { Info } from 'lucide-react';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 
 interface RatioComparisonCardProps {
   ratioName: string;
@@ -76,16 +70,7 @@ export function RatioComparisonCard({
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
           <h4 className="font-medium text-gray-900">{ratioName}</h4>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Info className="h-4 w-4 text-gray-400 cursor-help" />
-              </TooltipTrigger>
-              <TooltipContent className="max-w-xs">
-                <p className="text-sm">{RATIO_DESCRIPTIONS[ratioCode] || 'Finansal oran'}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Info className="h-4 w-4 text-gray-400 cursor-help" title={RATIO_DESCRIPTIONS[ratioCode] || 'Finansal oran'} />
         </div>
       </div>
 
