@@ -291,28 +291,25 @@ export function TradingViewChart({
     };
   }, [symbol, lastPrice, isVisible]);
 
-  // Lazy loading placeholder
-  if (!isVisible) {
-    return (
-      <div className="border border-border/40 rounded-2xl bg-card/15 p-4 md:p-5">
-        <div className="w-full aspect-video bg-muted/20 rounded-xl animate-pulse flex items-center justify-center">
-          <div className="flex flex-col items-center gap-2 text-muted-foreground">
-            <div className="w-12 h-12 rounded-full bg-muted/30 flex items-center justify-center">
-              <Loader2 size={20} className="animate-spin" />
-            </div>
-            <span className="text-xs font-medium">Grafik hazırlanıyor...</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+  // Lazy loading placeholder - ref'i her zaman render et
   return (
     <div className="border border-border/40 rounded-2xl bg-card/15 p-4 md:p-5 flex flex-col relative overflow-hidden group select-none transition-all duration-300 hover:border-border/60">
       
       {/* Main Canvas Body */}
       <div className="relative flex-1 w-full min-h-[300px] md:aspect-video md:min-h-0">
-        {loading && (
+        {!isVisible && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/55 backdrop-blur-xs z-10 gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <Loader2 className="animate-spin text-primary shrink-0" size={20} />
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-sm font-semibold text-foreground">Grafik hazırlanıyor...</span>
+              <span className="text-xs text-muted-foreground">Yaklaştığınızda yüklenecek</span>
+            </div>
+          </div>
+        )}
+
+        {loading && isVisible && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/55 backdrop-blur-xs z-20 gap-3 animate-in fade-in duration-200">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
               <Loader2 className="animate-spin text-primary shrink-0" size={20} />
@@ -333,7 +330,7 @@ export function TradingViewChart({
           </div>
         )}
 
-        {/* Ref Canvas Node */}
+        {/* Ref Canvas Node - her zaman render edilmeli */}
         <div ref={chartContainerRef} className="w-full h-full" />
       </div>
     </div>
