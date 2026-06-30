@@ -142,33 +142,43 @@ export function FundamentalAnalysisPage({ data, onUpgrade }: FundamentalAnalysis
 /**
  * Hook for fetching fundamental analysis data
  * Uses real auth token from better-auth session
+ * Supports AbortController to prevent stale responses and authLoading to wait for auth
  */
-export function useFundamentalAnalysis(ticker: string, tier: UserTier) {
+export function useFundamentalAnalysis(
+  ticker: string,
+  tier: UserTier,
+  options?: { authLoading?: boolean }
+) {
   const [data, setData] = React.useState<FundamentalAnalysisData | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
+    if (options?.authLoading) {
+      setLoading(true);
+      return;
+    }
+
+    const controller = new AbortController();
+
     const fetchData = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        const honoUrl = import.meta.env.VITE_HONO_URL || 'https://hono.ortakcalisma.workers.dev';
+        const compUrl = import.meta.env.VITE_COMP_API_URL || 'https://comp-ef958063.fastapicloud.dev';
         
-        // Build headers with tier information
         const headers: Record<string, string> = {
           'Content-Type': 'application/json',
         };
         
-        // Pass tier as header for backend to determine access level
-        // The tier comes from the authenticated user's profile
         if (tier !== 'anonymous') {
           headers['X-User-Tier'] = tier;
         }
 
-        const response = await fetch(`${honoUrl}/api/ai/analysis/${ticker}`, {
+        const response = await fetch(`${compUrl}/api/v1/ai/analysis/${ticker}`, {
           headers,
+          signal: controller.signal,
         });
 
         if (!response.ok) {
@@ -176,16 +186,27 @@ export function useFundamentalAnalysis(ticker: string, tier: UserTier) {
         }
 
         const result = await response.json();
-        setData(result);
+        if (!controller.signal.aborted) {
+          setData(result);
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error');
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        if (!controller.signal.aborted) {
+          setError(err instanceof Error ? err.message : 'Unknown error');
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchData();
-  }, [ticker, tier]);
+
+    return () => {
+      controller.abort();
+    };
+  }, [ticker, tier, options?.authLoading]);
 
   return { data, loading, error };
 }

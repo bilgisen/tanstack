@@ -7,12 +7,11 @@ import {
   Sparkles, Lock, Shield, AlertTriangle,
 } from 'lucide-react'
 import { 
-  FundamentalAnalysisWidget,
   useFundamentalAnalysis,
-  type UserTier 
+  type UserTier,
 } from '../components/fundamental'
 import { useAuth } from '../hooks/useAuth'
-import { TIER_CONFIG, type Tier } from '../lib/tiers'
+import { type Tier } from '../lib/tiers'
 
 export const Route = createFileRoute('/sektorler/$slug/$company/temel-analiz')({
   component: FundamentalAnalysisPage,
@@ -39,12 +38,15 @@ function FundamentalAnalysisPage() {
   const [fundamental, setFundamental] = useState<FundamentalData | null>(null)
   const [loading, setLoading] = useState(true)
   
-  // Get user from auth
   const { user, loading: authLoading } = useAuth()
   const userTier = getUserTierFromAuth(user)
 
-  // AI Analysis data
-  const { data: aiData, loading: aiLoading, error: aiError } = useFundamentalAnalysis(tickerUpper, userTier)
+  // Wait for auth to finish before fetching AI analysis
+  const { data: aiData, loading: aiLoading, error: aiError } = useFundamentalAnalysis(
+    tickerUpper,
+    userTier,
+    { authLoading }
+  )
 
   useEffect(() => {
     let isMounted = true
@@ -58,7 +60,8 @@ function FundamentalAnalysisPage() {
     return () => { isMounted = false }
   }, [tickerUpper, slug])
 
-  if (loading) {
+  // Show skeleton while fundamentals load or auth is still resolving
+  if (loading || authLoading) {
     return (
       <div className="space-y-4">
         <div className="h-48 w-full bg-muted/20 rounded-2xl animate-pulse" />
@@ -107,14 +110,40 @@ function FundamentalAnalysisPage() {
             </div>
             <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Temel Analiz Puanı</h3>
           </div>
-          <FundamentalAnalysisWidget 
-            ticker={tickerUpper} 
-            tier={userTier}
-            onUpgrade={() => {
-              // TODO: Navigate to upgrade page
-              console.log('Upgrade clicked')
-            }}
-          />
+          {/* Inline score card - no duplicate fetch */}
+          <div className="space-y-4">
+            {(() => {
+              const scoreCard = aiData.cards?.find((c: any) => c.type === 'score_card')?.data
+              if (!scoreCard) return null
+              const score = scoreCard.score_sektor ?? 0
+              return (
+                <div className="flex items-center gap-4 p-4 border border-border/40 rounded-xl bg-muted/10">
+                  <div className="relative w-16 h-16 flex-shrink-0">
+                    <svg className="w-full h-full transform -rotate-90">
+                      <circle cx="32" cy="32" r="28" stroke="currentColor" className="text-muted/20" strokeWidth="6" fill="none" />
+                      <circle
+                        cx="32" cy="32" r="28"
+                        stroke={score >= 70 ? '#22c55e' : score >= 50 ? '#eab308' : '#ef4444'}
+                        strokeWidth="6"
+                        fill="none"
+                        strokeDasharray={`${(score / 100) * 176} 176`}
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    <span className="absolute inset-0 flex items-center justify-center text-sm font-black">
+                      {score.toFixed(0)}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="font-bold text-foreground">Temel Analiz Puanı</p>
+                    <p className="text-sm text-muted-foreground">
+                      Sektör: %{scoreCard.percentile_sector} | Sıra: #{scoreCard.rank_sector}
+                    </p>
+                  </div>
+                </div>
+              )
+            })()}
+          </div>
         </div>
       )}
 

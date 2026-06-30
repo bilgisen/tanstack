@@ -176,19 +176,32 @@ export async function fetchCompanyData(tickerUpper: string, slug: string) {
 
   let fundamental: FundamentalData = { fk: '-', roe: '-', currentRatio: '-', debtToEquity: '-', sector: sectorName }
   try {
-    const res = await fetch(`${compUrl}/api/v1/companies/${tickerUpper}/profile`)
+    // Fetch from company_ratios via COMP API - using ratios that exist in the database
+    const res = await fetch(`${compUrl}/api/v1/companies/${tickerUpper}/ratios`)
     if (res.ok) {
       const json = await res.json()
-      const ratios = json.key_ratios || {}
+      const ratios = json.ratios || {}
       fundamental = {
-        fk: ratios.pe_ratio?.value != null ? ratios.pe_ratio.value.toFixed(2) : '-',
+        // F/K (pe_ratio) comes from CompanyMetrics table, not company_ratios
+        fk: '-',
         roe: ratios.roe?.value != null ? (ratios.roe.value * 100).toFixed(1) + '%' : '-',
         currentRatio: ratios.current_ratio?.value != null ? ratios.current_ratio.value.toFixed(2) : '-',
         debtToEquity: ratios.debt_to_equity?.value != null ? ratios.debt_to_equity.value.toFixed(2) : '-',
-        sector: json.sector_main || sectorName,
+        sector: json.sector || sectorName,
       }
     }
-  } catch (e) { console.error('comp profile fetch failed', e) }
+  } catch (e) { console.error('comp ratios fetch failed', e) }
+  
+  // Fetch F/K (P/E) from company metrics/profile which includes market data
+  try {
+    const profileRes = await fetch(`${compUrl}/api/v1/companies/${tickerUpper}/profile`)
+    if (profileRes.ok) {
+      const profileJson = await profileRes.json()
+      if (profileJson.market_data?.pe_ratio != null) {
+        fundamental.fk = profileJson.market_data.pe_ratio.toFixed(2)
+      }
+    }
+  } catch (e) { console.error('comp profile fetch failed for P/E', e) }
 
   return { stats, taData, fundamental, sectorName }
 }

@@ -1,6 +1,6 @@
 import { Lock, ArrowUpCircle } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
-import { TIER_CONFIG, type Tier } from '../../lib/tiers'
+import { type Tier } from '../../lib/tiers'
 
 type LockedSectionProps = {
   children: React.ReactNode
@@ -9,17 +9,14 @@ type LockedSectionProps = {
   description?: string
 }
 
-// Check if user has required tier level
 function hasRequiredTier(userTier: Tier | null, requiredVariant: 'anonymous' | 'subscriber'): boolean {
   if (!userTier) return requiredVariant === 'anonymous'
   
   if (requiredVariant === 'anonymous') {
-    // Any logged-in user can access anonymous content
     return true
   }
   
   if (requiredVariant === 'subscriber') {
-    // Only pro and ultimate can access subscriber content
     return userTier === 'pro' || userTier === 'ultimate'
   }
   
@@ -32,12 +29,25 @@ export function LockedSection({
   title,
   description,
 }: LockedSectionProps) {
-  const { user, login } = useAuth()
+  const { user, loading: authLoading, login } = useAuth()
   
-  // Get user's tier from profile
   const userTier = user?.tier as Tier | null
   const isAnonymous = !user
   const hasAccess = hasRequiredTier(userTier, variant)
+
+  // Show skeleton while auth is loading to prevent flash
+  if (authLoading) {
+    return (
+      <div className="space-y-4 animate-pulse">
+        <div className="h-20 bg-muted/30 rounded-xl" />
+        <div className="grid grid-cols-3 gap-4">
+          <div className="h-24 bg-muted/30 rounded-lg" />
+          <div className="h-24 bg-muted/30 rounded-lg" />
+          <div className="h-24 bg-muted/30 rounded-lg" />
+        </div>
+      </div>
+    )
+  }
 
   if (hasAccess) {
     return <>{children}</>
