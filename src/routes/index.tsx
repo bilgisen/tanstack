@@ -16,6 +16,7 @@ import { useUIStore } from '../store/ui'
 import companyLogos from '../constants/companyLogos.json'
 import companyNames from '../constants/companyNames.json'
 import tickerToSectorSlug from '../constants/tickerToSectorSlug'
+import { toSlug } from '../constants/companyShared'
 
 export const Route = createFileRoute('/')({
   component: LandingPage,
@@ -120,11 +121,7 @@ function LandingPage() {
             const sectorList = data.sectors
               .filter((s: any) => s.name)
               .map((s: any) => ({
-                slug: s.name.toLowerCase()
-                  .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
-                  .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
-                  .replace(/[^a-z0-9]+/g, '-')
-                  .replace(/^-|-$/g, ''),
+                slug: toSlug(s.name),
                 name: s.name,
                 companyCount: s.total_companies || s.active_companies || 0,
               }))
@@ -286,23 +283,23 @@ function LandingPage() {
                 </Link>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
-                {sectors.slice(0, 6).map((sector) => (
+                {sectors.map((sector) => (
                   <Link
                     key={sector.slug}
                     to="/sektorler/$slug"
                     params={{ slug: sector.slug }}
-                    className="group flex items-center justify-between border border-border/40 bg-muted/10 rounded-xl p-4 transition-all hover:border-primary/30 hover:bg-muted/20 cursor-pointer"
+                    className="group flex items-center justify-between border border-border/40 bg-muted/10 rounded-xl p-3 transition-all hover:border-primary/30 hover:bg-muted/20 cursor-pointer"
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
-                        <Factory size={16} />
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
+                        <Factory size={14} />
                       </div>
                       <div className="min-w-0">
-                        <h3 className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">{sector.name}</h3>
+                        <h3 className="text-xs font-bold text-foreground truncate group-hover:text-primary transition-colors">{sector.name}</h3>
                         <p className="text-[10px] text-muted-foreground mt-0.5">{sector.companyCount} şirket</p>
                       </div>
                     </div>
-                    <ChevronRight size={14} className="text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0" />
+                    <ChevronRight size={12} className="text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0" />
                   </Link>
                 ))}
               </div>

@@ -1,5 +1,15 @@
 import companyNames from './companyNames.json'
 
+export function toSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/i̇/g, 'i') // Handle İ → i̇ after lowercase (combining dot)
+    .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
+    .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
 export const SLUG_TO_NAME: Record<string, string> = {
   'saglik-ilac': 'Sağlık & İlaç',
   'gida-icecek-tarim': 'Gıda & İçecek & Tarım',

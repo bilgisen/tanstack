@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Loader2, ChevronRight, Factory, HelpCircle } from 'lucide-react'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
 import { useChatStore } from '../store/chat'
+import { toSlug } from '../constants/companyShared'
 
 export const Route = createFileRoute('/sektorler')({
   component: SektorlerPage,
@@ -13,15 +14,6 @@ type Sector = {
   name: string;
   companyCount: number;
 };
-
-function toSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
-    .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-}
 
 function SektorlerPage() {
   const matches = useMatches()
