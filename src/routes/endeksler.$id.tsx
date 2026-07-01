@@ -598,11 +598,11 @@ function EndeksDetailPage() {
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       {logoFile ? (
-                        <div className="h-7 w-7 rounded-lg bg-white overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
+                        <div className="h-7 w-7 rounded-md bg-white overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
                           <img src={`/logos/${logoFile}`} alt={row.code} className="h-full w-full object-cover p-0.5" />
                         </div>
                       ) : (
-                        <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-bold text-[9px] shrink-0">{row.code.slice(0, 2)}</div>
+                        <div className="h-7 w-7 rounded-md bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-bold text-[9px] shrink-0">{row.code.slice(0, 2)}</div>
                       )}
                       <span className="text-xs font-bold text-foreground truncate group-hover:text-primary transition-colors">{row.code}</span>
                     </div>
@@ -631,11 +631,11 @@ function EndeksDetailPage() {
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       {logoFile ? (
-                        <div className="h-7 w-7 rounded-lg bg-white overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
+                        <div className="h-7 w-7 rounded-md bg-white overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
                           <img src={`/logos/${logoFile}`} alt={row.code} className="h-full w-full object-cover p-0.5" />
                         </div>
                       ) : (
-                        <div className="h-7 w-7 rounded-lg bg-destructive/10 flex items-center justify-center text-destructive font-bold text-[9px] shrink-0">{row.code.slice(0, 2)}</div>
+                        <div className="h-7 w-7 rounded-md bg-destructive/10 flex items-center justify-center text-destructive font-bold text-[9px] shrink-0">{row.code.slice(0, 2)}</div>
                       )}
                       <span className="text-xs font-bold text-foreground truncate group-hover:text-primary transition-colors">{row.code}</span>
                     </div>

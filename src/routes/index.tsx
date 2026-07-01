@@ -234,11 +234,11 @@ function LandingPage() {
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         {logoFile ? (
-                          <div className="h-8 w-8 rounded-lg bg-white overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
+                          <div className="h-8 w-8 rounded-md bg-white overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
                             <img src={`/logos/${logoFile}`} alt={stock.ticker} className="h-full w-full object-cover p-0.5" />
                           </div>
                         ) : (
-                          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] shrink-0 border border-primary/10">
+                          <div className="h-8 w-8 rounded-md bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] shrink-0 border border-primary/10">
                             {stock.ticker.slice(0, 2)}
                           </div>
                         )}
