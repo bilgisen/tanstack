@@ -10,9 +10,10 @@ interface ChatPanelProps {
   placeholder?: string;
   onClose?: () => void;
   user?: any;
+  sessionLoading?: boolean;
 }
 
-export function ChatPanel({ context, placeholder, onClose, user }: ChatPanelProps) {
+export function ChatPanel({ context, placeholder, onClose, user, sessionLoading }: ChatPanelProps) {
   const { messages, isLoading, sessions, activeSessionId, loadSession, deleteSession, clearChat } = useChatStore();
   const { isChatMaximized, toggleChatMaximized } = useUIStore();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -194,6 +195,7 @@ export function ChatPanel({ context, placeholder, onClose, user }: ChatPanelProp
             placeholder={placeholder}
             className="w-full border-none shadow-none bg-transparent"
             user={user}
+            sessionLoading={sessionLoading}
           />
         </div>
       </div>

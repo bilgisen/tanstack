@@ -141,7 +141,7 @@ function PanelLayout() {
 
         {/* Desktop Right Column: Dedicated Fixed Chat Panel (40% or 100% maximized) */}
         <div className={`hidden md:block h-full shrink-0 transition-all duration-300 ${isChatMaximized ? 'w-full flex-1' : 'md:w-[360px] lg:w-[400px] xl:w-[440px]'}`}>
-          <ChatPanel context={context} placeholder={placeholder} user={user} />
+          <ChatPanel context={context} placeholder={placeholder} user={user} sessionLoading={loading} />
         </div>
 
       </div>
@@ -153,6 +153,7 @@ function PanelLayout() {
         context={context} 
         placeholder={placeholder}
         user={user}
+        sessionLoading={loading}
       />
     </div>
   )

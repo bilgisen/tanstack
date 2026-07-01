@@ -39,7 +39,7 @@ type StockRow = {
 }
 
 function LandingPage() {
-  const { user, login: handleLogin } = useAuth()
+  const { user, loading: sessionLoading, login: handleLogin } = useAuth()
   const { isChatMaximized } = useUIStore()
   const navigate = useNavigate()
   const [isChatSheetOpen, setIsChatSheetOpen] = useState(false)
@@ -326,7 +326,7 @@ function LandingPage() {
 
       {/* Desktop: Chat Panel */}
       <div className={`hidden md:block h-full shrink-0 transition-all duration-300 ${isChatMaximized ? 'w-full flex-1' : 'md:w-[360px] lg:w-[400px] xl:w-[440px]'}`}>
-        <ChatPanel context="global" placeholder="Borsa hakkında bir soru sorun..." user={user} />
+        <ChatPanel context="global" placeholder="Borsa hakkında bir soru sorun..." user={user} sessionLoading={sessionLoading} />
       </div>
 
       {/* Mobile: Chat Sheet */}
@@ -336,6 +336,7 @@ function LandingPage() {
         context="global"
         placeholder="Borsa hakkında bir soru sorun..."
         user={user}
+        sessionLoading={sessionLoading}
       />
     </div>
   )

@@ -7,9 +7,10 @@ interface ChatSheetProps {
   context: string;
   placeholder?: string;
   user?: any;
+  sessionLoading?: boolean;
 }
 
-export function ChatSheet({ isOpen, onClose, context, placeholder, user }: ChatSheetProps) {
+export function ChatSheet({ isOpen, onClose, context, placeholder, user, sessionLoading }: ChatSheetProps) {
   // Prevent page scroll when sheet is open
   useEffect(() => {
     if (isOpen) {
@@ -48,6 +49,7 @@ export function ChatSheet({ isOpen, onClose, context, placeholder, user }: ChatS
             placeholder={placeholder} 
             onClose={onClose}
             user={user}
+            sessionLoading={sessionLoading}
           />
         </div>
       </div>
