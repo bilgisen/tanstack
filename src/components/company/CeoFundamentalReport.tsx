@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   AlertTriangle, TrendingUp, TrendingDown, Shield, BarChart3,
-  ChevronDown, ChevronUp, Lightbulb,
+  ChevronDown, ChevronUp,
 } from 'lucide-react'
 
 interface FundamentalReport {
@@ -43,12 +43,6 @@ interface FundamentalReport {
     below_count: number
     above_ratios: string[]
     below_ratios: string[]
-  }
-  swot: {
-    strengths: Array<{ item: string; impact: string; source: string }>
-    weaknesses: Array<{ item: string; impact: string; source: string }>
-    opportunities: Array<{ item: string; impact: string; source: string }>
-    threats: Array<{ item: string; impact: string; source: string }>
   }
   scenarios: {
     optimistic: { title: string; probability: string; factors: string[]; outcome: string }
@@ -153,11 +147,7 @@ export function CeoFundamentalReport({ ticker }: CeoFundamentalReportProps) {
       </p>
 
       {/* Quick Stats — inline */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 py-4">
-        <div>
-          <span className="text-xs text-muted-foreground font-medium uppercase block mb-1">Sektör</span>
-          <span className="text-base font-medium text-foreground">{report.sector}</span>
-        </div>
+      <div className="grid grid-cols-3 gap-3 py-4">
         <div>
           <span className="text-xs text-muted-foreground font-medium uppercase block mb-1">Sıralama</span>
           <span className="text-base font-medium text-foreground">
@@ -285,63 +275,6 @@ export function CeoFundamentalReport({ ticker }: CeoFundamentalReportProps) {
                 </div>
               </div>
             )}
-          </div>
-        )}
-      </div>
-
-      {/* SWOT */}
-      <div>
-        <SectionHeader
-          icon={<Lightbulb size={14} className="text-indigo-500" />}
-          label="SWOT Analizi"
-          section="swot"
-        />
-        {expandedSection === 'swot' && (
-          <div className="pt-4 pb-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <span className="text-xs font-semibold text-emerald-500 uppercase tracking-wider block mb-2">Güçlü Yönler</span>
-              <ul className="space-y-1.5">
-                {report.swot.strengths.map((item, i) => (
-                  <li key={i} className="text-sm text-foreground/75 flex items-start gap-2">
-                    <span className="text-emerald-500 mt-0.5 shrink-0">•</span>
-                    <span>{item.item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <span className="text-xs font-semibold text-red-500 uppercase tracking-wider block mb-2">Zayıf Yönler</span>
-              <ul className="space-y-1.5">
-                {report.swot.weaknesses.map((item, i) => (
-                  <li key={i} className="text-sm text-foreground/75 flex items-start gap-2">
-                    <span className="text-red-500 mt-0.5 shrink-0">•</span>
-                    <span>{item.item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <span className="text-xs font-semibold text-blue-500 uppercase tracking-wider block mb-2">Fırsatlar</span>
-              <ul className="space-y-1.5">
-                {report.swot.opportunities.map((item, i) => (
-                  <li key={i} className="text-sm text-foreground/75 flex items-start gap-2">
-                    <span className="text-blue-500 mt-0.5 shrink-0">•</span>
-                    <span>{item.item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <span className="text-xs font-semibold text-amber-500 uppercase tracking-wider block mb-2">Tehditler</span>
-              <ul className="space-y-1.5">
-                {report.swot.threats.map((item, i) => (
-                  <li key={i} className="text-sm text-foreground/75 flex items-start gap-2">
-                    <span className="text-amber-500 mt-0.5 shrink-0">•</span>
-                    <span>{item.item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
           </div>
         )}
       </div>
