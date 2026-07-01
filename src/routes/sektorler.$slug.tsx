@@ -195,7 +195,7 @@ function SektorDetailPage() {
                     <span className="text-xs font-mono text-muted-foreground w-5 text-right shrink-0">{company.rank}</span>
                     {logoFile ? (
                       <div className="h-8 w-8 rounded-md bg-white overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
-                        <img src={`/logos/${logoFile}`} alt={company.ticker} className="h-full w-full object-cover p-0.5" />
+                        <img src={`/logos/${logoFile}`} alt={company.ticker} className="h-full w-full object-contain" />
                       </div>
                     ) : (
                       <div className="h-8 w-8 rounded-md bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] shrink-0 border border-primary/10">
