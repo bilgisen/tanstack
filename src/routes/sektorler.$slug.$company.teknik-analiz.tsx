@@ -2,10 +2,11 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { TradingViewChart } from '../components/dashboard/TradingViewChart'
 import { LockedSection } from '../components/company/LockedSection'
+import { CeoTaReport } from '../components/company/CeoTaReport'
 import { fetchCompanyData, ScoreGauge, SignalBadge, type CompanyStats, type TaData } from '../constants/companyShared'
 import {
   Activity, TrendingUp, BarChart3, Target, AlertTriangle,
-  CandlestickChart, Shield, Zap, Gauge, LineChart, Sparkles, Lock,
+  Shield, Gauge, LineChart,
 } from 'lucide-react'
 
 export const Route = createFileRoute('/sektorler/$slug/$company/teknik-analiz')({
@@ -166,46 +167,8 @@ function TechnicalAnalysisPage() {
         </div>
       )}
 
-      {/* SUBSCRIBER ONLY: Premium TA */}
-      <LockedSection variant="subscriber" title="Premium Teknik Analiz" description="Bu içeriğe erişmek için yükseltme yapın.">
-        <div className="border border-border/45 bg-card/20 rounded-2xl p-5 md:p-6 space-y-6">
-          <div className="flex items-center gap-2.5 pb-4 border-b border-border/30">
-            <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center">
-              <Zap size={14} />
-            </div>
-            <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Premium Teknik Analiz</h3>
-            <Lock size={12} className="text-muted-foreground ml-auto" />
-          </div>
-          <div className="border border-amber-500/20 rounded-xl bg-amber-500/5 p-4">
-            <span className="text-xs text-amber-500 font-bold uppercase tracking-wider block mb-1.5 flex items-center gap-1.5">
-              <Sparkles size={13} /> AI Detaylı Teknik Analiz
-            </span>
-            <p className="text-sm text-foreground/80 font-medium leading-relaxed">
-              AI destekli detaylı teknik analiz raporu. Çoklu zaman dilimi analizi, formasyon tanımlama ve gelecek fiyat projeksiyonları.
-            </p>
-          </div>
-          {taData && taData.candlestick_patterns.length > 0 && (
-            <div className="border border-border/40 rounded-xl bg-muted/10 p-4">
-              <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider block mb-2 flex items-center gap-1.5">
-                <CandlestickChart size={13} /> Mum Formasyonları Detay
-              </span>
-              <div className="flex flex-wrap gap-1.5">
-                {taData.candlestick_patterns.map((p: any, i: any) => (
-                  <span key={i} className="text-xs font-bold px-2.5 py-1 rounded-lg bg-primary/10 text-primary border border-primary/20">{p}</span>
-                ))}
-              </div>
-            </div>
-          )}
-          {taData && taData.market_regime.recommended_strategy && (
-            <div className="border border-primary/20 rounded-xl bg-primary/5 p-4">
-            <span className="text-xs text-primary font-bold uppercase tracking-wider block mb-1.5 flex items-center gap-1.5">
-              <Zap size={13} /> Önerilen Strateji
-            </span>
-            <p className="text-sm text-foreground/80 font-medium leading-relaxed">{taData.market_regime.recommended_strategy}</p>
-            </div>
-          )}
-        </div>
-      </LockedSection>
+      {/* SUBSCRIBER ONLY: CEO Technical Analysis Report */}
+      <CeoTaReport ticker={tickerUpper} />
 
     </div>
   )
