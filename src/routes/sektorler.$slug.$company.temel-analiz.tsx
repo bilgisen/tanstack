@@ -1,11 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { fetchCompanyData, type FundamentalData } from '../constants/companyShared'
-import { DollarSign } from 'lucide-react'
 import { CeoFundamentalReport } from '../components/company/CeoFundamentalReport'
-import { RatioRadar } from '../components/company/RatioRadar'
-import { RatioBarCard } from '../components/company/RatioBarCard'
-import { RatioScoreRing } from '../components/company/RatioScoreRing'
 
 export const Route = createFileRoute('/sektorler/$slug/$company/temel-analiz')({
   component: FundamentalAnalysisPage,
@@ -118,35 +114,8 @@ function FundamentalAnalysisPage() {
     return () => { isMounted = false }
   }, [tickerUpper, slug])
 
-  // Compute group averages for radar
-  const groupStats = useMemo(() => {
-    const stats: Record<string, { companyAvg: number; sectorAvg: number; count: number }> = {}
-    for (const r of ratios) {
-      if (!stats[r.group]) stats[r.group] = { companyAvg: 0, sectorAvg: 0, count: 0 }
-      const pct = r.percentile ?? 50
-      stats[r.group].companyAvg += pct
-      stats[r.group].sectorAvg += 50 // sector median = 50th percentile by definition
-      stats[r.group].count++
-    }
-    for (const g of Object.values(stats)) {
-      if (g.count > 0) { g.companyAvg /= g.count; g.sectorAvg /= g.count }
-    }
-    return stats
-  }, [ratios])
-
-  // Radar data
-  const radarData = useMemo(() => {
-    return RATIO_ORDER
-      .filter(g => groupStats[g])
-      .map(g => ({
-        label: GROUP_CONFIG[g].label,
-        company: Math.round(groupStats[g].companyAvg),
-        sector: 50,
-      }))
-  }, [groupStats])
-
   // Group ratios
-  const grouped = useMemo(() => {
+  const grouped = (() => {
     const map: Record<string, RatioItem[]> = {}
     for (const r of ratios) {
       if (!map[r.group]) map[r.group] = []
@@ -157,7 +126,7 @@ function FundamentalAnalysisPage() {
       ...GROUP_CONFIG[g],
       ratios: map[g],
     }))
-  }, [ratios])
+  })()
 
   if (loading) {
     return (
@@ -184,42 +153,37 @@ function FundamentalAnalysisPage() {
         </div>
       )}
 
-      {/* Radar + Score Rings */}
-      {radarData.length > 0 && (
-        <div className="flex flex-col md:flex-row items-center gap-8 py-4">
-          <RatioRadar data={radarData} size={220} />
-          <div className="flex gap-6">
-            {grouped.map(g => (
-              <RatioScoreRing
-                key={g.key}
-                label={g.label}
-                score={Math.round(groupStats[g.key]?.companyAvg ?? 50)}
-                color={g.color}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Ratio Groups with Bar Cards */}
+      {/* Ratio Groups */}
       {grouped.map(g => (
         <div key={g.key} className="space-y-1">
           <div className="flex items-center gap-2 pb-2 border-b border-border/15">
             <span className="text-sm font-medium text-muted-foreground">{g.icon} {g.label}</span>
             <span className="text-xs text-muted-foreground/60">({g.ratios.length})</span>
           </div>
-          {g.ratios.map(r => (
-            <RatioBarCard
-              key={r.key}
-              label={r.label}
-              companyValue={r.value}
-              sectorMedian={r.sectorMedian}
-              percentile={r.percentile}
-              formattedValue={r.formattedValue}
-              formattedMedian={formatValue(r.key, r.sectorMedian)}
-              higherIsBetter={r.higherIsBetter}
-            />
-          ))}
+          {g.ratios.map(r => {
+            const pct = r.percentile ?? 50
+            const isAbove = r.sectorMedian !== null && r.value !== null && (
+              r.higherIsBetter ? r.value > r.sectorMedian : r.value < r.sectorMedian
+            )
+            return (
+              <div key={r.key} className="flex items-center justify-between py-2.5">
+                <span className="text-sm text-foreground/80">{r.label}</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-semibold font-mono text-foreground">{r.formattedValue}</span>
+                  {r.sectorMedian !== null && (
+                    <span className="text-xs text-muted-foreground font-mono w-20 text-right">
+                      {formatValue(r.key, r.sectorMedian)}
+                    </span>
+                  )}
+                  {r.percentile !== null && (
+                    <span className={`text-xs font-medium w-10 text-right ${pct > 60 ? 'text-emerald-500' : pct < 40 ? 'text-red-500' : 'text-muted-foreground'}`}>
+                      %{pct}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )
+          })}
         </div>
       ))}
 
