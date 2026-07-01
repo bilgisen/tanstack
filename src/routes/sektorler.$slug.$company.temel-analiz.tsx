@@ -36,6 +36,11 @@ const RATIO_LABELS: Record<string, string> = {
   debt_ratio: 'Borçlanma',
   net_debt_to_equity: 'Net Borç/Özkaynak',
   asset_turnover: 'Aktif Devir',
+  cost_income_ratio: 'Maliyet/Gelir',
+  net_interest_margin: 'Net Faiz Marjı',
+  loan_to_deposit: 'Kredi/Mevduat',
+  npl_ratio: 'Takipteki Kredi',
+  capital_adequacy: 'Sermaye Yeterlilik',
 }
 
 const GROUP_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
@@ -47,8 +52,10 @@ const GROUP_CONFIG: Record<string, { label: string; color: string; icon: string 
 const GROUP_ASSIGNMENT: Record<string, string> = {
   roe: 'karlilik', roa: 'karlilik', gross_margin: 'karlilik',
   net_margin: 'karlilik', operating_margin: 'karlilik', ebitda_margin: 'karlilik',
+  cost_income_ratio: 'karlilik', net_interest_margin: 'karlilik',
   current_ratio: 'finansal', acid_test_ratio: 'finansal', debt_to_equity: 'finansal',
   debt_ratio: 'finansal', net_debt_to_equity: 'finansal',
+  loan_to_deposit: 'finansal', npl_ratio: 'finansal', capital_adequacy: 'finansal',
   asset_turnover: 'verimlilik',
 }
 
@@ -56,7 +63,7 @@ const RATIO_ORDER = ['karlilik', 'finansal', 'verimlilik']
 
 function formatValue(key: string, value: number | null): string {
   if (value === null) return '-'
-  if (['roe', 'roa', 'gross_margin', 'net_margin', 'operating_margin', 'ebitda_margin'].includes(key)) {
+  if (['roe', 'roa', 'gross_margin', 'net_margin', 'operating_margin', 'ebitda_margin', 'net_interest_margin', 'cost_income_ratio', 'npl_ratio'].includes(key)) {
     return `%${(value * 100).toFixed(1)}`
   }
   return value.toFixed(2)
