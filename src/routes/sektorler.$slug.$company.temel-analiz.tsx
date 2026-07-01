@@ -1,11 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { fetchCompanyData, type FundamentalData } from '../constants/companyShared'
-import {
-  Compass, TrendingUp, DollarSign, Shield,
-  BarChart3,
-} from 'lucide-react'
+import { DollarSign } from 'lucide-react'
 import { CeoFundamentalReport } from '../components/company/CeoFundamentalReport'
+import { RatioRadar } from '../components/company/RatioRadar'
+import { RatioBarCard } from '../components/company/RatioBarCard'
+import { RatioScoreRing } from '../components/company/RatioScoreRing'
 
 export const Route = createFileRoute('/sektorler/$slug/$company/temel-analiz')({
   component: FundamentalAnalysisPage,
@@ -14,6 +14,7 @@ export const Route = createFileRoute('/sektorler/$slug/$company/temel-analiz')({
 interface RatioItem {
   key: string
   label: string
+  group: string
   value: number | null
   formattedValue: string
   sectorMedian: number | null
@@ -22,63 +23,40 @@ interface RatioItem {
   higherIsBetter: boolean
 }
 
-interface RatioGroup {
-  title: string
-  icon: React.ReactNode
-  ratios: RatioItem[]
-}
-
 const RATIO_LABELS: Record<string, string> = {
-  roe: 'Özkaynak Kârlılığı (ROE)',
-  roa: 'Aktif Kârlılığı (ROA)',
-  gross_margin: 'Brüt Kâr Marjı',
-  net_margin: 'Net Kâr Marjı',
+  roe: 'ROE',
+  roa: 'ROA',
+  gross_margin: 'Brüt Marj',
+  net_margin: 'Net Marj',
   operating_margin: 'Operasyonel Marj',
-  ebitda_margin: 'FAVÖK Marjı',
+  ebitda_margin: 'FAVÖK Marj',
   current_ratio: 'Cari Oran',
-  acid_test_ratio: 'Asit Test Oranı',
-  debt_to_equity: 'Borç / Özsermaye',
-  debt_ratio: 'Borçlanma Oranı',
-  net_debt_to_equity: 'Net Borç / Özsermaye',
-  asset_turnover: 'Aktif Devir Hızı',
+  acid_test_ratio: 'Asit Test',
+  debt_to_equity: 'Borç/Özkaynak',
+  debt_ratio: 'Borçlanma',
+  net_debt_to_equity: 'Net Borç/Özkaynak',
+  asset_turnover: 'Aktif Devir',
 }
 
-const RATIO_GROUPS: Record<string, { title: string; icon: React.ReactNode; higherIsBetter: boolean }> = {
-  karlilik: {
-    title: 'Kârlılık Rasyoları',
-    icon: <TrendingUp size={14} className="text-emerald-500" />,
-    higherIsBetter: true,
-  },
-  finansal: {
-    title: 'Finansal Sağlık Rasyoları',
-    icon: <Shield size={14} className="text-blue-500" />,
-    higherIsBetter: false,
-  },
-  verimlilik: {
-    title: 'Verimlilik Rasyoları',
-    icon: <BarChart3 size={14} className="text-purple-500" />,
-    higherIsBetter: true,
-  },
+const GROUP_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
+  karlilik: { label: 'Kârlılık', color: '#10b981', icon: '📈' },
+  finansal: { label: 'Finansal Sağlık', color: '#3b82f6', icon: '🛡️' },
+  verimlilik: { label: 'Verimlilik', color: '#8b5cf6', icon: '⚡' },
 }
 
 const GROUP_ASSIGNMENT: Record<string, string> = {
-  roe: 'karlilik',
-  roa: 'karlilik',
-  gross_margin: 'karlilik',
-  net_margin: 'karlilik',
-  operating_margin: 'karlilik',
-  ebitda_margin: 'karlilik',
-  current_ratio: 'finansal',
-  acid_test_ratio: 'finansal',
-  debt_to_equity: 'finansal',
-  debt_ratio: 'finansal',
-  net_debt_to_equity: 'finansal',
+  roe: 'karlilik', roa: 'karlilik', gross_margin: 'karlilik',
+  net_margin: 'karlilik', operating_margin: 'karlilik', ebitda_margin: 'karlilik',
+  current_ratio: 'finansal', acid_test_ratio: 'finansal', debt_to_equity: 'finansal',
+  debt_ratio: 'finansal', net_debt_to_equity: 'finansal',
   asset_turnover: 'verimlilik',
 }
 
-function formatRatioValue(key: string, value: number | null): string {
+const RATIO_ORDER = ['karlilik', 'finansal', 'verimlilik']
+
+function formatValue(key: string, value: number | null): string {
   if (value === null) return '-'
-  if (key === 'gross_margin' || key === 'net_margin' || key === 'operating_margin' || key === 'ebitda_margin' || key === 'roe' || key === 'roa') {
+  if (['roe', 'roa', 'gross_margin', 'net_margin', 'operating_margin', 'ebitda_margin'].includes(key)) {
     return `%${(value * 100).toFixed(1)}`
   }
   return value.toFixed(2)
@@ -93,57 +71,86 @@ function FundamentalAnalysisPage() {
 
   useEffect(() => {
     let isMounted = true
-
     async function load() {
       const compUrl = import.meta.env.VITE_COMP_API_URL || 'https://comp-ef958063.fastapicloud.dev'
-
       try {
-      const [companyResult, ratiosResult] = await Promise.all([
-        fetchCompanyData(tickerUpper, slug),
-        (async () => {
-          try {
-            const res = await fetch(`${compUrl}/api/v1/companies/${tickerUpper}/ratios`)
-            if (res.ok) {
-              const json = await res.json()
-              return json.ratios || {}
-            }
-          } catch (e) { console.error('ratios fetch failed', e) }
-          return {}
-        })(),
-      ])
-
-      if (!isMounted) return
-
-      setFundamental(companyResult.fundamental)
-
-      const items: RatioItem[] = []
-      for (const [key, data] of Object.entries(ratiosResult) as any) {
-        const label = RATIO_LABELS[key]
-        if (!label) continue
-        const groupKey = GROUP_ASSIGNMENT[key]
-        const group = RATIO_GROUPS[groupKey]
-        if (!group) continue
-        const sc = data.sector_comparison
-        items.push({
-          key,
-          label,
-          value: data.value ?? null,
-          formattedValue: formatRatioValue(key, data.value ?? null),
-          sectorMedian: sc?.sector_median ?? null,
-          percentile: sc?.company_percentile ?? null,
-          vsSector: sc?.vs_sector ?? null,
-          higherIsBetter: group.higherIsBetter,
-        })
-      }
-
-      setRatios(items)
-      } catch (e) { console.error('fundamental data load failed', e) }
+        const [companyResult, ratiosResult] = await Promise.all([
+          fetchCompanyData(tickerUpper, slug),
+          (async () => {
+            try {
+              const res = await fetch(`${compUrl}/api/v1/companies/${tickerUpper}/ratios`)
+              if (res.ok) { const j = await res.json(); return j.ratios || {} }
+            } catch (e) { console.error('ratios fetch failed', e) }
+            return {}
+          })(),
+        ])
+        if (!isMounted) return
+        setFundamental(companyResult.fundamental)
+        const items: RatioItem[] = []
+        for (const [key, data] of Object.entries(ratiosResult) as any) {
+          const label = RATIO_LABELS[key]
+          if (!label) continue
+          const group = GROUP_ASSIGNMENT[key]
+          if (!group) continue
+          const sc = data.sector_comparison
+          items.push({
+            key, label, group,
+            value: data.value ?? null,
+            formattedValue: formatValue(key, data.value ?? null),
+            sectorMedian: sc?.sector_median ?? null,
+            percentile: sc?.company_percentile ?? null,
+            vsSector: sc?.vs_sector ?? null,
+            higherIsBetter: GROUP_ASSIGNMENT[key] !== 'finansal',
+          })
+        }
+        setRatios(items)
+      } catch (e) { console.error('load failed', e) }
       setLoading(false)
     }
-
     load()
     return () => { isMounted = false }
   }, [tickerUpper, slug])
+
+  // Compute group averages for radar
+  const groupStats = useMemo(() => {
+    const stats: Record<string, { companyAvg: number; sectorAvg: number; count: number }> = {}
+    for (const r of ratios) {
+      if (!stats[r.group]) stats[r.group] = { companyAvg: 0, sectorAvg: 0, count: 0 }
+      const pct = r.percentile ?? 50
+      stats[r.group].companyAvg += pct
+      stats[r.group].sectorAvg += 50 // sector median = 50th percentile by definition
+      stats[r.group].count++
+    }
+    for (const g of Object.values(stats)) {
+      if (g.count > 0) { g.companyAvg /= g.count; g.sectorAvg /= g.count }
+    }
+    return stats
+  }, [ratios])
+
+  // Radar data
+  const radarData = useMemo(() => {
+    return RATIO_ORDER
+      .filter(g => groupStats[g])
+      .map(g => ({
+        label: GROUP_CONFIG[g].label,
+        company: Math.round(groupStats[g].companyAvg),
+        sector: 50,
+      }))
+  }, [groupStats])
+
+  // Group ratios
+  const grouped = useMemo(() => {
+    const map: Record<string, RatioItem[]> = {}
+    for (const r of ratios) {
+      if (!map[r.group]) map[r.group] = []
+      map[r.group].push(r)
+    }
+    return RATIO_ORDER.filter(g => map[g]).map(g => ({
+      key: g,
+      ...GROUP_CONFIG[g],
+      ratios: map[g],
+    }))
+  }, [ratios])
 
   if (loading) {
     return (
@@ -154,98 +161,63 @@ function FundamentalAnalysisPage() {
     )
   }
 
-  const groupedRatios: RatioGroup[] = []
-  for (const [groupKey, config] of Object.entries(RATIO_GROUPS)) {
-    const groupRatios = ratios.filter(r => GROUP_ASSIGNMENT[r.key] === groupKey)
-    if (groupRatios.length > 0) {
-      groupedRatios.push({
-        title: config.title,
-        icon: config.icon,
-        ratios: groupRatios,
-      })
-    }
-  }
-
   return (
     <div className="space-y-8">
-      {/* RASYOLAR */}
-      <div className="space-y-5">
-        <div className="flex items-center gap-2.5 pb-3 border-b border-border/20">
-          <Compass size={14} className="text-blue-500" />
-          <h3 className="text-base font-semibold text-foreground">Rasyolar</h3>
-        </div>
 
-        {/* F/K Badge */}
-        {fundamental && fundamental.fk !== '-' && (
-          <div className="flex items-center gap-3 p-4 border border-border/40 rounded-xl bg-muted/10">
-            <div className="w-9 h-9 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center">
-              <DollarSign size={16} />
-            </div>
-            <div>
-              <span className="text-xs text-muted-foreground font-semibold uppercase">Fiyat / Kazanç (F/K)</span>
-              <div className="text-xl font-semibold text-foreground">{fundamental.fk}</div>
-            </div>
-          </div>
-        )}
-
-        {/* Ratio Groups */}
-        {groupedRatios.map((group) => (
-          <div key={group.title} className="space-y-3">
-            <div className="flex items-center gap-2">
-              {group.icon}
-              <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">{group.title}</h4>
-            </div>
-            <div className="space-y-1">
-              {group.ratios.map((ratio) => {
-                const isAboveMedian = ratio.sectorMedian !== null && ratio.value !== null && (
-                  ratio.higherIsBetter ? ratio.value > ratio.sectorMedian : ratio.value < ratio.sectorMedian
-                )
-                const percentile = ratio.percentile ?? 50
-                return (
-                  <div key={ratio.key} className="flex items-center justify-between gap-3 py-2.5 px-3 rounded-lg hover:bg-muted/20 transition-colors">
-                    <div className="flex-1 min-w-0">
-                      <span className="text-sm font-semibold text-foreground block">{ratio.label}</span>
-                    </div>
-                    <div className="flex items-center gap-4 shrink-0">
-                      {/* Company Value */}
-                      <div className="text-right min-w-[60px]">
-                        <span className="text-base font-semibold text-foreground font-mono">{ratio.formattedValue}</span>
-                      </div>
-                      {/* Sector Median */}
-                      {ratio.sectorMedian !== null && (
-                        <div className="text-right min-w-[80px]">
-                          <span className="text-[10px] text-muted-foreground font-semibold uppercase block">Sektör</span>
-                          <span className="text-sm font-bold text-muted-foreground font-mono">{formatRatioValue(ratio.key, ratio.sectorMedian)}</span>
-                        </div>
-                      )}
-                      {/* Percentile Bar */}
-                      {ratio.percentile !== null && (
-                        <div className="w-20 hidden md:block">
-                          <div className="h-1.5 bg-muted/30 rounded-full relative">
-                            <div
-                              className="absolute top-0 left-0 h-full bg-blue-500 rounded-full"
-                              style={{ width: `${percentile}%` }}
-                            />
-                          </div>
-                          <span className="text-[10px] text-muted-foreground text-center block mt-0.5">%{percentile.toFixed(0)}</span>
-                        </div>
-                      )}
-                      {/* Above/Below Badge */}
-                      {ratio.vsSector && (
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${isAboveMedian ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
-                          {isAboveMedian ? 'Üstünde' : 'Altında'}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        ))}
+      {/* Header */}
+      <div className="flex items-center gap-2.5 pb-3 border-b border-border/20">
+        <span className="text-base font-semibold text-foreground">Rasyolar</span>
       </div>
 
-      {/* AI TEMEL ANALIZ RAPORU */}
+      {/* F/K inline */}
+      {fundamental && fundamental.fk !== '-' && (
+        <div className="flex items-center gap-3">
+          <DollarSign size={14} className="text-amber-500" />
+          <span className="text-sm text-muted-foreground">F/K:</span>
+          <span className="text-lg font-semibold font-mono text-foreground">{fundamental.fk}</span>
+        </div>
+      )}
+
+      {/* Radar + Score Rings */}
+      {radarData.length > 0 && (
+        <div className="flex flex-col md:flex-row items-center gap-8 py-4">
+          <RatioRadar data={radarData} size={220} />
+          <div className="flex gap-6">
+            {grouped.map(g => (
+              <RatioScoreRing
+                key={g.key}
+                label={g.label}
+                score={Math.round(groupStats[g.key]?.companyAvg ?? 50)}
+                color={g.color}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Ratio Groups with Bar Cards */}
+      {grouped.map(g => (
+        <div key={g.key} className="space-y-1">
+          <div className="flex items-center gap-2 pb-2 border-b border-border/15">
+            <span className="text-sm font-medium text-muted-foreground">{g.icon} {g.label}</span>
+            <span className="text-xs text-muted-foreground/60">({g.ratios.length})</span>
+          </div>
+          {g.ratios.map(r => (
+            <RatioBarCard
+              key={r.key}
+              label={r.label}
+              companyValue={r.value}
+              sectorMedian={r.sectorMedian}
+              percentile={r.percentile}
+              formattedValue={r.formattedValue}
+              formattedMedian={formatValue(r.key, r.sectorMedian)}
+              higherIsBetter={r.higherIsBetter}
+            />
+          ))}
+        </div>
+      ))}
+
+      {/* AI Report */}
       <CeoFundamentalReport ticker={tickerUpper} />
     </div>
   )
