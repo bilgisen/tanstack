@@ -172,8 +172,7 @@ function FundamentalAnalysisPage() {
       {/* F/K inline */}
       {fundamental && fundamental.fk !== '-' && (
         <div className="flex items-center gap-3">
-          <DollarSign size={14} className="text-amber-500" />
-          <span className="text-sm text-muted-foreground">F/K:</span>
+          <span className="text-sm text-muted-foreground">Fiyat / Kazanç (F/K)</span>
           <span className="text-lg font-semibold font-mono text-foreground">{fundamental.fk}</span>
         </div>
       )}
