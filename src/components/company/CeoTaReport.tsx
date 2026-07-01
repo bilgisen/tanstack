@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { 
-  AlertTriangle, Target, Shield, Activity, BarChart3, Eye, 
+import {
+  AlertTriangle, Target, Shield, Activity, BarChart3, Eye,
   ChevronDown, ChevronUp, Zap, Sparkles
 } from 'lucide-react'
 
@@ -58,7 +58,7 @@ export function CeoTaReport({ ticker }: CeoTaReportProps) {
   const [report, setReport] = useState<CeoReport | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
-  const [expandedSection, setExpandedSection] = useState<string | null>('summary')
+  const [expandedSection, setExpandedSection] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchReport = async () => {
@@ -118,211 +118,174 @@ export function CeoTaReport({ ticker }: CeoTaReportProps) {
     )
   }
 
+  const SectionHeader = ({ icon, label, section }: { icon: React.ReactNode; label: string; section: string }) => (
+    <button
+      onClick={() => toggleSection(section)}
+      className="w-full flex items-center justify-between py-3 border-b border-border/20"
+    >
+      <div className="flex items-center gap-2.5">
+        {icon}
+        <h3 className="text-base font-semibold text-foreground">{label}</h3>
+      </div>
+      {expandedSection === section ? <ChevronUp size={16} className="text-muted-foreground" /> : <ChevronDown size={16} className="text-muted-foreground" />}
+    </button>
+  )
+
   return (
-    <div className="space-y-4">
-      
-      {/* Report Header */}
-      <div className="border border-border/45 bg-card/20 rounded-2xl p-5 md:p-6">
-        <div className="flex items-center justify-between pb-4 border-b border-border/30">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-              <Sparkles size={16} />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-foreground">{report.ticker} AI Teknik Analiz Raporu</h3>
-              <span className="text-sm text-muted-foreground">{report.report_date}</span>
-            </div>
-          </div>
-        </div>
+    <div className="space-y-0">
 
-        {/* Executive Summary */}
-        <div className="mt-4 p-4 rounded-xl bg-primary/5 border border-primary/20">
-          <div className="flex items-center gap-2 mb-2">
-            <Eye size={16} className="text-primary" />
-            <span className="text-sm font-bold text-primary uppercase tracking-wider">Yönetici Özeti</span>
-          </div>
-          <p className="text-base text-foreground/90 leading-relaxed font-medium">
-            {report.executive_summary}
-          </p>
-        </div>
+      {/* Executive Summary — no card, just text */}
+      <p className="text-lg text-foreground/85 leading-relaxed py-1">
+        {report.executive_summary}
+      </p>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
-          <div className="p-3 border border-border/40 rounded-xl bg-muted/10">
-            <span className="text-sm text-muted-foreground font-semibold uppercase block mb-1">Teknik Skor</span>
-            <span className={`text-xl font-bold font-mono ${getScoreColor(report.overview.technical_score)}`}>
-              {report.overview.technical_score}/100
-            </span>
-          </div>
-          <div className="p-3 border border-border/40 rounded-xl bg-muted/10">
-            <span className="text-sm text-muted-foreground font-semibold uppercase block mb-1">Piyasa Rejimi</span>
-            <span className="text-base font-bold text-foreground">{report.overview.market_regime}</span>
-          </div>
-          <div className="p-3 border border-border/40 rounded-xl bg-muted/10">
-            <span className="text-sm text-muted-foreground font-semibold uppercase block mb-1">Fiyat Karakteri</span>
-            <span className="text-base font-bold text-foreground">{report.overview.price_character}</span>
-          </div>
-          <div className="p-3 border border-border/40 rounded-xl bg-muted/10">
-            <span className="text-sm text-muted-foreground font-semibold uppercase block mb-1">Risk/Ödül</span>
-            <span className="text-xl font-bold font-mono text-foreground">{report.key_levels.risk_reward_ratio}</span>
-          </div>
+      {/* Quick Stats — inline, no card */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 py-4">
+        <div>
+          <span className="text-xs text-muted-foreground font-medium uppercase block mb-1">Teknik Skor</span>
+          <span className={`text-xl font-semibold font-mono ${getScoreColor(report.overview.technical_score)}`}>
+            {report.overview.technical_score}/100
+          </span>
+        </div>
+        <div>
+          <span className="text-xs text-muted-foreground font-medium uppercase block mb-1">Piyasa Rejimi</span>
+          <span className="text-base font-medium text-foreground">{report.overview.market_regime}</span>
+        </div>
+        <div>
+          <span className="text-xs text-muted-foreground font-medium uppercase block mb-1">Fiyat Karakteri</span>
+          <span className="text-base font-medium text-foreground">{report.overview.price_character}</span>
+        </div>
+        <div>
+          <span className="text-xs text-muted-foreground font-medium uppercase block mb-1">Risk/Ödül</span>
+          <span className="text-xl font-semibold font-mono text-foreground">{report.key_levels.risk_reward_ratio}</span>
         </div>
       </div>
 
       {/* Key Levels */}
-      <div className="border border-border/45 bg-card/20 rounded-2xl p-5 md:p-6">
-        <button 
-          onClick={() => toggleSection('levels')}
-          className="w-full flex items-center justify-between pb-4 border-b border-border/30"
-        >
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center">
-              <Target size={14} />
-            </div>
-            <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Kritik Fiyat Seviyeleri</h3>
-          </div>
-          {expandedSection === 'levels' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        </button>
-        
+      <div>
+        <SectionHeader
+          icon={<Target size={14} className="text-amber-500" />}
+          label="Kritik Fiyat Seviyeleri"
+          section="levels"
+        />
         {expandedSection === 'levels' && (
-          <div className="mt-4 space-y-3">
+          <div className="pt-4 pb-2 space-y-3">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {/* Supports */}
-              <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
-                <span className="text-sm font-bold text-emerald-500 uppercase tracking-wider block mb-3">Destek Seviyeleri</span>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">{report.key_levels.support_1.importance}</span>
-                    <span className="text-sm font-bold font-mono text-emerald-500">{formatPrice(report.key_levels.support_1.price)}</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{report.key_levels.support_1.scenario}</p>
-                  <div className="flex justify-between items-center pt-2 border-t border-emerald-500/10">
-                    <span className="text-sm text-muted-foreground">{report.key_levels.support_2.importance}</span>
-                    <span className="text-sm font-bold font-mono text-emerald-500">{formatPrice(report.key_levels.support_2.price)}</span>
-                  </div>
+              <div className="space-y-2">
+                <span className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">Destekler</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">{report.key_levels.support_1.importance}</span>
+                  <span className="text-sm font-semibold font-mono text-emerald-500">{formatPrice(report.key_levels.support_1.price)}</span>
+                </div>
+                <p className="text-sm text-muted-foreground">{report.key_levels.support_1.scenario}</p>
+                <div className="flex justify-between items-center pt-2 border-t border-border/10">
+                  <span className="text-sm text-muted-foreground">{report.key_levels.support_2.importance}</span>
+                  <span className="text-sm font-semibold font-mono text-emerald-500">{formatPrice(report.key_levels.support_2.price)}</span>
                 </div>
               </div>
-              
-              {/* Resistances */}
-              <div className="p-4 rounded-xl bg-destructive/5 border border-destructive/20">
-                <span className="text-sm font-bold text-destructive uppercase tracking-wider block mb-3">Direnç Seviyeleri</span>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">{report.key_levels.resistance_1.importance}</span>
-                    <span className="text-sm font-bold font-mono text-destructive">{formatPrice(report.key_levels.resistance_1.price)}</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{report.key_levels.resistance_1.scenario}</p>
-                  <div className="flex justify-between items-center pt-2 border-t border-destructive/10">
-                    <span className="text-sm text-muted-foreground">{report.key_levels.resistance_2.importance}</span>
-                    <span className="text-sm font-bold font-mono text-destructive">{formatPrice(report.key_levels.resistance_2.price)}</span>
-                  </div>
+              <div className="space-y-2">
+                <span className="text-xs font-semibold text-destructive uppercase tracking-wider">Dirençler</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">{report.key_levels.resistance_1.importance}</span>
+                  <span className="text-sm font-semibold font-mono text-destructive">{formatPrice(report.key_levels.resistance_1.price)}</span>
+                </div>
+                <p className="text-sm text-muted-foreground">{report.key_levels.resistance_1.scenario}</p>
+                <div className="flex justify-between items-center pt-2 border-t border-border/10">
+                  <span className="text-sm text-muted-foreground">{report.key_levels.resistance_2.importance}</span>
+                  <span className="text-sm font-semibold font-mono text-destructive">{formatPrice(report.key_levels.resistance_2.price)}</span>
                 </div>
               </div>
             </div>
-            
-            {/* Stop Loss / Take Profit */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="p-3 border border-border/40 rounded-xl bg-muted/10 text-center">
-                <span className="text-sm text-muted-foreground font-semibold uppercase block mb-1">Stop-Loss</span>
-                <span className="text-sm font-bold font-mono text-destructive">{formatPrice(report.key_levels.stop_loss)}</span>
+            <div className="grid grid-cols-3 gap-3 pt-2">
+              <div>
+                <span className="text-xs text-muted-foreground uppercase block mb-1">Stop-Loss</span>
+                <span className="text-sm font-semibold font-mono text-destructive">{formatPrice(report.key_levels.stop_loss)}</span>
               </div>
-              <div className="p-3 border border-border/40 rounded-xl bg-muted/10 text-center">
-                <span className="text-sm text-muted-foreground font-semibold uppercase block mb-1">Hedef</span>
-                <span className="text-sm font-bold font-mono text-emerald-500">{formatPrice(report.key_levels.take_profit)}</span>
+              <div>
+                <span className="text-xs text-muted-foreground uppercase block mb-1">Hedef</span>
+                <span className="text-sm font-semibold font-mono text-emerald-500">{formatPrice(report.key_levels.take_profit)}</span>
               </div>
-              <div className="p-3 border border-border/40 rounded-xl bg-muted/10 text-center">
-                <span className="text-sm text-muted-foreground font-semibold uppercase block mb-1">R/R Oranı</span>
-                <span className="text-sm font-bold font-mono text-foreground">{report.key_levels.risk_reward_ratio}</span>
+              <div>
+                <span className="text-xs text-muted-foreground uppercase block mb-1">R/R Oranı</span>
+                <span className="text-sm font-semibold font-mono text-foreground">{report.key_levels.risk_reward_ratio}</span>
               </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Indicators Interpretation */}
-      <div className="border border-border/45 bg-card/20 rounded-2xl p-5 md:p-6">
-        <button 
-          onClick={() => toggleSection('indicators')}
-          className="w-full flex items-center justify-between pb-4 border-b border-border/30"
-        >
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
-              <Activity size={14} />
-            </div>
-            <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Gösterge Yorumları</h3>
-          </div>
-          {expandedSection === 'indicators' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        </button>
-        
+      {/* Indicators */}
+      <div>
+        <SectionHeader
+          icon={<Activity size={14} className="text-blue-500" />}
+          label="Gösterge Yorumları"
+          section="indicators"
+        />
         {expandedSection === 'indicators' && (
-          <div className="mt-4 space-y-4">
-            {/* RSI */}
-            <div className="p-4 rounded-xl bg-muted/10 border border-border/30">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-bold text-muted-foreground uppercase">RSI (14)</span>
-                <span className={`text-base font-bold font-mono ${
-                  report.indicators.rsi.value > 70 ? 'text-destructive' : 
+          <div className="pt-4 pb-2 space-y-4">
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground uppercase">RSI (14)</span>
+                <span className={`text-base font-semibold font-mono ${
+                  report.indicators.rsi.value > 70 ? 'text-destructive' :
                   report.indicators.rsi.value < 30 ? 'text-emerald-500' : 'text-foreground'
                 }`}>{report.indicators.rsi.value}</span>
               </div>
-              <p className="text-sm text-foreground/80">{report.indicators.rsi.interpretation}</p>
+              <p className="text-sm text-foreground/70">{report.indicators.rsi.interpretation}</p>
             </div>
-            
-            {/* MACD */}
-            <div className="p-4 rounded-xl bg-muted/10 border border-border/30">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-bold text-muted-foreground uppercase">MACD</span>
-                <span className={`text-base font-bold font-mono ${
+
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground uppercase">MACD</span>
+                <span className={`text-base font-semibold font-mono ${
                   report.indicators.macd.histogram > 0 ? 'text-emerald-500' : 'text-destructive'
                 }`}>{report.indicators.macd.histogram > 0 ? 'Pozitif' : 'Negatif'}</span>
               </div>
-              <p className="text-sm text-foreground/80">{report.indicators.macd.interpretation}</p>
+              <p className="text-sm text-foreground/70">{report.indicators.macd.interpretation}</p>
             </div>
-            
-            {/* Moving Averages */}
-            <div className="p-4 rounded-xl bg-muted/10 border border-border/30">
-              <span className="text-sm font-bold text-muted-foreground uppercase block mb-3">Hareketli Ortalamalar</span>
+
+            <div className="space-y-2">
+              <span className="text-sm text-muted-foreground uppercase">Hareketli Ortalamalar</span>
               <div className="grid grid-cols-3 gap-3">
                 <div className="text-center">
-                  <span className="text-sm text-muted-foreground block">SMA 20</span>
-                  <span className="text-sm font-bold font-mono">{formatPrice(report.indicators.moving_averages.sma_20)}</span>
-                  <span className={`text-sm block ${report.indicators.moving_averages.price_vs_sma20 === 'Üstünde' ? 'text-emerald-500' : 'text-destructive'}`}>
+                  <span className="text-xs text-muted-foreground block">SMA 20</span>
+                  <span className="text-sm font-semibold font-mono">{formatPrice(report.indicators.moving_averages.sma_20)}</span>
+                  <span className={`text-xs block ${report.indicators.moving_averages.price_vs_sma20 === 'Üstünde' ? 'text-emerald-500' : 'text-destructive'}`}>
                     {report.indicators.moving_averages.price_vs_sma20}
                   </span>
                 </div>
                 <div className="text-center">
-                  <span className="text-sm text-muted-foreground block">SMA 50</span>
-                  <span className="text-sm font-bold font-mono">{formatPrice(report.indicators.moving_averages.sma_50)}</span>
-                  <span className={`text-sm block ${report.indicators.moving_averages.price_vs_sma50 === 'Üstünde' ? 'text-emerald-500' : 'text-destructive'}`}>
+                  <span className="text-xs text-muted-foreground block">SMA 50</span>
+                  <span className="text-sm font-semibold font-mono">{formatPrice(report.indicators.moving_averages.sma_50)}</span>
+                  <span className={`text-xs block ${report.indicators.moving_averages.price_vs_sma50 === 'Üstünde' ? 'text-emerald-500' : 'text-destructive'}`}>
                     {report.indicators.moving_averages.price_vs_sma50}
                   </span>
                 </div>
                 <div className="text-center">
-                  <span className="text-sm text-muted-foreground block">SMA 200</span>
-                  <span className="text-sm font-bold font-mono">{formatPrice(report.indicators.moving_averages.sma_200)}</span>
-                  <span className={`text-sm block ${report.indicators.moving_averages.price_vs_sma200 === 'Üstünde' ? 'text-emerald-500' : 'text-destructive'}`}>
+                  <span className="text-xs text-muted-foreground block">SMA 200</span>
+                  <span className="text-sm font-semibold font-mono">{formatPrice(report.indicators.moving_averages.sma_200)}</span>
+                  <span className={`text-xs block ${report.indicators.moving_averages.price_vs_sma200 === 'Üstünde' ? 'text-emerald-500' : 'text-destructive'}`}>
                     {report.indicators.moving_averages.price_vs_sma200}
                   </span>
                 </div>
               </div>
               {report.indicators.moving_averages.golden_cross && (
-                <div className="mt-2 p-2 rounded-lg bg-emerald-500/10 text-center">
-                  <span className="text-sm font-bold text-emerald-500">Golden Cross Aktif</span>
+                <div className="p-2 rounded-lg bg-emerald-500/10 text-center">
+                  <span className="text-sm font-semibold text-emerald-500">Golden Cross Aktif</span>
                 </div>
               )}
             </div>
-            
-            {/* Volatility */}
-            <div className="p-4 rounded-xl bg-muted/10 border border-border/30">
-              <span className="text-sm font-bold text-muted-foreground uppercase block mb-2">Volatilite</span>
+
+            <div className="space-y-1">
+              <span className="text-sm text-muted-foreground uppercase">Volatilite</span>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <span className="text-sm text-muted-foreground">ATR</span>
-                  <span className="text-sm font-bold font-mono block">{formatPrice(report.indicators.volatility.atr)}</span>
-                  <span className="text-sm text-muted-foreground">%{report.indicators.volatility.atr_percent}</span>
+                  <span className="text-xs text-muted-foreground">ATR</span>
+                  <span className="text-sm font-semibold font-mono block">{formatPrice(report.indicators.volatility.atr)}</span>
+                  <span className="text-xs text-muted-foreground">%{report.indicators.volatility.atr_percent}</span>
                 </div>
                 <div>
-                  <span className="text-sm text-muted-foreground">Bollinger</span>
+                  <span className="text-xs text-muted-foreground">Bollinger</span>
                   <span className="text-sm font-mono block">{formatPrice(report.indicators.volatility.bollinger_lower)} - {formatPrice(report.indicators.volatility.bollinger_upper)}</span>
                 </div>
               </div>
@@ -332,45 +295,35 @@ export function CeoTaReport({ ticker }: CeoTaReportProps) {
       </div>
 
       {/* Scenarios */}
-      <div className="border border-border/45 bg-card/20 rounded-2xl p-5 md:p-6">
-        <button 
-          onClick={() => toggleSection('scenarios')}
-          className="w-full flex items-center justify-between pb-4 border-b border-border/30"
-        >
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-violet-500/10 text-violet-500 flex items-center justify-center">
-              <Zap size={14} />
-            </div>
-            <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Senaryo Analizi</h3>
-          </div>
-          {expandedSection === 'scenarios' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        </button>
-        
+      <div>
+        <SectionHeader
+          icon={<Zap size={14} className="text-violet-500" />}
+          label="Senaryo Analizi"
+          section="scenarios"
+        />
         {expandedSection === 'scenarios' && (
-          <div className="mt-4 space-y-3">
-            {/* Positive */}
-            <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-bold text-emerald-500 uppercase">{report.scenarios.positive.name}</span>
-                <span className="text-sm px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-500">Olasılık: {report.scenarios.positive.probability}</span>
+          <div className="pt-4 pb-2 space-y-3">
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-emerald-500 uppercase">{report.scenarios.positive.name}</span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500">Olasılık: {report.scenarios.positive.probability}</span>
               </div>
-              <ul className="space-y-1 mb-2">
+              <ul className="space-y-1">
                 {report.scenarios.positive.conditions.map((c, i) => (
                   <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
                     <span className="text-emerald-500 mt-0.5">•</span>{c}
                   </li>
                 ))}
               </ul>
-              <span className="text-sm font-bold text-emerald-500">{report.scenarios.positive.target}</span>
+              <span className="text-sm font-semibold text-emerald-500">{report.scenarios.positive.target}</span>
             </div>
-            
-            {/* Neutral */}
-            <div className="p-4 rounded-xl bg-muted/10 border border-border/30">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-bold text-muted-foreground uppercase">{report.scenarios.neutral.name}</span>
-                <span className="text-sm px-2 py-0.5 rounded-full bg-muted/30 text-muted-foreground">Olasılık: {report.scenarios.neutral.probability}</span>
+
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-muted-foreground uppercase">{report.scenarios.neutral.name}</span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-muted/30 text-muted-foreground">Olasılık: {report.scenarios.neutral.probability}</span>
               </div>
-              <ul className="space-y-1 mb-2">
+              <ul className="space-y-1">
                 {report.scenarios.neutral.conditions.map((c, i) => (
                   <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
                     <span className="text-muted-foreground mt-0.5">•</span>{c}
@@ -379,45 +332,36 @@ export function CeoTaReport({ ticker }: CeoTaReportProps) {
               </ul>
               <span className="text-sm text-muted-foreground">{report.scenarios.neutral.strategy}</span>
             </div>
-            
-            {/* Negative */}
-            <div className="p-4 rounded-xl bg-destructive/5 border border-destructive/20">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-bold text-destructive uppercase">{report.scenarios.negative.name}</span>
-                <span className="text-sm px-2 py-0.5 rounded-full bg-destructive/20 text-destructive">Olasılık: {report.scenarios.negative.probability}</span>
+
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-destructive uppercase">{report.scenarios.negative.name}</span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/10 text-destructive">Olasılık: {report.scenarios.negative.probability}</span>
               </div>
-              <ul className="space-y-1 mb-2">
+              <ul className="space-y-1">
                 {report.scenarios.negative.conditions.map((c, i) => (
                   <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
                     <span className="text-destructive mt-0.5">•</span>{c}
                   </li>
                 ))}
               </ul>
-              <span className="text-sm font-bold text-destructive">{report.scenarios.negative.risk}</span>
+              <span className="text-sm font-semibold text-destructive">{report.scenarios.negative.risk}</span>
             </div>
           </div>
         )}
       </div>
 
       {/* Watchlist */}
-      <div className="border border-border/45 bg-card/20 rounded-2xl p-5 md:p-6">
-        <button 
-          onClick={() => toggleSection('watchlist')}
-          className="w-full flex items-center justify-between pb-4 border-b border-border/30"
-        >
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-cyan-500/10 text-cyan-500 flex items-center justify-center">
-              <BarChart3 size={14} />
-            </div>
-            <h3 className="text-base font-bold text-foreground uppercase tracking-wider">İzleme Listesi</h3>
-          </div>
-          {expandedSection === 'watchlist' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        </button>
-        
+      <div>
+        <SectionHeader
+          icon={<BarChart3 size={14} className="text-cyan-500" />}
+          label="İzleme Listesi"
+          section="watchlist"
+        />
         {expandedSection === 'watchlist' && (
-          <div className="mt-4 grid grid-cols-2 gap-4">
+          <div className="pt-4 pb-2 grid grid-cols-2 gap-4">
             <div>
-              <span className="text-sm font-bold text-muted-foreground uppercase block mb-2">Günlük Takip</span>
+              <span className="text-xs font-semibold text-muted-foreground uppercase block mb-2">Günlük Takip</span>
               <ul className="space-y-1">
                 {report.watchlist.daily.map((item, i) => (
                   <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
@@ -427,7 +371,7 @@ export function CeoTaReport({ ticker }: CeoTaReportProps) {
               </ul>
             </div>
             <div>
-              <span className="text-sm font-bold text-muted-foreground uppercase block mb-2">Haftalık Takip</span>
+              <span className="text-xs font-semibold text-muted-foreground uppercase block mb-2">Haftalık Takip</span>
               <ul className="space-y-1">
                 {report.watchlist.weekly.map((item, i) => (
                   <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
@@ -441,9 +385,8 @@ export function CeoTaReport({ ticker }: CeoTaReportProps) {
       </div>
 
       {/* Disclaimer */}
-      <div className="p-4 rounded-xl bg-muted/5 border border-border/20">
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          <Shield size={12} className="inline mr-1" />
+      <div className="pt-4 border-t border-border/15">
+        <p className="text-xs text-muted-foreground/70 italic leading-relaxed">
           {report.disclaimer}
         </p>
       </div>

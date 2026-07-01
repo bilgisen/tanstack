@@ -169,12 +169,10 @@ function FundamentalAnalysisPage() {
   return (
     <div className="space-y-8">
       {/* RASYOLAR */}
-      <div className="border border-border/45 bg-card/20 rounded-2xl p-5 md:p-6 space-y-5">
-        <div className="flex items-center gap-2.5 pb-4 border-b border-border/30">
-          <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
-            <Compass size={14} />
-          </div>
-          <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Rasyolar</h3>
+      <div className="space-y-5">
+        <div className="flex items-center gap-2.5 pb-3 border-b border-border/20">
+          <Compass size={14} className="text-blue-500" />
+          <h3 className="text-base font-semibold text-foreground">Rasyolar</h3>
         </div>
 
         {/* F/K Badge */}
@@ -185,7 +183,7 @@ function FundamentalAnalysisPage() {
             </div>
             <div>
               <span className="text-xs text-muted-foreground font-semibold uppercase">Fiyat / Kazanç (F/K)</span>
-              <div className="text-xl font-black text-foreground">{fundamental.fk}</div>
+              <div className="text-xl font-semibold text-foreground">{fundamental.fk}</div>
             </div>
           </div>
         )}
@@ -195,7 +193,7 @@ function FundamentalAnalysisPage() {
           <div key={group.title} className="space-y-3">
             <div className="flex items-center gap-2">
               {group.icon}
-              <h4 className="text-sm font-bold text-foreground uppercase tracking-wider">{group.title}</h4>
+              <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">{group.title}</h4>
             </div>
             <div className="space-y-1">
               {group.ratios.map((ratio) => {
@@ -211,7 +209,7 @@ function FundamentalAnalysisPage() {
                     <div className="flex items-center gap-4 shrink-0">
                       {/* Company Value */}
                       <div className="text-right min-w-[60px]">
-                        <span className="text-base font-black text-foreground font-mono">{ratio.formattedValue}</span>
+                        <span className="text-base font-semibold text-foreground font-mono">{ratio.formattedValue}</span>
                       </div>
                       {/* Sector Median */}
                       {ratio.sectorMedian !== null && (
