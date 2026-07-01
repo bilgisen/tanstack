@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { TrendingUp, TrendingDown, Info, AlertCircle, Sliders } from 'lucide-react'
+import { TrendingUp, TrendingDown, Info, AlertCircle, Sliders, Sparkles } from 'lucide-react'
 import tickerToSectorSlug from '../constants/tickerToSectorSlug'
 
 const TriangleUp = ({ size = 14, className = "" }: { size?: number; className?: string }) => (
@@ -12,6 +12,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { TradingViewChart } from '../components/dashboard/TradingViewChart'
 import { Skeleton } from '../components/ui/skeleton'
 import companyLogos from '../constants/companyLogos.json'
+import { CeoTaReport } from '../components/company/CeoTaReport'
 
 export const Route = createFileRoute('/endeksler/$id')({
   component: EndeksDetailPage,
@@ -572,6 +573,17 @@ function EndeksDetailPage() {
           )}
         </div>
       )}
+
+      {/* Pro AI Teknik Analiz Raporu */}
+      <div className="border border-border/40 bg-card/20 rounded-2xl p-4 md:p-5 space-y-4">
+        <div className="flex items-center gap-2 pb-2.5 border-b border-border/25">
+          <div className="w-6 h-6 rounded-lg bg-violet-500/10 text-violet-500 flex items-center justify-center">
+            <Sparkles size={12} />
+          </div>
+          <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Pro AI Teknik Analiz Raporu</h3>
+        </div>
+        <CeoTaReport ticker={priceDetails.code} unit="puan" />
+      </div>
 
       {/* Yükselenler / Düşenler */}
       <div className="border border-border/40 bg-card/20 rounded-2xl p-4 md:p-5 space-y-3">

@@ -52,13 +52,15 @@ interface CeoReport {
 
 interface CeoTaReportProps {
   ticker: string
+  unit?: string
 }
 
-export function CeoTaReport({ ticker }: CeoTaReportProps) {
+export function CeoTaReport({ ticker, unit = 'TL' }: CeoTaReportProps) {
   const [report, setReport] = useState<CeoReport | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
+  const [reportUnit, setReportUnit] = useState(unit)
 
   useEffect(() => {
     const fetchReport = async () => {
@@ -71,6 +73,10 @@ export function CeoTaReport({ ticker }: CeoTaReportProps) {
           const data = await res.json()
           if (!data.error) {
             setReport(data)
+            // Use unit from API response if available, otherwise use prop
+            if (data.unit) {
+              setReportUnit(data.unit)
+            }
           } else {
             setError(true)
           }
@@ -91,7 +97,12 @@ export function CeoTaReport({ ticker }: CeoTaReportProps) {
     setExpandedSection(expandedSection === section ? null : section)
   }
 
-  const formatPrice = (price: number) => `₺${price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  const formatPrice = (price: number) => {
+    if (reportUnit === 'puan') {
+      return `${price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} puan`
+    }
+    return `₺${price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  }
 
   const getScoreColor = (score: number) => {
     if (score >= 70) return 'text-emerald-500'
