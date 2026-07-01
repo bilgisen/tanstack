@@ -111,7 +111,7 @@ export function CeoTaReport({ ticker }: CeoTaReportProps) {
     )
   }
 
-  if (error || !report) {
+  if (error || !report || !report.overview) {
     return (
       <div className="border border-border/45 bg-card/20 rounded-2xl p-6 text-center">
         <AlertTriangle className="mx-auto mb-3 text-muted-foreground" size={24} />
