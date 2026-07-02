@@ -41,10 +41,10 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
   }, []);
 
   return (
-    <div className="flex flex-col h-full bg-background relative overflow-hidden font-sans">
-      {/* 1. Header */}
+    <div className="flex flex-col h-full bg-background relative font-sans">
+      {/* 1. Header - Fixed height, no shrink */}
       <div
-        className="h-14 flex items-center justify-between px-5 border-b border-border/50 bg-background/95 backdrop-blur-md shrink-0 select-none z-10 relative"
+        className="h-14 flex items-center justify-between px-5 border-b border-border/50 bg-background/95 backdrop-blur-md flex-shrink-0 select-none z-10 relative"
         ref={historyRef}
       >
         <span className="text-sm font-normal text-foreground">Araştır</span>
@@ -135,100 +135,95 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
         )}
       </div>
 
-      {/* 2. Messages Area - Flexible scroll with keyboard compensation */}
-      <div className="flex-1 min-h-0 overflow-hidden relative z-0" style={{ paddingBottom: '0px' }}>
-        <MessageScrollerProvider>
-          <MessageScroller className="h-full !min-h-0">
-            <MessageScrollerViewport className="h-full">
-              <MessageScrollerContent className="gap-4 p-5 pb-2">
-                {messages.length === 0 ? (
-                  <MessageScrollerItem className="flex-1 flex items-center justify-center min-h-full">
-                    <div className="flex flex-col items-center text-center p-6 space-y-4 max-w-md mx-auto select-none opacity-80">
-                      <Logo size={44} variant="icon" />
-                      <div className="space-y-1">
-                        <h5 className="text-base font-semibold text-foreground">Araştırmaya Başlayın</h5>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                          Hisseler, rasyolar, bilançolar ve teknik formasyonlar hakkında sorularınızı sorun.
-                          BIST odaklı yapay zeka analiz etsin.
-                        </p>
-                      </div>
+      {/* 2. Messages Area - Flex grow with proper MessageScroller */}
+      <MessageScrollerProvider>
+        <MessageScroller className="flex-1 min-h-0">
+          <MessageScrollerViewport className="h-full">
+            <MessageScrollerContent className="gap-4 p-5">
+              {messages.length === 0 ? (
+                <MessageScrollerItem className="flex items-center justify-center min-h-[300px]">
+                  <div className="flex flex-col items-center text-center p-6 space-y-4 max-w-md mx-auto select-none opacity-80">
+                    <Logo size={44} variant="icon" />
+                    <div className="space-y-1">
+                      <h5 className="text-base font-semibold text-foreground">Araştırmaya Başlayın</h5>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        Hisseler, rasyolar, bilançolar ve teknik formasyonlar hakkında sorularınızı sorun.
+                        BIST odaklı yapay zeka analiz etsin.
+                      </p>
                     </div>
-                  </MessageScrollerItem>
-                ) : (
-                  messages.map((msg, idx) => (
-                    <MessageScrollerItem key={idx}>
-                      <div className={`flex gap-2.5 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                        {msg.role === "assistant" && (
-                          <div className="shrink-0 mt-1">
-                            <Logo size={22} variant="icon" />
-                          </div>
-                        )}
-
-                        <div className={`${msg.role === "user" ? "max-w-[85%]" : "w-full min-w-0"}`}>
-                          <Bubble
-                            variant={msg.role === "user" ? "default" : "secondary"}
-                            align={msg.role === "user" ? "end" : "start"}
-                          >
-                            <BubbleContent
-                              className={`px-3.5 py-2.5 rounded-2xl ${
-                                msg.role === "user"
-                                  ? "rounded-tr-sm"
-                                  : "rounded-tl-sm border border-border/30"
-                              }`}
-                            >
-                              <MarkdownRenderer
-                                text={msg.text}
-                                isAssistant={msg.role === "assistant"}
-                                context={msg.context || context}
-                                suggestions={msg.suggestions}
-                                widget={msg.widget}
-                              />
-                            </BubbleContent>
-                          </Bubble>
+                  </div>
+                </MessageScrollerItem>
+              ) : (
+                messages.map((msg, idx) => (
+                  <MessageScrollerItem key={idx}>
+                    <div className={`flex gap-2.5 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                      {msg.role === "assistant" && (
+                        <div className="shrink-0 mt-1">
+                          <Logo size={22} variant="icon" />
                         </div>
-                      </div>
-                    </MessageScrollerItem>
-                  ))
-                )}
+                      )}
 
-                {isLoading && (
-                  <MessageScrollerItem>
-                    <div className="flex gap-2.5 justify-start">
-                      <div className="shrink-0 mt-1">
-                        <Logo size={22} variant="icon" />
+                      <div className={`${msg.role === "user" ? "max-w-[85%]" : "w-full min-w-0"}`}>
+                        <Bubble
+                          variant={msg.role === "user" ? "default" : "secondary"}
+                          align={msg.role === "user" ? "end" : "start"}
+                        >
+                          <BubbleContent
+                            className={`px-3.5 py-2.5 rounded-2xl ${
+                              msg.role === "user"
+                                ? "rounded-tr-sm"
+                                : "rounded-tl-sm border border-border/30"
+                            }`}
+                          >
+                            <MarkdownRenderer
+                              text={msg.text}
+                              isAssistant={msg.role === "assistant"}
+                              context={msg.context || context}
+                              suggestions={msg.suggestions}
+                              widget={msg.widget}
+                            />
+                          </BubbleContent>
+                        </Bubble>
                       </div>
-                      <Bubble variant="muted" align="start">
-                        <BubbleContent className="px-3.5 py-2.5 rounded-2xl rounded-tl-sm border border-border/30 flex items-center gap-2">
-                          <Loader2 size={13} className="animate-spin text-primary" />
-                          <span className="text-sm text-muted-foreground">
-                            Analiz raporu hazırlıyor...
-                          </span>
-                        </BubbleContent>
-                      </Bubble>
                     </div>
                   </MessageScrollerItem>
-                )}
+                ))
+              )}
 
-                {messages.length > 0 && (
-                  <MessageScrollerItem scrollAnchor>
-                    <Marker variant="separator" className="py-1 opacity-0">
-                      <span className="text-[10px]">son</span>
-                    </Marker>
-                  </MessageScrollerItem>
-                )}
-              </MessageScrollerContent>
-            </MessageScrollerViewport>
+              {isLoading && (
+                <MessageScrollerItem>
+                  <div className="flex gap-2.5 justify-start">
+                    <div className="shrink-0 mt-1">
+                      <Logo size={22} variant="icon" />
+                    </div>
+                    <Bubble variant="muted" align="start">
+                      <BubbleContent className="px-3.5 py-2.5 rounded-2xl rounded-tl-sm border border-border/30 flex items-center gap-2">
+                        <Loader2 size={13} className="animate-spin text-primary" />
+                        <span className="text-sm text-muted-foreground">
+                          Analiz raporu hazırlıyor...
+                        </span>
+                      </BubbleContent>
+                    </Bubble>
+                  </div>
+                </MessageScrollerItem>
+              )}
 
-            <MessageScrollerButton direction="end" />
-          </MessageScroller>
-        </MessageScrollerProvider>
-      </div>
+              {messages.length > 0 && (
+                <MessageScrollerItem scrollAnchor>
+                  <Marker variant="separator" className="py-1 opacity-0">
+                    <span className="text-[10px]">son</span>
+                  </Marker>
+                </MessageScrollerItem>
+              )}
+            </MessageScrollerContent>
+          </MessageScrollerViewport>
 
-      {/* 3. Input Footer - Always visible with safe area padding */}
-      <div 
-        className="shrink-0 sticky bottom-0 bg-background border-t border-border/50 z-20"
-        style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 8px)' }}
-      >
+          <MessageScrollerButton direction="end" />
+        </MessageScroller>
+      </MessageScrollerProvider>
+
+      {/* 3. Input Footer - Fixed height, no shrink */}
+      <div className="flex-shrink-0 border-t border-border/50 bg-background">
         <ChatPane
           context={context}
           placeholder={placeholder}

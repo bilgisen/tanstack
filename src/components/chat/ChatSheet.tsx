@@ -11,30 +11,21 @@ interface ChatSheetProps {
 }
 
 export function ChatSheet({ isOpen, onClose, context, placeholder, user, sessionLoading }: ChatSheetProps) {
-  // Prevent page scroll when sheet is open and handle keyboard
+  // Prevent page scroll when sheet is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
-      
-      // Handle visual viewport resize (keyboard open/close)
-      const handleResize = () => {
-        if (window.visualViewport) {
-          const vh = window.visualViewport.height;
-          document.documentElement.style.setProperty('--vh', `${vh * 0.01}px`);
-        }
+      // Set 100vh properly for mobile
+      const setVh = () => {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
       };
-
-      // Initial set
-      handleResize();
-      
-      window.visualViewport?.addEventListener('resize', handleResize);
-      window.visualViewport?.addEventListener('scroll', handleResize);
+      setVh();
+      window.addEventListener('resize', setVh);
       
       return () => {
         document.body.style.overflow = "unset";
-        window.visualViewport?.removeEventListener('resize', handleResize);
-        window.visualViewport?.removeEventListener('scroll', handleResize);
-        document.documentElement.style.removeProperty('--vh');
+        window.removeEventListener('resize', setVh);
       };
     }
   }, [isOpen]);
@@ -42,28 +33,31 @@ export function ChatSheet({ isOpen, onClose, context, placeholder, user, session
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 md:hidden flex flex-col font-sans select-none">
+    <div className="fixed inset-0 z-50 md:hidden font-sans select-none">
       {/* 1. Backdrop Overlay */}
       <div 
         onClick={onClose}
-        className="absolute inset-0 bg-black/65 backdrop-blur-sm animate-in fade-in duration-300 cursor-pointer"
+        className="absolute inset-0 bg-black/65 backdrop-blur-sm animate-in fade-in duration-300"
       />
 
-      {/* 2. Slide-up Sheet Panel - Responsive to keyboard */}
+      {/* 2. Slide-up Sheet Panel */}
       <div 
-        className="fixed bottom-0 left-0 right-0 bg-card border-t border-border/80 rounded-t-[28px] z-10 flex flex-col shadow-2xl animate-in slide-in-from-bottom duration-300"
-        style={{
+        className="absolute bottom-0 left-0 right-0 flex flex-col bg-card border-t border-border/80 rounded-t-[28px] shadow-2xl animate-in slide-in-from-bottom duration-300"
+        style={{ 
           height: 'calc(var(--vh, 1vh) * 90)',
           maxHeight: '90vh'
         }}
       >
-        {/* Drag Handle Top Bar */}
-        <div className="w-full flex justify-center py-3.5 bg-card rounded-t-[28px] cursor-pointer shrink-0 border-b border-border/10" onClick={onClose}>
+        {/* Drag Handle */}
+        <div 
+          className="flex justify-center py-3.5 cursor-pointer flex-shrink-0 border-b border-border/10 bg-card rounded-t-[28px]" 
+          onClick={onClose}
+        >
           <div className="w-12 h-1.5 rounded-full bg-muted-foreground/30 hover:bg-muted-foreground/50 transition-colors" />
         </div>
 
-        {/* Dedicated ChatPanel inside */}
-        <div className="flex-1 overflow-hidden min-h-0">
+        {/* ChatPanel - Takes remaining space */}
+        <div className="flex-1 min-h-0 overflow-hidden">
           <ChatPanel 
             context={context} 
             placeholder={placeholder} 
