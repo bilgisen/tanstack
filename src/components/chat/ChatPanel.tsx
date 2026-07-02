@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { Compass, History, Loader2, Maximize2, Minimize2, Plus, X } from "lucide-react";
+import { History, Loader2, Maximize2, Minimize2, Plus, X } from "lucide-react";
 import { useChatStore } from "../../store/chat";
 import { useUIStore } from "../../store/ui";
 import { ChatPane } from "../dashboard/ChatPane";
 import { MarkdownRenderer } from "../dashboard/MarkdownRenderer";
+import { Logo } from "../layout/Logo";
+import { Bubble, BubbleContent } from "../ui/bubble";
+import { Marker } from "../ui/marker";
 import {
   MessageScroller,
   MessageScrollerButton,
@@ -12,9 +15,6 @@ import {
   MessageScrollerProvider,
   MessageScrollerViewport,
 } from "../ui/message-scroller";
-import { Bubble, BubbleContent } from "../ui/bubble";
-import { Marker } from "../ui/marker";
-import { Message, MessageContent } from "../ui/message";
 
 interface ChatPanelProps {
   context: string;
@@ -138,15 +138,13 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
       {/* 2. Messages Area */}
       <div className="flex-1 min-h-0 overflow-hidden relative z-0">
         <MessageScrollerProvider>
-          <MessageScroller className="h-full">
+          <MessageScroller className="h-full !min-h-0">
             <MessageScrollerViewport className="h-full">
               <MessageScrollerContent className="gap-4 p-5">
                 {messages.length === 0 ? (
                   <MessageScrollerItem className="flex-1 flex items-center justify-center min-h-full">
                     <div className="flex flex-col items-center text-center p-6 space-y-4 max-w-sm mx-auto select-none opacity-80">
-                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                        <Compass size={24} className="animate-spin-slow" />
-                      </div>
+                      <Logo size={40} variant="icon" />
                       <div className="space-y-1">
                         <h5 className="text-sm font-semibold text-foreground">Sohbete Başlayın</h5>
                         <p className="text-xs text-muted-foreground leading-relaxed">
@@ -159,12 +157,18 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
                 ) : (
                   messages.map((msg, idx) => (
                     <MessageScrollerItem key={idx}>
-                      <Message align={msg.role === "user" ? "end" : "start"}>
-                        <MessageContent>
+                      <div className={`flex gap-2.5 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                        {/* AI Avatar */}
+                        {msg.role === "assistant" && (
+                          <div className="shrink-0 mt-1">
+                            <Logo size={22} variant="icon" />
+                          </div>
+                        )}
+
+                        <div className={`${msg.role === "user" ? "max-w-[85%]" : "w-full min-w-0"}`}>
                           <Bubble
                             variant={msg.role === "user" ? "default" : "secondary"}
                             align={msg.role === "user" ? "end" : "start"}
-                            className={msg.role === "user" ? "max-w-[85%]" : "w-full"}
                           >
                             <BubbleContent
                               className={`px-3.5 py-2.5 rounded-2xl ${
@@ -182,26 +186,27 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
                               />
                             </BubbleContent>
                           </Bubble>
-                        </MessageContent>
-                      </Message>
+                        </div>
+                      </div>
                     </MessageScrollerItem>
                   ))
                 )}
 
                 {isLoading && (
                   <MessageScrollerItem>
-                    <Message align="start">
-                      <MessageContent>
-                        <Bubble variant="muted" align="start">
-                          <BubbleContent className="px-3.5 py-2.5 rounded-2xl rounded-tl-sm border border-border/30 flex items-center gap-2">
-                            <Loader2 size={13} className="animate-spin text-primary" />
-                            <span className="text-xs text-muted-foreground">
-                              Yapay zeka analiz raporu hazırlıyor...
-                            </span>
-                          </BubbleContent>
-                        </Bubble>
-                      </MessageContent>
-                    </Message>
+                    <div className="flex gap-2.5 justify-start">
+                      <div className="shrink-0 mt-1">
+                        <Logo size={22} variant="icon" />
+                      </div>
+                      <Bubble variant="muted" align="start">
+                        <BubbleContent className="px-3.5 py-2.5 rounded-2xl rounded-tl-sm border border-border/30 flex items-center gap-2">
+                          <Loader2 size={13} className="animate-spin text-primary" />
+                          <span className="text-xs text-muted-foreground">
+                            Yapay zeka analiz raporu hazırlıyor...
+                          </span>
+                        </BubbleContent>
+                      </Bubble>
+                    </div>
                   </MessageScrollerItem>
                 )}
 
@@ -222,7 +227,7 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
       </div>
 
       {/* 3. Input Footer */}
-      <div className="shrink-0">
+      <div className="shrink-0 border-t border-border/30">
         <ChatPane
           context={context}
           placeholder={placeholder}
