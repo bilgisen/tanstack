@@ -124,7 +124,7 @@ export function ChatPane({
 
   return (
     <>
-      <div className={`flex items-end gap-2 bg-transparent px-5 py-3 w-full select-none ${className}`}>
+      <div className={`flex items-end gap-2 bg-transparent px-5 py-4 w-full select-none ${className}`}>
         <textarea
           ref={textareaRef}
           value={input}
@@ -134,13 +134,13 @@ export function ChatPane({
           disabled={isLoading}
           placeholder={placeholder}
           rows={1}
-          className="flex-1 bg-transparent border-none outline-none resize-none py-3 text-base text-foreground placeholder-muted-foreground/50 disabled:opacity-50 min-h-[44px] max-h-[140px] font-sans leading-relaxed custom-scrollbar"
+          className="flex-1 bg-transparent border-none outline-none resize-none py-3 text-base text-foreground placeholder-muted-foreground/50 disabled:opacity-50 min-h-[44px] max-h-[140px] font-sans leading-relaxed custom-scrollbar touch-manipulation"
         />
 
         <button
           onClick={handleSend}
           disabled={isLoading || !input.trim()}
-          className="w-9 h-9 flex items-center justify-center rounded-full bg-primary text-white disabled:opacity-20 transition-all cursor-pointer shadow-sm shrink-0 self-end hover:brightness-110 active:scale-90"
+          className="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-white disabled:opacity-20 transition-all cursor-pointer shadow-sm shrink-0 self-end hover:brightness-110 active:scale-90 touch-manipulation"
           title="Gönder"
         >
           <ArrowUp size={18} strokeWidth={2.5} />

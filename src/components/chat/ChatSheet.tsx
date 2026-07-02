@@ -11,31 +11,51 @@ interface ChatSheetProps {
 }
 
 export function ChatSheet({ isOpen, onClose, context, placeholder, user, sessionLoading }: ChatSheetProps) {
-  // Prevent page scroll when sheet is open
+  // Prevent page scroll when sheet is open and handle keyboard
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
+      
+      // Handle visual viewport resize (keyboard open/close)
+      const handleResize = () => {
+        if (window.visualViewport) {
+          const vh = window.visualViewport.height;
+          document.documentElement.style.setProperty('--vh', `${vh * 0.01}px`);
+        }
+      };
+
+      // Initial set
+      handleResize();
+      
+      window.visualViewport?.addEventListener('resize', handleResize);
+      window.visualViewport?.addEventListener('scroll', handleResize);
+      
+      return () => {
+        document.body.style.overflow = "unset";
+        window.visualViewport?.removeEventListener('resize', handleResize);
+        window.visualViewport?.removeEventListener('scroll', handleResize);
+        document.documentElement.style.removeProperty('--vh');
+      };
     }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
   }, [isOpen]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 md:hidden flex flex-col justify-end font-sans select-none">
+    <div className="fixed inset-0 z-50 md:hidden flex flex-col font-sans select-none">
       {/* 1. Backdrop Overlay */}
       <div 
         onClick={onClose}
         className="absolute inset-0 bg-black/65 backdrop-blur-sm animate-in fade-in duration-300 cursor-pointer"
       />
 
-      {/* 2. Slide-up Sheet Panel - Uses max-h with dvh for mobile keyboard support */}
+      {/* 2. Slide-up Sheet Panel - Responsive to keyboard */}
       <div 
-        className="w-full max-h-[85vh] max-h-[85dvh] bg-card border-t border-border/80 rounded-t-[28px] relative z-10 flex flex-col shadow-2xl animate-in slide-in-from-bottom duration-300"
+        className="fixed bottom-0 left-0 right-0 bg-card border-t border-border/80 rounded-t-[28px] z-10 flex flex-col shadow-2xl animate-in slide-in-from-bottom duration-300"
+        style={{
+          height: 'calc(var(--vh, 1vh) * 90)',
+          maxHeight: '90vh'
+        }}
       >
         {/* Drag Handle Top Bar */}
         <div className="w-full flex justify-center py-3.5 bg-card rounded-t-[28px] cursor-pointer shrink-0 border-b border-border/10" onClick={onClose}>

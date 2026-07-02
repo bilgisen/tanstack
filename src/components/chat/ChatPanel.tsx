@@ -135,12 +135,12 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
         )}
       </div>
 
-      {/* 2. Messages Area */}
-      <div className="flex-1 min-h-0 overflow-hidden relative z-0">
+      {/* 2. Messages Area - Flexible scroll with keyboard compensation */}
+      <div className="flex-1 min-h-0 overflow-hidden relative z-0" style={{ paddingBottom: '0px' }}>
         <MessageScrollerProvider>
           <MessageScroller className="h-full !min-h-0">
             <MessageScrollerViewport className="h-full">
-              <MessageScrollerContent className="gap-4 p-5">
+              <MessageScrollerContent className="gap-4 p-5 pb-2">
                 {messages.length === 0 ? (
                   <MessageScrollerItem className="flex-1 flex items-center justify-center min-h-full">
                     <div className="flex flex-col items-center text-center p-6 space-y-4 max-w-md mx-auto select-none opacity-80">
@@ -224,8 +224,11 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
         </MessageScrollerProvider>
       </div>
 
-      {/* 3. Input Footer */}
-      <div className="shrink-0 sticky bottom-0 bg-background border-t border-border/50">
+      {/* 3. Input Footer - Always visible with safe area padding */}
+      <div 
+        className="shrink-0 sticky bottom-0 bg-background border-t border-border/50 z-20"
+        style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 8px)' }}
+      >
         <ChatPane
           context={context}
           placeholder={placeholder}
