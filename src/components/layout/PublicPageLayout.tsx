@@ -25,8 +25,13 @@ export function PublicPageLayout({ context, placeholder, children }: PublicPageL
           </div>
         </div>
 
-        {/* Mobile floating chat trigger */}
-        <div className="md:hidden absolute bottom-6 left-6 right-6 z-40 flex justify-center pointer-events-none">
+        {/* Mobile floating chat trigger - Safe area aware */}
+        <div 
+          className="md:hidden fixed left-4 right-4 z-40 flex justify-center pointer-events-none"
+          style={{ 
+            bottom: 'max(env(safe-area-inset-bottom, 0px) + 16px, 20px)' 
+          }}
+        >
           <div
             onClick={() => setIsChatSheetOpen(true)}
             className="w-full max-w-3xl bg-background/80 backdrop-blur-2xl border border-border/50 rounded-full shadow-2xl pointer-events-auto overflow-hidden animate-in slide-in-from-bottom-6 duration-500 cursor-pointer flex items-center px-6 py-2.5 justify-between"
