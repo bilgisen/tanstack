@@ -152,8 +152,11 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
 
       {/* 2. Messages Area - Flex grow with proper MessageScroller */}
       <MessageScrollerProvider>
-        <MessageScroller className={`flex-1 min-h-0 ${isOverlayOpen ? 'overflow-hidden' : ''}`}>
-          <MessageScrollerViewport className={`h-full ${isOverlayOpen ? '!overflow-hidden' : ''}`}>
+        <MessageScroller className={`flex-1 min-h-0 ${isOverlayOpen ? '!overflow-hidden' : ''}`}>
+          <MessageScrollerViewport 
+            className={`h-full ${isOverlayOpen ? '!overflow-hidden [&::-webkit-scrollbar]:!hidden' : ''}`}
+            style={isOverlayOpen ? { overflow: 'hidden !important' } as any : undefined}
+          >
             <MessageScrollerContent className="gap-4 p-5">
               {messages.length === 0 ? (
                 <MessageScrollerItem className="flex items-center justify-center min-h-[300px]">

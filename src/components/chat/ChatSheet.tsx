@@ -56,7 +56,7 @@ export function ChatSheet({ isOpen, onClose, context, placeholder, user, session
 
       {/* 2. Slide-up Sheet Panel */}
       <div 
-        className="absolute bottom-0 left-0 right-0 flex flex-col bg-card border-t border-border/80 rounded-t-[28px] shadow-2xl animate-in slide-in-from-bottom duration-300"
+        className="absolute bottom-0 left-0 right-0 flex flex-col bg-card border-t border-border/80 rounded-t-[28px] shadow-2xl animate-in slide-in-from-bottom duration-300 overscroll-none"
         style={{ 
           height: 'calc(var(--vh, 1vh) * 90)',
           maxHeight: '90vh'
