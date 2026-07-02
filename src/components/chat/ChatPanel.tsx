@@ -1,9 +1,20 @@
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Compass, History, Loader2, Maximize2, Minimize2, Plus, X } from "lucide-react";
 import { useChatStore } from "../../store/chat";
-import { MarkdownRenderer } from "../dashboard/MarkdownRenderer";
-import { ChatPane } from "../dashboard/ChatPane";
 import { useUIStore } from "../../store/ui";
-import { Loader2, Compass, X, Plus, History, Maximize2, Minimize2 } from "lucide-react";
+import { ChatPane } from "../dashboard/ChatPane";
+import { MarkdownRenderer } from "../dashboard/MarkdownRenderer";
+import {
+  MessageScroller,
+  MessageScrollerButton,
+  MessageScrollerContent,
+  MessageScrollerItem,
+  MessageScrollerProvider,
+  MessageScrollerViewport,
+} from "../ui/message-scroller";
+import { Bubble, BubbleContent } from "../ui/bubble";
+import { Marker } from "../ui/marker";
+import { Message, MessageContent } from "../ui/message";
 
 interface ChatPanelProps {
   context: string;
@@ -16,7 +27,6 @@ interface ChatPanelProps {
 export function ChatPanel({ context, placeholder, onClose, user, sessionLoading }: ChatPanelProps) {
   const { messages, isLoading, sessions, activeSessionId, loadSession, deleteSession, clearChat } = useChatStore();
   const { isChatMaximized, toggleChatMaximized } = useUIStore();
-  const scrollRef = useRef<HTMLDivElement>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const historyRef = useRef<HTMLDivElement>(null);
 
@@ -30,53 +40,39 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
     return () => window.removeEventListener("mousedown", handleOutsideClick);
   }, []);
 
-  // Auto scroll to bottom when messages or loading state changes
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-      
-      const timer = setTimeout(() => {
-        if (scrollRef.current) {
-          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-        }
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [messages, isLoading]);
-
-
-
   return (
-    <div className="flex flex-col h-full bg-card border-l border-border/60 relative overflow-hidden font-sans">
-      {/* 1. Header Banner */}
-      <div className="h-14 flex items-center justify-between px-5 border-b border-border/50 bg-background/95 backdrop-blur-md shrink-0 select-none z-10 relative" ref={historyRef}>
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-normal text-foreground">Sohbet</span>
-        </div>
-        
+    <div className="flex flex-col h-full bg-background relative overflow-hidden font-sans">
+      {/* 1. Header */}
+      <div
+        className="h-14 flex items-center justify-between px-5 border-b border-border/50 bg-background/95 backdrop-blur-md shrink-0 select-none z-10 relative"
+        ref={historyRef}
+      >
+        <span className="text-sm font-normal text-foreground">Sohbet</span>
+
         <div className="flex items-center gap-1.5">
-          {/* New Chat Button */}
           <button
             onClick={() => clearChat()}
-            className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all cursor-pointer flex items-center justify-center border border-transparent active:scale-95"
+            className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all cursor-pointer flex items-center justify-center active:scale-95"
             title="Yeni Sohbet"
           >
             <Plus size={16} />
           </button>
 
-          {/* Sohbet Geçmişi Button */}
           <button
             onClick={() => setHistoryOpen(!historyOpen)}
-            className={`p-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center border border-transparent active:scale-95 ${historyOpen ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+            className={`p-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center active:scale-95 ${
+              historyOpen
+                ? "text-primary bg-primary/10"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            }`}
             title="Sohbet Geçmişi"
           >
             <History size={16} />
           </button>
 
-          {/* Maximize / Minimize Button */}
           <button
             onClick={toggleChatMaximized}
-            className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all cursor-pointer flex items-center justify-center border border-transparent active:scale-95"
+            className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all cursor-pointer flex items-center justify-center active:scale-95"
             title={isChatMaximized ? "Sohbeti Küçült" : "Sohbeti Genişlet"}
           >
             {isChatMaximized ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
@@ -93,7 +89,7 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
           )}
         </div>
 
-        {/* History Dropdown Overlay */}
+        {/* History Dropdown */}
         {historyOpen && (
           <div className="absolute right-5 top-12 w-64 bg-card border border-border/80 rounded-2xl shadow-xl p-2 z-50 animate-in fade-in slide-in-from-top-3 duration-200">
             <div className="text-[10px] font-bold text-muted-foreground/65 uppercase tracking-wider px-3 pb-2 pt-1.5 border-b border-border/30 mb-1">
@@ -106,9 +102,13 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
                 </div>
               ) : (
                 sessions.map((session) => (
-                  <div 
-                    key={session.id} 
-                    className={`flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition-all cursor-pointer ${session.id === activeSessionId ? 'bg-primary/10 text-primary font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                  <div
+                    key={session.id}
+                    className={`flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition-all cursor-pointer ${
+                      session.id === activeSessionId
+                        ? "bg-primary/10 text-primary font-medium"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    }`}
                     onClick={() => {
                       loadSession(session.id);
                       setHistoryOpen(false);
@@ -135,69 +135,101 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
         )}
       </div>
 
-      {/* 2. Messages Scroll Area */}
-      <div 
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto p-5 space-y-6 custom-scrollbar min-h-0 relative z-0"
-      >
-        {messages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-4 max-w-sm mx-auto select-none opacity-80">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-              <Compass size={24} className="animate-spin-slow" />
-            </div>
-            <div className="space-y-1">
-              <h5 className="text-sm font-semibold text-foreground">Sohbete Başlayın</h5>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Hisseler, rasyolar, bilançolar ve teknik formasyonlar hakkında sorularınızı sorun. BIST odaklı yapay zeka analiz etsin.
-              </p>
-            </div>
-          </div>
-        ) : (
-          messages.map((msg, idx) => (
-            <div
-              key={idx}
-              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-            >
-              <div
-                className={`rounded-2xl px-4 py-3 text-xs md:text-sm max-w-[85%] sm:max-w-[78%] leading-relaxed ${
-                  msg.role === "user"
-                    ? "chat-question-bubble font-medium rounded-tr-sm shadow-sm"
-                    : "bg-muted/40 text-foreground border border-border/40 rounded-tl-sm w-full chatbot-response"
-                }`}
-              >
-                <MarkdownRenderer
-                  text={msg.text}
-                  isAssistant={msg.role === "assistant"}
-                  context={msg.context || context}
-                  suggestions={msg.suggestions}
-                  widget={msg.widget}
-                />
-              </div>
-            </div>
-          ))
-        )}
+      {/* 2. Messages Area */}
+      <div className="flex-1 min-h-0 overflow-hidden relative z-0">
+        <MessageScrollerProvider>
+          <MessageScroller className="h-full">
+            <MessageScrollerViewport className="h-full">
+              <MessageScrollerContent className="gap-4 p-5">
+                {messages.length === 0 ? (
+                  <MessageScrollerItem className="flex-1 flex items-center justify-center min-h-full">
+                    <div className="flex flex-col items-center text-center p-6 space-y-4 max-w-sm mx-auto select-none opacity-80">
+                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                        <Compass size={24} className="animate-spin-slow" />
+                      </div>
+                      <div className="space-y-1">
+                        <h5 className="text-sm font-semibold text-foreground">Sohbete Başlayın</h5>
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          Hisseler, rasyolar, bilançolar ve teknik formasyonlar hakkında sorularınızı sorun.
+                          BIST odaklı yapay zeka analiz etsin.
+                        </p>
+                      </div>
+                    </div>
+                  </MessageScrollerItem>
+                ) : (
+                  messages.map((msg, idx) => (
+                    <MessageScrollerItem key={idx}>
+                      <Message align={msg.role === "user" ? "end" : "start"}>
+                        <MessageContent>
+                          <Bubble
+                            variant={msg.role === "user" ? "default" : "secondary"}
+                            align={msg.role === "user" ? "end" : "start"}
+                            className={msg.role === "user" ? "max-w-[85%]" : "w-full"}
+                          >
+                            <BubbleContent
+                              className={`px-3.5 py-2.5 rounded-2xl ${
+                                msg.role === "user"
+                                  ? "rounded-tr-sm"
+                                  : "rounded-tl-sm border border-border/30"
+                              }`}
+                            >
+                              <MarkdownRenderer
+                                text={msg.text}
+                                isAssistant={msg.role === "assistant"}
+                                context={msg.context || context}
+                                suggestions={msg.suggestions}
+                                widget={msg.widget}
+                              />
+                            </BubbleContent>
+                          </Bubble>
+                        </MessageContent>
+                      </Message>
+                    </MessageScrollerItem>
+                  ))
+                )}
 
-        {isLoading && (
-          <div className="flex justify-start animate-pulse">
-            <div className="bg-muted/20 text-muted-foreground text-xs md:text-sm rounded-2xl rounded-tl-sm px-4 py-3 border border-border/30 flex items-center gap-2">
-              <Loader2 size={13} className="animate-spin text-primary" />
-              <span>Yapay zeka analiz raporu hazırlıyor...</span>
-            </div>
-          </div>
-        )}
+                {isLoading && (
+                  <MessageScrollerItem>
+                    <Message align="start">
+                      <MessageContent>
+                        <Bubble variant="muted" align="start">
+                          <BubbleContent className="px-3.5 py-2.5 rounded-2xl rounded-tl-sm border border-border/30 flex items-center gap-2">
+                            <Loader2 size={13} className="animate-spin text-primary" />
+                            <span className="text-xs text-muted-foreground">
+                              Yapay zeka analiz raporu hazırlıyor...
+                            </span>
+                          </BubbleContent>
+                        </Bubble>
+                      </MessageContent>
+                    </Message>
+                  </MessageScrollerItem>
+                )}
+
+                {/* Scroll anchor */}
+                {messages.length > 0 && (
+                  <MessageScrollerItem scrollAnchor>
+                    <Marker variant="separator" className="py-1 opacity-0">
+                      <span className="text-[10px]">son</span>
+                    </Marker>
+                  </MessageScrollerItem>
+                )}
+              </MessageScrollerContent>
+            </MessageScrollerViewport>
+
+            <MessageScrollerButton direction="end" />
+          </MessageScroller>
+        </MessageScrollerProvider>
       </div>
 
       {/* 3. Input Footer */}
-      <div className="border-t border-border/40 bg-background/50 backdrop-blur-md p-4 shrink-0">
-        <div className="w-full bg-background/80 border border-border/50 rounded-full shadow-sm overflow-hidden">
-          <ChatPane
-            context={context}
-            placeholder={placeholder}
-            className="w-full border-none shadow-none bg-transparent"
-            user={user}
-            sessionLoading={sessionLoading}
-          />
-        </div>
+      <div className="shrink-0 border-t border-border/40 bg-background">
+        <ChatPane
+          context={context}
+          placeholder={placeholder}
+          className="w-full"
+          user={user}
+          sessionLoading={sessionLoading}
+        />
       </div>
     </div>
   );
