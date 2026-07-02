@@ -33,9 +33,9 @@ export function ChatSheet({ isOpen, onClose, context, placeholder, user, session
         className="absolute inset-0 bg-black/65 backdrop-blur-sm animate-in fade-in duration-300 cursor-pointer"
       />
 
-      {/* 2. Slide-up Sheet Panel */}
+      {/* 2. Slide-up Sheet Panel - Uses max-h with dvh for mobile keyboard support */}
       <div 
-        className="w-full h-[85vh] bg-card border-t border-border/80 rounded-t-[28px] relative z-10 flex flex-col shadow-2xl animate-in slide-in-from-bottom duration-300"
+        className="w-full max-h-[85vh] max-h-[85dvh] bg-card border-t border-border/80 rounded-t-[28px] relative z-10 flex flex-col shadow-2xl animate-in slide-in-from-bottom duration-300"
       >
         {/* Drag Handle Top Bar */}
         <div className="w-full flex justify-center py-3.5 bg-card rounded-t-[28px] cursor-pointer shrink-0 border-b border-border/10" onClick={onClose}>
@@ -43,7 +43,7 @@ export function ChatSheet({ isOpen, onClose, context, placeholder, user, session
         </div>
 
         {/* Dedicated ChatPanel inside */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden min-h-0">
           <ChatPanel 
             context={context} 
             placeholder={placeholder} 

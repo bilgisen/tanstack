@@ -225,7 +225,7 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
       </div>
 
       {/* 3. Input Footer */}
-      <div className="shrink-0">
+      <div className="shrink-0 sticky bottom-0 bg-background border-t border-border/50">
         <ChatPane
           context={context}
           placeholder={placeholder}

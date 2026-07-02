@@ -100,6 +100,15 @@ export function ChatPane({
     textarea.style.height = `${Math.min(textarea.scrollHeight, 140)}px`;
   };
 
+  const handleFocus = () => {
+    // Scroll textarea into view on mobile when focused
+    if (textareaRef.current && window.innerWidth < 768) {
+      setTimeout(() => {
+        textareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 300); // Delay for keyboard animation
+    }
+  };
+
   const handleLogin = async () => {
     setLoginInProgress(true);
     try {
@@ -121,6 +130,7 @@ export function ChatPane({
           value={input}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
+          onFocus={handleFocus}
           disabled={isLoading}
           placeholder={placeholder}
           rows={1}
