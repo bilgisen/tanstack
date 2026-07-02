@@ -264,6 +264,28 @@
   ::-webkit-scrollbar-thumb {
     @apply bg-border/40 rounded-full hover:bg-muted-foreground/40;
   }
+  
+  /* Custom scrollbar utility - hide scrollbar until hover */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  .custom-scrollbar:hover {
+    scrollbar-color: rgb(from var(--border) r g b / 0.4) transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-transparent rounded-full;
+  }
+  .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+    @apply bg-border/40 hover:bg-muted-foreground/40;
+  }
 }
 
 /* Premium Chatbot Response Styles - Revolut Style */
