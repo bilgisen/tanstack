@@ -40,10 +40,10 @@ function EndekslerLayout() {
   }
 
   return (
-    <div className="w-full h-full flex flex-col bg-background font-sans overflow-hidden">
-      <div className="flex-1 flex flex-row min-w-0 h-full relative overflow-hidden bg-background">
+    <div className="w-full h-full flex flex-col bg-background font-sans">
+      <div className="flex-1 flex flex-row min-w-0 h-full relative bg-background">
         
-        <div className={`flex-1 flex flex-col min-w-0 h-full relative overflow-hidden bg-background ${isChatMaximized ? 'hidden md:hidden' : ''}`}>
+        <div className={`flex-1 flex flex-col min-w-0 h-full relative bg-background ${isChatMaximized ? 'hidden md:hidden' : ''}`}>
           <main 
             ref={mainScrollRef}
             className="flex-1 overflow-y-auto bg-background px-6 md:px-8 py-6 custom-scrollbar min-w-0 relative z-10 pb-24 md:pb-12 scroll-smooth"
@@ -52,28 +52,28 @@ function EndekslerLayout() {
               <Outlet />
             </div>
           </main>
-
-          {/* Mobile floating chat trigger - Safe area aware */}
-          <div 
-            className="md:hidden fixed left-4 right-4 z-40 flex justify-center pointer-events-none"
-            style={{ 
-              bottom: 'max(env(safe-area-inset-bottom, 0px) + 16px, 20px)' 
-            }}
-          >
-            <div 
-              onClick={() => setIsChatSheetOpen(true)}
-              className="w-full max-w-3xl bg-background/80 backdrop-blur-2xl border border-border/50 rounded-full shadow-2xl pointer-events-auto overflow-hidden animate-in slide-in-from-bottom-6 duration-500 cursor-pointer flex items-center px-6 py-2.5 justify-between"
-            >
-              <span className="text-muted-foreground/60 text-sm truncate pr-4">{placeholder}</span>
-              <button className="w-9 h-9 flex items-center justify-center rounded-full bg-primary text-white shrink-0 self-center">
-                <ArrowUp size={14} strokeWidth={2.5} className="text-white" />
-              </button>
-            </div>
-          </div>
         </div>
 
         <div className={`hidden md:block h-full shrink-0 transition-all duration-300 ${isChatMaximized ? 'w-full flex-1' : 'md:w-[360px] lg:w-[400px] xl:w-[440px]'}`}>
           <ChatPanel context={context} placeholder={placeholder} />
+        </div>
+      </div>
+
+      {/* Mobile floating chat trigger - MOVED OUTSIDE overflow containers */}
+      <div 
+        className="md:hidden fixed left-4 right-4 z-40 flex justify-center pointer-events-none"
+        style={{ 
+          bottom: 'max(env(safe-area-inset-bottom, 0px) + 16px, 20px)' 
+        }}
+      >
+        <div 
+          onClick={() => setIsChatSheetOpen(true)}
+          className="w-full max-w-3xl bg-background/80 backdrop-blur-2xl border border-border/50 rounded-full shadow-2xl pointer-events-auto overflow-hidden animate-in slide-in-from-bottom-6 duration-500 cursor-pointer flex items-center px-6 py-2.5 justify-between"
+        >
+          <span className="text-muted-foreground/60 text-sm truncate pr-4">{placeholder}</span>
+          <button className="w-9 h-9 flex items-center justify-center rounded-full bg-primary text-white shrink-0 self-center">
+            <ArrowUp size={14} strokeWidth={2.5} className="text-white" />
+          </button>
         </div>
       </div>
 

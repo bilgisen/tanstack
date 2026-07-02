@@ -136,10 +136,10 @@ function LandingPage() {
   }, [])
 
   return (
-    <div className="flex-1 flex flex-row min-w-0 h-full overflow-hidden">
+    <div className="flex-1 flex flex-row min-w-0 h-full relative">
       
       {/* Left: Content */}
-      <div className={`flex-1 flex flex-col min-w-0 h-full relative overflow-hidden ${isChatMaximized ? 'hidden md:hidden' : ''}`}>
+      <div className={`flex-1 flex flex-col min-w-0 h-full relative ${isChatMaximized ? 'hidden md:hidden' : ''}`}>
         <div className="flex-1 overflow-y-auto custom-scrollbar min-w-0 relative z-10 pb-24 md:pb-4 scroll-smooth">
           
           {/* Hero */}
@@ -309,29 +309,29 @@ function LandingPage() {
             </div>
           </section>
         </div>
-
-        {/* Mobile floating chat trigger - Safe area aware */}
-        <div 
-          className="lg:hidden fixed left-4 right-4 z-40 flex justify-center pointer-events-none"
-          style={{ 
-            bottom: 'max(env(safe-area-inset-bottom, 0px) + 16px, 20px)' 
-          }}
-        >
-          <div
-            onClick={() => setIsChatSheetOpen(true)}
-            className="w-full max-w-3xl bg-background/80 backdrop-blur-2xl border border-border/50 rounded-full shadow-2xl pointer-events-auto overflow-hidden animate-in slide-in-from-bottom-6 duration-500 cursor-pointer flex items-center px-6 py-2.5 justify-between"
-          >
-            <span className="text-muted-foreground/60 text-base truncate pr-4">Bir soru sorun...</span>
-            <button className="w-9 h-9 flex items-center justify-center rounded-full bg-primary text-white shrink-0 self-center">
-              <ArrowUp size={18} strokeWidth={2.5} />
-            </button>
-          </div>
-        </div>
       </div>
 
       {/* Desktop: Chat Panel */}
       <div className={`hidden md:block h-full shrink-0 transition-all duration-300 ${isChatMaximized ? 'w-full flex-1' : 'md:w-[360px] lg:w-[400px] xl:w-[440px]'}`}>
         <ChatPanel context="global" placeholder="Borsa hakkında bir soru sorun..." user={user} sessionLoading={sessionLoading} />
+      </div>
+
+      {/* Mobile floating chat trigger - MOVED OUTSIDE overflow containers */}
+      <div 
+        className="lg:hidden fixed left-4 right-4 z-40 flex justify-center pointer-events-none"
+        style={{ 
+          bottom: 'max(env(safe-area-inset-bottom, 0px) + 16px, 20px)' 
+        }}
+      >
+        <div
+          onClick={() => setIsChatSheetOpen(true)}
+          className="w-full max-w-3xl bg-background/80 backdrop-blur-2xl border border-border/50 rounded-full shadow-2xl pointer-events-auto overflow-hidden animate-in slide-in-from-bottom-6 duration-500 cursor-pointer flex items-center px-6 py-2.5 justify-between"
+        >
+          <span className="text-muted-foreground/60 text-base truncate pr-4">Bir soru sorun...</span>
+          <button className="w-9 h-9 flex items-center justify-center rounded-full bg-primary text-white shrink-0 self-center">
+            <ArrowUp size={18} strokeWidth={2.5} />
+          </button>
+        </div>
       </div>
 
       {/* Mobile: Chat Sheet */}
