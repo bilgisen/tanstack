@@ -23,9 +23,13 @@ export function ChatSheet({ isOpen, onClose, context, placeholder, user, session
       setVh();
       window.addEventListener('resize', setVh);
       
+      // Emit event to disable background ChatPanel scrolling
+      window.dispatchEvent(new Event('chat-sheet-open'));
+      
       return () => {
         document.body.style.overflow = "unset";
         window.removeEventListener('resize', setVh);
+        window.dispatchEvent(new Event('chat-sheet-close'));
       };
     }
   }, [isOpen]);
