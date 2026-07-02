@@ -42,6 +42,31 @@ export const Route = createRootRoute({
         href: appCss,
       },
     ],
+    scripts: [
+      {
+        // Theme initialization script - runs before React hydration
+        children: `
+          (function() {
+            try {
+              const theme = localStorage.getItem('theme') || 'system';
+              const root = document.documentElement;
+              root.classList.remove('light', 'dark');
+              
+              if (theme === 'system') {
+                const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                root.classList.add(systemTheme);
+              } else {
+                root.classList.add(theme);
+              }
+            } catch (e) {
+              // Fallback to system preference if localStorage fails
+              const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+              document.documentElement.classList.add(systemTheme);
+            }
+          })();
+        `,
+      },
+    ],
   }),
   notFoundComponent: () => (
     <AppLayout>
@@ -55,29 +80,34 @@ export const Route = createRootRoute({
 })
 
 import { useEffect } from "react"
-import { useUIStore, applyTheme } from "../store/ui"
+import { useUIStore } from "../store/ui"
 import { ToastContainer } from "../components/ui/ToastContainer"
 
 function RootDocument() {
   const theme = useUIStore((s) => s.theme)
 
   useEffect(() => {
-    applyTheme(theme)
-    // Setup listener for system theme changes if theme is 'system'
+    // Only listen for system theme changes, don't re-apply theme
+    // (theme is already applied by blocking script in <head>)
     if (theme === 'system') {
       const media = window.matchMedia('(prefers-color-scheme: dark)')
-      const listener = () => applyTheme('system')
+      const listener = () => {
+        const root = window.document.documentElement
+        root.classList.remove('light', 'dark')
+        const systemTheme = media.matches ? 'dark' : 'light'
+        root.classList.add(systemTheme)
+      }
       media.addEventListener('change', listener)
       return () => media.removeEventListener('change', listener)
     }
   }, [theme])
 
   return (
-    <html lang="tr">
+    <html lang="tr" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <AppLayout>
           <Outlet />
         </AppLayout>

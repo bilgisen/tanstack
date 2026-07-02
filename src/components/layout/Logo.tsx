@@ -18,14 +18,17 @@ function JetIcon({ className, ...props }: React.SVGProps<SVGSVGElement>) {
 }
 
 function JetIconBranded({ size, className }: { size: number; className?: string }) {
-  const iconSize = size * 0.55;
+  // Round to avoid hydration mismatch from floating-point precision
+  const iconSize = Math.round(size * 0.55 * 100) / 100;
+  const iconWidth = Math.round(iconSize * (1163 / 1520) * 100) / 100;
+  
   return (
     <div
       className={className}
       style={{
         width: size,
         height: size,
-        borderRadius: size * 0.22,
+        borderRadius: Math.round(size * 0.22 * 100) / 100,
         backgroundColor: "var(--primary)",
         display: "flex",
         alignItems: "center",
@@ -33,7 +36,12 @@ function JetIconBranded({ size, className }: { size: number; className?: string 
         flexShrink: 0,
       }}
     >
-      <JetIcon width={iconSize * (1163 / 1520)} height={iconSize} style={{ color: "#fff" }} />
+      <JetIcon 
+        width={iconWidth} 
+        height={iconSize} 
+        style={{ color: "#fff" }} 
+        suppressHydrationWarning 
+      />
     </div>
   );
 }

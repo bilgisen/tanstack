@@ -11,10 +11,16 @@ interface ChatSheetProps {
 }
 
 export function ChatSheet({ isOpen, onClose, context, placeholder, user, sessionLoading }: ChatSheetProps) {
-  // Prevent page scroll when sheet is open
+  // Prevent page scroll when sheet is open (iOS-safe)
   useEffect(() => {
     if (isOpen) {
+      const scrollY = window.scrollY;
+      // overflow:hidden alone doesn't work on iOS Safari — also need position:fixed
       document.body.style.overflow = "hidden";
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = "100%";
+
       // Set 100vh properly for mobile
       const setVh = () => {
         const vh = window.innerHeight * 0.01;
@@ -22,12 +28,16 @@ export function ChatSheet({ isOpen, onClose, context, placeholder, user, session
       };
       setVh();
       window.addEventListener('resize', setVh);
-      
+
       // Emit event to disable background ChatPanel scrolling
       window.dispatchEvent(new Event('chat-sheet-open'));
-      
+
       return () => {
-        document.body.style.overflow = "unset";
+        document.body.style.overflow = "";
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        window.scrollTo(0, scrollY);
         window.removeEventListener('resize', setVh);
         window.dispatchEvent(new Event('chat-sheet-close'));
       };
