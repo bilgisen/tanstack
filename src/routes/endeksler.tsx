@@ -40,7 +40,7 @@ function EndekslerLayout() {
   }
 
   return (
-    <div className="w-full h-screen flex flex-col bg-background font-sans overflow-hidden">
+    <div className="w-full h-full flex flex-col bg-background font-sans overflow-hidden">
       <div className="flex-1 flex flex-row min-w-0 h-full relative overflow-hidden bg-background">
         
         <div className={`flex-1 flex flex-col min-w-0 h-full relative overflow-hidden bg-background ${isChatMaximized ? 'hidden md:hidden' : ''}`}>

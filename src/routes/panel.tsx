@@ -107,7 +107,7 @@ function PanelLayout() {
   }
 
   return (
-    <div className="w-full h-screen flex flex-col bg-background font-sans overflow-hidden">
+    <div className="w-full h-full flex flex-col bg-background font-sans overflow-hidden">
       
       {/* Remaining Layout: Body area (Sub-page content + Chat Panel) */}
       <div className="flex-1 flex flex-row min-w-0 h-full relative overflow-hidden bg-background">
