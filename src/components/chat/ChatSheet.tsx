@@ -33,7 +33,7 @@ export function ChatSheet({ isOpen, onClose, context, placeholder, user, session
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 md:hidden font-sans select-none">
+    <div className="fixed inset-0 z-50 md:hidden font-sans select-none overflow-hidden">
       {/* 1. Backdrop Overlay */}
       <div 
         onClick={onClose}

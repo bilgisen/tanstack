@@ -41,7 +41,7 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
   }, []);
 
   return (
-    <div className="flex flex-col h-full bg-background relative font-sans">
+    <div className="flex flex-col h-full bg-background relative font-sans [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
       {/* 1. Header - Fixed height, no shrink */}
       <div
         className="h-14 flex items-center justify-between px-5 border-b border-border/50 bg-background/95 backdrop-blur-md flex-shrink-0 select-none z-10 relative"
