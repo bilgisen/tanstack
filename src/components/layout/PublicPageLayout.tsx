@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ChatPanel } from "../chat/ChatPanel";
 import { ChatSheet } from "../chat/ChatSheet";
 import { useUIStore } from "../../store/ui";
-import { Logo } from "./Logo";
+import { ArrowUp } from "lucide-react";
 
 interface PublicPageLayoutProps {
   context: string;
@@ -33,7 +33,7 @@ export function PublicPageLayout({ context, placeholder, children }: PublicPageL
           >
             <span className="text-muted-foreground/60 text-sm truncate pr-4">{placeholder}</span>
             <button className="w-9 h-9 flex items-center justify-center rounded-full bg-primary text-white shrink-0 self-center">
-              <Logo size={14} variant="icon" className="text-white" />
+              <ArrowUp size={14} strokeWidth={2.5} className="text-white" />
             </button>
           </div>
         </div>

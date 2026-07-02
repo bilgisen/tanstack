@@ -124,7 +124,7 @@ export function ChatPane({
           disabled={isLoading}
           placeholder={placeholder}
           rows={1}
-          className="flex-1 bg-transparent border-none outline-none resize-none py-3 text-sm md:text-base text-foreground placeholder-muted-foreground/50 disabled:opacity-50 min-h-[44px] max-h-[140px] font-sans leading-relaxed custom-scrollbar"
+          className="flex-1 bg-transparent border-none outline-none resize-none py-3 text-base text-foreground placeholder-muted-foreground/50 disabled:opacity-50 min-h-[44px] max-h-[140px] font-sans leading-relaxed custom-scrollbar"
         />
 
         <button

@@ -47,7 +47,7 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
         className="h-14 flex items-center justify-between px-5 border-b border-border/50 bg-background/95 backdrop-blur-md shrink-0 select-none z-10 relative"
         ref={historyRef}
       >
-        <span className="text-sm font-normal text-foreground">Sohbet</span>
+        <span className="text-sm font-normal text-foreground">Araştır</span>
 
         <div className="flex items-center gap-1.5">
           <button
@@ -72,7 +72,7 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
 
           <button
             onClick={toggleChatMaximized}
-            className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all cursor-pointer flex items-center justify-center active:scale-95"
+            className="hidden md:flex p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all cursor-pointer items-center justify-center active:scale-95"
             title={isChatMaximized ? "Sohbeti Küçült" : "Sohbeti Genişlet"}
           >
             {isChatMaximized ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
@@ -143,11 +143,11 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
               <MessageScrollerContent className="gap-4 p-5">
                 {messages.length === 0 ? (
                   <MessageScrollerItem className="flex-1 flex items-center justify-center min-h-full">
-                    <div className="flex flex-col items-center text-center p-6 space-y-4 max-w-sm mx-auto select-none opacity-80">
-                      <Logo size={40} variant="icon" />
+                    <div className="flex flex-col items-center text-center p-6 space-y-4 max-w-md mx-auto select-none opacity-80">
+                      <Logo size={44} variant="icon" />
                       <div className="space-y-1">
-                        <h5 className="text-sm font-semibold text-foreground">Sohbete Başlayın</h5>
-                        <p className="text-xs text-muted-foreground leading-relaxed">
+                        <h5 className="text-base font-semibold text-foreground">Araştırmaya Başlayın</h5>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
                           Hisseler, rasyolar, bilançolar ve teknik formasyonlar hakkında sorularınızı sorun.
                           BIST odaklı yapay zeka analiz etsin.
                         </p>
@@ -158,7 +158,6 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
                   messages.map((msg, idx) => (
                     <MessageScrollerItem key={idx}>
                       <div className={`flex gap-2.5 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                        {/* AI Avatar */}
                         {msg.role === "assistant" && (
                           <div className="shrink-0 mt-1">
                             <Logo size={22} variant="icon" />
@@ -201,8 +200,8 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
                       <Bubble variant="muted" align="start">
                         <BubbleContent className="px-3.5 py-2.5 rounded-2xl rounded-tl-sm border border-border/30 flex items-center gap-2">
                           <Loader2 size={13} className="animate-spin text-primary" />
-                          <span className="text-xs text-muted-foreground">
-                            Yapay zeka analiz raporu hazırlıyor...
+                          <span className="text-sm text-muted-foreground">
+                            Analiz raporu hazırlıyor...
                           </span>
                         </BubbleContent>
                       </Bubble>
@@ -210,7 +209,6 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
                   </MessageScrollerItem>
                 )}
 
-                {/* Scroll anchor */}
                 {messages.length > 0 && (
                   <MessageScrollerItem scrollAnchor>
                     <Marker variant="separator" className="py-1 opacity-0">
@@ -227,7 +225,7 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
       </div>
 
       {/* 3. Input Footer */}
-      <div className="shrink-0 border-t border-border/30">
+      <div className="shrink-0">
         <ChatPane
           context={context}
           placeholder={placeholder}
