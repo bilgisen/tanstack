@@ -126,7 +126,7 @@ function PanelLayout() {
           </main>
 
           {/* Floating Chat Trigger Bar (Mobile only) */}
-          <div className="lg:hidden absolute bottom-6 left-6 right-6 z-40 flex justify-center pointer-events-none">
+          <div className="md:hidden absolute bottom-6 left-6 right-6 z-40 flex justify-center pointer-events-none">
             <div 
               onClick={() => setIsChatSheetOpen(true)}
               className="w-full max-w-3xl bg-background/80 backdrop-blur-2xl border border-border/50 rounded-full shadow-2xl pointer-events-auto overflow-hidden animate-in slide-in-from-bottom-6 duration-500 cursor-pointer flex items-center px-6 py-2.5 justify-between"
