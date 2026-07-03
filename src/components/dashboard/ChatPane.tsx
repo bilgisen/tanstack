@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { ArrowUp } from "lucide-react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useChatStore } from "../../store/chat";
