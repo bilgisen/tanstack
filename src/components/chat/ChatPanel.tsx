@@ -163,28 +163,26 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
                         </div>
                       )}
 
-                      <div className={`${msg.role === "user" ? "max-w-[85%]" : "w-full min-w-0"}`}>
-                        <Bubble
-                          variant={msg.role === "user" ? "default" : "secondary"}
-                          align={msg.role === "user" ? "end" : "start"}
+                      <Bubble
+                        variant={msg.role === "user" ? "default" : "secondary"}
+                        align={msg.role === "user" ? "end" : "start"}
+                      >
+                        <BubbleContent
+                          className={`px-3.5 py-2.5 rounded-2xl ${
+                            msg.role === "user"
+                              ? "rounded-tr-sm"
+                              : "rounded-tl-sm border border-border/30"
+                          }`}
                         >
-                          <BubbleContent
-                            className={`px-3.5 py-2.5 rounded-2xl ${
-                              msg.role === "user"
-                                ? "rounded-tr-sm"
-                                : "rounded-tl-sm border border-border/30"
-                            }`}
-                          >
-                            <MarkdownRenderer
-                              text={msg.text}
-                              isAssistant={msg.role === "assistant"}
-                              context={msg.context || context}
-                              suggestions={msg.suggestions}
-                              widget={msg.widget}
-                            />
-                          </BubbleContent>
-                        </Bubble>
-                      </div>
+                          <MarkdownRenderer
+                            text={msg.text}
+                            isAssistant={msg.role === "assistant"}
+                            context={msg.context || context}
+                            suggestions={msg.suggestions}
+                            widget={msg.widget}
+                          />
+                        </BubbleContent>
+                      </Bubble>
                     </div>
                   </MessageScrollerItem>
                 ))
