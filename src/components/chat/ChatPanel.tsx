@@ -28,7 +28,6 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
   const { messages, isLoading, sessions, activeSessionId, loadSession, deleteSession, clearChat } = useChatStore();
   const { isChatMaximized, toggleChatMaximized } = useUIStore();
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [isOverlayOpen, setIsOverlayOpen] = useState(false);
   const historyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -39,20 +38,6 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
     };
     window.addEventListener("mousedown", handleOutsideClick);
     return () => window.removeEventListener("mousedown", handleOutsideClick);
-  }, []);
-
-  // Listen for ChatSheet open/close events to disable scrolling
-  useEffect(() => {
-    const handleChatSheetOpen = () => setIsOverlayOpen(true);
-    const handleChatSheetClose = () => setIsOverlayOpen(false);
-    
-    window.addEventListener('chat-sheet-open', handleChatSheetOpen);
-    window.addEventListener('chat-sheet-close', handleChatSheetClose);
-    
-    return () => {
-      window.removeEventListener('chat-sheet-open', handleChatSheetOpen);
-      window.removeEventListener('chat-sheet-close', handleChatSheetClose);
-    };
   }, []);
 
   return (
@@ -152,11 +137,8 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
 
       {/* 2. Messages Area - Flex grow with proper MessageScroller */}
       <MessageScrollerProvider>
-        <MessageScroller className={`flex-1 min-h-0 ${isOverlayOpen ? '!overflow-hidden' : ''}`}>
-          <MessageScrollerViewport 
-            className={`h-full ${isOverlayOpen ? '!overflow-hidden [&::-webkit-scrollbar]:!hidden' : ''}`}
-            style={isOverlayOpen ? { overflow: 'hidden !important' } as any : undefined}
-          >
+        <MessageScroller className="flex-1 min-h-0">
+          <MessageScrollerViewport className="h-full">
             <MessageScrollerContent className="gap-4 p-5">
               {messages.length === 0 ? (
                 <MessageScrollerItem className="flex items-center justify-center min-h-[300px]">
