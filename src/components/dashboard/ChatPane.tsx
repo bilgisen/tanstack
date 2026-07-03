@@ -28,6 +28,16 @@ export function ChatPane({
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Lock body scroll when auth dialog is open
+  useEffect(() => {
+    if (showAuthDialog) {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }
+  }, [showAuthDialog]);
+
   const detectTargetAsset = (text: string): { path: string; context: string } | null => {
     const textLower = text.toLowerCase();
     
@@ -149,7 +159,7 @@ export function ChatPane({
 
       {/* Auth Dialog */}
       {showAuthDialog && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
@@ -159,7 +169,7 @@ export function ChatPane({
           />
 
           {/* Dialog */}
-          <div className="relative w-full max-w-sm bg-card border border-border/50 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 fade-in duration-200">
+          <div className="relative w-full max-w-sm bg-card border border-border/50 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 fade-in duration-200 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {/* Top accent bar */}
             <div className="h-1 w-full bg-gradient-to-r from-primary via-primary/60 to-primary" />
 

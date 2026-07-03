@@ -315,6 +315,18 @@
       height: 0 !important;
     }
   }
+
+  /* GENIUS FIX: Hide scrollbar on all fixed/absolute overlays on mobile */
+  @media (max-width: 768px) {
+    .fixed::-webkit-scrollbar,
+    .absolute::-webkit-scrollbar,
+    [class*="z-[100]"]::-webkit-scrollbar,
+    [class*="z-50"]::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+  }
 }
 
 /* Premium Chatbot Response Styles - Revolut Style */
