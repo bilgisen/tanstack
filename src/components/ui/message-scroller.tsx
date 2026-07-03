@@ -41,6 +41,7 @@ function MessageScrollerViewport({
       data-slot="message-scroller-viewport"
       className={cn(
         "size-full min-h-0 min-w-0 scroll-fade-b custom-scrollbar overflow-y-auto overscroll-contain contain-content md:scrollbar-gutter-stable",
+        "[&::-webkit-scrollbar]:md:block [&::-webkit-scrollbar]:hidden",
         className
       )}
       {...props}

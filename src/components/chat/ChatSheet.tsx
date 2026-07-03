@@ -74,6 +74,7 @@ export function ChatSheet({ isOpen, onClose, context, placeholder, user, session
             onClose={onClose}
             user={user}
             sessionLoading={sessionLoading}
+            isMobile={true}
           />
         </div>
       </div>

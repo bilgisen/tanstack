@@ -22,9 +22,10 @@ interface ChatPanelProps {
   onClose?: () => void;
   user?: any;
   sessionLoading?: boolean;
+  isMobile?: boolean; // For mobile-specific scrollbar hiding
 }
 
-export function ChatPanel({ context, placeholder, onClose, user, sessionLoading }: ChatPanelProps) {
+export function ChatPanel({ context, placeholder, onClose, user, sessionLoading, isMobile = false }: ChatPanelProps) {
   const { messages, isLoading, sessions, activeSessionId, loadSession, deleteSession, clearChat } = useChatStore();
   const { isChatMaximized, toggleChatMaximized } = useUIStore();
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -138,7 +139,14 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
       {/* 2. Messages Area - Flex grow with proper MessageScroller */}
       <MessageScrollerProvider>
         <MessageScroller className="flex-1 min-h-0">
-          <MessageScrollerViewport className="h-full">
+          <MessageScrollerViewport 
+            className="h-full"
+            style={isMobile ? {
+              msOverflowStyle: 'none',
+              scrollbarWidth: 'none',
+              WebkitOverflowScrolling: 'touch'
+            } as React.CSSProperties : undefined}
+          >
             <MessageScrollerContent className="gap-4 p-5">
               {messages.length === 0 ? (
                 <MessageScrollerItem className="flex items-center justify-center min-h-[300px]">
