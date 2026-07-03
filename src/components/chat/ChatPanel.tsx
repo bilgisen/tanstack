@@ -191,7 +191,7 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
               )}
 
               {isLoading && (
-                <MessageScrollerItem>
+                <MessageScrollerItem scrollAnchor>
                   <div className="flex gap-2.5 justify-start">
                     <div className="shrink-0 mt-1">
                       <Logo size={22} variant="icon" />
@@ -208,17 +208,14 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading 
                 </MessageScrollerItem>
               )}
 
-              {messages.length > 0 && (
-                <MessageScrollerItem scrollAnchor>
-                  <Marker variant="separator" className="py-1 opacity-0">
-                    <span className="text-[10px]">son</span>
-                  </Marker>
-                </MessageScrollerItem>
-              )}
+              <MessageScrollerItem scrollAnchor>
+                <div className="h-4" />
+              </MessageScrollerItem>
             </MessageScrollerContent>
           </MessageScrollerViewport>
 
-          <MessageScrollerButton direction="end" />
+          {/* Scroll to bottom button - hidden on mobile to save space */}
+          <MessageScrollerButton direction="end" className="hidden md:flex" />
         </MessageScroller>
       </MessageScrollerProvider>
 
