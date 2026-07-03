@@ -42,31 +42,6 @@ export const Route = createRootRoute({
         href: appCss,
       },
     ],
-    scripts: [
-      {
-        // Theme initialization script - runs before React hydration
-        children: `
-          (function() {
-            try {
-              const theme = localStorage.getItem('theme') || 'system';
-              const root = document.documentElement;
-              root.classList.remove('light', 'dark');
-              
-              if (theme === 'system') {
-                const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                root.classList.add(systemTheme);
-              } else {
-                root.classList.add(theme);
-              }
-            } catch (e) {
-              // Fallback to system preference if localStorage fails
-              const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-              document.documentElement.classList.add(systemTheme);
-            }
-          })();
-        `,
-      },
-    ],
   }),
   notFoundComponent: () => (
     <AppLayout>
@@ -79,16 +54,31 @@ export const Route = createRootRoute({
   component: RootDocument,
 })
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useUIStore } from "../store/ui"
 import { ToastContainer } from "../components/ui/ToastContainer"
 
 function RootDocument() {
   const theme = useUIStore((s) => s.theme)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    // Only listen for system theme changes, don't re-apply theme
-    // (theme is already applied by blocking script in <head>)
+    setMounted(true)
+    
+    // Apply theme after mount
+    if (typeof window !== 'undefined') {
+      const root = window.document.documentElement
+      root.classList.remove('light', 'dark')
+      
+      if (theme === 'system') {
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        root.classList.add(systemTheme)
+      } else {
+        root.classList.add(theme)
+      }
+    }
+    
+    // Setup listener for system theme changes if theme is 'system'
     if (theme === 'system') {
       const media = window.matchMedia('(prefers-color-scheme: dark)')
       const listener = () => {
@@ -106,6 +96,28 @@ function RootDocument() {
     <html lang="tr" suppressHydrationWarning>
       <head>
         <HeadContent />
+        {/* Blocking script to apply theme before hydration */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                const theme = localStorage.getItem('theme') || 'system';
+                const root = document.documentElement;
+                root.classList.remove('light', 'dark');
+                
+                if (theme === 'system') {
+                  const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                  root.classList.add(systemTheme);
+                } else {
+                  root.classList.add(theme);
+                }
+              } catch (e) {
+                const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                document.documentElement.classList.add(systemTheme);
+              }
+            `,
+          }}
+        />
       </head>
       <body suppressHydrationWarning>
         <AppLayout>
