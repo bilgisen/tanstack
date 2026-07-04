@@ -16,65 +16,79 @@ export async function checkAndReserveHT(
   estimatedInputTokens: number,
   estimatedOutputTokens: number,
 ): Promise<HTCheckResult> {
-  // 1. Get model config
-  const model = await db
-    .select()
-    .from(modelConfigs)
-    .where(and(eq(modelConfigs.modelId, modelId), eq(modelConfigs.isActive, true)))
-    .then((res: any[]) => res[0]);
+  try {
+    // 1. Get model config
+    const model = await db
+      .select()
+      .from(modelConfigs)
+      .where(and(eq(modelConfigs.modelId, modelId), eq(modelConfigs.isActive, true)))
+      .then((res: any[]) => res[0]);
 
-  if (!model) return { ok: false, error: 'MODEL_NOT_ALLOWED' };
-
-  // 2. Get user credits (with auto-provision fallback)
-  let credits = await db
-    .select()
-    .from(userCredits)
-    .where(eq(userCredits.userId, userId))
-    .then((res: any[]) => res[0]);
-
-  if (!credits) {
-    try {
-      credits = await db
-        .insert(userCredits)
-        .values({
-          userId,
-          tier: 'free',
-          monthlyHt: 5000,
-          usedHt: 0,
-          extraHt: 0,
-          resetAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        })
-        .returning()
-        .then((res: any[]) => res[0]);
-    } catch (err) {
-      console.error("Failed to auto-provision user credits:", err);
-      return { ok: false, error: 'USER_NOT_FOUND' };
+    if (!model) {
+      console.warn(`[checkAndReserveHT] Model not found or inactive: ${modelId}`);
+      return { ok: false, error: 'MODEL_NOT_ALLOWED' };
     }
+
+    // 2. Get user credits (with auto-provision fallback)
+    let credits = await db
+      .select()
+      .from(userCredits)
+      .where(eq(userCredits.userId, userId))
+      .then((res: any[]) => res[0]);
+
+    if (!credits) {
+      console.log(`[checkAndReserveHT] Auto-provisioning credits for user: ${userId}`);
+      try {
+        credits = await db
+          .insert(userCredits)
+          .values({
+            userId,
+            tier: 'free',
+            monthlyHt: 5000,
+            usedHt: 0,
+            extraHt: 0,
+            resetAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          })
+          .returning()
+          .then((res: any[]) => res[0]);
+        console.log(`[checkAndReserveHT] Credits auto-provisioned for user: ${userId}`);
+      } catch (err) {
+        console.error("[checkAndReserveHT] Failed to auto-provision user credits:", err);
+        return { ok: false, error: 'USER_NOT_FOUND' };
+      }
+    }
+
+    // 3. Check if user's tier has access to this model
+    const allowedTiers = model.allowedTiers || [];
+    if (!allowedTiers.includes(credits.tier)) {
+      console.warn(`[checkAndReserveHT] User tier '${credits.tier}' not allowed for model: ${modelId}`);
+      return { ok: false, error: 'MODEL_NOT_ALLOWED' };
+    }
+
+    // 4. Calculate estimated HT cost
+    const inputRate = parseFloat(model.htPer1kInput);
+    const outputRate = parseFloat(model.htPer1kOutput);
+    
+    const estimatedHT = Math.ceil(
+      (estimatedInputTokens / 1000) * inputRate +
+      (estimatedOutputTokens / 1000) * outputRate
+    );
+
+    // 5. Calculate total available HT
+    const availableHT = (credits.monthlyHt - credits.usedHt) + credits.extraHt;
+
+    if (availableHT < estimatedHT) {
+      console.warn(`[checkAndReserveHT] Insufficient HT. Available: ${availableHT}, Estimated: ${estimatedHT}`);
+      return { ok: false, error: 'INSUFFICIENT_HT', availableHT, estimatedCost: estimatedHT };
+    }
+
+    console.log(`[checkAndReserveHT] Check passed. Available HT: ${availableHT}, Estimated cost: ${estimatedHT}`);
+    return { ok: true, availableHT, estimatedCost: estimatedHT };
+  } catch (error) {
+    console.error('[checkAndReserveHT] Unexpected error:', error);
+    // Return a generic error instead of throwing
+    return { ok: false, error: 'USER_NOT_FOUND' };
   }
-
-  // 3. Check if user's tier has access to this model
-  const allowedTiers = model.allowedTiers || [];
-  if (!allowedTiers.includes(credits.tier)) {
-    return { ok: false, error: 'MODEL_NOT_ALLOWED' };
-  }
-
-  // 4. Calculate estimated HT cost
-  const inputRate = parseFloat(model.htPer1kInput);
-  const outputRate = parseFloat(model.htPer1kOutput);
-  
-  const estimatedHT = Math.ceil(
-    (estimatedInputTokens / 1000) * inputRate +
-    (estimatedOutputTokens / 1000) * outputRate
-  );
-
-  // 5. Calculate total available HT
-  const availableHT = (credits.monthlyHt - credits.usedHt) + credits.extraHt;
-
-  if (availableHT < estimatedHT) {
-    return { ok: false, error: 'INSUFFICIENT_HT', availableHT, estimatedCost: estimatedHT };
-  }
-
-  return { ok: true, availableHT, estimatedCost: estimatedHT };
 }
 
 // AFTER LLM CALL: Deduct HT based on actual token usage and log the transaction
