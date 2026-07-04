@@ -88,6 +88,7 @@ function SektorlerPage() {
         {labels[reliability as keyof typeof labels] || reliability}
       </span>
     )
+  }
 
   // If showing child route, render Outlet instead of list
   if (hasChildRoute) {
