@@ -49,73 +49,87 @@ function SektorDetailPage() {
   const [sectorName, setSectorName] = useState('')
   const [hasScoreData, setHasScoreData] = useState(true)
   const [loading, setLoading] = useState(true)
+  const [totalCompanies, setTotalCompanies] = useState(0)
+  const [activeCompanies, setActiveCompanies] = useState(0)
+  const [reliability, setReliability] = useState<string>('LOW')
 
-  const chatContext = `sektor:${slug}`
+  const chatContext = `industry:${slug}`
+  
+  // Reliability badge component
+  const ReliabilityBadge = ({ reliability }: { reliability: string }) => {
+    const colors = {
+      HIGH: 'bg-green-500/10 text-green-600 border-green-500/20',
+      MEDIUM: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20',
+      LOW: 'bg-orange-500/10 text-orange-600 border-orange-500/20',
+    }
+    const labels = {
+      HIGH: 'Yüksek Güvenilirlik',
+      MEDIUM: 'Orta Güvenilirlik',
+      LOW: 'Düşük Güvenilirlik',
+    }
+    return (
+      <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md border ${colors[reliability as keyof typeof colors] || colors.LOW}`}>
+        {labels[reliability as keyof typeof labels] || reliability}
+      </span>
+    )
+  }
 
   useEffect(() => {
     let isMounted = true
     setLoading(true)
 
-    const name = SLUG_TO_NAME[slug] || slug
-    setSectorName(name)
-
     async function fetchData() {
       const compUrl = import.meta.env.VITE_COMP_API_URL || "https://comp-ef958063.fastapicloud.dev"
 
       try {
-        // 1. Try leaderboard scores first
-        const scoreRes = await fetch(`${compUrl}/api/v1/scores/leaderboard/sektor?top_n=50`)
-        if (scoreRes.ok) {
-          const data = await scoreRes.json()
-          const sectors = Array.isArray(data) ? data : []
-
-          const matchSector = sectors.find((s: any) => {
-            const sectorSlug = s.sector?.toLowerCase()
-              .replace(/i̇/g, 'i')
-              .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
-              .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
-              .replace(/[^a-z0-9]+/g, '-')
-              .replace(/^-|-$/g, '')
-            return sectorSlug === slug
-          })
-
-          if (matchSector && matchSector.companies?.length > 0) {
-            const scored: ScoredCompany[] = matchSector.companies.map((c: any) => ({
-              rank: c.rank,
-              ticker: c.ticker?.toUpperCase(),
-              name: c.name || c.ticker,
-              score: c.score ?? null,
-              reliability: c.reliability || 'LOW',
-            }))
+        // Use NEW industry detail endpoint
+        const res = await fetch(`${compUrl}/api/v1/sectors/industries/${slug}`)
+        
+        if (res.ok) {
+          const data = await res.json()
+          
+          if (data && data.companies) {
+            // Set industry name and metadata from API
+            if (isMounted) {
+              setSectorName(data.industry)
+              setTotalCompanies(data.total_companies || data.companies.length)
+            }
+            
+            // Map companies with scores
+            const scored: ScoredCompany[] = data.companies
+              .filter((c: any) => c.ticker)
+              .map((c: any, i: number) => ({
+                rank: i + 1,
+                ticker: c.ticker.toUpperCase(),
+                name: c.name || c.ticker,
+                score: c.score ?? null,
+                reliability: c.score !== null ? 'HIGH' : 'LOW',
+              }))
+            
+            const scoredCount = scored.filter(c => c.score !== null).length
+            
             if (isMounted) {
               setCompanies(scored)
-              setHasScoreData(true)
+              setActiveCompanies(scoredCount)
+              setHasScoreData(scoredCount > 0)
+              
+              // Determine reliability based on total company count
+              const reliabilityRating = 
+                data.total_companies >= 10 ? 'HIGH' : 
+                data.total_companies >= 5 ? 'MEDIUM' : 'LOW'
+              setReliability(reliabilityRating)
+              
               setLoading(false)
             }
             return
           }
         }
-
-        // 2. Fallback: fetch companies from sector API (no scores)
-        setHasScoreData(false)
-        const compRes = await fetch(`${compUrl}/api/v1/sectors/${encodeURIComponent(name)}/companies`)
-        if (compRes.ok) {
-          const compData = await compRes.json()
-          if (compData?.companies) {
-            const list: ScoredCompany[] = compData.companies
-              .filter((c: any) => c.ticker)
-              .map((c: any, i: number) => ({
-                rank: i + 1,
-                ticker: c.ticker.toUpperCase(),
-                name: (companyNames as Record<string, string>)[c.ticker.toUpperCase()] || c.name || c.ticker,
-                score: null,
-                reliability: 'LOW',
-              }))
-            if (isMounted) setCompanies(list)
-          }
-        }
+        
+        // Fallback: If industry endpoint fails, show error
+        console.error(`Industry "${slug}" not found`)
+        
       } catch (e) {
-        console.error('Sector data fetch failed:', e)
+        console.error('Industry data fetch failed:', e)
       }
 
       if (isMounted) setLoading(false)
@@ -156,14 +170,21 @@ function SektorDetailPage() {
               <Factory size={20} />
             </div>
             <div className="min-w-0">
-              <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Sektörler</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Industry</span>
+                <ReliabilityBadge reliability={reliability} />
+              </div>
               <h1 className="text-base md:text-2xl font-bold text-foreground tracking-tight leading-none mt-1">{sectorName}</h1>
             </div>
           </div>
           <div className="flex items-center gap-6 shrink-0">
             <div className="text-right">
-              <div className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">{companies.length}</div>
-              <div className="text-[10px] text-muted-foreground font-medium uppercase">Şirket</div>
+              <div className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">{totalCompanies}</div>
+              <div className="text-[10px] text-muted-foreground font-medium uppercase">Toplam Şirket</div>
+            </div>
+            <div className="text-right">
+              <div className="text-2xl md:text-3xl font-bold text-green-600 tracking-tight">{activeCompanies}</div>
+              <div className="text-[10px] text-muted-foreground font-medium uppercase">Skorlu Şirket</div>
             </div>
           </div>
         </div>

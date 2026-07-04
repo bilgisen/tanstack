@@ -9,15 +9,17 @@ export const Route = createFileRoute('/sektorler')({
   component: SektorlerPage,
 })
 
-type Sector = {
+type Industry = {
   slug: string;
   name: string;
   companyCount: number;
+  activeCompanies: number;
+  reliability: 'HIGH' | 'MEDIUM' | 'LOW';
 };
 
 function SektorlerPage() {
   const matches = useMatches()
-  const [sectors, setSectors] = useState<Sector[]>([])
+  const [industries, setIndustries] = useState<Industry[]>([])
   const [loading, setLoading] = useState(true)
   const { sendMessage } = useChatStore()
 
@@ -30,30 +32,31 @@ function SektorlerPage() {
     let isMounted = true
     setLoading(true)
 
-    async function fetchSectors() {
+    async function fetchIndustries() {
       const compUrl = import.meta.env.VITE_COMP_API_URL || "https://comp-ef958063.fastapicloud.dev"
       try {
-        const res = await fetch(`${compUrl}/api/v1/sectors`)
+        // Use NEW industries endpoint
+        const res = await fetch(`${compUrl}/api/v1/sectors/industries`)
         if (res.ok) {
           const data = await res.json()
-          if (data && data.sectors) {
-            const sectorList = data.sectors
-              .filter((s: any) => s.name)
-              .map((s: any) => ({
-                slug: toSlug(s.name),
-                name: s.name,
-                companyCount: s.total_companies || s.active_companies || 0,
-              }))
-            if (isMounted) setSectors(sectorList)
+          if (data && data.industries) {
+            const industryList = data.industries.map((ind: any) => ({
+              slug: ind.slug,
+              name: ind.name,
+              companyCount: ind.total_companies || 0,
+              activeCompanies: ind.active_companies || 0,
+              reliability: ind.reliability || 'LOW',
+            }))
+            if (isMounted) setIndustries(industryList)
           }
         }
       } catch (e) {
-        console.error('Sektörler: Failed fetching sectors:', e)
+        console.error('Sektörler: Failed fetching industries:', e)
       }
       if (isMounted) setLoading(false)
     }
 
-    fetchSectors()
+    fetchIndustries()
     return () => { isMounted = false }
   }, [hasChildRoute])
 
@@ -65,7 +68,26 @@ function SektorlerPage() {
     'Sektörel bazda temel analiz karşılaştırması yapar mısın?'
   ]
 
-  const totalCompanies = sectors.reduce((sum, s) => sum + s.companyCount, 0)
+  const totalCompanies = industries.reduce((sum, ind) => sum + ind.companyCount, 0)
+  const highQualityCount = industries.filter(ind => ind.reliability === 'HIGH').length
+
+  // Reliability badge component
+  const ReliabilityBadge = ({ reliability }: { reliability: string }) => {
+    const colors = {
+      HIGH: 'bg-green-500/10 text-green-600 border-green-500/20',
+      MEDIUM: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20',
+      LOW: 'bg-orange-500/10 text-orange-600 border-orange-500/20',
+    }
+    const labels = {
+      HIGH: 'Yüksek Güvenilirlik',
+      MEDIUM: 'Orta Güvenilirlik',
+      LOW: 'Düşük Güvenilirlik',
+    }
+    return (
+      <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md border ${colors[reliability as keyof typeof colors] || colors.LOW}`}>
+        {labels[reliability as keyof typeof labels] || reliability}
+      </span>
+    )
 
   // If showing child route, render Outlet instead of list
   if (hasChildRoute) {
@@ -96,8 +118,12 @@ function SektorlerPage() {
             </div>
             <div className="flex items-center gap-6 shrink-0">
               <div className="text-right">
-                <div className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">{sectors.length}</div>
-                <div className="text-[10px] text-muted-foreground font-medium uppercase">Sektör</div>
+                <div className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">{industries.length}</div>
+                <div className="text-[10px] text-muted-foreground font-medium uppercase">Industry</div>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl md:text-3xl font-bold text-green-600 tracking-tight">{highQualityCount}</div>
+                <div className="text-[10px] text-muted-foreground font-medium uppercase">Yüksek Kalite</div>
               </div>
               <div className="text-right">
                 <div className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">{totalCompanies}</div>
@@ -106,25 +132,30 @@ function SektorlerPage() {
             </div>
           </div>
 
-          {/* Sector Grid - 2 columns */}
+          {/* Industry Grid - 2 columns */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {sectors.map((sector) => (
+            {industries.map((industry) => (
               <Link
-                key={sector.slug}
+                key={industry.slug}
                 to="/sektorler/$slug"
-                params={{ slug: sector.slug }}
+                params={{ slug: industry.slug }}
                 className="group flex items-center justify-between border border-border/45 bg-card/25 rounded-2xl p-5 transition-all hover:border-primary/30 hover:bg-card/40 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer"
               >
-                <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
                   <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
                     <Factory size={16} />
                   </div>
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">{sector.name}</h3>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">{sector.companyCount} şirket</p>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">{industry.name}</h3>
+                      <ReliabilityBadge reliability={industry.reliability} />
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                      {industry.companyCount} şirket · {industry.activeCompanies} skorlu
+                    </p>
                   </div>
                 </div>
-                <ChevronRight size={14} className="text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0" />
+                <ChevronRight size={14} className="text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0 ml-2" />
               </Link>
             ))}
           </div>
@@ -153,9 +184,9 @@ function SektorlerPage() {
             </div>
           </div>
 
-          {sectors.length === 0 && (
+          {industries.length === 0 && (
             <div className="text-center py-12 text-muted-foreground">
-              Sektör verisi yüklenemedi.
+              Industry verisi yüklenemedi.
             </div>
           )}
         </div>
