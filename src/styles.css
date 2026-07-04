@@ -253,16 +253,18 @@
     @apply bg-[#494fdf] text-white rounded-[20px] p-8;
   }
 
-  /* Custom Slim Scrollbars */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    @apply bg-border/40 rounded-full hover:bg-muted-foreground/40;
+  /* Custom Slim Scrollbars - Desktop Only */
+  @media (min-width: 769px) {
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      @apply bg-border/40 rounded-full hover:bg-muted-foreground/40;
+    }
   }
   
   /* Custom scrollbar utility - hide scrollbar until hover */
@@ -316,8 +318,10 @@
     }
   }
 
-  /* GENIUS FIX: Hide scrollbar on all fixed/absolute overlays on mobile */
+  /* GENIUS FIX: Hide scrollbar on all fixed/absolute overlays, html, and body on mobile */
   @media (max-width: 768px) {
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar,
     .fixed::-webkit-scrollbar,
     .absolute::-webkit-scrollbar,
     [class*="z-[100]"]::-webkit-scrollbar,
