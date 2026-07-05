@@ -136,9 +136,9 @@ function ProfilePage() {
           <h2 className="text-2xl font-black text-foreground tracking-tight">Abone olun</h2>
         </div>
 
-        <div className="space-y-4 max-w-lg mx-auto">
+        <div className="space-y-4">
           {/* Standard -> Abone */}
-          <div className={`rounded-2xl p-5 border transition-all ${
+          <div className={`rounded-2xl p-6 border transition-all ${
             userTier === 'standard'
               ? 'border-primary/30 bg-primary/5 ring-1 ring-primary'
               : 'border-white/5 bg-card hover:bg-muted/30'
@@ -148,100 +148,110 @@ function ProfilePage() {
                 Aktif
               </span>
             )}
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-5">
               <div>
-                <h3 className="font-extrabold text-foreground">Abone</h3>
+                <h3 className="text-lg font-extrabold text-foreground">Abone</h3>
                 <div className="flex items-center gap-1 mt-1">
                   <Coins size={12} className="text-primary" />
                   <span className="text-[11px] font-bold text-muted-foreground">
-                    {TIER_CONFIG.standard.monthlyHT.toLocaleString('tr-TR')} HT/ay
+                    100K Kredi / ay
                   </span>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-xl font-black text-foreground">
+                <div className="text-2xl font-black text-foreground">
                   {TIER_CONFIG.standard.price.toLocaleString()}
                 </div>
                 <span className="text-[10px] font-bold text-muted-foreground">₺ / ay</span>
               </div>
             </div>
-            <ul className="space-y-2 mt-4">
-              <li className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Check size={12} className={userTier === 'standard' ? 'text-primary' : 'text-muted-foreground/50'} />
-                <span>{TIER_CONFIG.standard.dailyCallLimit} günlük sorgu</span>
-              </li>
-              <li className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Check size={12} className={userTier === 'standard' ? 'text-primary' : 'text-muted-foreground/50'} />
-                <span>{TIER_CONFIG.standard.watchlistLimit} takip listesi</span>
-              </li>
-              <li className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Check size={12} className={userTier === 'standard' ? 'text-primary' : 'text-muted-foreground/50'} />
-                <span>{TIER_CONFIG.standard.historyDays} Gün sohbet geçmişi</span>
-              </li>
-            </ul>
-            {userTier !== 'standard' && (
-              <button
-                onClick={() => navigate({ to: '/' })}
-                className="mt-4 w-full py-2.5 rounded-xl text-xs font-bold bg-primary text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer"
-              >
-                Seç
-              </button>
-            )}
+
+            <div className="divide-y divide-border/30">
+              <div className="flex items-center gap-3 py-3">
+                <Check size={14} className="text-primary shrink-0" />
+                <span className="text-sm text-foreground">Gemini AI</span>
+              </div>
+              <div className="flex items-center gap-3 py-3">
+                <Check size={14} className="text-primary shrink-0" />
+                <span className="text-sm text-foreground">Gelişmiş Teknik Analiz Raporlarına erişim</span>
+              </div>
+              <div className="flex items-center gap-3 py-3">
+                <Check size={14} className="text-primary shrink-0" />
+                <span className="text-sm text-foreground">Gelişmiş Temel Analiz Raporlarına erişim</span>
+              </div>
+              <div className="flex items-center gap-3 py-3">
+                <Check size={14} className="text-primary shrink-0" />
+                <span className="text-sm text-foreground">100K Kredi</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => navigate({ to: '/' })}
+              className="mt-6 w-full py-3 rounded-xl text-sm font-bold bg-primary text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer"
+            >
+              Hemen Yükselt
+            </button>
           </div>
 
           {/* Pro -> Pro Abone */}
-          <div className={`rounded-2xl p-5 border transition-all ${
+          <div className={`rounded-2xl p-6 border transition-all ${
             userTier === 'pro'
               ? 'border-primary/30 bg-primary/5 ring-1 ring-primary'
               : 'border-blue-500/40 bg-card shadow-md'
           }`}>
-            <span className="inline-block mb-3 bg-blue-600 text-white font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider">
-              Popüler
-            </span>
-            {userTier === 'pro' && (
-              <span className="inline-block ml-2 mb-3 bg-primary/20 text-primary font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider border border-primary/30">
-                Aktif
+            <div className="flex items-center gap-2 mb-3">
+              <span className="bg-blue-600 text-white font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider">
+                Popüler
               </span>
-            )}
-            <div className="flex items-center justify-between mb-3">
+              {userTier === 'pro' && (
+                <span className="bg-primary/20 text-primary font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider border border-primary/30">
+                  Aktif
+                </span>
+              )}
+            </div>
+            <div className="flex items-center justify-between mb-5">
               <div>
-                <h3 className="font-extrabold text-foreground">Pro Abone</h3>
+                <h3 className="text-lg font-extrabold text-foreground">Pro Abone</h3>
                 <div className="flex items-center gap-1 mt-1">
                   <Coins size={12} className="text-primary" />
                   <span className="text-[11px] font-bold text-muted-foreground">
-                    {TIER_CONFIG.pro.monthlyHT.toLocaleString('tr-TR')} HT/ay
+                    500K Kredi / ay
                   </span>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-xl font-black text-foreground">
+                <div className="text-2xl font-black text-foreground">
                   {TIER_CONFIG.pro.price.toLocaleString()}
                 </div>
                 <span className="text-[10px] font-bold text-muted-foreground">₺ / ay</span>
               </div>
             </div>
-            <ul className="space-y-2 mt-4">
-              <li className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Check size={12} className={userTier === 'pro' ? 'text-primary' : 'text-muted-foreground/50'} />
-                <span>Sınırsız günlük sorgu</span>
-              </li>
-              <li className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Check size={12} className={userTier === 'pro' ? 'text-primary' : 'text-muted-foreground/50'} />
-                <span>{TIER_CONFIG.pro.watchlistLimit} takip listesi</span>
-              </li>
-              <li className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Check size={12} className={userTier === 'pro' ? 'text-primary' : 'text-muted-foreground/50'} />
-                <span>Sınırsız sohbet geçmişi</span>
-              </li>
-            </ul>
-            {userTier !== 'pro' && (
-              <button
-                onClick={() => navigate({ to: '/' })}
-                className="mt-4 w-full py-2.5 rounded-xl text-xs font-bold bg-blue-600 text-white hover:bg-blue-500 hover:shadow-[0_0_12px_rgba(37,99,235,0.3)] transition-all cursor-pointer"
-              >
-                Hemen Satın Al
-              </button>
-            )}
+
+            <div className="divide-y divide-border/30">
+              <div className="flex items-center gap-3 py-3">
+                <Check size={14} className="text-primary shrink-0" />
+                <span className="text-sm text-foreground">Gemini AI</span>
+              </div>
+              <div className="flex items-center gap-3 py-3">
+                <Check size={14} className="text-primary shrink-0" />
+                <span className="text-sm text-foreground">Gelişmiş Teknik Analiz Raporlarına erişim</span>
+              </div>
+              <div className="flex items-center gap-3 py-3">
+                <Check size={14} className="text-primary shrink-0" />
+                <span className="text-sm text-foreground">Gelişmiş Temel Analiz Raporlarına erişim</span>
+              </div>
+              <div className="flex items-center gap-3 py-3">
+                <Check size={14} className="text-primary shrink-0" />
+                <span className="text-sm text-foreground">500K Kredi</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => navigate({ to: '/' })}
+              className="mt-6 w-full py-3 rounded-xl text-sm font-bold bg-blue-600 text-white hover:bg-blue-500 hover:shadow-[0_0_12px_rgba(37,99,235,0.3)] transition-all cursor-pointer"
+            >
+              Hemen Yükselt
+            </button>
           </div>
         </div>
       </div>
