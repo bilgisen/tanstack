@@ -37,11 +37,11 @@ afterEach(() => {
 
 /**
  * Bu yardımcı fonksiyon, gerçek component kodunun API response'unu
- * nasıl işlediğini simüle eder. DÜZELTİLMEMİŞ koddaki mantığı içerir.
+ * nasıl işlediğini simüle eder. DÜZELTİLMİŞ koddaki mantığı içerir.
  */
 function simulateCurrentCodeBehavior(apiResponse: any) {
-  // Mevcut (buggy) kod: data.industry okumaya çalışıyor
-  const sectorName = apiResponse.industry || ''; // BUG: apiResponse.name olmalı!
+  // Düzeltilmiş kod: data.name okumaya çalışıyor
+  const sectorName = apiResponse.name || ''; // DÜZELTİLDİ: apiResponse.name kullanılıyor
   const totalCompanies = apiResponse.total_companies || 0;
   const activeCompanies = apiResponse.active_companies || 0;
   

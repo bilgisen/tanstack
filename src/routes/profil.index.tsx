@@ -1,14 +1,11 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useAuth } from '../hooks/useAuth'
-import { TIER_CONFIG, EXTRA_HT_PRICING, type Tier } from '../lib/tiers'
+import { TIER_CONFIG, type Tier } from '../lib/tiers'
 import { 
   Mail, 
   Calendar, 
-  CreditCard, 
   Zap, 
   Check, 
-  ArrowRight,
-  Star,
   Coins,
   Shield,
   Sparkles,
