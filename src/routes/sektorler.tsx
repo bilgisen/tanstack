@@ -40,13 +40,15 @@ function SektorlerPage() {
         if (res.ok) {
           const data = await res.json()
           if (data && data.industries) {
-            const industryList = data.industries.map((ind: any) => ({
-              slug: ind.slug,
-              name: ind.name,
-              companyCount: ind.total_companies || 0,
-              activeCompanies: ind.active_companies || 0,
-              reliability: ind.reliability || 'LOW',
-            }))
+            const industryList = data.industries
+              .filter((ind: any) => ind.slug !== 'diger' && ind.slug !== 'other')
+              .map((ind: any) => ({
+                slug: ind.slug,
+                name: ind.name,
+                companyCount: ind.total_companies || 0,
+                activeCompanies: ind.active_companies || 0,
+                reliability: ind.reliability || 'LOW',
+              }))
             if (isMounted) setIndustries(industryList)
           }
         }
@@ -59,14 +61,6 @@ function SektorlerPage() {
     fetchIndustries()
     return () => { isMounted = false }
   }, [hasChildRoute])
-
-  const sectorQuestions = [
-    'Borsa İstanbul\'da en çok yükselen sektörler hangileri?',
-    'Sektörel bazda hangi gruplar daha güçlü?',
-    'Sektörler arasında para akışı analizi yapabilir misin?',
-    'Hangi sektörler şu anda düşüş trendinde?',
-    'Sektörel bazda temel analiz karşılaştırması yapar mısın?'
-  ]
 
   const totalCompanies = industries.reduce((sum, ind) => sum + ind.companyCount, 0)
   const highQualityCount = industries.filter(ind => ind.reliability === 'HIGH').length

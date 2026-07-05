@@ -96,9 +96,9 @@ function SektorDetailPage() {
           const data = await res.json()
           
           if (data && data.companies) {
-            // Set industry name and metadata from API
+            // Set sector name and metadata from API
             if (isMounted) {
-              setSectorName(data.name)
+              setSectorName(data.name || '')
               setTotalCompanies(data.total_companies || data.companies.length)
             }
             
