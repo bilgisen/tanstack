@@ -133,13 +133,10 @@ function ProfilePage() {
       {/* 2. Upgrade Section */}
       <div className="space-y-5">
         <div className="text-center space-y-2">
-          <h2 className="text-2xl font-black text-foreground tracking-tight">Yükselt</h2>
-          <p className="text-sm text-muted-foreground max-w-xl mx-auto">
-            Yapay zeka analiz gücünüzü bir üst seviyeye taşıyın.
-          </p>
+          <h2 className="text-2xl font-black text-foreground tracking-tight">Abone olun</h2>
         </div>
 
-        <div className="space-y-4 max-w-md mx-auto">
+        <div className="space-y-4 max-w-lg mx-auto">
           {/* Standard -> Abone */}
           <div className={`rounded-2xl p-5 border transition-all ${
             userTier === 'standard'
