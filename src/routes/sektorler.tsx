@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, useMatches } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-import { Loader2, ChevronRight, Factory, HelpCircle } from 'lucide-react'
+import { Loader2, ChevronRight, Factory } from 'lucide-react'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
 import { useChatStore } from '../store/chat'
 import { toSlug } from '../constants/companyShared'
@@ -73,19 +73,26 @@ function SektorlerPage() {
 
   // Reliability badge component
   const ReliabilityBadge = ({ reliability }: { reliability: string }) => {
-    const colors = {
-      HIGH: 'bg-green-500/10 text-green-600 border-green-500/20',
-      MEDIUM: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20',
-      LOW: 'bg-orange-500/10 text-orange-600 border-orange-500/20',
+    const dotColors = {
+      HIGH: 'bg-green-500',
+      MEDIUM: 'bg-orange-500',
+      LOW: 'bg-red-500',
     }
-    const labels = {
-      HIGH: 'Yüksek Güvenilirlik',
-      MEDIUM: 'Orta Güvenilirlik',
-      LOW: 'Düşük Güvenilirlik',
+    const tooltips = {
+      HIGH: '',
+      MEDIUM: 'Orta güvenilirlik: şirket sayısı medyan hesaplama için yeterli ancak optimal değil',
+      LOW: 'Düşük güvenilirlik: şirket sayısı güvenilir sektör medyanı hesaplamak açısından yeterli değildir',
     }
+    
+    const dotColor = dotColors[reliability as keyof typeof dotColors] || dotColors.LOW
+    const tooltip = tooltips[reliability as keyof typeof tooltips] || ''
+    
     return (
-      <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md border ${colors[reliability as keyof typeof colors] || colors.LOW}`}>
-        {labels[reliability as keyof typeof labels] || reliability}
+      <span 
+        className="inline-flex items-center gap-1"
+        title={tooltip}
+      >
+        <span className={`w-2 h-2 rounded-full ${dotColor}`}></span>
       </span>
     )
   }
@@ -120,7 +127,7 @@ function SektorlerPage() {
             <div className="flex items-center gap-6 shrink-0">
               <div className="text-right">
                 <div className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">{industries.length}</div>
-                <div className="text-[10px] text-muted-foreground font-medium uppercase">Industry</div>
+                <div className="text-[10px] text-muted-foreground font-medium uppercase">Sektör</div>
               </div>
               <div className="text-right">
                 <div className="text-2xl md:text-3xl font-bold text-green-600 tracking-tight">{highQualityCount}</div>
@@ -159,30 +166,6 @@ function SektorlerPage() {
                 <ChevronRight size={14} className="text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0 ml-2" />
               </Link>
             ))}
-          </div>
-
-          {/* Suggested Questions */}
-          <div className="border border-border/45 bg-card/20 rounded-2xl p-6 space-y-3">
-            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-2">
-              <HelpCircle size={12} />
-              <span>Önerilen Sektör Analiz Soruları</span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-              {sectorQuestions.map((q, idx) => (
-                <button
-                  key={idx}
-                  onClick={async () => {
-                    if (window.innerWidth < 1024) {
-                      window.dispatchEvent(new CustomEvent('open-mobile-chat'));
-                    }
-                    await sendMessage(q, 'sektorler');
-                  }}
-                  className="text-left text-xs text-muted-foreground hover:bg-muted/20 hover:bg-muted/50 border border-border/30 hover:border-border/60 rounded-xl p-3 transition-colors cursor-pointer leading-normal active:scale-[0.99] font-medium"
-                >
-                  {q}
-                </button>
-              ))}
-            </div>
           </div>
 
           {industries.length === 0 && (

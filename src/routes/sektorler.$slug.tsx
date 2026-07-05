@@ -57,19 +57,26 @@ function SektorDetailPage() {
   
   // Reliability badge component
   const ReliabilityBadge = ({ reliability }: { reliability: string }) => {
-    const colors = {
-      HIGH: 'bg-green-500/10 text-green-600 border-green-500/20',
-      MEDIUM: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20',
-      LOW: 'bg-orange-500/10 text-orange-600 border-orange-500/20',
+    const dotColors = {
+      HIGH: 'bg-green-500',
+      MEDIUM: 'bg-orange-500',
+      LOW: 'bg-red-500',
     }
-    const labels = {
-      HIGH: 'Yüksek Güvenilirlik',
-      MEDIUM: 'Orta Güvenilirlik',
-      LOW: 'Düşük Güvenilirlik',
+    const tooltips = {
+      HIGH: '',
+      MEDIUM: 'Orta güvenilirlik: şirket sayısı medyan hesaplama için yeterli ancak optimal değil',
+      LOW: 'Düşük güvenilirlik: şirket sayısı güvenilir sektör medyanı hesaplamak açısından yeterli değildir',
     }
+    
+    const dotColor = dotColors[reliability as keyof typeof dotColors] || dotColors.LOW
+    const tooltip = tooltips[reliability as keyof typeof tooltips] || ''
+    
     return (
-      <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md border ${colors[reliability as keyof typeof colors] || colors.LOW}`}>
-        {labels[reliability as keyof typeof labels] || reliability}
+      <span 
+        className="inline-flex items-center gap-1"
+        title={tooltip}
+      >
+        <span className={`w-2 h-2 rounded-full ${dotColor}`}></span>
       </span>
     )
   }
@@ -91,7 +98,7 @@ function SektorDetailPage() {
           if (data && data.companies) {
             // Set industry name and metadata from API
             if (isMounted) {
-              setSectorName(data.industry)
+              setSectorName(data.name)
               setTotalCompanies(data.total_companies || data.companies.length)
             }
             
@@ -171,7 +178,7 @@ function SektorDetailPage() {
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Industry</span>
+                <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Sektör</span>
                 <ReliabilityBadge reliability={reliability} />
               </div>
               <h1 className="text-base md:text-2xl font-bold text-foreground tracking-tight leading-none mt-1">{sectorName}</h1>
