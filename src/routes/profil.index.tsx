@@ -133,198 +133,121 @@ function ProfilePage() {
         </div>
       </div>
 
-      {/* 2. Current Plan Section */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <CreditCard size={20} className="text-primary" />
-          </div>
-          <div>
-            <h2 className="text-lg font-extrabold text-foreground tracking-tight">Mevcut Plan</h2>
-            <p className="text-xs text-muted-foreground">Abonelik bilgileriniz</p>
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6">
-          <div className="flex items-center justify-between mb-5">
-            <div>
-              <span className="text-xs font-bold text-primary uppercase tracking-wider">
-                {tierConfig.displayName}
-              </span>
-              <div className="text-3xl font-black text-foreground mt-1 tracking-tight">
-                {tierConfig.price === 0 ? 'Ücretsiz' : `${tierConfig.price.toLocaleString()} ₺`}
-                {tierConfig.price > 0 && <span className="text-sm font-bold text-muted-foreground"> / ay</span>}
-              </div>
-            </div>
-            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
-              <Star size={28} className="text-primary" />
-            </div>
-          </div>
-
-          <div className="border-t border-primary/10 pt-5 space-y-3">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground flex items-center gap-2">
-                <Coins size={14} className="text-primary" />
-                Aylık Hak
-              </span>
-              <span className="font-bold text-foreground">
-                {tierConfig.monthlyHT.toLocaleString('tr-TR')} HT
-              </span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Günlük Sorgu</span>
-              <span className="font-bold text-foreground">
-                {tierConfig.dailyCallLimit || 'Sınırsız'}
-              </span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Takip Listesi</span>
-              <span className="font-bold text-foreground">
-                {tierConfig.watchlistLimit || 'Sınırsız'}
-              </span>
-            </div>
-            {credits && (
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Sıfırlanma Tarihi</span>
-                <span className="font-mono text-foreground text-xs">
-                  {new Date(credits.resetAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {credits && (
-            <div className="mt-5 space-y-2">
-              <div className="flex justify-between text-xs font-semibold">
-                <span className="text-muted-foreground">Kota Kullanımı</span>
-                <span className="text-foreground">%{credits.usagePercent}</span>
-              </div>
-              <div className="w-full bg-muted/40 rounded-full h-2 overflow-hidden border border-border/20">
-                <div 
-                  className="h-full bg-gradient-to-r from-primary via-blue-500 to-indigo-500 rounded-full transition-all duration-700 ease-out"
-                  style={{ width: `${credits.usagePercent}%` }}
-                />
-              </div>
-            </div>
-          )}
-
-          {userTier === 'free' && (
-            <button
-              onClick={() => {
-                const plansSection = document.getElementById('plans')
-                plansSection?.scrollIntoView({ behavior: 'smooth' })
-              }}
-              className="mt-6 w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-opacity cursor-pointer"
-            >
-              <Zap size={16} />
-              <span>Plan Yükselt</span>
-              <ArrowRight size={16} />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* 3. All Plans Section */}
-      <div id="plans" className="space-y-6">
+      {/* 2. Upgrade Section */}
+      <div className="space-y-5">
         <div className="text-center space-y-2">
-          <h2 className="text-2xl font-black text-foreground tracking-tight">Planlar</h2>
+          <h2 className="text-2xl font-black text-foreground tracking-tight">Yükselt</h2>
           <p className="text-sm text-muted-foreground max-w-xl mx-auto">
-            İhtiyacınıza uygun planı seçin ve yapay zeka analiz gücünüzü artırın.
+            Yapay zeka analiz gücünüzü bir üst seviyeye taşıyın.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {(Object.keys(TIER_CONFIG) as Array<keyof typeof TIER_CONFIG>).map((tierKey) => {
-            const config = TIER_CONFIG[tierKey]
-            const isActive = tierKey === userTier
-            const isPopular = tierKey === 'standard'
-
-            return (
-              <div
-                key={tierKey}
-                className={`rounded-2xl p-5 border transition-all relative overflow-hidden ${
-                  isActive
-                    ? 'border-primary/30 bg-primary/5 ring-1 ring-primary'
-                    : isPopular
-                      ? 'border-blue-500/40 bg-card shadow-md'
-                      : 'border-white/5 bg-card hover:bg-muted/30'
-                }`}
-              >
-                {isPopular && (
-                  <span className="absolute top-3 right-3 bg-blue-600 text-white font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider">
-                    Popüler
+        <div className="space-y-4 max-w-md mx-auto">
+          {/* Standard -> Abone */}
+          <div className={`rounded-2xl p-5 border transition-all ${
+            userTier === 'standard'
+              ? 'border-primary/30 bg-primary/5 ring-1 ring-primary'
+              : 'border-white/5 bg-card hover:bg-muted/30'
+          }`}>
+            {userTier === 'standard' && (
+              <span className="inline-block mb-3 bg-primary/20 text-primary font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider border border-primary/30">
+                Aktif
+              </span>
+            )}
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3 className="font-extrabold text-foreground">Abone</h3>
+                <div className="flex items-center gap-1 mt-1">
+                  <Coins size={12} className="text-primary" />
+                  <span className="text-[11px] font-bold text-muted-foreground">
+                    {TIER_CONFIG.standard.monthlyHT.toLocaleString('tr-TR')} HT/ay
                   </span>
-                )}
-                {isActive && (
-                  <span className="absolute top-3 right-3 bg-primary/20 text-primary font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider border border-primary/30">
-                    Aktif
-                  </span>
-                )}
-
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <h3 className="font-extrabold text-foreground">{config.displayName}</h3>
-                    <div className="flex items-center gap-1 mt-1">
-                      <Coins size={12} className="text-primary" />
-                      <span className="text-[11px] font-bold text-muted-foreground">
-                        {config.monthlyHT.toLocaleString('tr-TR')} HT/ay
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xl font-black text-foreground">
-                      {config.price === 0 ? 'Ücretsiz' : `${config.price.toLocaleString()}`}
-                    </div>
-                    {config.price > 0 && (
-                      <span className="text-[10px] font-bold text-muted-foreground">₺ / ay</span>
-                    )}
-                  </div>
                 </div>
-
-                <ul className="space-y-2 mt-4">
-                  <li className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Check size={12} className={isActive ? 'text-primary' : 'text-muted-foreground/50'} />
-                    <span>{config.dailyCallLimit || 'Sınırsız'} günlük sorgu</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Check size={12} className={isActive ? 'text-primary' : 'text-muted-foreground/50'} />
-                    <span>{config.watchlistLimit || 'Sınırsız'} takip listesi</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Check size={12} className={isActive ? 'text-primary' : 'text-muted-foreground/50'} />
-                    <span>{config.historyDays ? `${config.historyDays} Gün` : 'Sınırsız'} sohbet geçmişi</span>
-                  </li>
-                </ul>
-
-                {!isActive && (
-                  <button
-                    onClick={() => navigate({ to: '/' })}
-                    className="mt-4 w-full py-2 rounded-xl text-xs font-bold bg-primary text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer"
-                  >
-                    Seç
-                  </button>
-                )}
               </div>
-            )
-          })}
-        </div>
-
-        {/* Extra Credits */}
-        <div className="rounded-2xl border border-dashed border-amber-500/30 bg-amber-500/5 p-5">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Zap size={16} className="text-amber-500" />
-                <span className="text-sm font-extrabold text-foreground">Ek Kredi</span>
+              <div className="text-right">
+                <div className="text-xl font-black text-foreground">
+                  {TIER_CONFIG.standard.price.toLocaleString()}
+                </div>
+                <span className="text-[10px] font-bold text-muted-foreground">₺ / ay</span>
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Paket kotanız bittiğinde <strong>{EXTRA_HT_PRICING.amount.toLocaleString()} HT</strong> ek kredi alabilirsiniz. Süre sınırı yoktur.
-              </p>
             </div>
-            <div className="text-center sm:text-right shrink-0">
-              <div className="text-lg font-black text-foreground">+{EXTRA_HT_PRICING.amount.toLocaleString()} HT</div>
-              <div className="text-xs font-bold text-amber-500">{EXTRA_HT_PRICING.price} ₺</div>
+            <ul className="space-y-2 mt-4">
+              <li className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Check size={12} className={userTier === 'standard' ? 'text-primary' : 'text-muted-foreground/50'} />
+                <span>{TIER_CONFIG.standard.dailyCallLimit} günlük sorgu</span>
+              </li>
+              <li className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Check size={12} className={userTier === 'standard' ? 'text-primary' : 'text-muted-foreground/50'} />
+                <span>{TIER_CONFIG.standard.watchlistLimit} takip listesi</span>
+              </li>
+              <li className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Check size={12} className={userTier === 'standard' ? 'text-primary' : 'text-muted-foreground/50'} />
+                <span>{TIER_CONFIG.standard.historyDays} Gün sohbet geçmişi</span>
+              </li>
+            </ul>
+            {userTier !== 'standard' && (
+              <button
+                onClick={() => navigate({ to: '/' })}
+                className="mt-4 w-full py-2.5 rounded-xl text-xs font-bold bg-primary text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer"
+              >
+                Seç
+              </button>
+            )}
+          </div>
+
+          {/* Pro -> Pro Abone */}
+          <div className={`rounded-2xl p-5 border transition-all ${
+            userTier === 'pro'
+              ? 'border-primary/30 bg-primary/5 ring-1 ring-primary'
+              : 'border-blue-500/40 bg-card shadow-md'
+          }`}>
+            <span className="inline-block mb-3 bg-blue-600 text-white font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider">
+              Popüler
+            </span>
+            {userTier === 'pro' && (
+              <span className="inline-block ml-2 mb-3 bg-primary/20 text-primary font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider border border-primary/30">
+                Aktif
+              </span>
+            )}
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3 className="font-extrabold text-foreground">Pro Abone</h3>
+                <div className="flex items-center gap-1 mt-1">
+                  <Coins size={12} className="text-primary" />
+                  <span className="text-[11px] font-bold text-muted-foreground">
+                    {TIER_CONFIG.pro.monthlyHT.toLocaleString('tr-TR')} HT/ay
+                  </span>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-xl font-black text-foreground">
+                  {TIER_CONFIG.pro.price.toLocaleString()}
+                </div>
+                <span className="text-[10px] font-bold text-muted-foreground">₺ / ay</span>
+              </div>
             </div>
+            <ul className="space-y-2 mt-4">
+              <li className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Check size={12} className={userTier === 'pro' ? 'text-primary' : 'text-muted-foreground/50'} />
+                <span>Sınırsız günlük sorgu</span>
+              </li>
+              <li className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Check size={12} className={userTier === 'pro' ? 'text-primary' : 'text-muted-foreground/50'} />
+                <span>{TIER_CONFIG.pro.watchlistLimit} takip listesi</span>
+              </li>
+              <li className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Check size={12} className={userTier === 'pro' ? 'text-primary' : 'text-muted-foreground/50'} />
+                <span>Sınırsız sohbet geçmişi</span>
+              </li>
+            </ul>
+            {userTier !== 'pro' && (
+              <button
+                onClick={() => navigate({ to: '/' })}
+                className="mt-4 w-full py-2.5 rounded-xl text-xs font-bold bg-blue-600 text-white hover:bg-blue-500 hover:shadow-[0_0_12px_rgba(37,99,235,0.3)] transition-all cursor-pointer"
+              >
+                Hemen Satın Al
+              </button>
+            )}
           </div>
         </div>
       </div>
