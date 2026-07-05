@@ -55,7 +55,30 @@ function LandingPage() {
   ])
 
   const [topGainers, setTopGainers] = useState<StockRow[]>([])
-  const [sectors, setSectors] = useState<{ slug: string; name: string; companyCount: number }[]>([])
+  
+  // Static sectors list (alphabetically sorted)
+  const sectors = [
+    { slug: 'araci-kurumlar', name: 'Aracı Kurum' },
+    { slug: 'bankacilik', name: 'Banka' },
+    { slug: 'cimento', name: 'Çimento' },
+    { slug: 'demir-celik', name: 'Demir Çelik' },
+    { slug: 'elektrik-uretim', name: 'Elektrik' },
+    { slug: 'gida', name: 'Gıda' },
+    { slug: 'gyo', name: 'GYO' },
+    { slug: 'holdingler', name: 'Holding' },
+    { slug: 'insaat-malzemeleri', name: 'İnşaat' },
+    { slug: 'kimya', name: 'Kimya' },
+    { slug: 'perakende', name: 'Perakende' },
+    { slug: 'saglik', name: 'Sağlık' },
+    { slug: 'savunma-sanayi', name: 'Savunma' },
+    { slug: 'sigortacilik', name: 'Sigorta' },
+    { slug: 'spor', name: 'Spor' },
+    { slug: 'teknoloji', name: 'Teknoloji' },
+    { slug: 'tekstil', name: 'Tekstil' },
+    { slug: 'turizm', name: 'Turizm' },
+    { slug: 'ulastirma-lojistik', name: 'Ulaştırma' },
+    { slug: 'yatirim-ortakliklari', name: 'Yatırım Ortaklığı' },
+  ]
 
   useEffect(() => {
     async function fetchData() {
@@ -109,27 +132,6 @@ function LandingPage() {
         }
       } catch (e) {
         console.error("Failed fetching stocks:", e)
-      }
-
-      // Fetch sectors
-      try {
-        const compUrl = import.meta.env.VITE_COMP_API_URL || "https://comp-ef958063.fastapicloud.dev"
-        const res = await fetch(`${compUrl}/api/v1/sectors`)
-        if (res.ok) {
-          const data = await res.json()
-          if (data && data.sectors) {
-            const sectorList = data.sectors
-              .filter((s: any) => s.name)
-              .map((s: any) => ({
-                slug: toSlug(s.name),
-                name: s.name,
-                companyCount: s.total_companies || s.active_companies || 0,
-              }))
-            setSectors(sectorList)
-          }
-        }
-      } catch (e) {
-        console.error("Failed fetching sectors:", e)
       }
     }
     fetchData()
@@ -267,45 +269,36 @@ function LandingPage() {
           {/* Sektörler */}
           <section className="px-4 md:px-6 py-4">
             <div className="border border-border/45 bg-card/20 rounded-2xl p-5 md:p-6">
-              <div className="flex items-center justify-between pb-4 border-b border-border/30">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
-                    <Factory size={14} />
-                  </div>
-                  <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Sektörler</h3>
+              <div className="flex items-center gap-2.5 pb-4 border-b border-border/30">
+                <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                  <Factory size={14} />
                 </div>
-                <Link
-                  to="/sektorler"
-                  className="flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
-                >
-                  Tümünü Gör
-                  <ChevronRight size={12} />
-                </Link>
+                <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Sektörler</h3>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-4">
                 {sectors.map((sector) => (
                   <Link
                     key={sector.slug}
                     to="/sektorler/$slug"
                     params={{ slug: sector.slug }}
-                    className="group flex items-center justify-between border border-border/40 bg-muted/10 rounded-xl p-3 transition-all hover:border-primary/30 hover:bg-muted/20 cursor-pointer"
+                    className="group flex items-center gap-2.5 border border-border/40 bg-muted/10 rounded-xl p-3 transition-all hover:border-primary/30 hover:bg-muted/20 cursor-pointer"
                   >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
-                        <Factory size={14} />
-                      </div>
-                      <div className="min-w-0">
-                        <h3 className="text-xs font-bold text-foreground truncate group-hover:text-primary transition-colors">{sector.name}</h3>
-                        <p className="text-[10px] text-muted-foreground mt-0.5">{sector.companyCount} şirket</p>
-                      </div>
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
+                      <Factory size={14} />
                     </div>
-                    <ChevronRight size={12} className="text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0" />
+                    <h3 className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">{sector.name}</h3>
                   </Link>
                 ))}
               </div>
-              {sectors.length === 0 && (
-                <div className="py-8 text-center text-sm text-muted-foreground">Sektör verisi yükleniyor...</div>
-              )}
+              <div className="mt-4 pt-4 border-t border-border/30 flex justify-center">
+                <Link
+                  to="/sektorler"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full border-2 border-primary/40 text-primary font-semibold hover:bg-primary/5 hover:border-primary transition-all text-sm"
+                >
+                  Bütün Sektörlere Göz At
+                  <ChevronRight size={16} />
+                </Link>
+              </div>
             </div>
           </section>
         </div>
