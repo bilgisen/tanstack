@@ -94,26 +94,6 @@ function CompanyOverviewPage() {
       {/* Chart */}
       <TradingViewChart symbol={tickerUpper} lastPrice={stats?.price || 0} />
 
-      {/* Quick Stats */}
-      {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {[
-            { label: 'En Yüksek', value: formatCurrency(stats.high), icon: <TrendingUp size={14} /> },
-            { label: 'En Düşük', value: formatCurrency(stats.low), icon: <TrendingDown size={14} /> },
-            { label: 'Açılış', value: formatCurrency(stats.open), icon: <BarChart3 size={14} /> },
-            { label: 'Hacim (₺)', value: formatVolume(fundamentalDetail?.volume || (typeof stats.volume === 'number' ? stats.volume : 0)), icon: <Activity size={14} /> },
-          ].map((item) => (
-            <div key={item.label} className="p-3.5 border border-border/40 rounded-xl bg-muted/10">
-              <div className="flex items-center gap-1.5 mb-1.5">
-                <span className="text-muted-foreground">{item.icon}</span>
-                <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">{item.label}</span>
-              </div>
-              <span className="text-base font-bold text-foreground font-mono">{item.value}</span>
-            </div>
-          ))}
-        </div>
-      )}
-
       {/* Değişim Oranları */}
       {fundamentalDetail && stats && (
         <div className="border border-border/40 bg-card/20 rounded-2xl p-5 space-y-4">
@@ -175,6 +155,26 @@ function CompanyOverviewPage() {
               <span className="text-sm font-bold text-foreground font-mono">{formatVolume(fundamentalDetail.equity)}</span>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Quick Stats */}
+      {stats && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            { label: 'En Yüksek', value: formatCurrency(stats.high), icon: <TrendingUp size={14} /> },
+            { label: 'En Düşük', value: formatCurrency(stats.low), icon: <TrendingDown size={14} /> },
+            { label: 'Açılış', value: formatCurrency(stats.open), icon: <BarChart3 size={14} /> },
+            { label: 'Hacim (₺)', value: formatVolume(fundamentalDetail?.volume || (typeof stats.volume === 'number' ? stats.volume : 0)), icon: <Activity size={14} /> },
+          ].map((item) => (
+            <div key={item.label} className="p-3.5 border border-border/40 rounded-xl bg-muted/10">
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <span className="text-muted-foreground">{item.icon}</span>
+                <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">{item.label}</span>
+              </div>
+              <span className="text-base font-bold text-foreground font-mono">{item.value}</span>
+            </div>
+          ))}
         </div>
       )}
 
