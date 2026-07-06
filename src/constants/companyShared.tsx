@@ -156,7 +156,8 @@ export async function fetchCompanyData(tickerUpper: string, slug: string) {
   let volume = '-'
 
   try {
-    const res = await fetch(`${apiUrl}/api/market/symbol/${tickerUpper}/summary-card`)
+    // Use faster /api/market/symbol/{ticker} endpoint instead of summary-card
+    const res = await fetch(`${apiUrl}/api/market/symbol/${tickerUpper}`)
     if (res.ok) {
       const json = await res.json()
       if (json && !json.error) {
@@ -169,7 +170,7 @@ export async function fetchCompanyData(tickerUpper: string, slug: string) {
         volume = json.volume || volume
       }
     }
-  } catch (e) { console.error('summary-card fetch failed', e) }
+  } catch (e) { console.error('symbol fetch failed', e) }
 
   const stats: CompanyStats = { name: officialName, code: tickerUpper, price: lastPrice, diffPercent, high, low, open, close, volume }
 

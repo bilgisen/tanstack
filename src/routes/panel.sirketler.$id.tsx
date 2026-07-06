@@ -107,9 +107,9 @@ function SirketDetailPage() {
         console.error("Failed fetching live price", e);
       }
 
-      // 2. Fetch compact summary card
+      // 2. Fetch symbol data (faster than summary-card)
       try {
-        const cardRes = await fetch(`${apiUrl}/api/market/symbol/${tickerUpper}/summary-card`);
+        const cardRes = await fetch(`${apiUrl}/api/market/symbol/${tickerUpper}`);
         if (cardRes.ok) {
           const cJson = await cardRes.json();
           if (cJson && !cJson.error) {

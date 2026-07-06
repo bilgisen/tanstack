@@ -50,7 +50,8 @@ function CompanyLayout() {
       const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com"
       let lastPrice = 0, diffPercent = 0
       try {
-        const res = await fetch(`${apiUrl}/api/market/symbol/${tickerUpper}/summary-card`)
+        // Use faster /api/market/symbol/{ticker} endpoint instead of summary-card
+        const res = await fetch(`${apiUrl}/api/market/symbol/${tickerUpper}`)
         if (res.ok) {
           const json = await res.json()
           if (json && !json.error) {
@@ -58,7 +59,7 @@ function CompanyLayout() {
             diffPercent = json.diff_percent || 0
           }
         }
-      } catch (e) { console.error('summary-card fetch failed', e) }
+      } catch (e) { console.error('symbol fetch failed', e) }
       if (isMounted) {
         setStats({ name: displayName, code: tickerUpper, price: lastPrice, diffPercent, high: 0, low: 0, open: 0, close: 0, volume: '-' })
         setLoading(false)
