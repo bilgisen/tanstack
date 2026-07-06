@@ -114,7 +114,7 @@ export function TradingViewChart({
       setError(false);
 
       let rawData: HistoricalDataPoint[] = [];
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev";
+      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com";
       
       try {
         const response = await fetch(`${apiUrl}/api/market/symbol/${symbol.toUpperCase()}/history?limit=150`);

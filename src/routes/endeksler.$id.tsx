@@ -127,7 +127,7 @@ function EndeksDetailPage() {
     setLoading(true);
 
     async function loadIndexData() {
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev";
+      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com";
       
       let liveVal = currentFallback.price;
       let liveDf = currentFallback.diffPercent;

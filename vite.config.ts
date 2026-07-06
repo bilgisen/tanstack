@@ -17,7 +17,7 @@ const config = defineConfig({
           name: "tanstack",
           vars: {
             "BETTER_AUTH_URL": "https://jetborsa.com",
-            "VITE_HONO_API_URL": "https://hono.paraanaliz.workers.dev"
+            "VITE_HONO_API_URL": "https://hono.jetborsa.com"
           },
           hyperdrive: [
             {

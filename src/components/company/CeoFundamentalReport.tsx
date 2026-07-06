@@ -68,7 +68,7 @@ export function CeoFundamentalReport({ ticker }: CeoFundamentalReportProps) {
       setLoading(true)
       setError(false)
       try {
-        const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev"
+        const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com"
         const res = await fetch(`${apiUrl}/api/market/symbol/${ticker.toUpperCase()}/fundamental-report`)
         if (res.ok) {
           const data = await res.json()

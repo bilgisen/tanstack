@@ -123,7 +123,7 @@ export function SignalBadge({ signal }: { signal: string }) {
 }
 
 export async function fetchCompanyData(tickerUpper: string, slug: string) {
-  const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev"
+  const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com"
   const officialName = (companyNames as Record<string, string>)[tickerUpper] || tickerUpper
   const sectorName = SLUG_TO_NAME[slug] || slug
 

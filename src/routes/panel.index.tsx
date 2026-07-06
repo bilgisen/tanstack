@@ -67,7 +67,7 @@ function PanelIndexPage() {
     setLoading(true)
 
     async function fetchHomeDashboardData() {
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev";
+      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com";
       
       let liveIndices: any[] = []
       let liveStocks: any[] = []

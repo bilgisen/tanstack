@@ -33,7 +33,7 @@ function EndekslerPage() {
     setLoading(true)
 
     async function fetchMarketData() {
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev"
+      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com"
       try {
         const indexRes = await fetch(`${apiUrl}/api/market/summary`)
         if (indexRes.ok) {

@@ -193,7 +193,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
 
     // Fetch latest prices for all stocks and indices to enrich context dynamically
-    const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev";
+    const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com";
     let marketItemsMap: Record<string, { price: number; change: number }> = {};
     
     try {
@@ -247,7 +247,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     const enrichedContext = `${context} | Aktif Liste: "${activeWatchlist?.name || 'Yok'}" | Tüm Takip Listeleri ve Güncel Fiyat/Değişim Verileri: ${watchlistsContext} | Desteklenen AI komutları: Bir hisseyi/endeksi takip listesine eklemek için cevabın sonuna [WATCHLIST_ADD:SEMBOL:hisse|endeks] veya çıkarmak için [WATCHLIST_REMOVE:SEMBOL] ekleyebilirsin. Örneğin: [WATCHLIST_ADD:THYAO:stock] veya [WATCHLIST_REMOVE:THYAO] veya [WATCHLIST_ADD:XU100:index].`;
 
     try {
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev";
+      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com";
       const response = await fetch(`${apiUrl}/api/ai/chat`, {
         method: "POST",
         headers: {

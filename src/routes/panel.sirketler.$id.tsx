@@ -82,7 +82,7 @@ function SirketDetailPage() {
     setLoading(true);
 
     async function loadAllDetails() {
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev";
+      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com";
       const compUrl = import.meta.env.VITE_COMP_API_URL || "https://comp-ef958063.fastapicloud.dev";
       
       let lastPrice = 120.50;

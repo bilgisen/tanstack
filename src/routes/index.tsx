@@ -82,7 +82,7 @@ function LandingPage() {
 
   useEffect(() => {
     async function fetchData() {
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev";
+      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com";
       
       // Fetch indices
       try {

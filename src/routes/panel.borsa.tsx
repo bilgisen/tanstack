@@ -98,7 +98,7 @@ function BorsaPage() {
 
   useEffect(() => {
     async function fetchMarketData() {
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev"
+      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com"
       
       // Fetch Stocks
       try {
@@ -161,7 +161,7 @@ function BorsaPage() {
 
     async function fetchAllDetails() {
       setLoadingDetails(true)
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev"
+      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com"
       
       try {
         // Fetch in parallel to save time

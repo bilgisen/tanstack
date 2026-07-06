@@ -53,7 +53,7 @@ function WatchlistPage() {
   // Fetch all stocks and summary from API
   useEffect(() => {
     async function fetchMarketData() {
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev"
+      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com"
       const itemsMap: Record<string, MarketItem> = {}
 
       // Fetch Stocks

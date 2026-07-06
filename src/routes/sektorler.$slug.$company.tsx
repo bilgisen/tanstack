@@ -47,7 +47,7 @@ function CompanyLayout() {
   useEffect(() => {
     let isMounted = true
     async function fetchStats() {
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.paraanaliz.workers.dev"
+      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com"
       let lastPrice = 0, diffPercent = 0
       try {
         const res = await fetch(`${apiUrl}/api/market/symbol/${tickerUpper}/summary-card`)
