@@ -60,10 +60,14 @@ import { ToastContainer } from "../components/ui/ToastContainer"
 
 function RootDocument() {
   const theme = useUIStore((s) => s.theme)
+  const hydrateFromStorage = useUIStore((s) => s.hydrateFromStorage)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
+    
+    // Hydrate sidebar states from localStorage after mount
+    hydrateFromStorage()
     
     // Apply theme after mount
     if (typeof window !== 'undefined') {
@@ -90,7 +94,7 @@ function RootDocument() {
       media.addEventListener('change', listener)
       return () => media.removeEventListener('change', listener)
     }
-  }, [theme])
+  }, [theme, hydrateFromStorage])
 
   return (
     <html lang="tr" suppressHydrationWarning>

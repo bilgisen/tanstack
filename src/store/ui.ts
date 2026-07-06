@@ -21,6 +21,7 @@ interface UIState {
   setGlobalPrompt: (prompt: string | null) => void;
   isChatMaximized: boolean;
   toggleChatMaximized: () => void;
+  hydrateFromStorage: () => void;
 }
 
 const getInitialTheme = (): Theme => {
@@ -44,26 +45,14 @@ export const applyTheme = (theme: Theme) => {
 };
 
 const getInitialLeftSidebar = (): boolean => {
-  if (typeof window !== 'undefined') {
-    const isMobile = window.innerWidth < 1024;
-    const stored = localStorage.getItem(isMobile ? 'left_sidebar_expanded_mobile' : 'left_sidebar_expanded_desktop');
-    if (stored !== null) {
-      return stored === 'true';
-    }
-    return false;
-  }
+  // Always return false for SSR to match initial client render
+  // Will be updated after hydration via useEffect in components
   return false;
 };
 
 const getInitialRightSidebar = (): boolean => {
-  if (typeof window !== 'undefined') {
-    const isMobile = window.innerWidth < 1024;
-    const stored = localStorage.getItem(isMobile ? 'right_sidebar_open_mobile' : 'right_sidebar_open_desktop');
-    if (stored !== null) {
-      return stored === 'true';
-    }
-    return isMobile ? false : true;
-  }
+  // Always return true for SSR to match initial client render
+  // Will be updated after hydration via useEffect in components
   return true;
 };
 
@@ -110,5 +99,20 @@ export const useUIStore = create<UIState>((set) => ({
   setGlobalPrompt: (prompt) => set({ globalPrompt: prompt }),
   isChatMaximized: false,
   toggleChatMaximized: () => set((state) => ({ isChatMaximized: !state.isChatMaximized })),
+  hydrateFromStorage: () => set(() => {
+    if (typeof window === 'undefined') return {};
+    
+    const isMobile = window.innerWidth < 1024;
+    
+    // Hydrate left sidebar state
+    const leftStored = localStorage.getItem(isMobile ? 'left_sidebar_expanded_mobile' : 'left_sidebar_expanded_desktop');
+    const isLeftSidebarExpanded = leftStored !== null ? leftStored === 'true' : false;
+    
+    // Hydrate right sidebar state
+    const rightStored = localStorage.getItem(isMobile ? 'right_sidebar_open_mobile' : 'right_sidebar_open_desktop');
+    const isRightSidebarOpen = rightStored !== null ? rightStored === 'true' : (isMobile ? false : true);
+    
+    return { isLeftSidebarExpanded, isRightSidebarOpen };
+  }),
 }));
 
