@@ -1,32 +1,21 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
 import { Activity, TrendingUp, TrendingDown, BarChart3, Calendar } from 'lucide-react'
 import { TradingViewChart } from '../components/dashboard/TradingViewChart'
-import { fetchCompanyData, type CompanyStats, type FundamentalDetail } from '../constants/companyShared'
+import type { CompanyStats, FundamentalDetail } from '../constants/companyShared'
 import { Skeleton } from '../components/ui/skeleton'
+import { useCompanyData } from '../lib/useCompanyData'
 
 export const Route = createFileRoute('/sektorler/$slug/$company/')({
   component: CompanyOverviewPage,
 })
 
 function CompanyOverviewPage() {
-  const { slug, company } = Route.useParams()
+  const { company } = Route.useParams()
   const tickerUpper = company.toUpperCase()
-  const [stats, setStats] = useState<CompanyStats | null>(null)
-  const [fundamentalDetail, setFundamentalDetail] = useState<FundamentalDetail | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { data: companyRaw, isLoading: loading } = useCompanyData(tickerUpper)
 
-  useEffect(() => {
-    let isMounted = true
-    fetchCompanyData(tickerUpper, slug).then((data: any) => {
-      if (isMounted) {
-        setStats(data.stats)
-        setFundamentalDetail(data.fundamentalDetail)
-        setLoading(false)
-      }
-    })
-    return () => { isMounted = false }
-  }, [tickerUpper, slug])
+  const stats: CompanyStats | null = companyRaw?.stats || null
+  const fundamentalDetail: FundamentalDetail | null = companyRaw?.fundamentalDetail || null
 
   if (loading) {
     return (

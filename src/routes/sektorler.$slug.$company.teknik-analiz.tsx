@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
 import { TradingViewChart } from '../components/dashboard/TradingViewChart'
 import { CeoTaReport } from '../components/company/CeoTaReport'
-import { fetchCompanyData, ScoreGauge, SignalBadge, type CompanyStats, type TaData } from '../constants/companyShared'
+import { ScoreGauge, SignalBadge, type CompanyStats, type TaData } from '../constants/companyShared'
+import { useCompanyData } from '../lib/useCompanyData'
 import {
   Activity, TrendingUp, BarChart3, Target, AlertTriangle,
   Shield, Gauge, LineChart,
@@ -13,23 +13,12 @@ export const Route = createFileRoute('/sektorler/$slug/$company/teknik-analiz')(
 })
 
 function TechnicalAnalysisPage() {
-  const { slug, company } = Route.useParams()
+  const { company } = Route.useParams()
   const tickerUpper = company.toUpperCase()
-  const [taData, setTaData] = useState<TaData>(null)
-  const [stats, setStats] = useState<CompanyStats | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { data: companyRaw, isLoading: loading } = useCompanyData(tickerUpper)
 
-  useEffect(() => {
-    let isMounted = true
-    fetchCompanyData(tickerUpper, slug).then((data: any) => {
-      if (isMounted) {
-        setStats(data.stats)
-        setTaData(data.taData)
-        setLoading(false)
-      }
-    })
-    return () => { isMounted = false }
-  }, [tickerUpper, slug])
+  const stats: CompanyStats | null = companyRaw?.stats || null
+  const taData: TaData = companyRaw?.taData || null
 
   if (loading) {
     return (

@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { 
   ArrowUpRight, 
   ArrowDownRight, 
@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { useUIStore } from '../store/ui'
 import { useWatchlistStore } from '../store/watchlist'
+import { useMarketStocks, useMarketSummary } from '../lib/useMarketData'
 import tickerToSectorSlug from '../constants/tickerToSectorSlug'
 
 export const Route = createFileRoute('/takip-listesi')({
@@ -40,10 +41,9 @@ function WatchlistPage() {
 
   const { setGlobalPrompt, openRightSidebar } = useUIStore()
 
-  const [loading, setLoading] = useState(true)
-  const [marketItems, setMarketItems] = useState<Record<string, MarketItem>>({})
+  const { data: stocksData, isLoading: stocksLoading } = useMarketStocks()
+  const { data: summaryData, isLoading: summaryLoading } = useMarketSummary()
   
-  // Create Watchlist State
   const [newListName, setNewListName] = useState("")
   const [isCreatingList, setIsCreatingList] = useState(false)
   
@@ -51,63 +51,27 @@ function WatchlistPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [isSearchFocused, setIsSearchFocused] = useState(false)
 
-  // Fetch all stocks and summary from API
-  useEffect(() => {
-    async function fetchMarketData() {
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com"
-      const itemsMap: Record<string, MarketItem> = {}
-
-      // Fetch Stocks
-      try {
-        const res = await fetch(`${apiUrl}/api/market/stocks`)
-        if (res.ok) {
-          const json = await res.json()
-          if (json.data && Array.isArray(json.data)) {
-            json.data.forEach((stock: any) => {
-              itemsMap[stock.code.toUpperCase()] = {
-                code: stock.code,
-                name: stock.name,
-                last_price: stock.last_price || 0,
-                diff_percent: stock.diff_percent || 0,
-                volume: stock.volume,
-                type: 'stock'
-              }
-            })
-          }
-        }
-      } catch (err) {
-        console.error("Failed to load stocks for watchlist", err)
-      }
-
-      // Fetch Indices / Summary
-      try {
-        const resIndices = await fetch(`${apiUrl}/api/market/summary`)
-        if (resIndices.ok) {
-          const json = await resIndices.json()
-          if (json.data && Array.isArray(json.data)) {
-            json.data.forEach((index: any) => {
-              itemsMap[index.code.toUpperCase()] = {
-                code: index.code,
-                name: index.name || index.title || `${index.code} Endeksi`,
-                last_price: index.last_price || 0,
-                diff_percent: index.diff_percent || 0,
-                type: 'index'
-              }
-            })
-          }
-        }
-      } catch (err) {
-        console.error("Failed to load indices for watchlist", err)
-      }
-
-      setMarketItems(itemsMap)
-      setLoading(false)
+  const marketItems: Record<string, MarketItem> = {}
+  ;(stocksData || []).forEach((stock: any) => {
+    marketItems[stock.code.toUpperCase()] = {
+      code: stock.code,
+      name: stock.name,
+      last_price: stock.last_price || 0,
+      diff_percent: stock.diff_percent || 0,
+      volume: stock.volume,
+      type: 'stock'
     }
-
-    fetchMarketData()
-    const interval = setInterval(fetchMarketData, 30000)
-    return () => clearInterval(interval)
-  }, [])
+  })
+  ;(summaryData || []).forEach((index: any) => {
+    marketItems[index.code.toUpperCase()] = {
+      code: index.code,
+      name: index.name || index.title || `${index.code} Endeksi`,
+      last_price: index.last_price || 0,
+      diff_percent: index.diff_percent || 0,
+      type: 'index'
+    }
+  })
+  const loading = stocksLoading || summaryLoading
 
   const activeList = watchlists.find(w => w.id === activeWatchlistId) || watchlists[0]
 

@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
-import { fetchCompanyData, type FundamentalData } from '../constants/companyShared'
+import type { FundamentalData } from '../constants/companyShared'
 import { CeoFundamentalReport } from '../components/company/CeoFundamentalReport'
+import { useCompanyData, useCompanyRatios } from '../lib/useCompanyData'
 
 export const Route = createFileRoute('/sektorler/$slug/$company/temel-analiz')({
   component: FundamentalAnalysisPage,
@@ -66,53 +66,32 @@ function formatValue(key: string, value: number | null): string {
 }
 
 function FundamentalAnalysisPage() {
-  const { slug, company } = Route.useParams()
+  const { company } = Route.useParams()
   const tickerUpper = company.toUpperCase()
-  const [fundamental, setFundamental] = useState<FundamentalData | null>(null)
-  const [ratios, setRatios] = useState<RatioItem[]>([])
-  const [loading, setLoading] = useState(true)
+  const { data: companyRaw, isLoading: loading1 } = useCompanyData(tickerUpper)
+  const { data: ratiosRaw } = useCompanyRatios(tickerUpper)
 
-  useEffect(() => {
-    let isMounted = true
-    async function load() {
-      const compUrl = import.meta.env.VITE_COMP_API_URL || 'https://comp-ef958063.fastapicloud.dev'
-      try {
-        const [companyResult, ratiosResult] = await Promise.all([
-          fetchCompanyData(tickerUpper, slug),
-          (async () => {
-            try {
-              const res = await fetch(`${compUrl}/api/v1/companies/${tickerUpper}/ratios`)
-              if (res.ok) { const j = await res.json(); return j.ratios || {} }
-            } catch (e) { console.error('ratios fetch failed', e) }
-            return {}
-          })(),
-        ])
-        if (!isMounted) return
-        setFundamental(companyResult.fundamental)
-        const items: RatioItem[] = []
-        for (const [key, data] of Object.entries(ratiosResult) as any) {
-          const label = RATIO_LABELS[key]
-          if (!label) continue
-          const group = GROUP_ASSIGNMENT[key]
-          if (!group) continue
-          const sc = data.sector_comparison
-          items.push({
-            key, label, group,
-            value: data.value ?? null,
-            formattedValue: formatValue(key, data.value ?? null),
-            sectorMedian: sc?.sector_median ?? null,
-            percentile: sc?.company_percentile ?? null,
-            vsSector: sc?.vs_sector ?? null,
-            higherIsBetter: GROUP_ASSIGNMENT[key] !== 'finansal',
-          })
-        }
-        setRatios(items)
-      } catch (e) { console.error('load failed', e) }
-      setLoading(false)
-    }
-    load()
-    return () => { isMounted = false }
-  }, [tickerUpper, slug])
+  const fundamental: FundamentalData | null = companyRaw?.fundamental || null
+  const ratiosResult = ratiosRaw?.ratios || {}
+  const items: RatioItem[] = []
+  for (const [key, data] of Object.entries(ratiosResult) as any) {
+    const label = RATIO_LABELS[key]
+    if (!label) continue
+    const group = GROUP_ASSIGNMENT[key]
+    if (!group) continue
+    const sc = data.sector_comparison
+    items.push({
+      key, label, group,
+      value: data.value ?? null,
+      formattedValue: formatValue(key, data.value ?? null),
+      sectorMedian: sc?.sector_median ?? null,
+      percentile: sc?.company_percentile ?? null,
+      vsSector: sc?.vs_sector ?? null,
+      higherIsBetter: GROUP_ASSIGNMENT[key] !== 'finansal',
+    })
+  }
+  const ratios = items
+  const loading = loading1
 
   // Group ratios
   const grouped = (() => {

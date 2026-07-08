@@ -1,12 +1,12 @@
 import { createFileRoute, Link, Outlet } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
 import { ArrowLeft, TrendingUp, TrendingDown, Activity, Compass, Star } from 'lucide-react'
 import companyNames from '../constants/companyNames.json'
 import companyLogos from '../constants/companyLogos.json'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
 import { Skeleton } from '../components/ui/skeleton'
-import { SLUG_TO_NAME, type CompanyStats } from '../constants/companyShared'
+import { SLUG_TO_NAME } from '../constants/companyShared'
 import { useWatchlistStore } from '../store/watchlist'
+import { useCompanyQuote } from '../lib/useCompanyData'
 
 export const Route = createFileRoute('/sektorler/$slug/$company')({
   component: CompanyLayout,
@@ -25,8 +25,7 @@ function CompanyLayout() {
   const displayName = (companyNames as Record<string, string>)[tickerUpper] || tickerUpper
   const logoFile = companyLogos[tickerUpper as keyof typeof companyLogos]
 
-  const [stats, setStats] = useState<CompanyStats | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { data: quote, isLoading: loading } = useCompanyQuote(tickerUpper)
 
   const { watchlists, addItem, removeItem } = useWatchlistStore()
   const defaultWatchlist = watchlists.find(w => w.isDefault) || watchlists[0]
@@ -44,30 +43,7 @@ function CompanyLayout() {
   const chatContext = `sirket:${tickerUpper}`
   const basePath = `/sektorler/${slug}/${company.toLowerCase()}`
 
-  useEffect(() => {
-    let isMounted = true
-    async function fetchStats() {
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com"
-      let lastPrice = 0, diffPercent = 0
-      try {
-        // Use faster /api/market/symbol/{ticker} endpoint instead of summary-card
-        const res = await fetch(`${apiUrl}/api/market/symbol/${tickerUpper}`)
-        if (res.ok) {
-          const json = await res.json()
-          if (json && !json.error) {
-            lastPrice = json.last_price || 0
-            diffPercent = json.diff_percent || 0
-          }
-        }
-      } catch (e) { console.error('symbol fetch failed', e) }
-      if (isMounted) {
-        setStats({ name: displayName, code: tickerUpper, price: lastPrice, diffPercent, high: 0, low: 0, open: 0, close: 0, volume: '-' })
-        setLoading(false)
-      }
-    }
-    fetchStats()
-    return () => { isMounted = false }
-  }, [tickerUpper, displayName])
+  const stats = quote ? { name: displayName, code: tickerUpper, price: quote.last_price || 0, diffPercent: quote.diff_percent || 0, high: 0, low: 0, open: 0, close: 0, volume: '-' } : null
 
   if (loading || !stats) {
     return (

@@ -1,66 +1,30 @@
 import { createFileRoute, Link, Outlet, useMatches } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
 import { Loader2, ChevronRight, Factory } from 'lucide-react'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
 import { useChatStore } from '../store/chat'
+import { useIndustries } from '../lib/useCompanyData'
 import { toSlug } from '../constants/companyShared'
 
 export const Route = createFileRoute('/sektorler')({
   component: SektorlerPage,
 })
 
-type Industry = {
-  slug: string;
-  name: string;
-  companyCount: number;
-  activeCompanies: number;
-  reliability: 'HIGH' | 'MEDIUM' | 'LOW';
-};
-
 function SektorlerPage() {
   const matches = useMatches()
-  const [industries, setIndustries] = useState<Industry[]>([])
-  const [loading, setLoading] = useState(true)
+  const { data: industriesRaw, isLoading: loading } = useIndustries()
   const { sendMessage } = useChatStore()
 
-  // If there's a child route (e.g., /sektorler/holdingler), render the Outlet
   const hasChildRoute = matches.some(m => m.routeId === '/sektorler/$slug' || m.routeId === '/sektorler/$slug/$company')
 
-  useEffect(() => {
-    if (hasChildRoute) return // Don't fetch if showing child route
-    
-    let isMounted = true
-    setLoading(true)
-
-    async function fetchIndustries() {
-      const compUrl = import.meta.env.VITE_COMP_API_URL || "https://comp-ef958063.fastapicloud.dev"
-      try {
-        // Use NEW industries endpoint
-        const res = await fetch(`${compUrl}/api/v1/sectors/industries`)
-        if (res.ok) {
-          const data = await res.json()
-          if (data && data.industries) {
-            const industryList = data.industries
-              .filter((ind: any) => ind.slug !== 'diger' && ind.slug !== 'other')
-              .map((ind: any) => ({
-                slug: ind.slug,
-                name: ind.name,
-                companyCount: ind.total_companies || 0,
-                activeCompanies: ind.active_companies || 0,
-                reliability: ind.reliability || 'LOW',
-              }))
-            if (isMounted) setIndustries(industryList)
-          }
-        }
-      } catch (e) {
-        console.error('Sektörler: Failed fetching industries:', e)
-      }
-      if (isMounted) setLoading(false)
-    }
-
-    fetchIndustries()
-    return () => { isMounted = false }
-  }, [hasChildRoute])
+  const industries: Industry[] = (industriesRaw?.industries || [])
+    .filter((ind: any) => ind.slug !== 'diger' && ind.slug !== 'other')
+    .map((ind: any) => ({
+      slug: ind.slug,
+      name: ind.name,
+      companyCount: ind.total_companies || 0,
+      activeCompanies: ind.active_companies || 0,
+      reliability: ind.reliability || 'LOW',
+    }))
 
   const totalCompanies = industries.reduce((sum, ind) => sum + ind.companyCount, 0)
   const highQualityCount = industries.filter(ind => ind.reliability === 'HIGH').length

@@ -1,10 +1,10 @@
 import { createFileRoute, Link, Outlet, useNavigate, useMatches } from '@tanstack/react-router'
 import { ArrowLeft, Factory, Loader2, Trophy } from 'lucide-react'
-import { useEffect, useState } from 'react'
 import companyLogos from '../constants/companyLogos.json'
 import companyNames from '../constants/companyNames.json'
 import { SLUG_TO_NAME } from '../constants/companyShared'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
+import { useIndustryDetail } from '../lib/useCompanyData'
 
 export const Route = createFileRoute('/sektorler/$slug')({
   component: SektorSlugLayout,
@@ -45,17 +45,10 @@ function getScoreBg(score: number | null) {
 function SektorDetailPage() {
   const { slug } = Route.useParams()
   const navigate = useNavigate()
-  const [companies, setCompanies] = useState<ScoredCompany[]>([])
-  const [sectorName, setSectorName] = useState('')
-  const [hasScoreData, setHasScoreData] = useState(true)
-  const [loading, setLoading] = useState(true)
-  const [totalCompanies, setTotalCompanies] = useState(0)
-  const [activeCompanies, setActiveCompanies] = useState(0)
-  const [reliability, setReliability] = useState<string>('LOW')
+  const { data: industryData, isLoading: loading } = useIndustryDetail(slug)
 
   const chatContext = `industry:${slug}`
   
-  // Reliability badge component
   const ReliabilityBadge = ({ reliability }: { reliability: string }) => {
     const dotColors = {
       HIGH: 'bg-green-500',
@@ -67,84 +60,25 @@ function SektorDetailPage() {
       MEDIUM: 'Orta güvenilirlik: şirket sayısı medyan hesaplama için yeterli ancak optimal değil',
       LOW: 'Düşük güvenilirlik: şirket sayısı güvenilir sektör medyanı hesaplamak açısından yeterli değildir',
     }
-    
     const dotColor = dotColors[reliability as keyof typeof dotColors] || dotColors.LOW
-    const tooltip = tooltips[reliability as keyof typeof tooltips] || ''
-    
-    return (
-      <span 
-        className="inline-flex items-center gap-1"
-        title={tooltip}
-      >
-        <span className={`w-2 h-2 rounded-full ${dotColor}`}></span>
-      </span>
-    )
+    return <span className="inline-flex items-center gap-1"><span className={`w-2 h-2 rounded-full ${dotColor}`}></span></span>
   }
 
-  useEffect(() => {
-    let isMounted = true
-    setLoading(true)
-
-    async function fetchData() {
-      const compUrl = import.meta.env.VITE_COMP_API_URL || "https://comp-ef958063.fastapicloud.dev"
-
-      try {
-        // Use NEW industry detail endpoint
-        const res = await fetch(`${compUrl}/api/v1/sectors/industries/${slug}`)
-        
-        if (res.ok) {
-          const data = await res.json()
-          
-          if (data && data.companies) {
-            // Set sector name and metadata from API
-            if (isMounted) {
-              setSectorName(data.name || '')
-              setTotalCompanies(data.total_companies || data.companies.length)
-            }
-            
-            // Map companies with scores
-            const scored: ScoredCompany[] = data.companies
-              .filter((c: any) => c.ticker)
-              .map((c: any, i: number) => ({
-                rank: i + 1,
-                ticker: c.ticker.toUpperCase(),
-                name: c.name || c.ticker,
-                score: c.score ?? null,
-                reliability: c.score !== null ? 'HIGH' : 'LOW',
-              }))
-            
-            const scoredCount = scored.filter(c => c.score !== null).length
-            
-            if (isMounted) {
-              setCompanies(scored)
-              setActiveCompanies(scoredCount)
-              setHasScoreData(scoredCount > 0)
-              
-              // Determine reliability based on total company count
-              const reliabilityRating = 
-                data.total_companies >= 10 ? 'HIGH' : 
-                data.total_companies >= 5 ? 'MEDIUM' : 'LOW'
-              setReliability(reliabilityRating)
-              
-              setLoading(false)
-            }
-            return
-          }
-        }
-        
-        // Fallback: If industry endpoint fails, show error
-        console.error(`Industry "${slug}" not found`)
-        
-      } catch (e) {
-        console.error('Industry data fetch failed:', e)
-      }
-
-      if (isMounted) setLoading(false)
-    }
-
-    fetchData()
-    return () => { isMounted = false }
-  }, [slug])
+  const data = industryData || {}
+  const companies: ScoredCompany[] = (data.companies || [])
+    .filter((c: any) => c.ticker)
+    .map((c: any, i: number) => ({
+      rank: i + 1,
+      ticker: c.ticker.toUpperCase(),
+      name: c.name || c.ticker,
+      score: c.score ?? null,
+      reliability: c.score !== null ? 'HIGH' : 'LOW',
+    }))
+  const sectorName = data.name || ''
+  const totalCompanies = data.total_companies || companies.length
+  const activeCompanies = companies.filter(c => c.score !== null).length
+  const hasScoreData = activeCompanies > 0
+  const reliability = totalCompanies >= 10 ? 'HIGH' : totalCompanies >= 5 ? 'MEDIUM' : 'LOW'
 
   if (loading) {
     return (
