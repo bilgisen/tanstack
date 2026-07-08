@@ -17,6 +17,7 @@ import companyLogos from '../constants/companyLogos.json'
 import companyNames from '../constants/companyNames.json'
 import tickerToSectorSlug from '../constants/tickerToSectorSlug'
 import { toSlug } from '../constants/companyShared'
+import { useMarketSummary, useMarketStocks } from '../lib/useMarketData'
 
 export const Route = createFileRoute('/')({
   component: LandingPage,
@@ -47,6 +48,9 @@ function LandingPage() {
   const [emblaRef] = useEmblaCarousel(
     { align: 'start', slidesToScroll: 1 }
   )
+
+  const { data: summaryData } = useMarketSummary()
+  const { data: stocksData } = useMarketStocks()
 
   const [indexData, setIndexDisplay] = useState<IndexDisplay[]>([
     { id: 'bist100', name: "BIST 100", code: "XU100", price: 10240.20, diffPercent: 1.15 },
@@ -81,61 +85,36 @@ function LandingPage() {
   ]
 
   useEffect(() => {
-    async function fetchData() {
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com";
-      
-      // Fetch indices
-      try {
-        const res = await fetch(`${apiUrl}/api/market/summary`)
-        if (res.ok) {
-          const json = await res.json()
-          if (json && Array.isArray(json.data)) {
-            setIndexDisplay(prev => prev.map(item => {
-              const live = json.data.find((idx: any) => idx.code.toUpperCase() === item.code);
-              if (live) {
-                return {
-                  ...item,
-                  price: Number((live.last_price || item.price).toFixed(2)),
-                  diffPercent: Number((live.diff_percent !== undefined ? live.diff_percent : item.diffPercent).toFixed(2)),
-                };
-              }
-              return item;
-            }))
+    if (summaryData) {
+      setIndexDisplay(prev => prev.map(item => {
+        const live = summaryData.find((idx: any) => idx.code?.toUpperCase() === item.code)
+        if (live) {
+          return {
+            ...item,
+            price: Number((live.last_price || item.price).toFixed(2)),
+            diffPercent: Number((live.diff_percent ?? item.diffPercent).toFixed(2)),
           }
         }
-      } catch (e) {
-        console.error("Failed fetching indices:", e)
-      }
-
-      // Fetch stocks
-      try {
-        const res = await fetch(`${apiUrl}/api/market/stocks`)
-        if (res.ok) {
-          const json = await res.json()
-          if (json && Array.isArray(json.data)) {
-            const allStocks: StockRow[] = json.data
-              .filter((s: any) => s.code && s.last_price !== undefined)
-              .map((s: any) => ({
-                ticker: s.code.toUpperCase(),
-                name: (companyNames as Record<string, string>)[s.code.toUpperCase()] || s.code.toUpperCase(),
-                price: Number(s.last_price),
-                diffPercent: Number(s.diff_percent || 0),
-                volume: Number(s.volume || 0),
-              }))
-
-            // Top 10 gainers
-            const gainers = [...allStocks]
-              .sort((a, b) => b.diffPercent - a.diffPercent)
-              .slice(0, 10)
-            setTopGainers(gainers)
-          }
-        }
-      } catch (e) {
-        console.error("Failed fetching stocks:", e)
-      }
+        return item
+      }))
     }
-    fetchData()
-  }, [])
+  }, [summaryData])
+
+  useEffect(() => {
+    if (stocksData) {
+      const allStocks: StockRow[] = stocksData
+        .filter((s: any) => s.code && s.last_price !== undefined)
+        .map((s: any) => ({
+          ticker: s.code.toUpperCase(),
+          name: (companyNames as Record<string, string>)[s.code.toUpperCase()] || s.code.toUpperCase(),
+          price: Number(s.last_price),
+          diffPercent: Number(s.diff_percent || 0),
+          volume: Number(s.volume || 0),
+        }))
+      const gainers = [...allStocks].sort((a, b) => b.diffPercent - a.diffPercent).slice(0, 10)
+      setTopGainers(gainers)
+    }
+  }, [stocksData])
 
   return (
     <div className="flex-1 flex flex-row min-w-0 h-full relative">
