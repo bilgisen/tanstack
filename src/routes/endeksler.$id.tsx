@@ -8,11 +8,12 @@ const TriangleUp = ({ size = 14, className = "" }: { size?: number; className?: 
   </svg>
 )
 
-import { useState, useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import { TradingViewChart } from '../components/dashboard/TradingViewChart'
 import { Skeleton } from '../components/ui/skeleton'
 import companyLogos from '../constants/companyLogos.json'
 import { CeoTaReport } from '../components/company/CeoTaReport'
+import { useMarketSummary, useMarketStocks, useTASummary } from '../lib/useMarketData'
 
 export const Route = createFileRoute('/endeksler/$id')({
   component: EndeksDetailPage,
@@ -118,141 +119,68 @@ function EndeksDetailPage() {
   const rawId = id.toLowerCase();
   const currentFallback = indexMetadataFallbacks[rawId] || indexMetadataFallbacks.bist100;
 
-  const [priceDetails, setPriceDetails] = useState<IndexMeta | null>(null)
-  const [taData, setTaData] = useState<TaData>(null)
-  const [loading, setLoading] = useState(true)
+  const { data: summaryData } = useMarketSummary()
+  const { data: stocksData } = useMarketStocks()
+  const { data: taApiData } = useTASummary(currentFallback.code)
 
-  useEffect(() => {
-    let isMounted = true;
-    setLoading(true);
-
-    async function loadIndexData() {
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com";
-      
-      let liveVal = currentFallback.price;
-      let liveDf = currentFallback.diffPercent;
-      let apiComponents = [...currentFallback.components];
-
-      try {
-        const res = await fetch(`${apiUrl}/api/market/summary`);
-        if (res.ok) {
-          const json = await res.json();
-          if (json.data && Array.isArray(json.data)) {
-            const apiItem = json.data.find((item: any) => item.code.toUpperCase() === currentFallback.code);
-            if (apiItem) {
-              liveVal = apiItem.last_price || liveVal;
-              liveDf = apiItem.diff_percent !== undefined ? apiItem.diff_percent : liveDf;
-            }
-          }
-        }
-      } catch (e) {
-        console.error("Failed loading live index value", e);
+  const priceDetails = useMemo<IndexMeta | null>(() => {
+    const liveSummary = summaryData?.find((item: any) => item.code?.toUpperCase() === currentFallback.code)
+    const liveVal = liveSummary?.last_price || currentFallback.price
+    const liveDf = liveSummary?.diff_percent ?? currentFallback.diffPercent
+    const apiComponents = currentFallback.components.map((fc) => {
+      const live = stocksData?.find((s: any) => s.code?.toUpperCase() === fc.code)
+      return {
+        code: fc.code,
+        name: fc.name,
+        price: live?.last_price ?? fc.price,
+        diff: live?.diff_percent ?? fc.diff,
+        volume: live?.volume ?? fc.volume,
       }
-
-      try {
-        const resList = await fetch(`${apiUrl}/api/market/stocks`);
-        if (resList.ok) {
-          const listJson = await resList.json();
-          if (listJson.data && Array.isArray(listJson.data)) {
-            apiComponents = currentFallback.components.map((fallbackComp) => {
-              const liveStock = listJson.data.find((item: any) => item.code.toUpperCase() === fallbackComp.code);
-              return {
-                code: fallbackComp.code,
-                name: fallbackComp.name,
-                price: liveStock ? liveStock.last_price : fallbackComp.price,
-                diff: liveStock ? liveStock.diff_percent : fallbackComp.diff,
-                volume: liveStock ? (liveStock.volume ?? fallbackComp.volume) : fallbackComp.volume,
-              };
-            });
-          }
-        }
-      } catch (e) {
-        console.error("Failed fetching live components list", e);
-      }
-
-      try {
-        const taRes = await fetch(`${apiUrl}/api/market/symbol/${currentFallback.code}/ta/summary`);
-        if (taRes.ok) {
-          const tJson = await taRes.json();
-          if (tJson && !tJson.error) {
-            const formatRsi = (val: any): { value: number; status: string } => {
-              const num = typeof val === "number" ? val : parseFloat(val);
-              const rsiVal = isNaN(num) ? 50 : num;
-              const rsiStatus = tJson.rsi_status || "Nötr";
-              return { value: rsiVal, status: rsiStatus };
-            };
-
-            // Handle both API formats (rich borsa format vs simplified)
-            const rsiData = tJson.rsi && typeof tJson.rsi === 'object' && 'value' in tJson.rsi
-              ? tJson.rsi
-              : formatRsi(tJson.rsi);
-
-            const support = tJson.support_resistance?.support ?? tJson.support ?? (liveVal * 0.96);
-            const resistance = tJson.support_resistance?.resistance ?? tJson.resistance ?? (liveVal * 1.04);
-
-            setTaData({
-              trend: tJson.trend || "Nötr",
-              score: tJson.score ?? 50,
-              confidence: tJson.confidence || "Veri yok",
-              rsi: rsiData,
-              macd: tJson.macd || tJson.macd_status || "Nötr",
-              bollinger_status: tJson.bollinger_status || "Orta Bantta",
-              sma: {
-                sma_20: tJson.sma?.sma_20 || liveVal,
-                sma_50: tJson.sma?.sma_50 || liveVal,
-                sma_200: tJson.sma?.sma_200 || liveVal,
-              },
-              support_resistance: { support, resistance },
-              atr_stop_loss: tJson.atr_stop_loss || tJson.stop_loss || (liveVal * 0.03),
-              rr_ratio: tJson.rr_ratio || 0,
-              beta: tJson.beta ?? 1,
-              market_breadth: {
-                breadth: tJson.market_breadth?.breadth ?? 50,
-                status: tJson.market_breadth?.status || "Veri yok",
-              },
-              market_regime: {
-                regime: tJson.market_regime?.regime || "Veri yok",
-                trend_direction: tJson.market_regime?.trend_direction || "Veri yok",
-                volatility_regime: tJson.market_regime?.volatility_regime || "Veri yok",
-                adx: tJson.market_regime?.adx ?? 0,
-                recommended_strategy: tJson.market_regime?.recommended_strategy || "",
-              },
-              signals: tJson.signals || [],
-              divergences: {
-                rsi: tJson.divergences?.rsi || { bullish: false, bearish: false },
-                macd: tJson.divergences?.macd || { bullish: false, bearish: false },
-              },
-              score_components: {
-                trend: tJson.score_components?.trend ?? 0,
-                momentum: tJson.score_components?.momentum ?? 0,
-                volume: tJson.score_components?.volume ?? 0,
-              },
-              candlestick_patterns: tJson.candlestick_patterns || [],
-              llm_summary_prompt: tJson.llm_summary_prompt || "",
-            });
-          }
-        }
-      } catch (e) {
-        console.error("Failed fetching TA data", e);
-      }
-
-      if (!isMounted) return;
-
-      setPriceDetails({
-        name: currentFallback.name,
-        code: currentFallback.code,
-        price: liveVal,
-        diffPercent: liveDf,
-        description: currentFallback.description,
-        components: apiComponents,
-      });
-
-      setLoading(false);
+    })
+    return {
+      name: currentFallback.name,
+      code: currentFallback.code,
+      price: liveVal,
+      diffPercent: liveDf,
+      description: currentFallback.description,
+      components: apiComponents,
     }
+  }, [summaryData, stocksData, currentFallback])
 
-    loadIndexData();
-    return () => { isMounted = false; };
-  }, [id, currentFallback.code]);
+  const taData = useMemo<TaData | null>(() => {
+    const tJson = taApiData
+    if (!tJson || tJson.error) return null
+
+    const formatRsi = (val: any): { value: number; status: string } => {
+      const num = typeof val === "number" ? val : parseFloat(val)
+      return { value: isNaN(num) ? 50 : num, status: tJson.rsi_status || "Nötr" }
+    }
+    const rsiData = tJson.rsi && typeof tJson.rsi === 'object' && 'value' in tJson.rsi
+      ? tJson.rsi
+      : formatRsi(tJson.rsi)
+    const liveVal = priceDetails?.price || 10000
+
+    return {
+      trend: tJson.trend || "Nötr",
+      score: tJson.score ?? 50,
+      confidence: tJson.confidence || "Veri yok",
+      rsi: rsiData,
+      macd: tJson.macd || tJson.macd_status || "Nötr",
+      bollinger_status: tJson.bollinger_status || "Orta Bantta",
+      sma: { sma_20: tJson.sma?.sma_20 || liveVal, sma_50: tJson.sma?.sma_50 || liveVal, sma_200: tJson.sma?.sma_200 || liveVal },
+      support_resistance: { support: tJson.support_resistance?.support ?? tJson.support ?? (liveVal * 0.96), resistance: tJson.support_resistance?.resistance ?? tJson.resistance ?? (liveVal * 1.04) },
+      atr_stop_loss: tJson.atr_stop_loss || tJson.stop_loss || (liveVal * 0.03),
+      rr_ratio: tJson.rr_ratio || 0,
+      beta: tJson.beta ?? 1,
+      market_breadth: { breadth: tJson.market_breadth?.breadth ?? 50, status: tJson.market_breadth?.status || "Veri yok" },
+      market_regime: { regime: tJson.market_regime?.regime || "Veri yok", trend_direction: tJson.market_regime?.trend_direction || "Veri yok", volatility_regime: tJson.market_regime?.volatility_regime || "Veri yok", adx: tJson.market_regime?.adx ?? 0, recommended_strategy: tJson.market_regime?.recommended_strategy || "" },
+      signals: tJson.signals || [],
+      divergences: { rsi: tJson.divergences?.rsi || { bullish: false, bearish: false }, macd: tJson.divergences?.macd || { bullish: false, bearish: false } },
+      score_components: { trend: tJson.score_components?.trend ?? 0, momentum: tJson.score_components?.momentum ?? 0, volume: tJson.score_components?.volume ?? 0 },
+      candlestick_patterns: tJson.candlestick_patterns || [],
+      llm_summary_prompt: tJson.llm_summary_prompt || "",
+    }
+  }, [taApiData, priceDetails])
 
   const topGainers = useMemo(() => {
     if (!priceDetails) return [];
@@ -264,7 +192,7 @@ function EndeksDetailPage() {
     return [...priceDetails.components].sort((a, b) => a.diff - b.diff).slice(0, 5);
   }, [priceDetails]);
 
-  if (loading || !priceDetails) {
+  if (!priceDetails) {
     return (
       <div className="space-y-5 pb-8">
         <Skeleton className="h-24 w-full rounded-2xl" />

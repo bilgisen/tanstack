@@ -7,6 +7,7 @@ type StockItem = {
   last_price: number
   diff_percent: number
   volume: number
+  name?: string
 }
 
 type SummaryItem = {
@@ -29,12 +30,27 @@ async function fetchSummary(): Promise<SummaryItem[]> {
   return json?.data || []
 }
 
+async function fetchTASummary(code: string): Promise<any> {
+  const res = await fetch(`${API_URL}/api/market/symbol/${code}/ta/summary`)
+  if (!res.ok) throw new Error(`Failed to fetch TA summary for ${code}`)
+  return await res.json()
+}
+
+async function fetchHistory(code: string, limit = 150): Promise<any[]> {
+  const res = await fetch(`${API_URL}/api/market/symbol/${code}/history?limit=${limit}`)
+  if (!res.ok) throw new Error(`Failed to fetch history for ${code}`)
+  const json = await res.json()
+  return json?.data || json?.history || (Array.isArray(json) ? json : [])
+}
+
+const STALE = 120_000
+
 export function useMarketStocks() {
   return useQuery({
     queryKey: ['market', 'stocks'],
     queryFn: fetchStocks,
-    staleTime: 120_000,
-    refetchInterval: 120_000,
+    staleTime: STALE,
+    refetchInterval: STALE,
   })
 }
 
@@ -42,7 +58,25 @@ export function useMarketSummary() {
   return useQuery({
     queryKey: ['market', 'summary'],
     queryFn: fetchSummary,
-    staleTime: 120_000,
-    refetchInterval: 120_000,
+    staleTime: STALE,
+    refetchInterval: STALE,
+  })
+}
+
+export function useTASummary(code: string) {
+  return useQuery({
+    queryKey: ['ta', 'summary', code],
+    queryFn: () => fetchTASummary(code),
+    staleTime: 300_000,
+    enabled: !!code,
+  })
+}
+
+export function useHistory(code: string, limit = 150) {
+  return useQuery({
+    queryKey: ['history', code, limit],
+    queryFn: () => fetchHistory(code, limit),
+    staleTime: 300_000,
+    enabled: !!code,
   })
 }

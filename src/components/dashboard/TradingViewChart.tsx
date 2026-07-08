@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createChart, ColorType, CandlestickSeries, HistogramSeries } from "lightweight-charts";
 import type { IChartApi } from "lightweight-charts";
 import { Loader2 } from "lucide-react";
+import { useHistory } from "../../lib/useMarketData";
 
 interface TradingViewChartProps {
   symbol: string;
@@ -29,6 +30,7 @@ export function TradingViewChart({
   const [error, setError] = useState(false);
   const [isVisible, setIsVisible] = useState(!lazy);
   const observerRef = useRef<IntersectionObserver | null>(null);
+  const { data: historyApiData } = useHistory(symbol, 150);
 
   // High fidelity random walk generator for realistic historical candles fallback
   const generateMockHistory = (basePrice: number, days: number = 90): HistoricalDataPoint[] => {
@@ -114,40 +116,26 @@ export function TradingViewChart({
       setError(false);
 
       let rawData: HistoricalDataPoint[] = [];
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com";
       
-      try {
-        const response = await fetch(`${apiUrl}/api/market/symbol/${symbol.toUpperCase()}/history?limit=150`);
-        if (response.ok) {
-          const json = await response.json();
-          // Support multiple response formats: { success: true, data: [...] } or direct array
-          const candidates = json.data || json.history || (Array.isArray(json) ? json : null);
-          
-          if (Array.isArray(candidates) && candidates.length > 0) {
-            rawData = candidates.map((item: any) => {
-              // Parse time safely
-              let timeStr = "";
-              if (item.time) {
-                timeStr = typeof item.time === "string" ? item.time.split("T")[0] : new Date(item.time).toISOString().split("T")[0];
-              } else if (item.date) {
-                timeStr = typeof item.date === "string" ? item.date.split("T")[0] : new Date(item.date).toISOString().split("T")[0];
-              } else if (item.Date) {
-                timeStr = typeof item.Date === "string" ? item.Date.split("T")[0] : new Date(item.Date).toISOString().split("T")[0];
-              }
-
-              return {
-                time: timeStr,
-                open: Number(item.open || item.Open || item.last_price || lastPrice),
-                high: Number(item.high || item.High || item.last_price || lastPrice),
-                low: Number(item.low || item.Low || item.last_price || lastPrice),
-                close: Number(item.close || item.Close || item.last_price || lastPrice),
-                volume: Number(item.volume || item.Volume || 0),
-              };
-            }).filter((item) => item.time && !isNaN(item.close));
+      if (historyApiData && Array.isArray(historyApiData) && historyApiData.length > 0) {
+        rawData = historyApiData.map((item: any) => {
+          let timeStr = "";
+          if (item.time) {
+            timeStr = typeof item.time === "string" ? item.time.split("T")[0] : new Date(item.time).toISOString().split("T")[0];
+          } else if (item.date) {
+            timeStr = typeof item.date === "string" ? item.date.split("T")[0] : new Date(item.date).toISOString().split("T")[0];
+          } else if (item.Date) {
+            timeStr = typeof item.Date === "string" ? item.Date.split("T")[0] : new Date(item.Date).toISOString().split("T")[0];
           }
-        }
-      } catch (err) {
-        console.error(`Failed to fetch history for ${symbol}, utilizing mock fallback:`, err);
+          return {
+            time: timeStr,
+            open: Number(item.open || item.Open || item.last_price || lastPrice),
+            high: Number(item.high || item.High || item.last_price || lastPrice),
+            low: Number(item.low || item.Low || item.last_price || lastPrice),
+            close: Number(item.close || item.Close || item.last_price || lastPrice),
+            volume: Number(item.volume || item.Volume || 0),
+          };
+        }).filter((item) => item.time && !isNaN(item.close));
       }
 
       // Fallback if API returned empty, offline, or invalid candles
