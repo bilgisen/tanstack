@@ -193,39 +193,51 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
 
     // Fetch latest prices for all stocks and indices to enrich context dynamically
-    const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com";
+    // Client-side cache: only re-fetch if stale (>15s old)
     let marketItemsMap: Record<string, { price: number; change: number }> = {};
     
-    try {
-      const [stocksRes, summaryRes] = await Promise.allSettled([
-        fetch(`${apiUrl}/api/market/stocks`),
-        fetch(`${apiUrl}/api/market/summary`)
-      ]);
-      
-      if (stocksRes.status === 'fulfilled' && stocksRes.value.ok) {
-        const json = await stocksRes.value.json();
-        if (json.data && Array.isArray(json.data)) {
-          json.data.forEach((stock: any) => {
-            marketItemsMap[stock.code.toUpperCase()] = {
-              price: stock.last_price || 0,
-              change: stock.diff_percent || 0
-            };
-          });
+    const cachedPrices = (window as any).__chat_market_prices_cache;
+    const cacheAge = cachedPrices ? Date.now() - cachedPrices.ts : Infinity;
+    
+    if (cachedPrices && cacheAge < 15000) {
+      marketItemsMap = cachedPrices.data;
+    } else {
+      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com";
+      try {
+        const [stocksRes, summaryRes] = await Promise.allSettled([
+          fetch(`${apiUrl}/api/market/stocks`),
+          fetch(`${apiUrl}/api/market/summary`)
+        ]);
+        
+        if (stocksRes.status === 'fulfilled' && stocksRes.value.ok) {
+          const json = await stocksRes.value.json();
+          if (json.data && Array.isArray(json.data)) {
+            json.data.forEach((stock: any) => {
+              marketItemsMap[stock.code.toUpperCase()] = {
+                price: stock.last_price || 0,
+                change: stock.diff_percent || 0
+              };
+            });
+          }
         }
-      }
-      if (summaryRes.status === 'fulfilled' && summaryRes.value.ok) {
-        const json = await summaryRes.value.json();
-        if (json.data && Array.isArray(json.data)) {
-          json.data.forEach((index: any) => {
-            marketItemsMap[index.code.toUpperCase()] = {
-              price: index.last_price || 0,
-              change: index.diff_percent || 0
-            };
-          });
+        if (summaryRes.status === 'fulfilled' && summaryRes.value.ok) {
+          const json = await summaryRes.value.json();
+          if (json.data && Array.isArray(json.data)) {
+            json.data.forEach((index: any) => {
+              marketItemsMap[index.code.toUpperCase()] = {
+                price: index.last_price || 0,
+                change: index.diff_percent || 0
+              };
+            });
+          }
         }
+        (window as any).__chat_market_prices_cache = { data: marketItemsMap, ts: Date.now() };
+      } catch (e) {
+        if (cachedPrices) {
+          marketItemsMap = cachedPrices.data; // fallback to stale cache
+        }
+        console.error("Failed to fetch current market prices for chatbot context:", e);
       }
-    } catch (e) {
-      console.error("Failed to fetch current market prices for chatbot context:", e);
     }
 
     // Enrich context with active watchlists to feed Gemini AI with real-time price & performance data
