@@ -23,7 +23,7 @@ interface WatchlistState {
   removeItem: (watchlistId: string, symbol: string) => void;
 }
 
-const DEFAULT_WATCHLISTS: Watchlist[] = [
+const getDefaultWatchlists = (): Watchlist[] => [
   {
     id: "default-list",
     name: "Takip Listem",
@@ -38,13 +38,13 @@ const DEFAULT_WATCHLISTS: Watchlist[] = [
 ];
 
 const loadWatchlistsFromStorage = (): Watchlist[] => {
-  if (typeof window === 'undefined') return DEFAULT_WATCHLISTS;
+  if (typeof window === 'undefined') return getDefaultWatchlists();
   try {
     const data = localStorage.getItem('hissepro_watchlists');
-    return data ? JSON.parse(data) : DEFAULT_WATCHLISTS;
+    return data ? JSON.parse(data) : getDefaultWatchlists();
   } catch (e) {
     console.error("Failed to load watchlists from localStorage:", e);
-    return DEFAULT_WATCHLISTS;
+    return getDefaultWatchlists();
   }
 };
 

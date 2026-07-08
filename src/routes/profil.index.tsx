@@ -34,6 +34,11 @@ function ProfilePage() {
   const navigate = useNavigate()
   const [credits, setCredits] = useState<UserCredits | null>(null)
   const [loading, setLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const fetchCredits = async () => {
     try {
@@ -115,7 +120,7 @@ function ProfilePage() {
           <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground mt-2">
             <Calendar size={12} />
             <span>
-              Üyelik: {new Date(user?.createdAt || Date.now()).toLocaleDateString('tr-TR')}
+              Üyelik: {mounted ? new Date(user?.createdAt || Date.now()).toLocaleDateString('tr-TR') : ''}
             </span>
           </div>
         </div>

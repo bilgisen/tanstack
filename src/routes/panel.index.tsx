@@ -54,13 +54,16 @@ function PanelIndexPage() {
   const defaultWatchlist = watchlists.find(w => w.id === "default-list") || watchlists[0]
   const watchlistItems = defaultWatchlist?.items || []
 
-  // Format today's date in Turkish
-  const formattedDate = new Intl.DateTimeFormat('tr-TR', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  }).format(new Date())
+  const [formattedDate, setFormattedDate] = useState("")
+
+  useEffect(() => {
+    setFormattedDate(new Intl.DateTimeFormat('tr-TR', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }).format(new Date()))
+  }, [])
 
   useEffect(() => {
     let isMounted = true

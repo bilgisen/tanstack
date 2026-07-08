@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ResponsiveLogo } from "./ResponsiveLogo";
 import { Menu } from "lucide-react";
@@ -11,6 +11,11 @@ export function Topbar() {
   const { user, login: handleLogin, logout } = useAuth();
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLogout = async () => {
     await logout();
@@ -52,8 +57,8 @@ export function Topbar() {
           {/* Right: Actions */}
          <div className="flex items-center gap-2">
            
-           {/* Avatar (logged in only) */}
-           {user && (
+           {/* Avatar (logged in only, mounted check for hydration) */}
+           {mounted && user && (
              <button
                onClick={handleAvatarClick}
                className="w-8 h-8 rounded-full cursor-pointer hover:opacity-80 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
