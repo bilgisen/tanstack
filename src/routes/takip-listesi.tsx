@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { useUIStore } from '../store/ui'
 import { useWatchlistStore } from '../store/watchlist'
+import tickerToSectorSlug from '../constants/tickerToSectorSlug'
 
 export const Route = createFileRoute('/takip-listesi')({
   component: WatchlistPage,
@@ -355,8 +356,8 @@ function WatchlistPage() {
                   activeListDetailedItems.map((item) => {
                     const isUp = item.diff_percent >= 0
                     const itemUrl = item.type === 'index' 
-                      ? `/endeksler/${item.code === 'XU100' ? 'bist100' : item.code === 'XU030' ? 'bist30' : 'bist100'}`
-                      : `/panel/sirketler/${item.code.toLowerCase()}`
+                      ? `/endeksler/${item.code.toLowerCase()}`
+                      : `/sektorler/${tickerToSectorSlug[item.code.toUpperCase()] || 'diger'}/${item.code.toLowerCase()}`
                     return (
                       <tr 
                         key={item.code} 

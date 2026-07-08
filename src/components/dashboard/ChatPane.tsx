@@ -3,6 +3,7 @@ import { ArrowUp } from "lucide-react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useChatStore } from "../../store/chat";
 import companyNames from "../../constants/companyNames.json";
+import tickerToSectorSlug from "../../constants/tickerToSectorSlug";
 
 interface ChatPaneProps {
   context?: string;
@@ -45,7 +46,8 @@ export function ChatPane({
     for (const w of words) {
       const upperWord = w.toUpperCase();
       if (upperWord.length >= 3 && upperWord.length <= 6 && upperWord in companyNames) {
-        return { path: `/panel/sirketler/${w.toLowerCase()}`, context: `sirket:${w.toLowerCase()}` };
+        const slug = tickerToSectorSlug[upperWord] || 'diger';
+        return { path: `/sektorler/${slug}/${w.toLowerCase()}`, context: `sirket:${w.toLowerCase()}` };
       }
     }
     return null;
@@ -68,7 +70,7 @@ export function ChatPane({
     }
 
     const currentPath = location.pathname.toLowerCase();
-    const isGlobalHome = currentPath === "/panel" || currentPath === "/panel/" || context === "global";
+    const isGlobalHome = currentPath === "/" || context === "global";
     
     if (isGlobalHome) {
       const target = detectTargetAsset(textToSend);

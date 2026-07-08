@@ -46,7 +46,7 @@ export function LeftSidebar() {
           {/* Top Branding & Collapse Control */}
           <div className="flex items-center justify-between p-6 pb-4 shrink-0">
             <Link 
-              to="/panel" 
+              to="/" 
               className="flex items-center gap-2 group"
             >
               <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground shadow-sm group-hover:scale-105 transition-transform">

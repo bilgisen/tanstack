@@ -17,7 +17,7 @@ function Login() {
       }
       await signIn.social({
         provider: "google",
-        callbackURL: "/panel",
+        callbackURL: "/",
       });
     } catch (err: any) {
       console.error("Google Login Error:", err);

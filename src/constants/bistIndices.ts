@@ -1,0 +1,66 @@
+const bistIndices: Record<string, string> = {
+  XU100: 'BİST 100 Endeksi',
+  X100S: 'BİST 100 Ağırlık Sınırlamalı Endeksi',
+  XYUZO: 'BİST 100-30 Endeksi',
+  XU030: 'BİST 30 Endeksi',
+  X030S: 'BİST 30 Ağırlık Sınırlamalı Endeksi',
+  XU050: 'BİST 50 Endeksi',
+  XSADA: 'BİST Adana Endeksi',
+  XBANA: 'BİST Ana Endeksi',
+  XSANK: 'BİST Ankara Endeksi',
+  XSANT: 'BİST Antalya Endeksi',
+  XSBAL: 'BİST Balıkesir Endeksi',
+  XBANK: 'BİST Banka Endeksi',
+  XBLSM: 'BİST Bilişim Endeksi',
+  XSBUR: 'BİST Bursa Endeksi',
+  XSDNZ: 'BİST Denizli Endeksi',
+  XELKT: 'BİST Elektrik Endeksi',
+  XFINK: 'BİST Fin. Kir. Faktoring Endeksi',
+  XGMYO: 'BİST Gayrimenkul Y.O. Endeksi',
+  XGIDA: 'BİST Gıda İçecek Endeksi',
+  XHARZ: 'BİST Halka Arz Endeksi',
+  XUHIZ: 'BİST Hizmetler Endeksi',
+  XHOLD: 'BİST Holding ve Yatırım Endeksi',
+  XILTM: 'BİST İletişim Endeksi',
+  XINSA: 'BİST İnşaat Endeksi',
+  XSIST: 'BİST İstanbul Endeksi',
+  XSIZM: 'BİST İzmir Endeksi',
+  XSKAY: 'BİST Kayseri Endeksi',
+  XKMYA: 'BİST Kimya Petrol Plastik Endeksi',
+  XKOBI: 'BİST KOBİ Sanayi Endeksi',
+  XSKOC: 'BİST Kocaeli Endeksi',
+  XSKON: 'BİST Konya Endeksi',
+  XKURY: 'BİST Kurumsal Yönetim Endeksi',
+  XMADN: 'BİST Madencilik Endeksi',
+  XUMAL: 'BİST Mali Endeksi',
+  XYORT: 'BİST Menkul Kıym. Y.O. Endeksi',
+  XMANA: 'BİST Metal Ana Endeksi',
+  XMESY: 'BİST Metal Eşya Makina Endeksi',
+  XKAGT: 'BİST Orman Kağıt Basım Endeksi',
+  XSGRT: 'BİST Sigorta Endeksi',
+  XUSIN: 'BİST Sınai Endeksi',
+  XSPOR: 'BİST Spor Endeksi',
+  XUSRD: 'BİST Sürdürülebilirlik Endeksi',
+  XTAST: 'BİST Taş Toprak Endeksi',
+  XSTKR: 'BİST Tekirdağ Endeksi',
+  XUTEK: 'BİST Teknoloji Endeksi',
+  XTEKS: 'BİST Tekstil Deri Endeksi',
+  XTMTU: 'BİST Temettü Endeksi',
+  XTM25: 'BİST Temettü 25 Endeksi',
+  XTCRT: 'BİST Ticaret Endeksi',
+  XUTUM: 'BİST Tüm Endeksi',
+  XTUMY: 'BİST Tüm-100 Endeksi',
+  XTRZM: 'BİST Turizm Endeksi',
+  XULAS: 'BİST Ulaştırma Endeksi',
+  XYLDZ: 'BİST Yıldız Endeksi',
+}
+
+export default bistIndices
+
+export function getIndexSlug(code: string): string {
+  return code.toLowerCase()
+}
+
+export function getIndexName(code: string): string {
+  return bistIndices[code.toUpperCase()] || `${code} Endeksi`
+}
