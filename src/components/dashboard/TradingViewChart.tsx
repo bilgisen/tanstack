@@ -30,7 +30,7 @@ export function TradingViewChart({
   const [error, setError] = useState(false);
   const [isVisible, setIsVisible] = useState(!lazy);
   const observerRef = useRef<IntersectionObserver | null>(null);
-  const { data: historyApiData } = useHistory(symbol, 150);
+  const { data: historyApiData, isLoading: historyLoading } = useHistory(symbol, 150);
 
   // High fidelity random walk generator for realistic historical candles fallback
   const generateMockHistory = (basePrice: number, days: number = 90): HistoricalDataPoint[] => {
@@ -104,9 +104,10 @@ export function TradingViewChart({
     };
   }, [lazy]);
 
-  // Main chart effect - only runs when visible
+  // Main chart effect - runs when visible and history data ready
   useEffect(() => {
     if (!chartContainerRef.current || !isVisible) return;
+    if (historyLoading) return;
 
     let isMounted = true;
     let chart: IChartApi | null = null;
@@ -277,7 +278,7 @@ export function TradingViewChart({
         chart.remove();
       }
     };
-  }, [symbol, lastPrice, isVisible]);
+  }, [symbol, lastPrice, isVisible, historyApiData, historyLoading]);
 
   // Lazy loading placeholder - ref'i her zaman render et
   return (

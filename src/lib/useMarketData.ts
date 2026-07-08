@@ -43,14 +43,12 @@ async function fetchHistory(code: string, limit = 150): Promise<any[]> {
   return json?.data || json?.history || (Array.isArray(json) ? json : [])
 }
 
-const STALE = 120_000
-
 export function useMarketStocks() {
   return useQuery({
     queryKey: ['market', 'stocks'],
     queryFn: fetchStocks,
-    staleTime: STALE,
-    refetchInterval: STALE,
+    staleTime: 120_000,
+    refetchInterval: 120_000,
   })
 }
 
@@ -58,8 +56,8 @@ export function useMarketSummary() {
   return useQuery({
     queryKey: ['market', 'summary'],
     queryFn: fetchSummary,
-    staleTime: STALE,
-    refetchInterval: STALE,
+    staleTime: 120_000,
+    refetchInterval: 120_000,
   })
 }
 
@@ -67,7 +65,8 @@ export function useTASummary(code: string) {
   return useQuery({
     queryKey: ['ta', 'summary', code],
     queryFn: () => fetchTASummary(code),
-    staleTime: 300_000,
+    staleTime: 600_000,
+    gcTime: 3_600_000,
     enabled: !!code,
   })
 }
@@ -76,7 +75,8 @@ export function useHistory(code: string, limit = 150) {
   return useQuery({
     queryKey: ['history', code, limit],
     queryFn: () => fetchHistory(code, limit),
-    staleTime: 300_000,
+    staleTime: 21_600_000,
+    gcTime: 86_400_000,
     enabled: !!code,
   })
 }
