@@ -1,85 +1,83 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-import { 
-  Loader2, 
-  ExternalLink,
-  Info
-} from 'lucide-react'
+import useEmblaCarousel from 'embla-carousel-react'
+import { Loader2, ArrowUp, ArrowDown, Search } from 'lucide-react'
+import { DataTable } from '../components/ui/data-table'
+import bistIndices, { getIndexName, getIndexSlug } from '../constants/bistIndices'
 
 export const Route = createFileRoute('/endeksler/')({
   component: EndekslerPage,
 })
 
 type IndexData = {
-  id: string;
-  title: string;
-  code: string;
-  last_price: number;
-  diff_percent: number;
-  up: boolean;
-  sparkline?: number[];
-};
+  code: string
+  name: string
+  last_price: number
+  diff_percent: number
+  up: boolean
+}
+
+const TOP_INDICES = ['XU100', 'XU030', 'XU500', 'XBANK', 'XUSIN']
 
 function EndekslerPage() {
-  const [indices, setIndices] = useState<IndexData[]>([
-    { id: 'bist100', title: 'BIST 100', code: 'XU100', last_price: 10245.50, diff_percent: 1.10, up: true },
-    { id: 'bist30', title: 'BIST 30', code: 'XU030', last_price: 11250.40, diff_percent: 1.20, up: true },
-    { id: 'bist500', title: 'BIST 500', code: 'XU500', last_price: 12540.80, diff_percent: 1.45, up: true },
-  ])
+  const navigate = useNavigate()
+  const [emblaRef] = useEmblaCarousel({ align: 'start', slidesToScroll: 1 })
+
+  const [indices, setIndices] = useState<Record<string, IndexData>>({})
   const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
-    let isMounted = true
-    setLoading(true)
-
-    async function fetchMarketData() {
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com"
+    let mounted = true
+    async function fetchData() {
+      const apiUrl = import.meta.env.VITE_HONO_API_URL || 'https://hono.jetborsa.com'
       try {
-        const indexRes = await fetch(`${apiUrl}/api/market/summary`)
-        if (indexRes.ok) {
-          const indexJson = await indexRes.json()
-          if (indexJson && Array.isArray(indexJson.data)) {
-            const liveIndices = indexJson.data
-              .filter((idx: any) => ['XU100', 'XU030', 'XU500'].includes(idx.code?.toUpperCase()))
-              .map((idx: any) => {
-                const last_price = typeof idx.last_price === 'number' ? idx.last_price : (typeof idx.value === 'string' ? parseFloat(idx.value.replace(',', '.')) : (typeof idx.value === 'number' ? idx.value : 0))
-                const diff_percent = typeof idx.diff_percent === 'number' ? idx.diff_percent : (typeof idx.changePercent === 'string' ? parseFloat(idx.changePercent.replace(',', '.')) : (typeof idx.changePercent === 'number' ? idx.changePercent : 0))
-                const code = idx.code?.toUpperCase() || ''
-                const nameMap: Record<string, string> = { XU100: 'BIST 100', XU030: 'BIST 30', XU500: 'BIST 500' }
-                const idMap: Record<string, string> = { XU100: 'bist100', XU030: 'bist30', XU500: 'bist500' }
-                const sparkline = [
-                  last_price * (1 - diff_percent * 0.005),
-                  last_price * (1 - diff_percent * 0.003),
-                  last_price * (1 - diff_percent * 0.004),
-                  last_price * (1 - diff_percent * 0.001),
-                  last_price * (1 - diff_percent * 0.002),
-                  last_price * (1 + diff_percent * 0.001),
-                  last_price
-                ]
-                return {
-                  id: idMap[code] || code.toLowerCase(),
-                  title: nameMap[code] || idx.name || code,
+        const res = await fetch(`${apiUrl}/api/market/summary`)
+        if (res.ok) {
+          const json = await res.json()
+          if (json?.data && Array.isArray(json.data)) {
+            const map: Record<string, IndexData> = {}
+            json.data.forEach((idx: any) => {
+              const code = idx.code?.toUpperCase()
+              if (code) {
+                map[code] = {
                   code,
-                  last_price: Number(last_price.toFixed(2)),
-                  diff_percent: Number(diff_percent.toFixed(2)),
-                  up: diff_percent >= 0,
-                  sparkline,
+                  name: getIndexName(code),
+                  last_price: idx.last_price || 0,
+                  diff_percent: idx.diff_percent || 0,
+                  up: (idx.diff_percent || 0) >= 0,
                 }
-              })
-            if (isMounted && liveIndices.length > 0) {
-              setIndices(liveIndices)
-            }
+              }
+            })
+            if (mounted) setIndices(map)
           }
         }
       } catch (e) {
-        console.error('Endeksler: Failed fetching live summary:', e)
+        console.error('Failed fetching indices:', e)
       }
-      if (isMounted) setLoading(false)
+      if (mounted) setLoading(false)
     }
-
-    fetchMarketData()
-    return () => { isMounted = false }
+    fetchData()
   }, [])
+
+  const topIndices = TOP_INDICES
+    .map(code => indices[code])
+    .filter(Boolean)
+
+  const allIndexCodes = Object.keys(bistIndices)
+  const allIndices = allIndexCodes
+    .map(code => ({
+      code,
+      name: getIndexName(code),
+      last_price: indices[code]?.last_price ?? null,
+      diff_percent: indices[code]?.diff_percent ?? null,
+      up: (indices[code]?.diff_percent ?? 0) >= 0,
+    }))
+    .filter(idx =>
+      !searchQuery ||
+      idx.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      idx.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
 
   if (loading) {
     return (
@@ -90,75 +88,118 @@ function EndekslerPage() {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-400 max-w-5xl mx-auto py-2">
-
-        {/* Index Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {indices.map((index) => (
-            <Link
-              key={index.id}
-              to="/endeksler/$id"
-              params={{ id: index.id }}
-              className="group bg-card border border-border/50 rounded-2xl p-5 transition-all hover:border-border/80 hover:shadow-lg hover:-translate-y-0.5"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{index.code}</span>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${index.up ? 'bg-emerald-500/10 text-emerald-500' : 'bg-destructive/10 text-destructive'}`}>
-                      {index.up ? '+' : ''}{index.diff_percent.toFixed(2)}%
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-bold text-foreground truncate group-hover:text-primary transition-colors">{index.title}</h3>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <ExternalLink size={14} className="text-muted-foreground/50 group-hover:text-foreground transition-colors" />
-                </div>
-              </div>
-              
-              <div className="mt-4 pt-4 border-t border-border/30">
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-2xl font-bold tabular-nums text-foreground">{index.last_price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                  <div className="flex items-center gap-1 text-sm font-semibold shrink-0">
-                    <span className={index.up ? 'text-emerald-500' : 'text-destructive'}>
-                      {index.up ? '+' : ''}{index.diff_percent.toFixed(2)}%
-                    </span>
-                  </div>
-                </div>
-                
-                {index.sparkline && index.sparkline.length > 1 && (
-                  <div className="mt-3 h-8 relative">
-                    <svg className="w-full h-full" viewBox={`0 0 ${index.sparkline.length * 10} 40`} preserveAspectRatio="none">
-                      <polyline
-                        fill="none"
-                        stroke={index.up ? '#22c55e' : '#ef4444'}
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        points={index.sparkline.map((v, i) => {
-                          const min = Math.min(...index.sparkline!)
-                          const max = Math.max(...index.sparkline!)
-                          const range = max - min || 1
-                          const x = i * 10
-                          const y = 35 - ((v - min) / range) * 30
-                          return `${x},${y}`
-                        }).join(' ')}
-                      />
-                    </svg>
-                  </div>
-                )}
-              </div>
-            </Link>
-          ))}
+    <div className="space-y-6 animate-in fade-in duration-400 max-w-5xl mx-auto py-2">
+      {/* Index Cards Carousel */}
+      <section>
+        <div className="flex items-center gap-2 px-1 mb-4">
+          <div className="w-2 h-2 rounded-full bg-primary" />
+          <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">Başlıca Endeksler</h2>
         </div>
-
-        {/* Info Section */}
-        <div className="p-4 bg-muted/30 rounded-xl border border-border/30">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Info size={16} className="shrink-0" />
-            <span>Endeks verileri Borsa İstanbul'dan anlık olarak alınmaktadır. Detaylı analiz ve grafikler için endekse tıklayın.</span>
+        <div className="overflow-hidden" ref={emblaRef}>
+          <div className="flex gap-3">
+            {topIndices.map((idx) => (
+              <Link
+                key={idx.code}
+                to="/endeksler/$id"
+                params={{ id: getIndexSlug(idx.code) }}
+                className="flex-none w-[200px] md:w-[240px] rounded-2xl p-4 bg-card/50 border border-border/40 hover:border-border/70 transition-all cursor-pointer group"
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-sm font-bold text-foreground truncate">{idx.name.replace('BİST ', '')}</span>
+                  <span className={`text-sm font-bold ${idx.up ? 'text-emerald-500' : 'text-destructive'}`}>
+                    %{idx.up ? '+' : ''}{idx.diff_percent.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xl font-bold text-foreground font-mono truncate">
+                    {idx.last_price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                  </span>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${idx.up ? 'bg-emerald-500' : 'bg-destructive'}`}>
+                    {idx.up ? <ArrowUp size={16} className="text-white" /> : <ArrowDown size={16} className="text-white" />}
+                  </div>
+                </div>
+              </Link>
+            ))}
+            {topIndices.length === 0 && (
+              <div className="flex-none w-[200px] md:w-[240px] rounded-2xl p-4 bg-card/30 border border-border/20">
+                <p className="text-xs text-muted-foreground">Veri yükleniyor...</p>
+              </div>
+            )}
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Tüm Endeksler */}
+      <section>
+        <div className="flex items-center justify-between gap-4 mb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-primary" />
+            <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">Tüm Endeksler</h2>
+            <span className="text-xs text-muted-foreground">({allIndices.length})</span>
+          </div>
+          <div className="relative max-w-xs w-full">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Endeks ara..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="w-full h-9 pl-9 pr-3 rounded-xl bg-muted/40 border border-border/40 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-primary/50 transition-colors"
+            />
+          </div>
+        </div>
+        <div className="border border-border/40 rounded-2xl bg-card/10 overflow-hidden">
+          <DataTable
+            columns={[
+              {
+                key: 'code',
+                header: 'Kod',
+                className: 'w-24 font-mono',
+                render: (item) => (
+                  <span className="font-mono text-sm font-semibold text-primary">{item.code}</span>
+                ),
+              },
+              {
+                key: 'name',
+                header: 'Endeks Adı',
+                render: (item) => (
+                  <span className="text-sm font-medium text-foreground">{item.name}</span>
+                ),
+              },
+              {
+                key: 'last_price',
+                header: 'Son Fiyat',
+                className: 'w-40 text-right font-mono',
+                render: (item) => (
+                  <span className="font-mono text-sm tabular-nums">
+                    {item.last_price != null
+                      ? item.last_price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                      : '-'}
+                  </span>
+                ),
+              },
+              {
+                key: 'diff_percent',
+                header: 'Değişim',
+                className: 'w-28 text-right',
+                render: (item) => (
+                  item.diff_percent != null ? (
+                    <span className={`text-sm font-semibold ${item.up ? 'text-emerald-500' : 'text-destructive'}`}>
+                      {item.up ? '+' : ''}{item.diff_percent.toFixed(2)}%
+                    </span>
+                  ) : (
+                    <span className="text-sm text-muted-foreground">-</span>
+                  )
+                ),
+              },
+            ]}
+            data={allIndices}
+            onRowClick={(item) =>
+              navigate({ to: '/endeksler/$id', params: { id: getIndexSlug(item.code) } })
+            }
+          />
+        </div>
+      </section>
+    </div>
   )
 }

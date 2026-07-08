@@ -1,7 +1,9 @@
 import { HeadContent, Scripts, createRootRoute, Outlet } from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
+import { QueryClientProvider } from "@tanstack/react-query"
 import { AppLayout } from "../components/layout/AppLayout"
+import { queryClient } from "../lib/queryClient"
 
 import appCss from "../styles.css?url"
 
@@ -124,9 +126,11 @@ function RootDocument() {
         />
       </head>
       <body suppressHydrationWarning>
+      <QueryClientProvider client={queryClient}>
         <AppLayout>
           <Outlet />
         </AppLayout>
+      </QueryClientProvider>
         <ToastContainer />
         <TanStackDevtools
           config={{
