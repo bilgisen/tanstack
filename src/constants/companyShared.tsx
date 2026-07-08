@@ -254,7 +254,7 @@ export async function fetchCompanyData(tickerUpper: string, slug: string) {
     }
   } catch (e) { console.error('comp ratios fetch failed', e) }
   
-  const finveriUrl = "https://finveri-cbe8c089.fastapicloud.dev"
+  const finveriUrl = import.meta.env.VITE_FINVERI_API_URL || "https://tekapi.jetborsa.com"
   let fundamentalDetail: FundamentalDetail | null = null
   try {
     const detailRes = await fetch(`${finveriUrl}/instruments/stocks/${tickerUpper}/detail`)
