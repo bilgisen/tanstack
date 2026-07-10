@@ -162,57 +162,55 @@ function LandingPage() {
 
           {/* Günün Yıldızları */}
           <section className="px-4 md:px-6 py-4">
-            <div className="border border-border/45 bg-card/20 rounded-2xl p-5 md:p-6">
-              <div className="flex items-center gap-2.5 pb-4 border-b border-border/30">
-                <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center">
-                  <Star size={14} />
-                </div>
-                <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Günün Yıldızları</h3>
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center">
+                <Star size={14} />
               </div>
-              <div className="divide-y divide-white/5">
-                {topGainers.map((stock) => {
-                  const logoFile = companyLogos[stock.ticker as keyof typeof companyLogos]
-                  return (
-                    <div
-                      key={stock.ticker}
-                      onClick={() => navigate({ to: `/hisse/${stock.ticker.toLowerCase()}` })}
-                      className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        {logoFile ? (
-                          <div className="h-8 w-8 rounded-md bg-white overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
-                            <img src={`/logos/${logoFile}`} alt={stock.ticker} className="h-full w-full object-contain" />
-                          </div>
-                        ) : (
-                          <div className="h-8 w-8 rounded-md bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] shrink-0 border border-primary/10">
-                            {stock.ticker.slice(0, 2)}
-                          </div>
-                        )}
-                        <div className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
-                          {stock.ticker}
+              <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Günün Yıldızları</h3>
+            </div>
+            <div className="divide-y divide-white/5">
+              {topGainers.map((stock) => {
+                const logoFile = companyLogos[stock.ticker as keyof typeof companyLogos]
+                return (
+                  <div
+                    key={stock.ticker}
+                    onClick={() => navigate({ to: `/hisse/${stock.ticker.toLowerCase()}` })}
+                    className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      {logoFile ? (
+                        <div className="h-8 w-8 rounded-md bg-white overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
+                          <img src={`/logos/${logoFile}`} alt={stock.ticker} className="h-full w-full object-contain" />
                         </div>
-                      </div>
-                      <div className="flex items-center gap-4 shrink-0">
-                        <span className="text-base font-bold font-mono text-emerald-500">
-                          +{stock.diffPercent.toFixed(2).replace('.', ',')}%
-                        </span>
-                        <span className="text-base font-semibold font-mono text-foreground">
-                          ₺{stock.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                        </span>
+                      ) : (
+                        <div className="h-8 w-8 rounded-md bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0 border border-primary/10">
+                          {stock.ticker.slice(0, 2)}
+                        </div>
+                      )}
+                      <div className="text-base font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                        {stock.ticker}
                       </div>
                     </div>
-                  )
-                })}
-                {stocksError && (
-                  <div className="py-8 text-center text-sm text-destructive/80">Veri alınamadı. Lütfen sayfayı yenileyin.</div>
-                )}
-                {stocksLoading && !stocksError && topGainers.length === 0 && (
-                  <div className="py-8 text-center text-sm text-muted-foreground">Veriler yükleniyor...</div>
-                )}
-                {!stocksLoading && !stocksError && topGainers.length === 0 && (
-                  <div className="py-8 text-center text-sm text-muted-foreground">Bugün için veri bulunamadı.</div>
-                )}
-              </div>
+                    <div className="flex items-center gap-4 shrink-0">
+                      <span className="text-base font-bold font-mono text-emerald-500">
+                        +{stock.diffPercent.toFixed(2).replace('.', ',')}%
+                      </span>
+                      <span className="text-base font-semibold font-mono text-foreground">
+                        {stock.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })}
+              {stocksError && (
+                <div className="py-8 text-center text-sm text-destructive/80">Veri alınamadı. Lütfen sayfayı yenileyin.</div>
+              )}
+              {stocksLoading && !stocksError && topGainers.length === 0 && (
+                <div className="py-8 text-center text-sm text-muted-foreground">Veriler yükleniyor...</div>
+              )}
+              {!stocksLoading && !stocksError && topGainers.length === 0 && (
+                <div className="py-8 text-center text-sm text-muted-foreground">Bugün için veri bulunamadı.</div>
+              )}
             </div>
           </section>
 
