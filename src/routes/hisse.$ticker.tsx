@@ -92,9 +92,9 @@ function CompanyLayout() {
               <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0">{tickerUpper.slice(0, 2)}</div>
             )}
             <div className="min-w-0 space-y-0.5">
-              <span className="text-base text-muted-foreground font-semibold tracking-tight">{tickerUpper}</span>
+              <span className="text-sm text-muted-foreground font-semibold tracking-tight">{tickerUpper}</span>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg md:text-xl font-bold text-foreground tracking-tight truncate">{stats.name}</h1>
+                <h1 className="text-base md:text-lg font-bold text-foreground tracking-tight truncate">{stats.name}</h1>
                 <button
                   onClick={toggleWatchlist}
                   className={`shrink-0 transition-all duration-200 ${
