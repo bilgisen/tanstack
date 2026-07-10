@@ -3,7 +3,7 @@ import { Loader2, ChevronRight, Factory } from 'lucide-react'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
 import { useChatStore } from '../store/chat'
 import { useIndustries } from '../lib/useCompanyData'
-import { toSlug } from '../constants/companyShared'
+
 
 export const Route = createFileRoute('/sektorler')({
   component: SektorlerPage,
@@ -14,15 +14,15 @@ function SektorlerPage() {
   const { data: industriesRaw, isLoading: loading } = useIndustries()
   const { sendMessage } = useChatStore()
 
-  const hasChildRoute = matches.some(m => m.routeId === '/sektorler/$slug' || m.routeId === '/sektorler/$slug/$company')
+  const hasChildRoute = matches.some(m => m.routeId === '/sektorler/$slug')
 
-  const industries: Industry[] = (industriesRaw?.industries || [])
+  const industries: Industry[] = (industriesRaw?.data || [])
     .filter((ind: any) => ind.slug !== 'diger' && ind.slug !== 'other')
     .map((ind: any) => ({
       slug: ind.slug,
       name: ind.name,
-      companyCount: ind.total_companies || 0,
-      activeCompanies: ind.active_companies || 0,
+      companyCount: ind.companyCount || 0,
+      activeCompanies: ind.activeCompanies || 0,
       reliability: ind.reliability || 'LOW',
     }))
 

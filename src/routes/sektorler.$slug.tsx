@@ -1,8 +1,7 @@
-import { createFileRoute, Link, Outlet, useNavigate, useMatches } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { ArrowLeft, Factory, Loader2, Trophy } from 'lucide-react'
 import companyLogos from '../constants/companyLogos.json'
-import companyNames from '../constants/companyNames.json'
-import { SLUG_TO_NAME } from '../constants/companyShared'
+
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
 import { useIndustryDetail } from '../lib/useCompanyData'
 
@@ -11,12 +10,6 @@ export const Route = createFileRoute('/sektorler/$slug')({
 })
 
 function SektorSlugLayout() {
-  const matches = useMatches()
-  const hasCompanyDetail = matches.some(m => m.routeId === '/sektorler/$slug/$company')
-
-  if (hasCompanyDetail) {
-    return <Outlet />
-  }
   return <SektorDetailPage />
 }
 
@@ -74,8 +67,8 @@ function SektorDetailPage() {
       score: c.score ?? null,
       reliability: c.score !== null ? 'HIGH' : 'LOW',
     }))
-  const sectorName = data.name || ''
-  const totalCompanies = data.total_companies || companies.length
+  const sectorName = data.sector_name || data.name || ''
+  const totalCompanies = data.total || companies.length
   const activeCompanies = companies.filter(c => c.score !== null).length
   const hasScoreData = activeCompanies > 0
   const reliability = totalCompanies >= 10 ? 'HIGH' : totalCompanies >= 5 ? 'MEDIUM' : 'LOW'
@@ -150,7 +143,7 @@ function SektorDetailPage() {
               return (
                 <div
                   key={company.ticker}
-                  onClick={() => navigate({ to: `/sektorler/${slug}/${company.ticker.toLowerCase()}` })}
+                  onClick={() => navigate({ to: `/hisse/${company.ticker.toLowerCase()}` })}
                   className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
                 >
                   <div className="flex items-center gap-3 min-w-0">

@@ -1,20 +1,12 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { TrendingUp, TrendingDown, Info, AlertCircle, Sliders, Sparkles, ChevronUp, ChevronDown } from 'lucide-react'
-import tickerToSectorSlug from '../constants/tickerToSectorSlug'
-
-const TriangleUp = ({ size = 14, className = "" }: { size?: number; className?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
-    <polygon points="12,4 22,20 2,20" />
-  </svg>
-)
+import { createFileRoute } from '@tanstack/react-router'
+import { TrendingUp, TrendingDown, Info, AlertCircle, Sliders, Sparkles } from 'lucide-react'
 
 import { useMemo } from 'react'
 import { TradingViewChart } from '../components/dashboard/TradingViewChart'
 import { Skeleton } from '../components/ui/skeleton'
-import companyLogos from '../constants/companyLogos.json'
 import { CeoTaReport } from '../components/company/CeoTaReport'
 import { getIndexName } from '../constants/bistIndices'
-import { useIndices, useMarketStocks, useTASummary, useIndexDetail } from '../lib/useMarketData'
+import { useIndices, useTASummary, useIndexDetail } from '../lib/useMarketData'
 
 export const Route = createFileRoute('/endeksler/$id')({
   component: EndeksDetailPage,
@@ -116,36 +108,24 @@ type TaData = {
 
 function EndeksDetailPage() {
   const { id } = Route.useParams()
-  const navigate = useNavigate()
   const code = id.toUpperCase();
 
   const { data: indicesData } = useIndices()
-  const { data: stocksData } = useMarketStocks()
   const { data: taApiData } = useTASummary(code)
   const { data: indexDetail } = useIndexDetail(code)
 
   const priceDetails = useMemo<IndexMeta | null>(() => {
     const liveIndex = indicesData?.find((item: any) => item.code?.toUpperCase() === code)
     const fallback = indexMetadataFallbacks[id.toLowerCase()]
-    const apiComponents = (fallback?.components || []).map((fc) => {
-      const live = stocksData?.find((s: any) => s.code?.toUpperCase() === fc.code)
-      return {
-        code: fc.code,
-        name: fc.name,
-        price: live?.last_price ?? fc.price,
-        diff: live?.diff_percent ?? fc.diff,
-        volume: live?.volume ?? fc.volume,
-      }
-    })
     return {
       name: getIndexName(code) || liveIndex?.name || code,
       code,
       price: liveIndex?.last_price ?? fallback?.price ?? 0,
       diffPercent: liveIndex?.diff_percent ?? fallback?.diffPercent ?? 0,
       description: liveIndex?.description || fallback?.description || '',
-      components: apiComponents,
+      components: [],
     }
-  }, [indicesData, stocksData, code, id])
+  }, [indicesData, code, id])
 
   const taData = useMemo<TaData | null>(() => {
     const tJson = taApiData
@@ -181,16 +161,6 @@ function EndeksDetailPage() {
       llm_summary_prompt: tJson.llm_summary_prompt || "",
     }
   }, [taApiData, priceDetails])
-
-  const topGainers = useMemo(() => {
-    if (!priceDetails) return [];
-    return [...priceDetails.components].sort((a, b) => b.diff - a.diff).slice(0, 5);
-  }, [priceDetails]);
-
-  const topLosers = useMemo(() => {
-    if (!priceDetails) return [];
-    return [...priceDetails.components].sort((a, b) => a.diff - b.diff).slice(0, 5);
-  }, [priceDetails]);
 
   if (!priceDetails) {
     return (
@@ -517,81 +487,7 @@ function EndeksDetailPage() {
         <CeoTaReport ticker={priceDetails.code} unit="puan" />
       </div>
 
-      {/* Yükselenler / Düşenler */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2 pb-2 border-b border-border/30">
-          <TriangleUp size={14} className="text-emerald-500" />
-          <h3 className="text-sm md:text-base font-bold text-foreground uppercase tracking-wider">Hisse Performansı</h3>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <div className="flex items-center gap-1.5 mb-2">
-              <div className="w-1.5 h-3 rounded-full bg-emerald-500" />
-              <span className="text-xs md:text-sm text-muted-foreground font-bold uppercase tracking-wider">Yükselenler</span>
-            </div>
-            <div className="divide-y divide-white/5 border border-border/30 rounded-xl overflow-hidden">
-              {topGainers.map((row) => {
-                const logoFile = companyLogos[row.code as keyof typeof companyLogos];
-                return (
-                  <div
-                    key={row.code}
-                    onClick={() => navigate({ to: `/sektorler/${tickerToSectorSlug[row.code] || 'diger'}/${row.code.toLowerCase()}` })}
-                    className="flex items-center justify-between py-2.5 px-3 hover:bg-muted/30 transition-colors cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      {logoFile ? (
-                        <div className="h-7 w-7 rounded-md bg-white overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
-                          <img src={`/logos/${logoFile}`} alt={row.code} className="h-full w-full object-contain" />
-                        </div>
-                      ) : (
-                        <div className="h-7 w-7 rounded-md bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-bold text-[9px] shrink-0">{row.code.slice(0, 2)}</div>
-                      )}
-                      <span className="text-xs md:text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">{row.code}</span>
-                    </div>
-                    <div className="flex items-center gap-3 shrink-0">
-                      <span className="text-xs md:text-sm font-bold font-mono text-emerald-500">+{row.diff.toFixed(2).replace('.', ',')}%</span>
-                      <span className="text-xs md:text-sm font-semibold font-mono text-foreground">₺{row.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5 mb-2">
-              <div className="w-1.5 h-3 rounded-full bg-destructive" />
-              <span className="text-xs md:text-sm text-muted-foreground font-bold uppercase tracking-wider">Düşenler</span>
-            </div>
-            <div className="divide-y divide-white/5 border border-border/30 rounded-xl overflow-hidden">
-              {topLosers.map((row) => {
-                const logoFile = companyLogos[row.code as keyof typeof companyLogos];
-                return (
-                  <div
-                    key={row.code}
-                    onClick={() => navigate({ to: `/sektorler/${tickerToSectorSlug[row.code] || 'diger'}/${row.code.toLowerCase()}` })}
-                    className="flex items-center justify-between py-2.5 px-3 hover:bg-muted/30 transition-colors cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      {logoFile ? (
-                        <div className="h-7 w-7 rounded-md bg-white overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
-                          <img src={`/logos/${logoFile}`} alt={row.code} className="h-full w-full object-contain" />
-                        </div>
-                      ) : (
-                        <div className="h-7 w-7 rounded-md bg-destructive/10 flex items-center justify-center text-destructive font-bold text-[9px] shrink-0">{row.code.slice(0, 2)}</div>
-                      )}
-                      <span className="text-xs md:text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">{row.code}</span>
-                    </div>
-                    <div className="flex items-center gap-3 shrink-0">
-                      <span className="text-xs md:text-sm font-bold font-mono text-destructive">{row.diff.toFixed(2).replace('.', ',')}%</span>
-                      <span className="text-xs md:text-sm font-semibold font-mono text-foreground">₺{row.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
+
 
     </div>
   )

@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 
 const HONO_API = import.meta.env.VITE_HONO_API_URL || 'https://hono.jetborsa.com'
-const COMP_API = import.meta.env.VITE_COMP_API_URL || 'https://comp-ef958063.fastapicloud.dev'
 
 type Industry = {
   slug: string
@@ -15,7 +14,7 @@ export function useIndustries() {
   return useQuery({
     queryKey: ['industries'],
     queryFn: async () => {
-      const res = await fetch(`${COMP_API}/api/v1/sectors/industries`)
+      const res = await fetch(`${HONO_API}/api/sectors/industries`)
       if (!res.ok) throw new Error('Failed to fetch industries')
       return await res.json() as { success: boolean; data: Industry[]; total: number }
     },
@@ -27,7 +26,7 @@ export function useIndustryDetail(slug: string) {
   return useQuery({
     queryKey: ['industry', slug],
     queryFn: async () => {
-      const res = await fetch(`${COMP_API}/api/v1/sectors/industries/${slug}`)
+      const res = await fetch(`${HONO_API}/api/sectors/industries/${slug}`)
       if (!res.ok) throw new Error(`Failed to fetch industry ${slug}`)
       return await res.json()
     },
@@ -53,7 +52,7 @@ export function useCompanyRatios(ticker: string) {
   return useQuery({
     queryKey: ['company', 'ratios', ticker],
     queryFn: async () => {
-      const res = await fetch(`${COMP_API}/api/v1/companies/${ticker}/ratios`)
+      const res = await fetch(`${HONO_API}/api/market/symbol/${ticker}/fundamental`)
       if (!res.ok) throw new Error(`Failed to fetch ratios for ${ticker}`)
       return await res.json()
     },

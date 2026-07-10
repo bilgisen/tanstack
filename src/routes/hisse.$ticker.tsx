@@ -1,27 +1,24 @@
 import { createFileRoute, Link, Outlet } from '@tanstack/react-router'
-import { ArrowLeft, TrendingUp, TrendingDown, Activity, Compass, Star } from 'lucide-react'
+import { TrendingUp, TrendingDown, Activity, Star } from 'lucide-react'
 import companyNames from '../constants/companyNames.json'
 import companyLogos from '../constants/companyLogos.json'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
 import { Skeleton } from '../components/ui/skeleton'
-import { SLUG_TO_NAME } from '../constants/companyShared'
 import { useWatchlistStore } from '../store/watchlist'
 import { useCompanyQuote } from '../lib/useCompanyData'
 
-export const Route = createFileRoute('/sektorler/$slug/$company')({
+export const Route = createFileRoute('/hisse/$ticker')({
   component: CompanyLayout,
 })
 
 const TABS = [
   { suffix: '', label: 'Genel Bakış', icon: Activity },
   { suffix: '/teknik-analiz', label: 'Teknik Analiz', icon: Activity },
-  { suffix: '/temel-analiz', label: 'Temel Analiz', icon: Compass },
 ]
 
 function CompanyLayout() {
-  const { slug, company } = Route.useParams()
-  const tickerUpper = company.toUpperCase()
-  const sectorName = SLUG_TO_NAME[slug] || slug
+  const { ticker } = Route.useParams()
+  const tickerUpper = ticker.toUpperCase()
   const displayName = (companyNames as Record<string, string>)[tickerUpper] || tickerUpper
   const logoFile = companyLogos[tickerUpper as keyof typeof companyLogos]
 
@@ -41,7 +38,7 @@ function CompanyLayout() {
   }
 
   const chatContext = `sirket:${tickerUpper}`
-  const basePath = `/sektorler/${slug}/${company.toLowerCase()}`
+  const basePath = `/hisse/${ticker.toLowerCase()}`
 
   const stats = quote ? { name: displayName, code: tickerUpper, price: quote.last_price || 0, diffPercent: quote.diff_percent || 0, high: 0, low: 0, open: 0, close: 0, volume: '-' } : null
 
@@ -63,11 +60,6 @@ function CompanyLayout() {
   return (
     <PublicPageLayout context={chatContext} placeholder={`${tickerUpper} hakkında bir soru sorun...`}>
       <div className="space-y-4 pb-8 animate-in fade-in duration-400">
-        {/* Back */}
-        <Link to={`/sektorler/${slug}` as any} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft size={14} />
-          {sectorName}
-        </Link>
 
         {/* Ticker Header */}
         <div className="border border-border/40 bg-card/30 rounded-2xl p-4 md:p-6 flex items-center justify-between gap-4">

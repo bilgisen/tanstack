@@ -222,40 +222,10 @@ export async function fetchCompanyData(tickerUpper: string, slug: string) {
     }
   } catch (e) { console.error('ta/summary fetch failed', e) }
 
-  const compUrl = import.meta.env.VITE_COMP_API_URL || "https://comp-ef958063.fastapicloud.dev"
-  let fundamental: FundamentalData = { fk: '-', roe: '-', currentRatio: '-', debtToEquity: '-', sector: sectorName }
-  
-  // Fetch P/E ratio from COMP profile endpoint (more reliable)
-  let peRatio: string | null = null
-  try {
-    const profileRes = await fetch(`${compUrl}/api/v1/companies/${tickerUpper}/profile`)
-    if (profileRes.ok) {
-      const profileJson = await profileRes.json()
-      if (profileJson.market_data?.pe_ratio != null) {
-        peRatio = profileJson.market_data.pe_ratio.toFixed(2)
-      }
-    }
-  } catch (e) {
-    console.warn('COMP profile fetch failed, will fallback to finveri:', e)
-  }
-  
-  try {
-    const res = await fetch(`${compUrl}/api/v1/companies/${tickerUpper}/ratios`)
-    if (res.ok) {
-      const json = await res.json()
-      const ratios = json.ratios || {}
-      fundamental = {
-        fk: peRatio || '-', // Use COMP pe_ratio if available
-        roe: ratios.roe?.value != null ? (ratios.roe.value * 100).toFixed(1) + '%' : '-',
-        currentRatio: ratios.current_ratio?.value != null ? ratios.current_ratio.value.toFixed(2) : '-',
-        debtToEquity: ratios.debt_to_equity?.value != null ? ratios.debt_to_equity.value.toFixed(2) : '-',
-        sector: json.sector || sectorName,
-      }
-    }
-  } catch (e) { console.error('comp ratios fetch failed', e) }
-  
   const finveriUrl = import.meta.env.VITE_FINVERI_API_URL || "https://tekapi.jetborsa.com"
+  let fundamental: FundamentalData = { fk: '-', roe: '-', currentRatio: '-', debtToEquity: '-', sector: sectorName }
   let fundamentalDetail: FundamentalDetail | null = null
+  
   try {
     const detailRes = await fetch(`${finveriUrl}/instruments/stocks/${tickerUpper}/detail`)
     if (detailRes.ok) {
@@ -294,21 +264,12 @@ export async function fetchCompanyData(tickerUpper: string, slug: string) {
     const fundRes = await fetch(`${finveriUrl}/instruments/stocks/${tickerUpper}/fundamental`)
     if (fundRes.ok) {
       const fund = await fundRes.json()
-      // Only use Finveri data as fallback if COMP didn't provide pe_ratio
-      if (fund.pe_ratio != null && !peRatio) {
-        fundamental.fk = fund.pe_ratio.toFixed(2)
-      }
-      if (fund.roe != null && fundamental.roe === '-') {
-        fundamental.roe = (fund.roe * 100).toFixed(1) + '%'
-      }
-      if (fund.current_ratio != null && fundamental.currentRatio === '-') {
-        fundamental.currentRatio = fund.current_ratio.toFixed(2)
-      }
-      if (fund.debt_to_equity != null && fundamental.debtToEquity === '-') {
-        fundamental.debtToEquity = fund.debt_to_equity.toFixed(2)
-      }
-      if (fund.sector) {
-        fundamental.sector = fund.sector
+      fundamental = {
+        fk: fund.pe_ratio?.toFixed(2) || '-',
+        roe: fund.roe != null ? (fund.roe * 100).toFixed(1) + '%' : '-',
+        currentRatio: fund.current_ratio?.toFixed(2) || '-',
+        debtToEquity: fund.debt_to_equity?.toFixed(2) || '-',
+        sector: fund.sector || sectorName,
       }
     }
   } catch (e) { console.error('finveri fundamental fetch failed', e) }

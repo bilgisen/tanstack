@@ -6,8 +6,6 @@ import {
   Sparkles, 
   ArrowUp,
   ArrowDown,
-  Factory,
-  ChevronRight,
   Star,
 } from 'lucide-react'
 import { ChatPanel } from '../components/chat/ChatPanel'
@@ -15,8 +13,6 @@ import { ChatSheet } from '../components/chat/ChatSheet'
 import { useUIStore } from '../store/ui'
 import companyLogos from '../constants/companyLogos.json'
 import companyNames from '../constants/companyNames.json'
-import tickerToSectorSlug from '../constants/tickerToSectorSlug'
-import { toSlug } from '../constants/companyShared'
 import { useMarketSummary, useMarketStocks } from '../lib/useMarketData'
 
 export const Route = createFileRoute('/')({
@@ -69,30 +65,6 @@ function LandingPage() {
 
   const [topGainers, setTopGainers] = useState<StockRow[]>([])
   
-  // Static sectors list (alphabetically sorted)
-  const sectors = [
-    { slug: 'araci-kurumlar', name: 'Aracı Kurum' },
-    { slug: 'bankacilik', name: 'Banka' },
-    { slug: 'cimento', name: 'Çimento' },
-    { slug: 'demir-celik', name: 'Demir Çelik' },
-    { slug: 'elektrik-uretim', name: 'Elektrik' },
-    { slug: 'gida', name: 'Gıda' },
-    { slug: 'gyo', name: 'GYO' },
-    { slug: 'holdingler', name: 'Holding' },
-    { slug: 'insaat-malzemeleri', name: 'İnşaat' },
-    { slug: 'kimya', name: 'Kimya' },
-    { slug: 'perakende', name: 'Perakende' },
-    { slug: 'saglik', name: 'Sağlık' },
-    { slug: 'savunma-sanayi', name: 'Savunma' },
-    { slug: 'sigortacilik', name: 'Sigorta' },
-    { slug: 'spor', name: 'Spor' },
-    { slug: 'teknoloji', name: 'Teknoloji' },
-    { slug: 'tekstil', name: 'Tekstil' },
-    { slug: 'turizm', name: 'Turizm' },
-    { slug: 'ulastirma-lojistik', name: 'Ulaştırma' },
-    { slug: 'yatirim-ortakliklari', name: 'Yatırım Ortaklığı' },
-  ]
-
   useEffect(() => {
     if (stocksData) {
       const allStocks: StockRow[] = stocksData
@@ -203,7 +175,7 @@ function LandingPage() {
                   return (
                     <div
                       key={stock.ticker}
-                      onClick={() => navigate({ to: `/sektorler/${tickerToSectorSlug[stock.ticker] || 'diger'}/${stock.ticker.toLowerCase()}` })}
+                      onClick={() => navigate({ to: `/hisse/${stock.ticker.toLowerCase()}` })}
                       className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
                     >
                       <div className="flex items-center gap-3 min-w-0">
@@ -244,41 +216,6 @@ function LandingPage() {
             </div>
           </section>
 
-          {/* Sektörler */}
-          <section className="px-4 md:px-6 py-4">
-            <div className="border border-border/45 bg-card/20 rounded-2xl p-5 md:p-6">
-              <div className="flex items-center gap-2.5 pb-4 border-b border-border/30">
-                <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
-                  <Factory size={14} />
-                </div>
-                <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Sektörler</h3>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-4">
-                {sectors.map((sector) => (
-                  <Link
-                    key={sector.slug}
-                    to="/sektorler/$slug"
-                    params={{ slug: sector.slug }}
-                    className="group flex items-center gap-2.5 border border-border/40 bg-muted/10 rounded-xl p-3 transition-all hover:border-primary/30 hover:bg-muted/20 cursor-pointer"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
-                      <Factory size={14} />
-                    </div>
-                    <h3 className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">{sector.name}</h3>
-                  </Link>
-                ))}
-              </div>
-              <div className="mt-4 pt-4 border-t border-border/30 flex justify-center">
-                <Link
-                  to="/sektorler"
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full border-2 border-primary/40 text-primary font-semibold hover:bg-primary/5 hover:border-primary transition-all text-sm"
-                >
-                  Bütün Sektörlere Göz At
-                  <ChevronRight size={16} />
-                </Link>
-              </div>
-            </div>
-          </section>
         </div>
       </div>
 

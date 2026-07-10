@@ -13,7 +13,6 @@ import {
 import { useUIStore } from '../store/ui'
 import { useWatchlistStore } from '../store/watchlist'
 import { useMarketStocks, useMarketSummary } from '../lib/useMarketData'
-import tickerToSectorSlug from '../constants/tickerToSectorSlug'
 
 export const Route = createFileRoute('/takip-listesi')({
   component: WatchlistPage,
@@ -321,7 +320,7 @@ function WatchlistPage() {
                     const isUp = item.diff_percent >= 0
                     const itemUrl = item.type === 'index' 
                       ? `/endeksler/${item.code.toLowerCase()}`
-                      : `/sektorler/${tickerToSectorSlug[item.code.toUpperCase()] || 'diger'}/${item.code.toLowerCase()}`
+                      : `/hisse/${item.code.toLowerCase()}`
                     return (
                       <tr 
                         key={item.code} 

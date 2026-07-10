@@ -10,15 +10,15 @@ import {
   Shield, Gauge, LineChart,
 } from 'lucide-react'
 
-export const Route = createFileRoute('/sektorler/$slug/$company/teknik-analiz')({
+export const Route = createFileRoute('/hisse/$ticker/teknik-analiz')({
   component: TechnicalAnalysisPage,
 })
 
 function TechnicalAnalysisPage() {
-  const { company } = Route.useParams()
+  const { ticker } = Route.useParams()
   const { user, loading: authLoading } = useAuth()
   const navigate = useNavigate()
-  const tickerUpper = company.toUpperCase()
+  const tickerUpper = ticker.toUpperCase()
   const { data: companyRaw, isLoading: loading } = useCompanyData(tickerUpper)
 
   useEffect(() => {
@@ -43,10 +43,8 @@ function TechnicalAnalysisPage() {
 
   return (
     <div className="space-y-5">
-      {/* Chart — no card wrapper */}
       <TradingViewChart symbol={tickerUpper} lastPrice={stats?.price || 0} />
 
-      {/* TA Summary — seamless, no outer card */}
       {taData && (
         <div className="space-y-5">
           <div className="flex items-center justify-between">
@@ -57,7 +55,6 @@ function TechnicalAnalysisPage() {
             <ScoreGauge score={taData.score} />
           </div>
 
-          {/* Trend Row */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               { label: 'Günlük Trend', value: taData.trend, icon: <TrendingUp size={13} />, bull: taData.trend.toLowerCase().includes('bull') || taData.trend.toLowerCase().includes('yükseliş') },
@@ -75,7 +72,6 @@ function TechnicalAnalysisPage() {
             ))}
           </div>
 
-          {/* Detailed Indicators — no card */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <div className="divide-y divide-border/15">
               {[
@@ -155,9 +151,7 @@ function TechnicalAnalysisPage() {
         </div>
       )}
 
-      {/* AI CEO Report */}
       <CeoTaReport ticker={tickerUpper} />
-
     </div>
   )
 }

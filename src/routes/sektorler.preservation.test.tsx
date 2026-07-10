@@ -64,7 +64,7 @@ function generateSectorDetailUrl(slug: string): string {
  * Bu routing mantığı korunmalıdır
  */
 function generateCompanyDetailUrl(sectorSlug: string, companyTicker: string): string {
-  return `/sektorler/${sectorSlug}/${companyTicker.toLowerCase()}`;
+  return `/hisse/${companyTicker.toLowerCase()}`;
 }
 
 /**
@@ -170,10 +170,10 @@ describe("Preservation Property Tests - Mevcut Davranışların Korunması", () 
    */
   it("Preservation 3.6: Şirket kartlarına tıklandığında şirket detay sayfasına yönlendirme çalışmalı", () => {
     const companies = [
-      { sectorSlug: "banka", ticker: "GARAN", expectedUrl: "/sektorler/banka/garan" },
-      { sectorSlug: "banka", ticker: "ISCTR", expectedUrl: "/sektorler/banka/isctr" },
-      { sectorSlug: "teknoloji", ticker: "ASELS", expectedUrl: "/sektorler/teknoloji/asels" },
-      { sectorSlug: "gida", ticker: "ULKER", expectedUrl: "/sektorler/gida/ulker" },
+      { sectorSlug: "banka", ticker: "GARAN", expectedUrl: "/hisse/garan" },
+      { sectorSlug: "banka", ticker: "ISCTR", expectedUrl: "/hisse/isctr" },
+      { sectorSlug: "teknoloji", ticker: "ASELS", expectedUrl: "/hisse/asels" },
+      { sectorSlug: "gida", ticker: "ULKER", expectedUrl: "/hisse/ulker" },
     ];
 
     for (const company of companies) {
@@ -374,8 +374,8 @@ describe("Preservation Property Tests - Mevcut Davranışların Korunması", () 
           
           // Company URL generation (ticker lowercase)
           const companyUrl = generateCompanyDetailUrl(sectorSlug, companyTicker);
-          expect(companyUrl).toBe(`/sektorler/${sectorSlug}/${companyTicker.toLowerCase()}`);
-          expect(companyUrl.startsWith(`/sektorler/${sectorSlug}/`)).toBe(true);
+          expect(companyUrl).toBe(`/hisse/${companyTicker.toLowerCase()}`);
+          expect(companyUrl.startsWith(`/hisse/`)).toBe(true);
           
           // Property: Company URL her zaman lowercase ticker içermeli
           expect(companyUrl).toBe(companyUrl.toLowerCase());
@@ -483,7 +483,7 @@ describe("Preservation Property Tests - Mevcut Davranışların Korunması", () 
           // 5. Each company has valid URL
           sortedCompanies.forEach(company => {
             const companyUrl = generateCompanyDetailUrl(sector.slug, company.ticker);
-            expect(companyUrl).toBe(`/sektorler/${sector.slug}/${company.ticker.toLowerCase()}`);
+            expect(companyUrl).toBe(`/hisse/${company.ticker.toLowerCase()}`);
           });
         }
       ),

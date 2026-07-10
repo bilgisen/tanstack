@@ -14,25 +14,23 @@ import { Route as SektorlerRouteImport } from './routes/sektorler'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as NedenJetborsaRouteImport } from './routes/neden-jetborsa'
 import { Route as NasilCalisirRouteImport } from './routes/nasil-calisir'
-import { Route as LoginRouteImport } from './routes/login'
 import { Route as KurumsalRouteImport } from './routes/kurumsal'
 import { Route as EndekslerRouteImport } from './routes/endeksler'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfilIndexRouteImport } from './routes/profil.index'
 import { Route as EndekslerIndexRouteImport } from './routes/endeksler.index'
 import { Route as SektorlerSlugRouteImport } from './routes/sektorler.$slug'
+import { Route as HisseTickerRouteImport } from './routes/hisse.$ticker'
 import { Route as EndekslerIdRouteImport } from './routes/endeksler.$id'
 import { Route as ApiCheckoutRouteImport } from './routes/api/checkout'
-import { Route as SektorlerSlugCompanyRouteImport } from './routes/sektorler.$slug.$company'
+import { Route as HisseTickerIndexRouteImport } from './routes/hisse.$ticker.index'
+import { Route as HisseTickerTeknikAnalizRouteImport } from './routes/hisse.$ticker.teknik-analiz'
 import { Route as ApiWebhooksPolarRouteImport } from './routes/api/webhooks/polar'
 import { Route as ApiUserCreditsRouteImport } from './routes/api/user/credits'
 import { Route as ApiModelsAvailableRouteImport } from './routes/api/models/available'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiAiPreCheckRouteImport } from './routes/api/ai/pre-check'
 import { Route as ApiAiChargeRouteImport } from './routes/api/ai/charge'
-import { Route as SektorlerSlugCompanyIndexRouteImport } from './routes/sektorler.$slug.$company.index'
-import { Route as SektorlerSlugCompanyTemelAnalizRouteImport } from './routes/sektorler.$slug.$company.temel-analiz'
-import { Route as SektorlerSlugCompanyTeknikAnalizRouteImport } from './routes/sektorler.$slug.$company.teknik-analiz'
 
 const TakipListesiRoute = TakipListesiRouteImport.update({
   id: '/takip-listesi',
@@ -57,11 +55,6 @@ const NedenJetborsaRoute = NedenJetborsaRouteImport.update({
 const NasilCalisirRoute = NasilCalisirRouteImport.update({
   id: '/nasil-calisir',
   path: '/nasil-calisir',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KurumsalRoute = KurumsalRouteImport.update({
@@ -94,6 +87,11 @@ const SektorlerSlugRoute = SektorlerSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => SektorlerRoute,
 } as any)
+const HisseTickerRoute = HisseTickerRouteImport.update({
+  id: '/hisse/$ticker',
+  path: '/hisse/$ticker',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EndekslerIdRoute = EndekslerIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -104,10 +102,15 @@ const ApiCheckoutRoute = ApiCheckoutRouteImport.update({
   path: '/api/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SektorlerSlugCompanyRoute = SektorlerSlugCompanyRouteImport.update({
-  id: '/$company',
-  path: '/$company',
-  getParentRoute: () => SektorlerSlugRoute,
+const HisseTickerIndexRoute = HisseTickerIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => HisseTickerRoute,
+} as any)
+const HisseTickerTeknikAnalizRoute = HisseTickerTeknikAnalizRouteImport.update({
+  id: '/teknik-analiz',
+  path: '/teknik-analiz',
+  getParentRoute: () => HisseTickerRoute,
 } as any)
 const ApiWebhooksPolarRoute = ApiWebhooksPolarRouteImport.update({
   id: '/api/webhooks/polar',
@@ -139,30 +142,11 @@ const ApiAiChargeRoute = ApiAiChargeRouteImport.update({
   path: '/api/ai/charge',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SektorlerSlugCompanyIndexRoute =
-  SektorlerSlugCompanyIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => SektorlerSlugCompanyRoute,
-  } as any)
-const SektorlerSlugCompanyTemelAnalizRoute =
-  SektorlerSlugCompanyTemelAnalizRouteImport.update({
-    id: '/temel-analiz',
-    path: '/temel-analiz',
-    getParentRoute: () => SektorlerSlugCompanyRoute,
-  } as any)
-const SektorlerSlugCompanyTeknikAnalizRoute =
-  SektorlerSlugCompanyTeknikAnalizRouteImport.update({
-    id: '/teknik-analiz',
-    path: '/teknik-analiz',
-    getParentRoute: () => SektorlerSlugCompanyRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/endeksler': typeof EndekslerRouteWithChildren
   '/kurumsal': typeof KurumsalRoute
-  '/login': typeof LoginRoute
   '/nasil-calisir': typeof NasilCalisirRoute
   '/neden-jetborsa': typeof NedenJetborsaRoute
   '/profil': typeof ProfilRouteWithChildren
@@ -170,7 +154,8 @@ export interface FileRoutesByFullPath {
   '/takip-listesi': typeof TakipListesiRoute
   '/api/checkout': typeof ApiCheckoutRoute
   '/endeksler/$id': typeof EndekslerIdRoute
-  '/sektorler/$slug': typeof SektorlerSlugRouteWithChildren
+  '/hisse/$ticker': typeof HisseTickerRouteWithChildren
+  '/sektorler/$slug': typeof SektorlerSlugRoute
   '/endeksler/': typeof EndekslerIndexRoute
   '/profil/': typeof ProfilIndexRoute
   '/api/ai/charge': typeof ApiAiChargeRoute
@@ -179,22 +164,19 @@ export interface FileRoutesByFullPath {
   '/api/models/available': typeof ApiModelsAvailableRoute
   '/api/user/credits': typeof ApiUserCreditsRoute
   '/api/webhooks/polar': typeof ApiWebhooksPolarRoute
-  '/sektorler/$slug/$company': typeof SektorlerSlugCompanyRouteWithChildren
-  '/sektorler/$slug/$company/teknik-analiz': typeof SektorlerSlugCompanyTeknikAnalizRoute
-  '/sektorler/$slug/$company/temel-analiz': typeof SektorlerSlugCompanyTemelAnalizRoute
-  '/sektorler/$slug/$company/': typeof SektorlerSlugCompanyIndexRoute
+  '/hisse/$ticker/teknik-analiz': typeof HisseTickerTeknikAnalizRoute
+  '/hisse/$ticker/': typeof HisseTickerIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/kurumsal': typeof KurumsalRoute
-  '/login': typeof LoginRoute
   '/nasil-calisir': typeof NasilCalisirRoute
   '/neden-jetborsa': typeof NedenJetborsaRoute
   '/sektorler': typeof SektorlerRouteWithChildren
   '/takip-listesi': typeof TakipListesiRoute
   '/api/checkout': typeof ApiCheckoutRoute
   '/endeksler/$id': typeof EndekslerIdRoute
-  '/sektorler/$slug': typeof SektorlerSlugRouteWithChildren
+  '/sektorler/$slug': typeof SektorlerSlugRoute
   '/endeksler': typeof EndekslerIndexRoute
   '/profil': typeof ProfilIndexRoute
   '/api/ai/charge': typeof ApiAiChargeRoute
@@ -203,16 +185,14 @@ export interface FileRoutesByTo {
   '/api/models/available': typeof ApiModelsAvailableRoute
   '/api/user/credits': typeof ApiUserCreditsRoute
   '/api/webhooks/polar': typeof ApiWebhooksPolarRoute
-  '/sektorler/$slug/$company/teknik-analiz': typeof SektorlerSlugCompanyTeknikAnalizRoute
-  '/sektorler/$slug/$company/temel-analiz': typeof SektorlerSlugCompanyTemelAnalizRoute
-  '/sektorler/$slug/$company': typeof SektorlerSlugCompanyIndexRoute
+  '/hisse/$ticker/teknik-analiz': typeof HisseTickerTeknikAnalizRoute
+  '/hisse/$ticker': typeof HisseTickerIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/endeksler': typeof EndekslerRouteWithChildren
   '/kurumsal': typeof KurumsalRoute
-  '/login': typeof LoginRoute
   '/nasil-calisir': typeof NasilCalisirRoute
   '/neden-jetborsa': typeof NedenJetborsaRoute
   '/profil': typeof ProfilRouteWithChildren
@@ -220,7 +200,8 @@ export interface FileRoutesById {
   '/takip-listesi': typeof TakipListesiRoute
   '/api/checkout': typeof ApiCheckoutRoute
   '/endeksler/$id': typeof EndekslerIdRoute
-  '/sektorler/$slug': typeof SektorlerSlugRouteWithChildren
+  '/hisse/$ticker': typeof HisseTickerRouteWithChildren
+  '/sektorler/$slug': typeof SektorlerSlugRoute
   '/endeksler/': typeof EndekslerIndexRoute
   '/profil/': typeof ProfilIndexRoute
   '/api/ai/charge': typeof ApiAiChargeRoute
@@ -229,10 +210,8 @@ export interface FileRoutesById {
   '/api/models/available': typeof ApiModelsAvailableRoute
   '/api/user/credits': typeof ApiUserCreditsRoute
   '/api/webhooks/polar': typeof ApiWebhooksPolarRoute
-  '/sektorler/$slug/$company': typeof SektorlerSlugCompanyRouteWithChildren
-  '/sektorler/$slug/$company/teknik-analiz': typeof SektorlerSlugCompanyTeknikAnalizRoute
-  '/sektorler/$slug/$company/temel-analiz': typeof SektorlerSlugCompanyTemelAnalizRoute
-  '/sektorler/$slug/$company/': typeof SektorlerSlugCompanyIndexRoute
+  '/hisse/$ticker/teknik-analiz': typeof HisseTickerTeknikAnalizRoute
+  '/hisse/$ticker/': typeof HisseTickerIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -240,7 +219,6 @@ export interface FileRouteTypes {
     | '/'
     | '/endeksler'
     | '/kurumsal'
-    | '/login'
     | '/nasil-calisir'
     | '/neden-jetborsa'
     | '/profil'
@@ -248,6 +226,7 @@ export interface FileRouteTypes {
     | '/takip-listesi'
     | '/api/checkout'
     | '/endeksler/$id'
+    | '/hisse/$ticker'
     | '/sektorler/$slug'
     | '/endeksler/'
     | '/profil/'
@@ -257,15 +236,12 @@ export interface FileRouteTypes {
     | '/api/models/available'
     | '/api/user/credits'
     | '/api/webhooks/polar'
-    | '/sektorler/$slug/$company'
-    | '/sektorler/$slug/$company/teknik-analiz'
-    | '/sektorler/$slug/$company/temel-analiz'
-    | '/sektorler/$slug/$company/'
+    | '/hisse/$ticker/teknik-analiz'
+    | '/hisse/$ticker/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/kurumsal'
-    | '/login'
     | '/nasil-calisir'
     | '/neden-jetborsa'
     | '/sektorler'
@@ -281,15 +257,13 @@ export interface FileRouteTypes {
     | '/api/models/available'
     | '/api/user/credits'
     | '/api/webhooks/polar'
-    | '/sektorler/$slug/$company/teknik-analiz'
-    | '/sektorler/$slug/$company/temel-analiz'
-    | '/sektorler/$slug/$company'
+    | '/hisse/$ticker/teknik-analiz'
+    | '/hisse/$ticker'
   id:
     | '__root__'
     | '/'
     | '/endeksler'
     | '/kurumsal'
-    | '/login'
     | '/nasil-calisir'
     | '/neden-jetborsa'
     | '/profil'
@@ -297,6 +271,7 @@ export interface FileRouteTypes {
     | '/takip-listesi'
     | '/api/checkout'
     | '/endeksler/$id'
+    | '/hisse/$ticker'
     | '/sektorler/$slug'
     | '/endeksler/'
     | '/profil/'
@@ -306,23 +281,21 @@ export interface FileRouteTypes {
     | '/api/models/available'
     | '/api/user/credits'
     | '/api/webhooks/polar'
-    | '/sektorler/$slug/$company'
-    | '/sektorler/$slug/$company/teknik-analiz'
-    | '/sektorler/$slug/$company/temel-analiz'
-    | '/sektorler/$slug/$company/'
+    | '/hisse/$ticker/teknik-analiz'
+    | '/hisse/$ticker/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   EndekslerRoute: typeof EndekslerRouteWithChildren
   KurumsalRoute: typeof KurumsalRoute
-  LoginRoute: typeof LoginRoute
   NasilCalisirRoute: typeof NasilCalisirRoute
   NedenJetborsaRoute: typeof NedenJetborsaRoute
   ProfilRoute: typeof ProfilRouteWithChildren
   SektorlerRoute: typeof SektorlerRouteWithChildren
   TakipListesiRoute: typeof TakipListesiRoute
   ApiCheckoutRoute: typeof ApiCheckoutRoute
+  HisseTickerRoute: typeof HisseTickerRouteWithChildren
   ApiAiChargeRoute: typeof ApiAiChargeRoute
   ApiAiPreCheckRoute: typeof ApiAiPreCheckRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -368,13 +341,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NasilCalisirRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/kurumsal': {
       id: '/kurumsal'
       path: '/kurumsal'
@@ -417,6 +383,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SektorlerSlugRouteImport
       parentRoute: typeof SektorlerRoute
     }
+    '/hisse/$ticker': {
+      id: '/hisse/$ticker'
+      path: '/hisse/$ticker'
+      fullPath: '/hisse/$ticker'
+      preLoaderRoute: typeof HisseTickerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/endeksler/$id': {
       id: '/endeksler/$id'
       path: '/$id'
@@ -431,12 +404,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sektorler/$slug/$company': {
-      id: '/sektorler/$slug/$company'
-      path: '/$company'
-      fullPath: '/sektorler/$slug/$company'
-      preLoaderRoute: typeof SektorlerSlugCompanyRouteImport
-      parentRoute: typeof SektorlerSlugRoute
+    '/hisse/$ticker/': {
+      id: '/hisse/$ticker/'
+      path: '/'
+      fullPath: '/hisse/$ticker/'
+      preLoaderRoute: typeof HisseTickerIndexRouteImport
+      parentRoute: typeof HisseTickerRoute
+    }
+    '/hisse/$ticker/teknik-analiz': {
+      id: '/hisse/$ticker/teknik-analiz'
+      path: '/teknik-analiz'
+      fullPath: '/hisse/$ticker/teknik-analiz'
+      preLoaderRoute: typeof HisseTickerTeknikAnalizRouteImport
+      parentRoute: typeof HisseTickerRoute
     }
     '/api/webhooks/polar': {
       id: '/api/webhooks/polar'
@@ -480,27 +460,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAiChargeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sektorler/$slug/$company/': {
-      id: '/sektorler/$slug/$company/'
-      path: '/'
-      fullPath: '/sektorler/$slug/$company/'
-      preLoaderRoute: typeof SektorlerSlugCompanyIndexRouteImport
-      parentRoute: typeof SektorlerSlugCompanyRoute
-    }
-    '/sektorler/$slug/$company/temel-analiz': {
-      id: '/sektorler/$slug/$company/temel-analiz'
-      path: '/temel-analiz'
-      fullPath: '/sektorler/$slug/$company/temel-analiz'
-      preLoaderRoute: typeof SektorlerSlugCompanyTemelAnalizRouteImport
-      parentRoute: typeof SektorlerSlugCompanyRoute
-    }
-    '/sektorler/$slug/$company/teknik-analiz': {
-      id: '/sektorler/$slug/$company/teknik-analiz'
-      path: '/teknik-analiz'
-      fullPath: '/sektorler/$slug/$company/teknik-analiz'
-      preLoaderRoute: typeof SektorlerSlugCompanyTeknikAnalizRouteImport
-      parentRoute: typeof SektorlerSlugCompanyRoute
-    }
   }
 }
 
@@ -529,56 +488,43 @@ const ProfilRouteChildren: ProfilRouteChildren = {
 const ProfilRouteWithChildren =
   ProfilRoute._addFileChildren(ProfilRouteChildren)
 
-interface SektorlerSlugCompanyRouteChildren {
-  SektorlerSlugCompanyTeknikAnalizRoute: typeof SektorlerSlugCompanyTeknikAnalizRoute
-  SektorlerSlugCompanyTemelAnalizRoute: typeof SektorlerSlugCompanyTemelAnalizRoute
-  SektorlerSlugCompanyIndexRoute: typeof SektorlerSlugCompanyIndexRoute
-}
-
-const SektorlerSlugCompanyRouteChildren: SektorlerSlugCompanyRouteChildren = {
-  SektorlerSlugCompanyTeknikAnalizRoute: SektorlerSlugCompanyTeknikAnalizRoute,
-  SektorlerSlugCompanyTemelAnalizRoute: SektorlerSlugCompanyTemelAnalizRoute,
-  SektorlerSlugCompanyIndexRoute: SektorlerSlugCompanyIndexRoute,
-}
-
-const SektorlerSlugCompanyRouteWithChildren =
-  SektorlerSlugCompanyRoute._addFileChildren(SektorlerSlugCompanyRouteChildren)
-
-interface SektorlerSlugRouteChildren {
-  SektorlerSlugCompanyRoute: typeof SektorlerSlugCompanyRouteWithChildren
-}
-
-const SektorlerSlugRouteChildren: SektorlerSlugRouteChildren = {
-  SektorlerSlugCompanyRoute: SektorlerSlugCompanyRouteWithChildren,
-}
-
-const SektorlerSlugRouteWithChildren = SektorlerSlugRoute._addFileChildren(
-  SektorlerSlugRouteChildren,
-)
-
 interface SektorlerRouteChildren {
-  SektorlerSlugRoute: typeof SektorlerSlugRouteWithChildren
+  SektorlerSlugRoute: typeof SektorlerSlugRoute
 }
 
 const SektorlerRouteChildren: SektorlerRouteChildren = {
-  SektorlerSlugRoute: SektorlerSlugRouteWithChildren,
+  SektorlerSlugRoute: SektorlerSlugRoute,
 }
 
 const SektorlerRouteWithChildren = SektorlerRoute._addFileChildren(
   SektorlerRouteChildren,
 )
 
+interface HisseTickerRouteChildren {
+  HisseTickerTeknikAnalizRoute: typeof HisseTickerTeknikAnalizRoute
+  HisseTickerIndexRoute: typeof HisseTickerIndexRoute
+}
+
+const HisseTickerRouteChildren: HisseTickerRouteChildren = {
+  HisseTickerTeknikAnalizRoute: HisseTickerTeknikAnalizRoute,
+  HisseTickerIndexRoute: HisseTickerIndexRoute,
+}
+
+const HisseTickerRouteWithChildren = HisseTickerRoute._addFileChildren(
+  HisseTickerRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   EndekslerRoute: EndekslerRouteWithChildren,
   KurumsalRoute: KurumsalRoute,
-  LoginRoute: LoginRoute,
   NasilCalisirRoute: NasilCalisirRoute,
   NedenJetborsaRoute: NedenJetborsaRoute,
   ProfilRoute: ProfilRouteWithChildren,
   SektorlerRoute: SektorlerRouteWithChildren,
   TakipListesiRoute: TakipListesiRoute,
   ApiCheckoutRoute: ApiCheckoutRoute,
+  HisseTickerRoute: HisseTickerRouteWithChildren,
   ApiAiChargeRoute: ApiAiChargeRoute,
   ApiAiPreCheckRoute: ApiAiPreCheckRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,

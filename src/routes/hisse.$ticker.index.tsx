@@ -5,13 +5,13 @@ import type { CompanyStats, FundamentalDetail } from '../constants/companyShared
 import { Skeleton } from '../components/ui/skeleton'
 import { useCompanyData } from '../lib/useCompanyData'
 
-export const Route = createFileRoute('/sektorler/$slug/$company/')({
+export const Route = createFileRoute('/hisse/$ticker/')({
   component: CompanyOverviewPage,
 })
 
 function CompanyOverviewPage() {
-  const { company } = Route.useParams()
-  const tickerUpper = company.toUpperCase()
+  const { ticker } = Route.useParams()
+  const tickerUpper = ticker.toUpperCase()
   const { data: companyRaw, isLoading: loading } = useCompanyData(tickerUpper)
 
   const stats: CompanyStats | null = companyRaw?.stats || null
@@ -20,11 +20,9 @@ function CompanyOverviewPage() {
   if (loading) {
     return (
       <div className="space-y-4">
-        {/* Chart skeleton */}
         <div className="border border-border/40 rounded-2xl bg-card/15 p-4 md:p-5">
           <Skeleton className="w-full aspect-video rounded-xl" />
         </div>
-        {/* Stats skeleton */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="p-3.5 border border-border/40 rounded-xl bg-muted/10">
@@ -33,7 +31,6 @@ function CompanyOverviewPage() {
             </div>
           ))}
         </div>
-
       </div>
     )
   }
@@ -52,10 +49,8 @@ function CompanyOverviewPage() {
 
   return (
     <div className="space-y-5">
-      {/* Chart */}
       <TradingViewChart symbol={tickerUpper} lastPrice={stats?.price || 0} />
 
-      {/* Değişim Oranları */}
       {fundamentalDetail && stats && (
         <div className="border border-border/40 bg-card/20 rounded-2xl p-5 space-y-4">
           <div className="flex items-center gap-2.5 pb-3 border-b border-border/30">
@@ -119,7 +114,6 @@ function CompanyOverviewPage() {
         </div>
       )}
 
-      {/* Quick Stats */}
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
@@ -138,8 +132,6 @@ function CompanyOverviewPage() {
           ))}
         </div>
       )}
-
-
     </div>
   )
 }

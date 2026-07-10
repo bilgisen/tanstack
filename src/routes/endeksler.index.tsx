@@ -1,9 +1,8 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
 import { Loader2, ArrowUp, ArrowDown } from 'lucide-react'
-import { DataTable } from '../components/ui/data-table'
-import bistIndices, { getIndexName, getIndexSlug } from '../constants/bistIndices'
+import { getIndexName, getIndexSlug } from '../constants/bistIndices'
 
 export const Route = createFileRoute('/endeksler/')({
   component: EndekslerPage,
@@ -20,7 +19,6 @@ type IndexData = {
 const TOP_INDICES = ['XU100', 'XU030', 'XU500', 'XBANK', 'XUSIN']
 
 function EndekslerPage() {
-  const navigate = useNavigate()
   const [emblaRef] = useEmblaCarousel({ align: 'start', slidesToScroll: 1 })
 
   const [indices, setIndices] = useState<Record<string, IndexData>>({})
@@ -62,16 +60,6 @@ function EndekslerPage() {
   const topIndices = TOP_INDICES
     .map(code => indices[code])
     .filter(Boolean)
-
-  const allIndexCodes = Object.keys(bistIndices).filter(code => !TOP_INDICES.includes(code))
-  const allIndices = allIndexCodes
-    .map(code => ({
-      code,
-      name: getIndexName(code),
-      last_price: indices[code]?.last_price ?? null,
-      diff_percent: indices[code]?.diff_percent ?? null,
-      up: (indices[code]?.diff_percent ?? 0) >= 0,
-    }))
 
   if (loading) {
     return (
@@ -119,59 +107,7 @@ function EndekslerPage() {
         </div>
       </section>
 
-      {/* Tüm Endeksler */}
-      <section>
-        <DataTable
-          hideHeader
-          columns={[
-            {
-              key: 'code',
-              header: '',
-              className: 'w-24 font-mono',
-              render: (item) => (
-                <span className="font-mono text-sm font-semibold text-primary">{item.code}</span>
-              ),
-            },
-            {
-              key: 'name',
-              header: '',
-              render: (item) => (
-                <span className="text-sm font-medium text-foreground">{item.name}</span>
-              ),
-            },
-            {
-              key: 'last_price',
-              header: '',
-              className: 'w-40 text-right font-mono',
-              render: (item) => (
-                <span className="font-mono text-sm tabular-nums">
-                  {item.last_price != null
-                    ? item.last_price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                    : '-'}
-                </span>
-              ),
-            },
-            {
-              key: 'diff_percent',
-              header: '',
-              className: 'w-28 text-right',
-              render: (item) => (
-                item.diff_percent != null ? (
-                  <span className={`text-sm font-semibold ${item.up ? 'text-emerald-500' : 'text-destructive'}`}>
-                    {item.up ? '+' : ''}{item.diff_percent.toFixed(2)}%
-                  </span>
-                ) : (
-                  <span className="text-sm text-muted-foreground">-</span>
-                )
-              ),
-            },
-          ]}
-          data={allIndices}
-          onRowClick={(item) =>
-            navigate({ to: '/endeksler/$id', params: { id: getIndexSlug(item.code) } })
-          }
-        />
-      </section>
+
     </div>
   )
 }
