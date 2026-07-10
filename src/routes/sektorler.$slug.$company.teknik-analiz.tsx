@@ -18,6 +18,8 @@ function TechnicalAnalysisPage() {
   const { company } = Route.useParams()
   const { user, loading: authLoading } = useAuth()
   const navigate = useNavigate()
+  const tickerUpper = company.toUpperCase()
+  const { data: companyRaw, isLoading: loading } = useCompanyData(tickerUpper)
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -26,8 +28,6 @@ function TechnicalAnalysisPage() {
   }, [user, authLoading, navigate])
 
   if (authLoading || !user) return null
-  const tickerUpper = company.toUpperCase()
-  const { data: companyRaw, isLoading: loading } = useCompanyData(tickerUpper)
 
   const stats: CompanyStats | null = companyRaw?.stats || null
   const taData: TaData = companyRaw?.taData || null

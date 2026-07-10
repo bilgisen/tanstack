@@ -71,6 +71,9 @@ function FundamentalAnalysisPage() {
   const { company } = Route.useParams()
   const { user, loading: authLoading } = useAuth()
   const navigate = useNavigate()
+  const tickerUpper = company.toUpperCase()
+  const { data: companyRaw, isLoading: loading1 } = useCompanyData(tickerUpper)
+  const { data: ratiosRaw } = useCompanyRatios(tickerUpper)
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -79,10 +82,6 @@ function FundamentalAnalysisPage() {
   }, [user, authLoading, navigate])
 
   if (authLoading || !user) return null
-
-  const tickerUpper = company.toUpperCase()
-  const { data: companyRaw, isLoading: loading1 } = useCompanyData(tickerUpper)
-  const { data: ratiosRaw } = useCompanyRatios(tickerUpper)
 
   const fundamental: FundamentalData | null = companyRaw?.fundamental || null
   const ratiosResult = ratiosRaw?.ratios || {}
