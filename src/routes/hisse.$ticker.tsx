@@ -121,7 +121,7 @@ function CompanyLayout() {
         </div>
 
         {/* Stats Strip */}
-        <div className="flex items-center justify-between text-[11px] text-muted-foreground px-1 -mt-1">
+        <div className="flex items-center justify-between text-xs text-muted-foreground px-1 -mt-1">
           <div className="flex items-center gap-3">
             <span className="font-medium">Hacim: <span className="text-foreground/70 font-semibold">{formatVol(quote?.volume)}</span></span>
             <span className="flex items-center gap-0.5 text-destructive/70">
@@ -134,7 +134,7 @@ function CompanyLayout() {
             </span>
           </div>
           {formatTime(quote?.record_date) && (
-            <span className="flex items-center gap-1 text-[10px] text-muted-foreground/60">
+            <span className="flex items-center gap-1 text-[10px] text-muted-foreground/50">
               <Clock size={10} />
               Son güncelleme: {formatTime(quote?.record_date)}
             </span>
