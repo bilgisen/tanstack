@@ -74,7 +74,9 @@ function CompanyLayout() {
   const formatTime = (dateStr: string | undefined | null) => {
     if (!dateStr) return null
     try {
-      const d = new Date(dateStr)
+      const normalized = dateStr.replace(/\+(\d{2})$/, '+$1:00')
+      const d = new Date(normalized)
+      if (isNaN(d.getTime())) return null
       return d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
     } catch { return null }
   }
@@ -87,14 +89,14 @@ function CompanyLayout() {
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             {logoFile ? (
-              <img src={`/logos/${logoFile}`} alt={tickerUpper} className="h-10 w-10 rounded object-contain bg-white shrink-0" />
+              <img src={`/logos/${logoFile}`} alt={tickerUpper} className="h-9 w-9 rounded-sm object-contain bg-white shrink-0" />
             ) : (
-              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0">{tickerUpper.slice(0, 2)}</div>
+              <div className="h-9 w-9 rounded-sm bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0">{tickerUpper.slice(0, 2)}</div>
             )}
             <div className="min-w-0 space-y-0.5">
-              <span className="text-sm text-muted-foreground font-semibold tracking-tight">{tickerUpper}</span>
+              <span className="text-base text-muted-foreground font-semibold tracking-tight">{tickerUpper}</span>
               <div className="flex items-center gap-2">
-                <h1 className="text-base md:text-lg font-bold text-foreground tracking-tight truncate">{stats.name}</h1>
+                <h1 className="text-lg md:text-xl font-bold text-foreground tracking-tight truncate">{stats.name}</h1>
                 <button
                   onClick={toggleWatchlist}
                   className={`shrink-0 transition-all duration-200 ${
@@ -113,29 +115,29 @@ function CompanyLayout() {
             <span className="text-xl md:text-2xl font-bold text-foreground tracking-tight block leading-none">
               {stats.price > 0 ? stats.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}
             </span>
-            <span className={`text-xs md:text-sm font-bold inline-flex items-center gap-0.5 ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
-              {isUp ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
+            <span className={`text-sm md:text-base font-bold inline-flex items-center gap-0.5 ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
+              {isUp ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
               {isUp ? '+' : ''}{stats.diffPercent.toFixed(2)}%
             </span>
           </div>
         </div>
 
         {/* Stats Strip */}
-        <div className="flex items-center justify-between text-xs text-muted-foreground px-1 -mt-1">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between text-sm text-muted-foreground px-1 -mt-1">
+          <div className="flex items-center gap-4">
             <span className="font-medium">Hacim: <span className="text-foreground/70 font-semibold">{formatVol(quote?.volume)}</span></span>
             <span className="flex items-center gap-0.5 text-destructive/70">
-              <ChevronDown size={10} />
+              <ChevronDown size={12} />
               <span className="text-foreground/70 font-semibold">{formatPrice(quote?.low_price)}</span>
             </span>
             <span className="flex items-center gap-0.5 text-emerald-500/70">
-              <ChevronUp size={10} />
+              <ChevronUp size={12} />
               <span className="text-foreground/70 font-semibold">{formatPrice(quote?.high_price)}</span>
             </span>
           </div>
           {formatTime(quote?.record_date) && (
-            <span className="flex items-center gap-1 text-[10px] text-muted-foreground/50">
-              <Clock size={10} />
+            <span className="flex items-center gap-1 text-xs text-muted-foreground/50">
+              <Clock size={12} />
               Son güncelleme: {formatTime(quote?.record_date)}
             </span>
           )}
