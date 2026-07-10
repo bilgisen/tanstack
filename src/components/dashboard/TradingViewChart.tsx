@@ -263,7 +263,7 @@ export function TradingViewChart({
   }, [symbol, lastPrice, revealed, historyApiData, historyLoading]);
 
   return (
-    <div className="border border-border/40 rounded-2xl bg-card/15 p-4 md:p-5 flex flex-col relative overflow-hidden group select-none transition-all duration-300 hover:border-border/60">
+    <div className="flex flex-col relative select-none">
       
       {/* Main Canvas Body */}
       <div className="relative flex-1 w-full min-h-[300px] md:aspect-video md:min-h-0">

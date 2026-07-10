@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet } from '@tanstack/react-router'
-import { TrendingUp, TrendingDown, Activity, Star, ChevronDown, ChevronUp, Clock } from 'lucide-react'
+import { ArrowUp, ArrowDown, Activity, Info, Star, ChevronDown, ChevronUp, Clock } from 'lucide-react'
 import companyNames from '../constants/companyNames.json'
 import companyLogos from '../constants/companyLogos.json'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
@@ -12,7 +12,7 @@ export const Route = createFileRoute('/hisse/$ticker')({
 })
 
 const TABS = [
-  { suffix: '', label: 'Genel Bakış', icon: Activity },
+  { suffix: '', label: 'Genel Bakış', icon: Info },
   { suffix: '/teknik-analiz', label: 'Teknik Analiz', icon: Activity },
 ]
 
@@ -94,9 +94,9 @@ function CompanyLayout() {
               <div className="h-9 w-9 rounded-sm bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0">{tickerUpper.slice(0, 2)}</div>
             )}
             <div className="min-w-0 space-y-0.5">
-              <span className="text-base text-muted-foreground font-semibold tracking-tight">{tickerUpper}</span>
+              <span className="text-base text-muted-foreground font-light tracking-tight">{tickerUpper}</span>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg md:text-xl font-bold text-foreground tracking-tight truncate">{stats.name}</h1>
+                <h1 className="text-xl md:text-2xl font-bold text-foreground tracking-tight truncate">{stats.name}</h1>
                 <button
                   onClick={toggleWatchlist}
                   className={`shrink-0 transition-all duration-200 ${
@@ -112,11 +112,11 @@ function CompanyLayout() {
             </div>
           </div>
           <div className="text-right shrink-0">
-            <span className="text-xl md:text-2xl font-bold text-foreground tracking-tight block leading-none">
+            <span className="text-2xl md:text-3xl font-bold text-foreground tracking-tight block leading-none">
               {stats.price > 0 ? stats.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}
             </span>
-            <span className={`text-sm md:text-base font-bold inline-flex items-center gap-0.5 ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
-              {isUp ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
+            <span className={`text-base md:text-lg font-bold inline-flex items-center gap-1 ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
+              {isUp ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
               {isUp ? '+' : ''}{stats.diffPercent.toFixed(2)}%
             </span>
           </div>
@@ -137,8 +137,8 @@ function CompanyLayout() {
           </div>
           {formatTime(quote?.record_date) && (
             <span className="flex items-center gap-1 text-xs text-muted-foreground/50">
-              <Clock size={12} />
-              Son güncelleme: {formatTime(quote?.record_date)}
+              <Clock size={14} />
+              {formatTime(quote?.record_date)}
             </span>
           )}
         </div>
