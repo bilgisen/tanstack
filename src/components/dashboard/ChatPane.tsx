@@ -1,9 +1,7 @@
 import { useRef, useState } from "react";
 import { ArrowUp } from "lucide-react";
-import { useLocation, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { useChatStore } from "../../store/chat";
-import companyNames from "../../constants/companyNames.json";
-import tickerToSectorSlug from "../../constants/tickerToSectorSlug";
 
 interface ChatPaneProps {
   context?: string;
@@ -24,34 +22,6 @@ export function ChatPane({
   const { isLoading, sendMessage, clearChat } = useChatStore();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const detectTargetAsset = (text: string): { path: string; context: string } | null => {
-    const textLower = text.toLowerCase();
-    
-    if (textLower.includes("bist 100") || textLower.includes("bist100") || textLower.includes("xu100")) {
-      return { path: "/endeksler/xu100", context: "endeks:xu100" };
-    }
-    if (textLower.includes("bist 30") || textLower.includes("bist30") || textLower.includes("xu030")) {
-      return { path: "/endeksler/xu030", context: "endeks:xu030" };
-    }
-    if (textLower.includes("bist 500") || textLower.includes("bist500") || textLower.includes("xu500")) {
-      return { path: "/endeksler/xu500", context: "endeks:xu500" };
-    }
-    if (textLower.includes("bankacılık") || textLower.includes("bist banka") || textLower.includes("xbank") || textLower.includes("bistbanka")) {
-      return { path: "/endeksler/xbank", context: "endeks:xbank" };
-    }
-
-    const words = textLower.match(/[a-zA-Z0-9]+/g) || [];
-    for (const w of words) {
-      const upperWord = w.toUpperCase();
-      if (upperWord.length >= 3 && upperWord.length <= 6 && upperWord in companyNames) {
-        const slug = tickerToSectorSlug[upperWord] || 'diger';
-        return { path: `/sektorler/${slug}/${w.toLowerCase()}`, context: `sirket:${w.toLowerCase()}` };
-      }
-    }
-    return null;
-  };
 
   const handleSend = async () => {
     const textToSend = input.trim();
@@ -67,19 +37,6 @@ export function ChatPane({
     setInput("");
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
-    }
-
-    const currentPath = location.pathname.toLowerCase();
-    const isGlobalHome = currentPath === "/" || context === "global";
-    
-    if (isGlobalHome) {
-      const target = detectTargetAsset(textToSend);
-      if (target) {
-        clearChat();
-        navigate({ to: target.path as any });
-        await sendMessage(textToSend, target.context);
-        return;
-      }
     }
 
     await sendMessage(textToSend, context);
