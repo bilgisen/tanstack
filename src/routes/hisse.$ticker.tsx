@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet } from '@tanstack/react-router'
-import { TrendingUp, TrendingDown, Activity, Star } from 'lucide-react'
+import { TrendingUp, TrendingDown, Activity, Star, ChevronDown, ChevronUp, Clock } from 'lucide-react'
 import companyNames from '../constants/companyNames.json'
 import companyLogos from '../constants/companyLogos.json'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
@@ -57,47 +57,88 @@ function CompanyLayout() {
 
   const isUp = stats.diffPercent >= 0
 
+  const formatVol = (v: number | string | undefined) => {
+    if (v == null || v === '-') return '-'
+    const n = typeof v === 'string' ? parseFloat(v) : v
+    if (n >= 1e9) return `${(n / 1e9).toFixed(2)}B`
+    if (n >= 1e6) return `${(n / 1e6).toFixed(2)}M`
+    if (n >= 1e3) return `${(n / 1e3).toFixed(1)}K`
+    return n.toLocaleString('tr-TR')
+  }
+
+  const formatPrice = (v: number | undefined | null) => {
+    if (v == null || v <= 0) return '-'
+    return `₺${v.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  }
+
+  const formatTime = (dateStr: string | undefined | null) => {
+    if (!dateStr) return null
+    try {
+      const d = new Date(dateStr)
+      return d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+    } catch { return null }
+  }
+
   return (
     <PublicPageLayout context={chatContext} placeholder={`${tickerUpper} hakkında bir soru sorun...`}>
       <div className="space-y-4 pb-8 animate-in fade-in duration-400">
 
         {/* Ticker Header */}
-        <div className="border border-border/40 bg-card/30 rounded-2xl p-4 md:p-6 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4 min-w-0">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             {logoFile ? (
-              <img src={`/logos/${logoFile}`} alt={tickerUpper} className="h-12 w-12 rounded-md object-contain bg-white shrink-0 shadow-3xs" />
+              <img src={`/logos/${logoFile}`} alt={tickerUpper} className="h-10 w-10 rounded object-contain bg-white shrink-0" />
             ) : (
-              <div className="h-12 w-12 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center text-primary font-bold text-base shrink-0">{tickerUpper.slice(0, 2)}</div>
+              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0">{tickerUpper.slice(0, 2)}</div>
             )}
             <div className="min-w-0">
-              <span className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider block">{tickerUpper}</span>
-              <div className="flex items-center gap-2 mt-0.5">
-                <h1 className="text-xl md:text-2xl font-bold text-foreground tracking-tight leading-tight truncate">{stats.name}</h1>
+              <h1 className="text-lg md:text-xl font-bold text-foreground tracking-tight truncate">{stats.name}</h1>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="text-[11px] text-muted-foreground font-semibold">{tickerUpper}</span>
                 <button
                   onClick={toggleWatchlist}
-                  className={`shrink-0 p-1.5 rounded-lg transition-all duration-200 ${
+                  className={`shrink-0 transition-all duration-200 ${
                     isStarred
-                      ? 'text-amber-500 hover:text-amber-400 bg-amber-500/10'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
+                      ? 'text-amber-500 hover:text-amber-400'
+                      : 'text-muted-foreground/40 hover:text-muted-foreground'
                   }`}
                   title={isStarred ? 'Takip Listesinden Çıkar' : 'Takip Listeme Ekle'}
                 >
-                  <Star size={18} fill={isStarred ? 'currentColor' : 'none'} />
+                  <Star size={13} fill={isStarred ? 'currentColor' : 'none'} />
                 </button>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-4 shrink-0">
-            <div className="text-right">
-              <span className="text-2xl md:text-3xl font-bold text-foreground tracking-tight block leading-none">
-                {stats.price > 0 ? stats.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}
-              </span>
-              <span className={`text-sm md:text-lg font-bold px-2.5 py-0.5 rounded-full inline-flex items-center gap-0.5 mt-1.5 ${isUp ? 'bg-emerald-500/10 text-emerald-500' : 'bg-destructive/10 text-destructive'}`}>
-                {isUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                {isUp ? '+' : ''}{stats.diffPercent.toFixed(2)}%
-              </span>
-            </div>
+          <div className="text-right shrink-0">
+            <span className="text-xl md:text-2xl font-bold text-foreground tracking-tight block leading-none">
+              {stats.price > 0 ? stats.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}
+            </span>
+            <span className={`text-xs md:text-sm font-bold inline-flex items-center gap-0.5 ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
+              {isUp ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
+              {isUp ? '+' : ''}{stats.diffPercent.toFixed(2)}%
+            </span>
           </div>
+        </div>
+
+        {/* Stats Strip */}
+        <div className="flex items-center justify-between text-[11px] text-muted-foreground px-1 -mt-1">
+          <div className="flex items-center gap-3">
+            <span className="font-medium">Hacim: <span className="text-foreground/70 font-semibold">{formatVol(quote?.volume)}</span></span>
+            <span className="flex items-center gap-0.5 text-destructive/70">
+              <ChevronDown size={10} />
+              <span className="text-foreground/70 font-semibold">{formatPrice(quote?.low_price)}</span>
+            </span>
+            <span className="flex items-center gap-0.5 text-emerald-500/70">
+              <ChevronUp size={10} />
+              <span className="text-foreground/70 font-semibold">{formatPrice(quote?.high_price)}</span>
+            </span>
+          </div>
+          {formatTime(quote?.record_date) && (
+            <span className="flex items-center gap-1 text-[10px] text-muted-foreground/60">
+              <Clock size={10} />
+              Son güncelleme: {formatTime(quote?.record_date)}
+            </span>
+          )}
         </div>
 
         {/* Tab Nav */}

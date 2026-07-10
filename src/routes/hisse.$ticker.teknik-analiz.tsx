@@ -1,13 +1,13 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { TradingViewChart } from '../components/dashboard/TradingViewChart'
 import { CeoTaReport } from '../components/company/CeoTaReport'
-import { ScoreGauge, SignalBadge, type CompanyStats, type TaData } from '../constants/companyShared'
+import { ScoreGauge, SignalBadge, type CompanyStats, type TaData, type FundamentalDetail } from '../constants/companyShared'
 import { useCompanyData } from '../lib/useCompanyData'
 import { useAuth } from '../hooks/useAuth'
 import { useEffect } from 'react'
 import {
   Activity, TrendingUp, BarChart3, Target, AlertTriangle,
-  Shield, Gauge, LineChart,
+  Shield, Gauge, LineChart, Calendar,
 } from 'lucide-react'
 
 export const Route = createFileRoute('/hisse/$ticker/teknik-analiz')({
@@ -31,6 +31,7 @@ function TechnicalAnalysisPage() {
 
   const stats: CompanyStats | null = companyRaw?.stats || null
   const taData: TaData = companyRaw?.taData || null
+  const fundamentalDetail: FundamentalDetail | null = companyRaw?.fundamentalDetail || null
 
   if (loading) {
     return (
@@ -44,6 +45,54 @@ function TechnicalAnalysisPage() {
   return (
     <div className="space-y-5">
       <TradingViewChart symbol={tickerUpper} lastPrice={stats?.price || 0} />
+
+      {fundamentalDetail && stats && (
+        <div className="border border-border/40 bg-card/20 rounded-2xl p-5 space-y-4">
+          <div className="flex items-center gap-2.5 pb-3 border-b border-border/30">
+            <div className="w-7 h-7 rounded-lg bg-violet-500/10 text-violet-500 flex items-center justify-center">
+              <Calendar size={16} />
+            </div>
+            <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Değişim Oranları</h3>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              {
+                label: 'Haftalık',
+                value: fundamentalDetail.weekClose > 0
+                  ? ((stats.price - fundamentalDetail.weekClose) / fundamentalDetail.weekClose) * 100
+                  : null,
+              },
+              {
+                label: 'Aylık',
+                value: fundamentalDetail.monthClose > 0
+                  ? ((stats.price - fundamentalDetail.monthClose) / fundamentalDetail.monthClose) * 100
+                  : null,
+              },
+              {
+                label: 'Yıllık',
+                value: fundamentalDetail.yearClose > 0
+                  ? ((stats.price - fundamentalDetail.yearClose) / fundamentalDetail.yearClose) * 100
+                  : null,
+              },
+            ].map((item) => {
+              const isUp = (item.value ?? 0) >= 0
+              return (
+                <div key={item.label} className="p-3 border border-border/40 rounded-xl bg-muted/10 text-center">
+                  <span className="text-[10px] text-muted-foreground font-semibold uppercase block mb-1.5">{item.label}</span>
+                  {item.value != null ? (
+                    <span className={`text-lg font-bold font-mono ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
+                      {isUp ? '+' : ''}{item.value.toFixed(1)}%
+                    </span>
+                  ) : (
+                    <span className="text-lg font-bold font-mono text-muted-foreground">-</span>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {taData && (
         <div className="space-y-5">
