@@ -106,7 +106,7 @@ export function CommandPalette() {
                   <Clock className="w-3 h-3" /> Son Aramalar
                 </h3>
                 <div className="space-y-1">
-                  <button onClick={() => handleNavigate('/endeksler/bist100')} className="w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 transition-colors">
+                  <button onClick={() => handleNavigate('/endeksler/xu100')} className="w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 transition-colors">
                     <FileText className="w-4 h-4 text-zinc-400" />
                     <span>BIST 100 Teknik Analizi</span>
                   </button>

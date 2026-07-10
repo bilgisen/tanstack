@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ChatPanel } from '../components/chat/ChatPanel'
 import { ChatSheet } from '../components/chat/ChatSheet'
 import { useUIStore } from '../store/ui'
+import { getIndexName } from '../constants/bistIndices'
 import { ArrowUp } from 'lucide-react'
 
 export const Route = createFileRoute('/endeksler')({
@@ -34,7 +35,7 @@ function EndekslerLayout() {
     if (parts[1]) {
       const endeksId = parts[1]
       context = `endeks:${endeksId}`
-      const indexName = endeksId === 'bist30' ? 'BIST 30' : endeksId === 'bist100' ? 'BIST 100' : endeksId === 'bistbanka' ? 'BIST Bankacılık' : endeksId.toUpperCase()
+      const indexName = getIndexName(endeksId.toUpperCase())
       placeholder = `${indexName} hakkında bir soru sorun...`
     }
   }

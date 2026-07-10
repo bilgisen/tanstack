@@ -18,10 +18,7 @@ export function ensureEnv() {
           }
         }
         
-        // Map Cloudflare Hyperdrive connectionString globally to process.env.DATABASE_URL
-        if (cf.env.HYPERDRIVE?.connectionString) {
-          process.env.DATABASE_URL = cf.env.HYPERDRIVE.connectionString;
-        }
+        // D1 connection uses the DB binding directly, no env mapping needed
       }
     }
   } catch (error) {

@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { TrendingUp, TrendingDown, Info, AlertCircle, Sliders, Sparkles } from 'lucide-react'
+import { TrendingUp, TrendingDown, Info, AlertCircle, Sliders, Sparkles, ChevronUp, ChevronDown } from 'lucide-react'
 import tickerToSectorSlug from '../constants/tickerToSectorSlug'
 
 const TriangleUp = ({ size = 14, className = "" }: { size?: number; className?: string }) => (
@@ -13,7 +13,8 @@ import { TradingViewChart } from '../components/dashboard/TradingViewChart'
 import { Skeleton } from '../components/ui/skeleton'
 import companyLogos from '../constants/companyLogos.json'
 import { CeoTaReport } from '../components/company/CeoTaReport'
-import { useMarketSummary, useMarketStocks, useTASummary } from '../lib/useMarketData'
+import { getIndexName } from '../constants/bistIndices'
+import { useIndices, useMarketStocks, useTASummary, useIndexDetail } from '../lib/useMarketData'
 
 export const Route = createFileRoute('/endeksler/$id')({
   component: EndeksDetailPage,
@@ -29,8 +30,8 @@ type IndexMeta = {
 };
 
 const indexMetadataFallbacks: Record<string, IndexMeta> = {
-  bist30: {
-    name: "BIST 30 Endeksi",
+  xu030: {
+    name: "BIST 30",
     code: "XU030",
     price: 11250.40,
     diffPercent: 1.45,
@@ -44,8 +45,8 @@ const indexMetadataFallbacks: Record<string, IndexMeta> = {
       { code: "EREGL", name: "Ereğli Demir Çelik", price: 48.12, diff: -2.85, volume: "9.2M" },
     ]
   },
-  bist100: {
-    name: "BIST 100 Endeksi",
+  xu100: {
+    name: "BIST 100",
     code: "XU100",
     price: 10240.20,
     diffPercent: 1.15,
@@ -59,8 +60,8 @@ const indexMetadataFallbacks: Record<string, IndexMeta> = {
       { code: "BIMAS", name: "Bim Mağazalar", price: 385.50, diff: -0.52, volume: "2.1M" },
     ]
   },
-  bist500: {
-    name: "BIST 500 Endeksi",
+  xu500: {
+    name: "BIST 500",
     code: "XU500",
     price: 12540.80,
     diffPercent: 0.95,
@@ -74,8 +75,8 @@ const indexMetadataFallbacks: Record<string, IndexMeta> = {
       { code: "EREGL", name: "Ereğli Demir Çelik", price: 48.12, diff: -2.85, volume: "9.2M" },
     ]
   },
-  bistbanka: {
-    name: "BIST Bankacılık",
+  xbank: {
+    name: "BIST Banka",
     code: "XBANK",
     price: 14520.10,
     diffPercent: -2.15,
@@ -116,18 +117,17 @@ type TaData = {
 function EndeksDetailPage() {
   const { id } = Route.useParams()
   const navigate = useNavigate()
-  const rawId = id.toLowerCase();
-  const currentFallback = indexMetadataFallbacks[rawId] || indexMetadataFallbacks.bist100;
+  const code = id.toUpperCase();
 
-  const { data: summaryData } = useMarketSummary()
+  const { data: indicesData } = useIndices()
   const { data: stocksData } = useMarketStocks()
-  const { data: taApiData } = useTASummary(currentFallback.code)
+  const { data: taApiData } = useTASummary(code)
+  const { data: indexDetail } = useIndexDetail(code)
 
   const priceDetails = useMemo<IndexMeta | null>(() => {
-    const liveSummary = summaryData?.find((item: any) => item.code?.toUpperCase() === currentFallback.code)
-    const liveVal = liveSummary?.last_price || currentFallback.price
-    const liveDf = liveSummary?.diff_percent ?? currentFallback.diffPercent
-    const apiComponents = currentFallback.components.map((fc) => {
+    const liveIndex = indicesData?.find((item: any) => item.code?.toUpperCase() === code)
+    const fallback = indexMetadataFallbacks[id.toLowerCase()]
+    const apiComponents = (fallback?.components || []).map((fc) => {
       const live = stocksData?.find((s: any) => s.code?.toUpperCase() === fc.code)
       return {
         code: fc.code,
@@ -138,14 +138,14 @@ function EndeksDetailPage() {
       }
     })
     return {
-      name: currentFallback.name,
-      code: currentFallback.code,
-      price: liveVal,
-      diffPercent: liveDf,
-      description: currentFallback.description,
+      name: getIndexName(code) || liveIndex?.name || code,
+      code,
+      price: liveIndex?.last_price ?? fallback?.price ?? 0,
+      diffPercent: liveIndex?.diff_percent ?? fallback?.diffPercent ?? 0,
+      description: liveIndex?.description || fallback?.description || '',
       components: apiComponents,
     }
-  }, [summaryData, stocksData, currentFallback])
+  }, [indicesData, stocksData, code, id])
 
   const taData = useMemo<TaData | null>(() => {
     const tJson = taApiData
@@ -210,131 +210,142 @@ function EndeksDetailPage() {
   return (
     <div className="space-y-5 pb-8 animate-in fade-in duration-400">
       
-      {/* Heading Card */}
-      <div className="border border-border/40 bg-card/30 rounded-2xl p-4 md:p-5 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5 min-w-0">
-          <img
-            src="/logos/bist.svg"
-            alt="BIST"
-            className="h-11 w-11 rounded-xl object-contain bg-white p-1.5 border border-border/30 shadow-3xs shrink-0"
-          />
-          <div className="min-w-0">
-            <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider block">{priceDetails.code}</span>
-            <h1 className="text-base md:text-xl font-bold text-foreground tracking-tight leading-tight truncate mt-0.5">{priceDetails.name}</h1>
+      {/* Heading */}
+      <div className="space-y-2 pb-3 border-b border-border/30">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <img
+              src="/logos/bist.svg"
+              alt="BIST"
+              className="h-7 w-7 md:h-8 md:w-8 object-contain"
+            />
+            <span className="text-xs md:text-sm text-muted-foreground font-mono font-semibold">{priceDetails.code}</span>
+            <h1 className="text-xl md:text-2xl font-bold text-foreground">{priceDetails.name}</h1>
           </div>
+          {indexDetail?.updateDate && (
+            <span className="text-sm md:text-base font-light text-muted-foreground shrink-0">
+              {indexDetail.updateDate.match(/(\d{2}):(\d{2})/)?.[0] || ''}
+            </span>
+          )}
         </div>
 
-        <div className="flex items-center gap-4 shrink-0">
-          <div className="text-right">
-            <span className="text-xl md:text-2xl font-bold text-foreground tracking-tight block leading-none">
-              {priceDetails.price.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </span>
-            <span className={`text-xs md:text-sm font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-0.5 mt-1.5 ${
-              isUp ? 'bg-emerald-500/10 text-emerald-500' : 'bg-destructive/10 text-destructive'
-            }`}>
-              {isUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-              {isUp ? '+' : ''}{priceDetails.diffPercent.toFixed(2)}%
-            </span>
-          </div>
+        <div className="flex items-baseline gap-2.5 md:gap-3 flex-wrap">
+          <span className="text-3xl md:text-4xl font-bold text-foreground tabular-nums">
+            {priceDetails.price.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </span>
+          <span className={`text-xl md:text-2xl font-bold ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
+            {isUp ? '+' : ''}{priceDetails.diffPercent.toFixed(2)}%
+          </span>
         </div>
+
+        {indexDetail && (
+          <div className="flex items-center gap-4 md:gap-5 text-base md:text-lg text-muted-foreground">
+            <span>En Düşük {indexDetail.low.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
+            <span>En Yüksek {indexDetail.high.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
+            <span>Hacim {(indexDetail.volume / 1_000_000_000).toFixed(2)}B</span>
+          </div>
+        )}
       </div>
 
       {/* Chart */}
       <TradingViewChart symbol={priceDetails.code} lastPrice={priceDetails.price} />
 
-      {/* Teknik Sinyaller - Rich TA Data */}
+      {indexDetail && (
+        <div className="flex items-baseline gap-3 md:gap-4 flex-wrap text-base md:text-lg text-muted-foreground pb-3 border-b border-border/30">
+          Haftalık: <span className={(indexDetail.weekClose ? ((indexDetail.last - indexDetail.weekClose) / indexDetail.weekClose) * 100 : 0) >= 0 ? 'text-emerald-500' : 'text-destructive'}>{(indexDetail.weekClose ? ((indexDetail.last - indexDetail.weekClose) / indexDetail.weekClose) * 100 : 0) >= 0 ? '+' : ''}{(indexDetail.weekClose ? ((indexDetail.last - indexDetail.weekClose) / indexDetail.weekClose) * 100 : 0).toFixed(2)}%</span>
+          {'  '}Ay: <span className={(indexDetail.monthClose ? ((indexDetail.last - indexDetail.monthClose) / indexDetail.monthClose) * 100 : 0) >= 0 ? 'text-emerald-500' : 'text-destructive'}>{(indexDetail.monthClose ? ((indexDetail.last - indexDetail.monthClose) / indexDetail.monthClose) * 100 : 0) >= 0 ? '+' : ''}{(indexDetail.monthClose ? ((indexDetail.last - indexDetail.monthClose) / indexDetail.monthClose) * 100 : 0).toFixed(2)}%</span>
+          {'  '}Yıl: <span className={(indexDetail.yearClose ? ((indexDetail.last - indexDetail.yearClose) / indexDetail.yearClose) * 100 : 0) >= 0 ? 'text-emerald-500' : 'text-destructive'}>{(indexDetail.yearClose ? ((indexDetail.last - indexDetail.yearClose) / indexDetail.yearClose) * 100 : 0) >= 0 ? '+' : ''}{(indexDetail.yearClose ? ((indexDetail.last - indexDetail.yearClose) / indexDetail.yearClose) * 100 : 0).toFixed(2)}%</span>
+        </div>
+      )}
+
+      {/* Teknik Sinyaller */}
       {taAvailable && taData && (
-        <div className="border border-border/40 bg-card/20 rounded-2xl p-4 md:p-5 space-y-4">
-          <div className="flex items-center justify-between pb-2.5 border-b border-border/25">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between pb-2 border-b border-border/30">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-                <Sliders size={12} />
-              </div>
-              <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Teknik Sinyaller</h3>
+              <Sliders size={14} className="text-emerald-500" />
+              <h3 className="text-sm md:text-base font-bold text-foreground uppercase tracking-wider">Teknik Sinyaller</h3>
             </div>
             <div className="flex items-center gap-2">
-              <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+              <span className={`text-xs md:text-sm font-bold px-2 py-0.5 rounded-full ${
                 taData.score >= 70 ? "bg-teal-500/10 text-teal-600" : taData.score >= 40 ? "bg-amber-500/10 text-amber-600" : "bg-destructive/10 text-destructive"
               }`}>
                 Skor: {taData.score}/100
               </span>
-              <span className="text-[10px] text-muted-foreground font-semibold">{taData.confidence} Güven</span>
+              <span className="text-xs md:text-sm text-muted-foreground">{taData.confidence} Güven</span>
             </div>
           </div>
 
           {/* Trend & ADX */}
-          <div className="bg-muted/30 p-4 border border-border/80 rounded-xl flex items-center justify-between">
+          <div className="flex items-center justify-between py-2.5 border-b border-border/10">
             <div>
-              <span className="text-[11px] text-muted-foreground font-bold uppercase block mb-1">Günlük Trend</span>
-              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold ${
-                taData.trend.includes("Bullish") ? "bg-teal-500/10 text-teal-600 dark:text-teal-400" 
-                : taData.trend.includes("Bearish") ? "bg-destructive/10 text-destructive" 
-                : "bg-muted text-muted-foreground"
+              <span className="text-xs md:text-sm text-muted-foreground font-semibold uppercase block mb-0.5">Günlük Trend</span>
+              <span className={`inline-flex items-center gap-1.5 text-sm font-semibold ${
+                taData.trend.includes("Bullish") ? "text-teal-600" 
+                : taData.trend.includes("Bearish") ? "text-destructive" 
+                : "text-muted-foreground"
               }`}>
                 {taData.trend.includes("Bullish") ? <TrendingUp size={14} /> : taData.trend.includes("Bearish") ? <TrendingDown size={14} /> : <Info size={14} />}
                 {taData.trend}
               </span>
             </div>
             <div className="text-right">
-              <span className="text-[11px] text-muted-foreground font-bold uppercase block mb-1">ADX Trend Gücü</span>
-              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold ${
-                taData.market_regime.adx >= 25 ? "bg-teal-500/10 text-teal-600 dark:text-teal-400" 
-                : "bg-muted text-muted-foreground"
-              }`}>
+              <span className="text-xs md:text-sm text-muted-foreground font-semibold uppercase block mb-0.5">ADX Trend Gücü</span>
+              <span className={`text-sm font-bold ${taData.market_regime.adx >= 25 ? "text-teal-600" : "text-muted-foreground"}`}>
                 {taData.market_regime.adx}
               </span>
             </div>
           </div>
 
           {/* Market Regime */}
-          <div className="bg-muted/30 p-4 border border-border/80 rounded-xl space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-[11px] text-muted-foreground font-bold uppercase">Piyasa Rejimi</span>
-              <span className="text-xs font-extrabold text-foreground">{taData.market_regime.regime}</span>
+          <div className="py-2.5 border-b border-border/10">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-xs md:text-sm text-muted-foreground font-semibold uppercase">Piyasa Rejimi</span>
+              <span className="text-sm md:text-base font-bold text-foreground">{taData.market_regime.regime}</span>
             </div>
-            <div className="grid grid-cols-2 gap-2 text-[11px]">
+            <div className="grid grid-cols-2 gap-1 text-sm">
               <div>
-                <span className="text-muted-foreground font-semibold">Yön: </span>
-                <span className="font-bold text-foreground">{taData.market_regime.trend_direction}</span>
+                <span className="text-muted-foreground">Yön: </span>
+                <span className="font-semibold text-foreground">{taData.market_regime.trend_direction}</span>
               </div>
               <div>
-                <span className="text-muted-foreground font-semibold">Volatilite: </span>
-                <span className="font-bold text-foreground">{taData.market_regime.volatility_regime}</span>
+                <span className="text-muted-foreground">Volatilite: </span>
+                <span className="font-semibold text-foreground">{taData.market_regime.volatility_regime}</span>
               </div>
               <div>
-                <span className="text-muted-foreground font-semibold">ADX: </span>
-                <span className="font-bold text-foreground">{taData.market_regime.adx}</span>
+                <span className="text-muted-foreground">ADX: </span>
+                <span className="font-semibold text-foreground">{taData.market_regime.adx}</span>
               </div>
               <div>
-                <span className="text-muted-foreground font-semibold">Beta: </span>
-                <span className="font-bold text-foreground">{taData.beta}</span>
+                <span className="text-muted-foreground">Beta: </span>
+                <span className="font-semibold text-foreground">{taData.beta}</span>
               </div>
             </div>
             {taData.market_regime.recommended_strategy && (
-              <p className="text-[10px] text-muted-foreground italic leading-relaxed pt-1 border-t border-border/30">
+              <p className="text-xs text-muted-foreground italic leading-relaxed mt-1.5 pt-1.5 border-t border-border/20">
                 {taData.market_regime.recommended_strategy}
               </p>
             )}
           </div>
 
           {/* RSI Gauge */}
-          <div className="bg-muted/30 p-4 border border-border/80 rounded-xl space-y-2.5">
-            <div className="flex justify-between items-center">
-              <span className="text-[11px] text-muted-foreground font-bold uppercase">RSI Göstergesi</span>
-              <span className={`text-xs font-extrabold ${
-                taData.rsi.value > 70 ? "text-destructive" : taData.rsi.value < 30 ? "text-teal-600 dark:text-teal-400" : "text-foreground"
+          <div className="py-2.5 border-b border-border/10">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-xs md:text-sm text-muted-foreground font-semibold uppercase">RSI Göstergesi</span>
+              <span className={`text-sm font-bold ${
+                taData.rsi.value > 70 ? "text-destructive" : taData.rsi.value < 30 ? "text-teal-600" : "text-foreground"
               }`}>
                 {taData.rsi.value} ({taData.rsi.status})
               </span>
             </div>
-            <div className="relative h-2 w-full rounded-full bg-muted overflow-hidden">
+            <div className="relative h-1.5 w-full rounded-full bg-muted overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-teal-500/40 via-muted to-destructive/40" />
               <div 
-                className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-card border-2 border-border shadow-sm transition-all duration-500" 
+                className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-card border-2 border-border" 
                 style={{ left: `${Math.min(Math.max(taData.rsi.value, 0), 100)}%`, transform: "translate(-50%, -50%)" }}
               />
             </div>
-            <div className="flex justify-between text-[10px] text-muted-foreground">
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
               <span>30 (Aşırı Satım)</span>
               <span>50 (Nötr)</span>
               <span>70 (Aşırı Alım)</span>
@@ -342,18 +353,15 @@ function EndeksDetailPage() {
           </div>
 
           {/* MACD */}
-          <div className="bg-muted/30 p-4 border border-border/80 rounded-xl space-y-1">
-            <span className="text-[11px] text-muted-foreground font-bold uppercase block">MACD (12, 26, 9)</span>
-            <div className="flex items-center gap-2 text-xs font-semibold text-foreground/85">
-              <Sliders size={14} className="text-primary" />
-              <span>{taData.macd}</span>
-            </div>
+          <div className="py-2.5 border-b border-border/10">
+            <span className="text-xs md:text-sm text-muted-foreground font-semibold uppercase block mb-0.5">MACD (12, 26, 9)</span>
+            <span className="text-sm md:text-base font-semibold text-foreground">{taData.macd}</span>
           </div>
 
           {/* SMA Lines */}
-          <div className="bg-muted/30 p-4 border border-border/80 rounded-xl space-y-2">
-            <span className="text-[11px] text-muted-foreground font-bold uppercase block">Hareketli Ortalamalar</span>
-            <div className="grid grid-cols-3 gap-2">
+          <div className="py-2.5 border-b border-border/10">
+            <span className="text-xs md:text-sm text-muted-foreground font-semibold uppercase block mb-2">Hareketli Ortalamalar</span>
+            <div className="grid grid-cols-3 gap-2 text-center">
               {[
                 { label: "SMA 20", value: taData.sma.sma_20 },
                 { label: "SMA 50", value: taData.sma.sma_50 },
@@ -361,9 +369,9 @@ function EndeksDetailPage() {
               ].map((sma) => {
                 const above = priceDetails.price > sma.value;
                 return (
-                  <div key={sma.label} className="text-center">
-                    <span className="text-[9px] text-muted-foreground font-bold uppercase block">{sma.label}</span>
-                    <span className={`text-[11px] font-bold font-mono ${above ? 'text-teal-600 dark:text-teal-400' : 'text-destructive'}`}>
+                  <div key={sma.label}>
+                    <span className="text-xs md:text-sm text-muted-foreground font-semibold uppercase block">{sma.label}</span>
+                    <span className={`text-sm md:text-base font-bold font-mono ${above ? 'text-teal-600' : 'text-destructive'}`}>
                       {sma.value.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                     </span>
                   </div>
@@ -373,11 +381,11 @@ function EndeksDetailPage() {
           </div>
 
           {/* Support & Resistance */}
-          <div className="bg-muted/30 p-4 border border-border/80 rounded-xl space-y-2.5">
-            <span className="text-[11px] text-muted-foreground font-bold uppercase block">Destek / Direnç Seviyeleri</span>
-            <div className="relative h-2 w-full rounded-full bg-muted">
+          <div className="py-2.5 border-b border-border/10">
+            <span className="text-xs md:text-sm text-muted-foreground font-semibold uppercase block mb-2">Destek / Direnç Seviyeleri</span>
+            <div className="relative h-1.5 w-full rounded-full bg-muted mb-1.5">
               <div 
-                className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-primary border-2 border-border shadow-sm"
+                className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-primary border-2 border-border"
                 style={{ 
                   left: `${((priceDetails.price - taData.support_resistance.support) / 
                   (taData.support_resistance.resistance - taData.support_resistance.support || 1)) * 100}%`, 
@@ -385,66 +393,64 @@ function EndeksDetailPage() {
                 }}
               />
             </div>
-            <div className="flex justify-between text-[11px] font-mono font-semibold">
-              <div className="text-destructive flex flex-col">
-                <span className="text-[9px] text-muted-foreground font-bold uppercase">Destek</span>
+            <div className="flex justify-between text-sm font-mono font-semibold">
+              <div className="text-destructive">
+                <span className="text-xs md:text-sm text-muted-foreground font-semibold uppercase block">Destek</span>
                 <span>{taData.support_resistance.support.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
-              <div className="text-teal-600 dark:text-teal-400 flex flex-col items-end">
-                <span className="text-[9px] text-muted-foreground font-bold uppercase text-right">Direnç</span>
+              <div className="text-teal-600 text-right">
+                <span className="text-xs md:text-sm text-muted-foreground font-semibold uppercase block">Direnç</span>
                 <span>{taData.support_resistance.resistance.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
             </div>
           </div>
 
           {/* Bollinger Status */}
-          <div className="bg-muted/30 p-4 border border-border/80 rounded-xl space-y-1">
-            <span className="text-[11px] text-muted-foreground font-bold uppercase block">Bollinger Bands Konumu</span>
-            <span className="text-xs font-semibold text-foreground/85">{taData.bollinger_status}</span>
+          <div className="py-2.5 border-b border-border/10">
+            <span className="text-xs md:text-sm text-muted-foreground font-semibold uppercase block mb-0.5">Bollinger Bands Konumu</span>
+            <span className="text-sm md:text-base font-semibold text-foreground">{taData.bollinger_status}</span>
           </div>
 
           {/* Stop-Loss & Risk/Reward */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-destructive/5 p-4 border border-destructive/20 rounded-xl">
-              <span className="text-[10px] text-destructive font-extrabold uppercase flex items-center gap-1.5 mb-1">
-                <AlertCircle size={11} /> Stop-Loss (1.5x ATR)
+          <div className="grid grid-cols-2 gap-4 py-1">
+            <div>
+              <span className="text-xs md:text-sm text-muted-foreground font-semibold uppercase flex items-center gap-1 mb-0.5">
+                <AlertCircle size={12} className="text-destructive" /> Stop-Loss (1.5x ATR)
               </span>
-              <span className="text-lg font-bold text-destructive font-mono block">
+              <span className="text-lg md:text-xl font-bold text-destructive font-mono block">
                 {taData.atr_stop_loss.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </span>
-              <span className="text-[9px] text-muted-foreground">Puan</span>
+              <span className="text-xs text-muted-foreground">Puan</span>
             </div>
-            <div className="bg-teal-500/5 p-4 border border-teal-500/20 rounded-xl">
-              <span className="text-[10px] text-teal-600 font-extrabold uppercase flex items-center gap-1.5 mb-1">
-                <TrendingUp size={11} /> Risk/Ödül
+            <div>
+              <span className="text-xs md:text-sm text-muted-foreground font-semibold uppercase flex items-center gap-1 mb-0.5">
+                <TrendingUp size={12} className="text-teal-600" /> Risk/Ödül
               </span>
-              <span className="text-lg font-bold text-teal-600 font-mono block">
+              <span className="text-lg md:text-xl font-bold text-teal-600 font-mono block">
                 {taData.rr_ratio.toFixed(2)}
               </span>
-              <span className="text-[9px] text-muted-foreground">Oran</span>
+              <span className="text-xs text-muted-foreground">Oran</span>
             </div>
           </div>
 
           {/* Market Breadth */}
-          <div className="bg-muted/30 p-4 border border-border/80 rounded-xl">
-            <div className="flex justify-between items-center">
-              <span className="text-[11px] text-muted-foreground font-bold uppercase">Piyasa Genişliği</span>
-              <span className="text-xs font-bold text-foreground">{taData.market_breadth.breadth.toFixed(1)}% — {taData.market_breadth.status}</span>
-            </div>
+          <div className="flex justify-between items-center py-2.5 border-b border-border/10">
+            <span className="text-xs md:text-sm text-muted-foreground font-semibold uppercase">Piyasa Genişliği</span>
+            <span className="text-sm md:text-base font-bold text-foreground">{taData.market_breadth.breadth.toFixed(1)}% — {taData.market_breadth.status}</span>
           </div>
 
           {/* Score Components */}
-          <div className="bg-muted/30 p-4 border border-border/80 rounded-xl space-y-2">
-            <span className="text-[11px] text-muted-foreground font-bold uppercase block">Skor Bileşenleri</span>
-            <div className="grid grid-cols-3 gap-2">
+          <div className="py-2.5 border-b border-border/10">
+            <span className="text-xs md:text-sm text-muted-foreground font-semibold uppercase block mb-2">Skor Bileşenleri</span>
+            <div className="grid grid-cols-3 gap-2 text-center">
               {[
                 { label: "Trend", value: taData.score_components.trend, color: taData.score_components.trend >= 0 ? "text-teal-600" : "text-destructive" },
                 { label: "Momentum", value: taData.score_components.momentum, color: taData.score_components.momentum >= 0 ? "text-teal-600" : "text-destructive" },
                 { label: "Hacim", value: taData.score_components.volume, color: taData.score_components.volume >= 0 ? "text-teal-600" : "text-destructive" },
               ].map((c) => (
-                <div key={c.label} className="text-center">
-                  <span className="text-[9px] text-muted-foreground font-bold uppercase block">{c.label}</span>
-                  <span className={`text-sm font-extrabold font-mono ${c.color}`}>{c.value > 0 ? '+' : ''}{c.value}</span>
+                <div key={c.label}>
+                  <span className="text-xs md:text-sm text-muted-foreground font-semibold uppercase block">{c.label}</span>
+                  <span className={`text-sm md:text-base font-bold font-mono ${c.color}`}>{c.value > 0 ? '+' : ''}{c.value}</span>
                 </div>
               ))}
             </div>
@@ -452,11 +458,11 @@ function EndeksDetailPage() {
 
           {/* Signals */}
           {taData.signals.length > 0 && (
-            <div className="bg-muted/30 p-4 border border-border/80 rounded-xl space-y-2">
-              <span className="text-[11px] text-muted-foreground font-bold uppercase block">Aktif Sinyaller</span>
-              <div className="space-y-1.5">
+            <div className="py-2.5 border-b border-border/10">
+              <span className="text-xs md:text-sm text-muted-foreground font-semibold uppercase block mb-1.5">Aktif Sinyaller</span>
+              <div className="space-y-1">
                 {taData.signals.map((signal, i) => (
-                  <div key={i} className="text-[11px] text-foreground/80 font-medium flex items-start gap-2">
+                  <div key={i} className="text-sm text-foreground/80 flex items-start gap-2">
                     <span className="text-primary mt-0.5 shrink-0">•</span>
                     <span>{signal}</span>
                   </div>
@@ -467,24 +473,24 @@ function EndeksDetailPage() {
 
           {/* Divergences */}
           {(taData.divergences.rsi.bullish || taData.divergences.rsi.bearish || taData.divergences.macd.bullish || taData.divergences.macd.bearish) && (
-            <div className="bg-muted/30 p-4 border border-border/80 rounded-xl space-y-2">
-              <span className="text-[11px] text-muted-foreground font-bold uppercase block">Sapma Analizi</span>
-              <div className="grid grid-cols-2 gap-2">
-                {taData.divergences.rsi.bullish && <span className="text-[10px] font-bold text-teal-600 bg-teal-500/10 px-2 py-0.5 rounded">RSI: Bullish Divergence ↑</span>}
-                {taData.divergences.rsi.bearish && <span className="text-[10px] font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded">RSI: Bearish Divergence ↓</span>}
-                {taData.divergences.macd.bullish && <span className="text-[10px] font-bold text-teal-600 bg-teal-500/10 px-2 py-0.5 rounded">MACD: Bullish Divergence ↑</span>}
-                {taData.divergences.macd.bearish && <span className="text-[10px] font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded">MACD: Bearish Divergence ↓</span>}
+            <div className="py-2.5 border-b border-border/10">
+              <span className="text-xs md:text-sm text-muted-foreground font-semibold uppercase block mb-1.5">Sapma Analizi</span>
+              <div className="flex flex-wrap gap-2">
+                {taData.divergences.rsi.bullish && <span className="text-xs font-semibold text-teal-600 bg-teal-500/10 px-2 py-0.5 rounded">RSI: Bullish Divergence ↑</span>}
+                {taData.divergences.rsi.bearish && <span className="text-xs font-semibold text-destructive bg-destructive/10 px-2 py-0.5 rounded">RSI: Bearish Divergence ↓</span>}
+                {taData.divergences.macd.bullish && <span className="text-xs font-semibold text-teal-600 bg-teal-500/10 px-2 py-0.5 rounded">MACD: Bullish Divergence ↑</span>}
+                {taData.divergences.macd.bearish && <span className="text-xs font-semibold text-destructive bg-destructive/10 px-2 py-0.5 rounded">MACD: Bearish Divergence ↓</span>}
               </div>
             </div>
           )}
 
           {/* Candlestick Patterns */}
           {taData.candlestick_patterns.length > 0 && (
-            <div className="bg-muted/30 p-4 border border-border/80 rounded-xl space-y-2">
-              <span className="text-[11px] text-muted-foreground font-bold uppercase block">Son Mum Formasyonları</span>
+            <div className="py-2.5 border-b border-border/10">
+              <span className="text-xs md:text-sm text-muted-foreground font-semibold uppercase block mb-1.5">Son Mum Formasyonları</span>
               <div className="flex flex-wrap gap-1.5">
                 {taData.candlestick_patterns.map((pattern, i) => (
-                  <span key={i} className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/15">
+                  <span key={i} className="text-xs font-semibold uppercase px-2 py-0.5 rounded bg-primary/10 text-primary">
                     {pattern}
                   </span>
                 ))}
@@ -494,38 +500,34 @@ function EndeksDetailPage() {
 
           {/* LLM Summary */}
           {taData.llm_summary_prompt && (
-            <div className="bg-muted/15 p-4 border border-border/40 rounded-xl">
-              <span className="text-[11px] text-muted-foreground font-bold uppercase block mb-2">AI Yorumu</span>
-              <p className="text-xs text-foreground/80 leading-relaxed whitespace-pre-line">{taData.llm_summary_prompt}</p>
+            <div>
+              <span className="text-xs text-muted-foreground font-bold uppercase block mb-1">AI Yorumu</span>
+              <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-line">{taData.llm_summary_prompt}</p>
             </div>
           )}
         </div>
       )}
 
       {/* Pro AI Teknik Analiz Raporu */}
-      <div className="border border-border/40 bg-card/20 rounded-2xl p-4 md:p-5 space-y-4">
-        <div className="flex items-center gap-2 pb-2.5 border-b border-border/25">
-          <div className="w-6 h-6 rounded-lg bg-violet-500/10 text-violet-500 flex items-center justify-center">
-            <Sparkles size={12} />
-          </div>
-          <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Pro AI Teknik Analiz Raporu</h3>
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 pb-2 border-b border-border/30">
+          <Sparkles size={14} className="text-violet-500" />
+          <h3 className="text-sm md:text-base font-bold text-foreground uppercase tracking-wider">Pro AI Teknik Analiz Raporu</h3>
         </div>
         <CeoTaReport ticker={priceDetails.code} unit="puan" />
       </div>
 
       {/* Yükselenler / Düşenler */}
-      <div className="border border-border/40 bg-card/20 rounded-2xl p-4 md:p-5 space-y-3">
-        <div className="flex items-center gap-2 pb-2.5 border-b border-border/25">
-          <div className="w-6 h-6 rounded-lg bg-muted/30 flex items-center justify-center">
-            <TriangleUp size={12} className="text-emerald-500" />
-          </div>
-          <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Hisse Performansı</h3>
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 pb-2 border-b border-border/30">
+          <TriangleUp size={14} className="text-emerald-500" />
+          <h3 className="text-sm md:text-base font-bold text-foreground uppercase tracking-wider">Hisse Performansı</h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <div className="flex items-center gap-1.5 mb-2">
               <div className="w-1.5 h-3 rounded-full bg-emerald-500" />
-              <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Yükselenler</span>
+              <span className="text-xs md:text-sm text-muted-foreground font-bold uppercase tracking-wider">Yükselenler</span>
             </div>
             <div className="divide-y divide-white/5 border border-border/30 rounded-xl overflow-hidden">
               {topGainers.map((row) => {
@@ -544,11 +546,11 @@ function EndeksDetailPage() {
                       ) : (
                         <div className="h-7 w-7 rounded-md bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-bold text-[9px] shrink-0">{row.code.slice(0, 2)}</div>
                       )}
-                      <span className="text-xs font-bold text-foreground truncate group-hover:text-primary transition-colors">{row.code}</span>
+                      <span className="text-xs md:text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">{row.code}</span>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
-                      <span className="text-xs font-bold font-mono text-emerald-500">+{row.diff.toFixed(2).replace('.', ',')}%</span>
-                      <span className="text-xs font-semibold font-mono text-foreground">₺{row.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
+                      <span className="text-xs md:text-sm font-bold font-mono text-emerald-500">+{row.diff.toFixed(2).replace('.', ',')}%</span>
+                      <span className="text-xs md:text-sm font-semibold font-mono text-foreground">₺{row.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
                     </div>
                   </div>
                 );
@@ -558,7 +560,7 @@ function EndeksDetailPage() {
           <div>
             <div className="flex items-center gap-1.5 mb-2">
               <div className="w-1.5 h-3 rounded-full bg-destructive" />
-              <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Düşenler</span>
+              <span className="text-xs md:text-sm text-muted-foreground font-bold uppercase tracking-wider">Düşenler</span>
             </div>
             <div className="divide-y divide-white/5 border border-border/30 rounded-xl overflow-hidden">
               {topLosers.map((row) => {
@@ -577,11 +579,11 @@ function EndeksDetailPage() {
                       ) : (
                         <div className="h-7 w-7 rounded-md bg-destructive/10 flex items-center justify-center text-destructive font-bold text-[9px] shrink-0">{row.code.slice(0, 2)}</div>
                       )}
-                      <span className="text-xs font-bold text-foreground truncate group-hover:text-primary transition-colors">{row.code}</span>
+                      <span className="text-xs md:text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">{row.code}</span>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
-                      <span className="text-xs font-bold font-mono text-destructive">{row.diff.toFixed(2).replace('.', ',')}%</span>
-                      <span className="text-xs font-semibold font-mono text-foreground">₺{row.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
+                      <span className="text-xs md:text-sm font-bold font-mono text-destructive">{row.diff.toFixed(2).replace('.', ',')}%</span>
+                      <span className="text-xs md:text-sm font-semibold font-mono text-foreground">₺{row.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
                     </div>
                   </div>
                 );

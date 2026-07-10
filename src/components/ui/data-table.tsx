@@ -14,6 +14,7 @@ interface DataTableProps<T> {
   data: T[]
   onRowClick?: (item: T) => void
   className?: string
+  hideHeader?: boolean
 }
 
 export function DataTable<T extends Record<string, any>>({
@@ -21,25 +22,28 @@ export function DataTable<T extends Record<string, any>>({
   data,
   onRowClick,
   className,
+  hideHeader,
 }: DataTableProps<T>) {
   return (
     <div className={cn("w-full overflow-auto", className)}>
       <table className="w-full caption-bottom text-sm">
-        <thead>
-          <tr className="border-b border-border/40">
-            {columns.map((col) => (
-              <th
-                key={col.key}
-                className={cn(
-                  "h-10 px-3 text-left align-middle font-semibold text-muted-foreground text-xs uppercase tracking-wider",
-                  col.className
-                )}
-              >
-                {col.header}
-              </th>
-            ))}
-          </tr>
-        </thead>
+        {!hideHeader && (
+          <thead>
+            <tr className="border-b border-border/40">
+              {columns.map((col) => (
+                <th
+                  key={col.key}
+                  className={cn(
+                    "h-10 px-3 text-left align-middle font-semibold text-muted-foreground text-xs uppercase tracking-wider",
+                    col.className
+                  )}
+                >
+                  {col.header}
+                </th>
+              ))}
+            </tr>
+          </thead>
+        )}
         <tbody>
           {data.map((item, idx) => (
             <tr

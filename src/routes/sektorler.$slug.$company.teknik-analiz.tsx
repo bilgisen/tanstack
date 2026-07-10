@@ -1,8 +1,10 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { TradingViewChart } from '../components/dashboard/TradingViewChart'
 import { CeoTaReport } from '../components/company/CeoTaReport'
 import { ScoreGauge, SignalBadge, type CompanyStats, type TaData } from '../constants/companyShared'
 import { useCompanyData } from '../lib/useCompanyData'
+import { useAuth } from '../hooks/useAuth'
+import { useEffect } from 'react'
 import {
   Activity, TrendingUp, BarChart3, Target, AlertTriangle,
   Shield, Gauge, LineChart,
@@ -14,6 +16,16 @@ export const Route = createFileRoute('/sektorler/$slug/$company/teknik-analiz')(
 
 function TechnicalAnalysisPage() {
   const { company } = Route.useParams()
+  const { user, loading: authLoading } = useAuth()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate({ to: '/' })
+    }
+  }, [user, authLoading, navigate])
+
+  if (authLoading || !user) return null
   const tickerUpper = company.toUpperCase()
   const { data: companyRaw, isLoading: loading } = useCompanyData(tickerUpper)
 

@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { createChart, ColorType, CandlestickSeries, HistogramSeries } from "lightweight-charts";
 import type { IChartApi } from "lightweight-charts";
-import { Loader2 } from "lucide-react";
+import { Loader2, BarChart3 } from "lucide-react";
 import { useHistory } from "../../lib/useMarketData";
 
 interface TradingViewChartProps {
   symbol: string;
   lastPrice?: number;
-  lazy?: boolean; // Lazy loading option
 }
 
 interface HistoricalDataPoint {
@@ -22,15 +21,20 @@ interface HistoricalDataPoint {
 export function TradingViewChart({
   symbol,
   lastPrice = 100.0,
-  lazy = true,
 }: TradingViewChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [isVisible, setIsVisible] = useState(!lazy);
-  const observerRef = useRef<IntersectionObserver | null>(null);
+  const [revealed, setRevealed] = useState(false);
   const { data: historyApiData, isLoading: historyLoading } = useHistory(symbol, 150);
+
+  // Auto-reveal if history data already cached (subsequent visits)
+  useEffect(() => {
+    if (historyApiData && Array.isArray(historyApiData) && historyApiData.length > 0) {
+      setRevealed(true);
+    }
+  }, [historyApiData]);
 
   // High fidelity random walk generator for realistic historical candles fallback
   const generateMockHistory = (basePrice: number, days: number = 90): HistoricalDataPoint[] => {
@@ -82,31 +86,9 @@ export function TradingViewChart({
     }));
   };
 
-  // Intersection Observer for lazy loading
+  // Main chart effect - runs when revealed and history data ready
   useEffect(() => {
-    if (!lazy || !chartContainerRef.current) return;
-
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observerRef.current?.disconnect();
-        }
-      },
-      { threshold: 0.1, rootMargin: '100px' }
-    );
-
-    observerRef.current.observe(chartContainerRef.current);
-
-    return () => {
-      observerRef.current?.disconnect();
-    };
-  }, [lazy]);
-
-  // Main chart effect - runs when visible and history data ready
-  useEffect(() => {
-    if (!chartContainerRef.current || !isVisible) return;
+    if (!chartContainerRef.current || !revealed) return;
     if (historyLoading) return;
 
     let isMounted = true;
@@ -278,27 +260,27 @@ export function TradingViewChart({
         chart.remove();
       }
     };
-  }, [symbol, lastPrice, isVisible, historyApiData, historyLoading]);
+  }, [symbol, lastPrice, revealed, historyApiData, historyLoading]);
 
-  // Lazy loading placeholder - ref'i her zaman render et
   return (
     <div className="border border-border/40 rounded-2xl bg-card/15 p-4 md:p-5 flex flex-col relative overflow-hidden group select-none transition-all duration-300 hover:border-border/60">
       
       {/* Main Canvas Body */}
       <div className="relative flex-1 w-full min-h-[300px] md:aspect-video md:min-h-0">
-        {!isVisible && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/55 backdrop-blur-xs z-10 gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <Loader2 className="animate-spin text-primary shrink-0" size={20} />
-            </div>
-            <div className="flex flex-col items-center gap-1">
-              <span className="text-sm font-semibold text-foreground">Grafik hazırlanıyor...</span>
-              <span className="text-xs text-muted-foreground">Yaklaştığınızda yüklenecek</span>
-            </div>
+        {!revealed && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/55 backdrop-blur-xs z-10 gap-3 rounded-2xl">
+            <button
+              onClick={() => setRevealed(true)}
+              className="inline-flex items-center gap-1.5 px-5 py-2 text-sm font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-xs"
+            >
+              <BarChart3 size={16} />
+              Grafiği Göster
+            </button>
+            <span className="text-xs text-muted-foreground">Fiyat hareketlerini görmek için tıklayın</span>
           </div>
         )}
 
-        {loading && isVisible && (
+        {loading && revealed && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/55 backdrop-blur-xs z-20 gap-3 animate-in fade-in duration-200">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
               <Loader2 className="animate-spin text-primary shrink-0" size={20} />

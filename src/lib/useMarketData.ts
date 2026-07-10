@@ -30,6 +30,20 @@ async function fetchSummary(): Promise<SummaryItem[]> {
   return json?.data || []
 }
 
+async function fetchIndices(): Promise<any[]> {
+  const res = await fetch(`${API_URL}/api/market/indices`)
+  if (!res.ok) throw new Error('Failed to fetch indices')
+  const json = await res.json()
+  return json?.data || []
+}
+
+async function fetchIndexDetail(code: string): Promise<any> {
+  const res = await fetch(`${API_URL}/api/market/indices/${code}`)
+  if (!res.ok) throw new Error(`Failed to fetch index detail for ${code}`)
+  const json = await res.json()
+  return json?.data || null
+}
+
 async function fetchTASummary(code: string): Promise<any> {
   const res = await fetch(`${API_URL}/api/market/symbol/${code}/ta/summary`)
   if (!res.ok) throw new Error(`Failed to fetch TA summary for ${code}`)
@@ -49,6 +63,28 @@ export function useMarketStocks() {
     queryFn: fetchStocks,
     staleTime: 120_000,
     refetchInterval: 120_000,
+    placeholderData: (prev) => prev,
+  })
+}
+
+export function useIndices() {
+  return useQuery({
+    queryKey: ['indices', 'all'],
+    queryFn: fetchIndices,
+    staleTime: 300_000,
+    refetchInterval: 300_000,
+    placeholderData: (prev) => prev,
+  })
+}
+
+export function useIndexDetail(code: string) {
+  return useQuery({
+    queryKey: ['indices', 'detail', code],
+    queryFn: () => fetchIndexDetail(code),
+    staleTime: 300_000,
+    refetchInterval: 300_000,
+    enabled: !!code,
+    placeholderData: (prev) => prev,
   })
 }
 
@@ -58,6 +94,7 @@ export function useMarketSummary() {
     queryFn: fetchSummary,
     staleTime: 120_000,
     refetchInterval: 120_000,
+    placeholderData: (prev) => prev,
   })
 }
 

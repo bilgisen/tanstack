@@ -1,4 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useAuth } from '../hooks/useAuth'
+import { useEffect } from 'react'
 import type { FundamentalData } from '../constants/companyShared'
 import { CeoFundamentalReport } from '../components/company/CeoFundamentalReport'
 import { useCompanyData, useCompanyRatios } from '../lib/useCompanyData'
@@ -67,6 +69,17 @@ function formatValue(key: string, value: number | null): string {
 
 function FundamentalAnalysisPage() {
   const { company } = Route.useParams()
+  const { user, loading: authLoading } = useAuth()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate({ to: '/' })
+    }
+  }, [user, authLoading, navigate])
+
+  if (authLoading || !user) return null
+
   const tickerUpper = company.toUpperCase()
   const { data: companyRaw, isLoading: loading1 } = useCompanyData(tickerUpper)
   const { data: ratiosRaw } = useCompanyRatios(tickerUpper)

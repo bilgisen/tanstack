@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import useEmblaCarousel from 'embla-carousel-react'
 import { 
@@ -49,14 +49,23 @@ function LandingPage() {
     { align: 'start', slidesToScroll: 1 }
   )
 
-  const { data: summaryData } = useMarketSummary()
-  const { data: stocksData } = useMarketStocks()
+  const { data: summaryData, isLoading: summaryLoading, isError: summaryError } = useMarketSummary()
+  const { data: stocksData, isLoading: stocksLoading, isError: stocksError, error: stocksErrorObj } = useMarketStocks()
 
-  const [indexData, setIndexDisplay] = useState<IndexDisplay[]>([
-    { id: 'bist100', name: "BIST 100", code: "XU100", price: 10240.20, diffPercent: 1.15 },
-    { id: 'bist30', name: "BIST 30", code: "XU030", price: 11250.40, diffPercent: 1.45 },
-    { id: 'bist500', name: "BIST 500", code: "XU500", price: 12540.80, diffPercent: 0.95 },
-  ])
+  const indexData: IndexDisplay[] = useMemo(() => {
+    if (!summaryData) return []
+    const codes = ['XU100', 'XU030', 'XU500']
+    return codes.map((code, i) => {
+      const live = summaryData.find((s: any) => s.code?.toUpperCase() === code)
+      return {
+        id: code.toLowerCase(),
+        name: live?.name || code,
+        code,
+        price: live?.last_price ?? 0,
+        diffPercent: live?.diff_percent ?? 0,
+      }
+    })
+  }, [summaryData])
 
   const [topGainers, setTopGainers] = useState<StockRow[]>([])
   
@@ -83,22 +92,6 @@ function LandingPage() {
     { slug: 'ulastirma-lojistik', name: 'Ulaştırma' },
     { slug: 'yatirim-ortakliklari', name: 'Yatırım Ortaklığı' },
   ]
-
-  useEffect(() => {
-    if (summaryData) {
-      setIndexDisplay(prev => prev.map(item => {
-        const live = summaryData.find((idx: any) => idx.code?.toUpperCase() === item.code)
-        if (live) {
-          return {
-            ...item,
-            price: Number((live.last_price || item.price).toFixed(2)),
-            diffPercent: Number((live.diff_percent ?? item.diffPercent).toFixed(2)),
-          }
-        }
-        return item
-      }))
-    }
-  }, [summaryData])
 
   useEffect(() => {
     if (stocksData) {
@@ -238,8 +231,14 @@ function LandingPage() {
                     </div>
                   )
                 })}
-                {topGainers.length === 0 && (
+                {stocksError && (
+                  <div className="py-8 text-center text-sm text-destructive/80">Veri alınamadı. Lütfen sayfayı yenileyin.</div>
+                )}
+                {stocksLoading && !stocksError && topGainers.length === 0 && (
                   <div className="py-8 text-center text-sm text-muted-foreground">Veriler yükleniyor...</div>
+                )}
+                {!stocksLoading && !stocksError && topGainers.length === 0 && (
+                  <div className="py-8 text-center text-sm text-muted-foreground">Bugün için veri bulunamadı.</div>
                 )}
               </div>
             </div>

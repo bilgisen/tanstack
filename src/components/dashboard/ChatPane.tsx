@@ -30,16 +30,16 @@ export function ChatPane({
     const textLower = text.toLowerCase();
     
     if (textLower.includes("bist 100") || textLower.includes("bist100") || textLower.includes("xu100")) {
-      return { path: "/endeksler/bist100", context: "endeks:bist100" };
+      return { path: "/endeksler/xu100", context: "endeks:xu100" };
     }
     if (textLower.includes("bist 30") || textLower.includes("bist30") || textLower.includes("xu030")) {
-      return { path: "/endeksler/bist30", context: "endeks:bist30" };
+      return { path: "/endeksler/xu030", context: "endeks:xu030" };
     }
     if (textLower.includes("bist 500") || textLower.includes("bist500") || textLower.includes("xu500")) {
-      return { path: "/endeksler/bist500", context: "endeks:bist500" };
+      return { path: "/endeksler/xu500", context: "endeks:xu500" };
     }
     if (textLower.includes("bankacılık") || textLower.includes("bist banka") || textLower.includes("xbank") || textLower.includes("bistbanka")) {
-      return { path: "/endeksler/bistbanka", context: "endeks:bistbanka" };
+      return { path: "/endeksler/xbank", context: "endeks:xbank" };
     }
 
     const words = textLower.match(/[a-zA-Z0-9]+/g) || [];
@@ -59,7 +59,7 @@ export function ChatPane({
 
     if (!user) {
       if (!sessionLoading) {
-        navigate({ to: "/login" as any });
+        navigate({ to: "/" as any });
       }
       return;
     }

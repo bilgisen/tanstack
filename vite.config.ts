@@ -12,6 +12,9 @@ const config = defineConfig({
     nitro({
       preset: "cloudflare-module",
       compatibilityDate: "2024-11-01",
+      routeRules: {
+        "/**": { headers: { "Cache-Control": "public, max-age=60, s-maxage=60" } },
+      },
       cloudflare: {
         wrangler: {
           name: "tanstack",
@@ -20,10 +23,17 @@ const config = defineConfig({
             "VITE_HONO_API_URL": "https://hono.jetborsa.com",
             "VITE_FINVERI_API_URL": "https://tekapi.jetborsa.com"
           },
-          hyperdrive: [
+          d1_databases: [
             {
-              binding: "HYPERDRIVE",
-              id: "f614db26fd0a42838491f51346370c3d"
+              binding: "DB",
+              database_name: "jetmain",
+              database_id: "a0023a59-c72a-4406-b674-bd35d1123108"
+            }
+          ],
+          kv_namespaces: [
+            {
+              binding: "TANSTACK_KV_CACHE",
+              id: "43a104ed19384acf8f671dcb18ce92be"
             }
           ]
         }
