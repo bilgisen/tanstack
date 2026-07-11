@@ -71,7 +71,7 @@ export function CeoTaReport({ ticker, unit = 'TL' }: CeoTaReportProps) {
         const res = await fetch(`${apiUrl}/api/market/symbol/${ticker.toUpperCase()}/ta/ceo-report`)
         if (res.ok) {
           const data = await res.json()
-          if (!data.error) {
+          if (data && !data.error) {
             setReport(data)
             // Use unit from API response if available, otherwise use prop
             if (data.unit) {

@@ -252,7 +252,7 @@ export function TradingViewChart({
         chart.remove();
       }
     };
-  }, [symbol, lastPrice, revealed, historyApiData, historyLoading]);
+  }, [symbol, lastPrice, historyApiData, historyLoading]);
 
   return (
     <div className="flex flex-col relative select-none">
