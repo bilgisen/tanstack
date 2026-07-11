@@ -2,6 +2,14 @@ import { useQuery } from '@tanstack/react-query'
 
 const API_URL = import.meta.env.VITE_HONO_API_URL || 'https://hono.jetborsa.com'
 
+function isMarketOpen(): boolean {
+  const now = new Date().toLocaleString('en-US', { timeZone: 'Europe/Istanbul', hour12: false })
+  const hour = parseInt(now.split(', ')[1]?.split(':')[0] || '0')
+  const weekday = new Date().toLocaleString('en-US', { timeZone: 'Europe/Istanbul', weekday: 'short' })
+  if (['Sat', 'Sun'].includes(weekday)) return false
+  return hour >= 9 && hour < 17
+}
+
 type StockItem = {
   code: string
   last_price: number
@@ -57,13 +65,19 @@ async function fetchHistory(code: string, limit = 150): Promise<any[]> {
   return json?.data || json?.history || (Array.isArray(json) ? json : [])
 }
 
+function marketStaleTime(openShort: number, closedLong: number): number {
+  return isMarketOpen() ? openShort : closedLong
+}
+
 export function useMarketStocks() {
   return useQuery({
     queryKey: ['market', 'stocks'],
     queryFn: fetchStocks,
-    staleTime: 120_000,
-    refetchInterval: 120_000,
+    staleTime: marketStaleTime(10_000, 3_600_000),
+    gcTime: 86_400_000,
+    refetchInterval: marketStaleTime(120_000, false),
     placeholderData: (prev) => prev,
+    refetchOnReconnect: false,
   })
 }
 
@@ -71,9 +85,11 @@ export function useIndices() {
   return useQuery({
     queryKey: ['indices', 'all'],
     queryFn: fetchIndices,
-    staleTime: 300_000,
-    refetchInterval: 300_000,
+    staleTime: marketStaleTime(30_000, 3_600_000),
+    gcTime: 86_400_000,
+    refetchInterval: marketStaleTime(300_000, false),
     placeholderData: (prev) => prev,
+    refetchOnReconnect: false,
   })
 }
 
@@ -81,10 +97,12 @@ export function useIndexDetail(code: string) {
   return useQuery({
     queryKey: ['indices', 'detail', code],
     queryFn: () => fetchIndexDetail(code),
-    staleTime: 300_000,
-    refetchInterval: 300_000,
+    staleTime: marketStaleTime(30_000, 3_600_000),
+    gcTime: 86_400_000,
+    refetchInterval: marketStaleTime(300_000, false),
     enabled: !!code,
     placeholderData: (prev) => prev,
+    refetchOnReconnect: false,
   })
 }
 
@@ -92,9 +110,11 @@ export function useMarketSummary() {
   return useQuery({
     queryKey: ['market', 'summary'],
     queryFn: fetchSummary,
-    staleTime: 120_000,
-    refetchInterval: 120_000,
+    staleTime: marketStaleTime(10_000, 3_600_000),
+    gcTime: 86_400_000,
+    refetchInterval: marketStaleTime(120_000, false),
     placeholderData: (prev) => prev,
+    refetchOnReconnect: false,
   })
 }
 
@@ -102,9 +122,10 @@ export function useTASummary(code: string) {
   return useQuery({
     queryKey: ['ta', 'summary', code],
     queryFn: () => fetchTASummary(code),
-    staleTime: 600_000,
+    staleTime: marketStaleTime(60_000, 3_600_000),
     gcTime: 3_600_000,
     enabled: !!code,
+    refetchOnReconnect: false,
   })
 }
 
@@ -115,5 +136,6 @@ export function useHistory(code: string, limit = 150) {
     staleTime: 21_600_000,
     gcTime: 86_400_000,
     enabled: !!code,
+    refetchOnReconnect: false,
   })
 }
