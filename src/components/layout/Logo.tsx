@@ -48,7 +48,7 @@ function JetIconBranded({ size, className }: { size: number; className?: string 
 
 function BorsaText({ className, style, ...props }: React.HTMLAttributes<HTMLSpanElement>) {
   return (
-      <span className={className} style={{ fontWeight: 600, textTransform: "capitalize", ...style }} {...props}>
+      <span className={className} style={{ fontWeight: 600, textTransform: "uppercase", ...style }} {...props}>
         jetborsa
       </span>
   );

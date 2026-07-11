@@ -52,7 +52,7 @@ export function LeftSidebar() {
               <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground shadow-sm group-hover:scale-105 transition-transform">
                 <Logo size={20} variant="icon" />
               </div>
-              <span className="font-display font-semibold text-lg tracking-tight">Jetborsa</span>
+              <span className="font-display font-semibold text-lg tracking-tight">JETBORSA</span>
             </Link>
             
             <button 
