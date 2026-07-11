@@ -22,6 +22,7 @@ import { Route as EndekslerIndexRouteImport } from './routes/endeksler.index'
 import { Route as SektorlerSlugRouteImport } from './routes/sektorler.$slug'
 import { Route as HisseTickerRouteImport } from './routes/hisse.$ticker'
 import { Route as EndekslerIdRouteImport } from './routes/endeksler.$id'
+import { Route as ApiTickersRouteImport } from './routes/api/tickers'
 import { Route as ApiCheckoutRouteImport } from './routes/api/checkout'
 import { Route as HisseTickerIndexRouteImport } from './routes/hisse.$ticker.index'
 import { Route as HisseTickerTeknikAnalizRouteImport } from './routes/hisse.$ticker.teknik-analiz'
@@ -97,6 +98,11 @@ const EndekslerIdRoute = EndekslerIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => EndekslerRoute,
 } as any)
+const ApiTickersRoute = ApiTickersRouteImport.update({
+  id: '/api/tickers',
+  path: '/api/tickers',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiCheckoutRoute = ApiCheckoutRouteImport.update({
   id: '/api/checkout',
   path: '/api/checkout',
@@ -153,6 +159,7 @@ export interface FileRoutesByFullPath {
   '/sektorler': typeof SektorlerRouteWithChildren
   '/takip-listesi': typeof TakipListesiRoute
   '/api/checkout': typeof ApiCheckoutRoute
+  '/api/tickers': typeof ApiTickersRoute
   '/endeksler/$id': typeof EndekslerIdRoute
   '/hisse/$ticker': typeof HisseTickerRouteWithChildren
   '/sektorler/$slug': typeof SektorlerSlugRoute
@@ -175,6 +182,7 @@ export interface FileRoutesByTo {
   '/sektorler': typeof SektorlerRouteWithChildren
   '/takip-listesi': typeof TakipListesiRoute
   '/api/checkout': typeof ApiCheckoutRoute
+  '/api/tickers': typeof ApiTickersRoute
   '/endeksler/$id': typeof EndekslerIdRoute
   '/sektorler/$slug': typeof SektorlerSlugRoute
   '/endeksler': typeof EndekslerIndexRoute
@@ -199,6 +207,7 @@ export interface FileRoutesById {
   '/sektorler': typeof SektorlerRouteWithChildren
   '/takip-listesi': typeof TakipListesiRoute
   '/api/checkout': typeof ApiCheckoutRoute
+  '/api/tickers': typeof ApiTickersRoute
   '/endeksler/$id': typeof EndekslerIdRoute
   '/hisse/$ticker': typeof HisseTickerRouteWithChildren
   '/sektorler/$slug': typeof SektorlerSlugRoute
@@ -225,6 +234,7 @@ export interface FileRouteTypes {
     | '/sektorler'
     | '/takip-listesi'
     | '/api/checkout'
+    | '/api/tickers'
     | '/endeksler/$id'
     | '/hisse/$ticker'
     | '/sektorler/$slug'
@@ -247,6 +257,7 @@ export interface FileRouteTypes {
     | '/sektorler'
     | '/takip-listesi'
     | '/api/checkout'
+    | '/api/tickers'
     | '/endeksler/$id'
     | '/sektorler/$slug'
     | '/endeksler'
@@ -270,6 +281,7 @@ export interface FileRouteTypes {
     | '/sektorler'
     | '/takip-listesi'
     | '/api/checkout'
+    | '/api/tickers'
     | '/endeksler/$id'
     | '/hisse/$ticker'
     | '/sektorler/$slug'
@@ -295,6 +307,7 @@ export interface RootRouteChildren {
   SektorlerRoute: typeof SektorlerRouteWithChildren
   TakipListesiRoute: typeof TakipListesiRoute
   ApiCheckoutRoute: typeof ApiCheckoutRoute
+  ApiTickersRoute: typeof ApiTickersRoute
   HisseTickerRoute: typeof HisseTickerRouteWithChildren
   ApiAiChargeRoute: typeof ApiAiChargeRoute
   ApiAiPreCheckRoute: typeof ApiAiPreCheckRoute
@@ -396,6 +409,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/endeksler/$id'
       preLoaderRoute: typeof EndekslerIdRouteImport
       parentRoute: typeof EndekslerRoute
+    }
+    '/api/tickers': {
+      id: '/api/tickers'
+      path: '/api/tickers'
+      fullPath: '/api/tickers'
+      preLoaderRoute: typeof ApiTickersRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/checkout': {
       id: '/api/checkout'
@@ -524,6 +544,7 @@ const rootRouteChildren: RootRouteChildren = {
   SektorlerRoute: SektorlerRouteWithChildren,
   TakipListesiRoute: TakipListesiRoute,
   ApiCheckoutRoute: ApiCheckoutRoute,
+  ApiTickersRoute: ApiTickersRoute,
   HisseTickerRoute: HisseTickerRouteWithChildren,
   ApiAiChargeRoute: ApiAiChargeRoute,
   ApiAiPreCheckRoute: ApiAiPreCheckRoute,

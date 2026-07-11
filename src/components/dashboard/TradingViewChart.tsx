@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createChart, ColorType, CandlestickSeries, HistogramSeries } from "lightweight-charts";
 import type { IChartApi } from "lightweight-charts";
-import { Loader2, BarChart3 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useHistory } from "../../lib/useMarketData";
 
 interface TradingViewChartProps {
@@ -26,15 +26,7 @@ export function TradingViewChart({
   const chartRef = useRef<IChartApi | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [revealed, setRevealed] = useState(false);
   const { data: historyApiData, isLoading: historyLoading } = useHistory(symbol, 150);
-
-  // Auto-reveal if history data already cached (subsequent visits)
-  useEffect(() => {
-    if (historyApiData && Array.isArray(historyApiData) && historyApiData.length > 0) {
-      setRevealed(true);
-    }
-  }, [historyApiData]);
 
   // High fidelity random walk generator for realistic historical candles fallback
   const generateMockHistory = (basePrice: number, days: number = 90): HistoricalDataPoint[] => {
@@ -86,9 +78,9 @@ export function TradingViewChart({
     }));
   };
 
-  // Main chart effect - runs when revealed and history data ready
+  // Main chart effect - runs when history data ready
   useEffect(() => {
-    if (!chartContainerRef.current || !revealed) return;
+    if (!chartContainerRef.current) return;
     if (historyLoading) return;
 
     let isMounted = true;
@@ -267,20 +259,7 @@ export function TradingViewChart({
       
       {/* Main Canvas Body */}
       <div className="relative flex-1 w-full min-h-[300px] md:aspect-video md:min-h-0">
-        {!revealed && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/55 backdrop-blur-xs z-10 gap-3 rounded-2xl">
-            <button
-              onClick={() => setRevealed(true)}
-              className="inline-flex items-center gap-1.5 px-5 py-2 text-sm font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-xs"
-            >
-              <BarChart3 size={16} />
-              Grafiği Göster
-            </button>
-            <span className="text-xs text-muted-foreground">Fiyat hareketlerini görmek için tıklayın</span>
-          </div>
-        )}
-
-        {loading && revealed && (
+        {loading && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/55 backdrop-blur-xs z-20 gap-3 animate-in fade-in duration-200">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
               <Loader2 className="animate-spin text-primary shrink-0" size={20} />
@@ -292,7 +271,7 @@ export function TradingViewChart({
           </div>
         )}
 
-        {error && !loading && (
+        {error && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/55 text-center p-6 z-20 gap-2">
             <span className="text-xs font-semibold text-destructive">Grafik Yüklenemedi</span>
             <p className="text-[11px] text-muted-foreground max-w-xs leading-relaxed">
