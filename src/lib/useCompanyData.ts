@@ -61,6 +61,28 @@ export function useCompanyRatios(ticker: string) {
   })
 }
 
+export function useCompanyProfile(ticker: string) {
+  return useQuery({
+    queryKey: ['company', 'profile', ticker],
+    queryFn: async () => {
+      const res = await fetch(`${HONO_API}/api/market/symbol/${ticker}/company-profile`)
+      if (!res.ok) throw new Error(`Failed to fetch company profile for ${ticker}`)
+      return await res.json() as {
+        ticker: string
+        unvan?: string
+        kurulus?: string
+        faaliyet?: string
+        telefon?: string
+        faks?: string
+        adres?: string
+        shareholders?: { name: string; share_pct?: number }[]
+      }
+    },
+    staleTime: 86_400_000,
+    enabled: !!ticker,
+  })
+}
+
 export function useCompanyQuote(ticker: string) {
   return useQuery({
     queryKey: ['company', 'quote', ticker],
