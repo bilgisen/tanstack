@@ -2,17 +2,6 @@ import { useQuery } from '@tanstack/react-query'
 
 const HONO_API = import.meta.env.VITE_HONO_API_URL || 'https://hono.jetborsa.com'
 
-async function getAuthToken(): Promise<string | null> {
-  try {
-    const res = await fetch('/api/auth/token', { method: 'GET', credentials: 'include' })
-    if (!res.ok) return null
-    const data = await res.json()
-    return data?.token || null
-  } catch {
-    return null
-  }
-}
-
 function isMarketOpen(): boolean {
   const now = new Date().toLocaleString('en-US', { timeZone: 'Europe/Istanbul', hour12: false })
   const hour = parseInt(now.split(', ')[1]?.split(':')[0] || '0')
@@ -25,15 +14,8 @@ function marketStaleTime(openShort: number, closedLong: number): number {
   return isMarketOpen() ? openShort : closedLong
 }
 
-async function fetchFromTA(endpoint: string, authenticated = false) {
-  const headers: Record<string, string> = {}
-  if (authenticated) {
-    const token = await getAuthToken()
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`
-    }
-  }
-  const res = await fetch(`${HONO_API}/api/v1/ta${endpoint}`, { headers })
+async function fetchFromTA(endpoint: string) {
+  const res = await fetch(`${HONO_API}/api/v1/ta${endpoint}`)
   if (!res.ok) {
     if (res.status === 403) return { _blocked: true, _requires: 'subscriber' }
     if (res.status === 404) return null
@@ -56,7 +38,7 @@ function useTAPublicSummary(ticker: string) {
 function useTAMemberSummary(ticker: string, enabled: boolean) {
   return useQuery({
     queryKey: ['ta', 'member', ticker],
-    queryFn: () => fetchFromTA(`/member/${ticker}/summary`, true),
+    queryFn: () => fetchFromTA(`/member/${ticker}/summary`),
     staleTime: marketStaleTime(300_000, 3_600_000),
     gcTime: 30 * 60 * 1000,
     retry: 1,
@@ -67,7 +49,7 @@ function useTAMemberSummary(ticker: string, enabled: boolean) {
 function useTAFullAnalysis(ticker: string, enabled: boolean) {
   return useQuery({
     queryKey: ['ta', 'full', ticker],
-    queryFn: () => fetchFromTA(`/full/${ticker}`, true),
+    queryFn: () => fetchFromTA(`/full/${ticker}`),
     staleTime: 15 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
     retry: 0,
