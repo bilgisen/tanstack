@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { TradingViewChart } from '../components/dashboard/TradingViewChart'
 import { CeoTaReport } from '../components/company/CeoTaReport'
-import { ScoreGauge, SignalBadge } from '../constants/companyShared'
+import { ScoreGauge } from '../constants/companyShared'
 import { useCompanyData } from '../lib/useCompanyData'
-import { useTAPublicSummary, useTAMemberSummary } from '../lib/useTechnicalAnalysis'
+import { useTAPublicSummary } from '../lib/useTechnicalAnalysis'
 import { useAuth } from '../hooks/useAuth'
 import {
   Activity, TrendingUp, BarChart3, AlertTriangle,
@@ -74,12 +74,10 @@ function TechnicalAnalysisPage() {
   // Determine access tier
   const userTier = !user ? 'anonymous' : (user.tier === 'pro' || user.tier === 'ultimate') ? 'subscriber' : 'member'
 
-  const isMember = userTier === 'member' || userTier === 'subscriber'
   const isSubscriber = userTier === 'subscriber'
 
   const { data: companyRaw, isLoading: companyLoading } = useCompanyData(tickerUpper)
   const { data: publicTa } = useTAPublicSummary(tickerUpper)
-  const { data: memberTa } = useTAMemberSummary(tickerUpper, isMember || isSubscriber)
 
   const stats = companyRaw?.stats || null
   const taData = companyRaw?.taData || null
@@ -186,22 +184,6 @@ function TechnicalAnalysisPage() {
         </div>
       )}
 
-      {/* ═══ MEMBER TIER: Extended Analysis ═══ */}
-      <LockedSection tier={userTier} requiredTier="member">
-        <div className="space-y-5 pt-2">
-          <div className="flex items-center gap-2 pb-2 border-b border-border/30">
-            <Shield size={14} className="text-primary" />
-            <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Üyelere Özel Teknik Analiz</h3>
-          </div>
-
-          {memberTa && !memberTa._blocked ? (
-            <MemberContent data={memberTa as any} />
-          ) : (
-            <MemberContent data={taData} />
-          )}
-        </div>
-      </LockedSection>
-
       {/* ═══ SUBSCRIBER TIER: AI Report ═══ */}
       <LockedSection tier={userTier} requiredTier="subscriber">
         <div className="space-y-5 pt-2">
@@ -216,107 +198,4 @@ function TechnicalAnalysisPage() {
   )
 }
 
-function MemberContent({ data }: { data: any }) {
-  if (!data) {
-    return <p className="text-sm text-muted-foreground">Veri yüklenemedi.</p>
-  }
 
-  const regime = data.market_regime || data.regime || {}
-  const divergences = data.divergences || {}
-  const signals = data.signals || []
-  const scoreComp = data.score_components || {}
-  const breadth = data.market_breadth || {}
-  const bollingerStatus = data.bollinger_status || '—'
-
-  return (
-    <div className="space-y-4">
-      {/* Market Regime */}
-      {regime.regime && (
-        <div className="bg-card/30 border border-border/20 rounded-xl p-4 space-y-2">
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Piyasa Rejimi</span>
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div><span className="text-muted-foreground">Rejim: </span><span className="font-semibold">{regime.regime}</span></div>
-            <div><span className="text-muted-foreground">Yön: </span><span className={`font-semibold ${(regime.trend_direction || '').toLowerCase().includes('bull') ? 'text-emerald-500' : 'text-destructive'}`}>{regime.trend_direction || '—'}</span></div>
-            <div><span className="text-muted-foreground">Volatilite: </span><span className="font-semibold">{regime.volatility_regime || '—'}</span></div>
-            <div><span className="text-muted-foreground">ADX: </span><span className="font-semibold">{regime.adx ?? '—'}</span></div>
-          </div>
-          {regime.recommended_strategy && (
-            <p className="text-xs text-muted-foreground italic mt-1 pt-2 border-t border-border/10">{regime.recommended_strategy}</p>
-          )}
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* Score Components */}
-        {scoreComp.trend != null && (
-          <div className="space-y-3">
-            <span className="text-xs font-semibold text-muted-foreground uppercase">Skor Bileşenleri</span>
-            {[
-              { label: 'Trend', value: scoreComp.trend, max: 50, color: 'bg-emerald-500' },
-              { label: 'Momentum', value: scoreComp.momentum, max: 30, color: 'bg-blue-500' },
-              { label: 'Hacim', value: scoreComp.volume, max: 20, color: 'bg-primary' },
-            ].filter(c => c.value != null).map((bar) => (
-              <div key={bar.label}>
-                <div className="flex justify-between text-base mb-1">
-                  <span className="text-muted-foreground font-medium">{bar.label}</span>
-                  <span className="text-foreground font-semibold">{Math.round(bar.value)}/{bar.max}</span>
-                </div>
-                <div className="h-1.5 bg-muted/30 rounded-full overflow-hidden">
-                  <div className={`h-full ${bar.color} rounded-full transition-all`} style={{ width: `${Math.min((bar.value / bar.max) * 100, 100)}%` }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Divergences + Signals */}
-        <div className="space-y-4">
-          {signals.length > 0 && (
-            <div>
-              <span className="text-xs font-semibold text-muted-foreground uppercase block mb-2">Aktif Sinyaller</span>
-              <div className="flex flex-wrap gap-1.5">
-                {signals.slice(0, 8).map((s: any, i: number) => (
-                  <SignalBadge key={i} signal={typeof s === 'string' ? s : s.label || ''} />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {(divergences.rsi?.bullish || divergences.rsi?.bearish || divergences.macd?.bullish || divergences.macd?.bearish) && (
-            <div>
-              <span className="text-xs font-semibold text-muted-foreground uppercase block mb-2">Sapma Analizi</span>
-              <div className="flex flex-wrap gap-2">
-                {divergences.rsi?.bullish && <span className="text-xs font-semibold text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded">RSI: Bullish ↑</span>}
-                {divergences.rsi?.bearish && <span className="text-xs font-semibold text-destructive bg-destructive/10 px-2 py-0.5 rounded">RSI: Bearish ↓</span>}
-                {divergences.macd?.bullish && <span className="text-xs font-semibold text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded">MACD: Bullish ↑</span>}
-                {divergences.macd?.bearish && <span className="text-xs font-semibold text-destructive bg-destructive/10 px-2 py-0.5 rounded">MACD: Bearish ↓</span>}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Additional indicators */}
-      <div className="divide-y divide-border/15">
-        {bollingerStatus !== '—' && (
-          <div className="flex justify-between items-center py-2.5">
-            <span className="text-base font-medium text-muted-foreground">Bollinger Bandı</span>
-            <span className="text-base font-semibold text-foreground">{bollingerStatus}</span>
-          </div>
-        )}
-        {breadth.breadth != null && (
-          <div className="flex justify-between items-center py-2.5">
-            <span className="text-base font-medium text-muted-foreground">Piyasa Genişliği</span>
-            <span className="text-base font-semibold text-foreground">{breadth.breadth.toFixed(1)}% — {breadth.status || '—'}</span>
-          </div>
-        )}
-        {(regime.adx != null) && (
-          <div className="flex justify-between items-center py-2.5">
-            <span className="text-base font-medium text-muted-foreground">ADX Trend Gücü</span>
-            <span className={`text-base font-semibold font-mono ${regime.adx >= 25 ? 'text-emerald-500' : 'text-foreground'}`}>{regime.adx.toFixed(1)}</span>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
