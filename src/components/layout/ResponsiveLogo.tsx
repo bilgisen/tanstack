@@ -16,12 +16,7 @@ function ResponsiveLogo({
   className, 
   forceFull = false,
 }: ResponsiveLogoProps) {
-  const [isMobile, setIsMobile] = useState<boolean>(() => {
-    if (typeof window === 'undefined') {
-      return false;
-    }
-    return window.innerWidth < 768;
-  });
+  const [isMobile, setIsMobile] = useState<boolean>(false);
   const debounceTimerRef = useRef<number | null>(null);
 
   const handleResize = useCallback(() => {
