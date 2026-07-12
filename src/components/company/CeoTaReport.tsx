@@ -84,7 +84,8 @@ export function CeoTaReport({ ticker, unit = 'TL' }: CeoTaReportProps) {
     fetchReport()
   }, [ticker])
 
-  const fmt = (price: number) => {
+  const fmt = (price: number | null | undefined) => {
+    if (price == null || isNaN(price)) return '—'
     const opts = { minimumFractionDigits: 2, maximumFractionDigits: 2 }
     if (reportUnit === 'puan') return `${price.toLocaleString('tr-TR', opts)} puan`
     return `₺${price.toLocaleString('tr-TR', opts)}`
