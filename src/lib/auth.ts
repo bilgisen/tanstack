@@ -1,7 +1,10 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { eq } from "drizzle-orm";
+import { jwt } from "better-auth/plugins/jwt";
 import { db } from "./db";
 import * as schema from "./auth-schema";
+import { userCredits } from "./schema";
 import { ensureEnv } from "./env";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 
@@ -51,7 +54,35 @@ function getAuth() {
         },
       },
       plugins: [
-        tanstackStartCookies()
+        tanstackStartCookies(),
+        jwt({
+          jwt: {
+            definePayload: async (session) => {
+              try {
+                const credits = await db
+                  .select()
+                  .from(userCredits)
+                  .where(eq(userCredits.userId, session.user.id))
+                  .then((r: any[]) => r?.[0] as { tier: string } | undefined)
+                return {
+                  id: session.user.id,
+                  email: session.user.email,
+                  name: session.user.name,
+                  role: session.user.role,
+                  subscription_tier: credits?.tier || 'free',
+                };
+              } catch {
+                return {
+                  id: session.user.id,
+                  email: session.user.email,
+                  name: session.user.name,
+                  role: session.user.role,
+                  subscription_tier: 'free',
+                };
+              }
+            },
+          },
+        }),
       ],
     });
   }

@@ -78,7 +78,7 @@ function EndeksTechnicalAnalysisPage() {
   const { id } = Route.useParams()
   const code = id.toUpperCase()
   const { user } = useAuth()
-  const userTier = !user ? 'anonymous' : user.tier === 'subscriber' ? 'subscriber' : 'member'
+  const userTier = !user ? 'anonymous' : (user.tier === 'pro' || user.tier === 'ultimate') ? 'subscriber' : 'member'
   const isMember = userTier === 'member' || userTier === 'subscriber'
 
   const { data: indicesData } = useIndices()
