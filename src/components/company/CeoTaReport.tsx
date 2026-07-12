@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   AlertTriangle, Target, Shield, Activity, BarChart3,
-  Zap, Sparkles, TrendingUp, Gauge, Coins, LineChart
+  Zap, Sparkles, TrendingUp, Gauge, Coins, LineChart, Clock, Info
 } from 'lucide-react'
 
 interface CeoTaReportProps {
@@ -539,6 +539,81 @@ export function CeoTaReport({ ticker, unit = 'TL' }: CeoTaReportProps) {
           </div>
         </div>
       )}
+
+      {/* AI Sonuç - Action Tips */}
+      {report.ai_analysis?.sonuc?.length > 0 && (
+        <div className="border border-emerald-500/20 bg-emerald-500/5 rounded-2xl p-5 space-y-3">
+          <h3 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
+            <Zap size={14} className="text-emerald-500" />
+            Sonuç & Aksiyon İpuçları
+          </h3>
+          <ul className="space-y-3">
+            {report.ai_analysis.sonuc.map((tip: string, i: number) => (
+              <li key={i} className="flex items-start gap-3 text-sm">
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/15 text-emerald-500 flex items-center justify-center text-xs font-bold">
+                  {i + 1}
+                </span>
+                <span className="text-foreground/85 leading-relaxed">{tip}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* AI Notlar - Key Takeaways */}
+      {report.ai_analysis?.notlar?.length > 0 && (
+        <div>
+          <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+            <Info size={14} className="text-blue-500" />
+            Öne Çıkanlar
+          </h3>
+          <div className="bg-card/30 border border-border/15 rounded-xl divide-y divide-border/10">
+            {report.ai_analysis.notlar.map((note: string, i: number) => (
+              <div key={i} className="p-3.5 text-sm text-foreground/80 leading-relaxed">
+                {note}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Teknik Skor Nasıl Hesaplandı */}
+      <div>
+        <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+          <Gauge size={14} className="text-primary" />
+          Teknik Skor Nasıl Hesaplandı?
+        </h3>
+        <div className="bg-card/30 border border-border/15 rounded-xl p-4 text-sm text-muted-foreground space-y-2 leading-relaxed">
+          <p>
+            Teknik skor, hissenin <strong className="text-foreground">Trend (50 puan)</strong>,{' '}
+            <strong className="text-foreground">Momentum (30 puan)</strong>,{' '}
+            <strong className="text-foreground">Hacim (20 puan)</strong> ve{' '}
+            <strong className="text-foreground">Formasyon (bonus)</strong> olmak üzere
+            dört ana bileşenin ağırlıklı toplamıdır.
+          </p>
+          <ul className="space-y-1 pl-4 list-disc">
+            <li><strong className="text-emerald-500">Trend (50p):</strong> EMA mesafesi, SMA kesişimleri ve ADX gücü. Güçlü trend = yüksek puan.</li>
+            <li><strong className="text-blue-500">Momentum (30p):</strong> RSI seviyesi, MACD histogram yönü ve Stokastik konumu. Uyumlu sinyaller = yüksek puan.</li>
+            <li><strong className="text-amber-500">Hacim (20p):</strong> MFI, OBV trendi ve hacim/ortalama oranı. Artan hacimli hareket = yüksek puan.</li>
+            <li><strong className="text-violet-500">Formasyon (bonus):</strong> Tespit edilen mum ve teknik formasyonların güvenilirlik puanı. Bonus puan eklenir veya düşülür.</li>
+          </ul>
+          <p className="text-xs text-muted-foreground/60 pt-1">
+            Skor 0-100 arasıdır. 70+ güçlü, 40-70 nötr, 40 altı zayıf teknik görünümü ifade eder.
+          </p>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="border-t border-border/15 pt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <Sparkles size={12} className="text-primary" />
+          <span>JetBorsa AI tarafından hazırlanmıştır</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Clock size={12} />
+          <span>Rapor oluşturulma tarihi: {new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+        </div>
+      </div>
 
     </div>
   )
