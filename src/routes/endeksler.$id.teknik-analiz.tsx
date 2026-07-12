@@ -1,28 +1,38 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { useMemo } from 'react'
+import { TrendingUp, Info, AlertCircle, Sparkles, Shield, Gauge, Lock, ChevronRight } from 'lucide-react'
 import { TradingViewChart } from '../components/dashboard/TradingViewChart'
 import { CeoTaReport } from '../components/company/CeoTaReport'
 import { ScoreGauge, SignalBadge } from '../constants/companyShared'
-import { useCompanyData } from '../lib/useCompanyData'
+import { getIndexName } from '../constants/bistIndices'
+import { useIndices, useTASummary } from '../lib/useMarketData'
 import { useTAPublicSummary, useTAMemberSummary } from '../lib/useTechnicalAnalysis'
 import { useAuth } from '../hooks/useAuth'
-import {
-  Activity, TrendingUp, BarChart3, AlertTriangle,
-  Shield, Gauge, Lock, Sparkles, ChevronRight
-} from 'lucide-react'
 
-export const Route = createFileRoute('/hisse/$ticker/teknik-analiz')({
-  component: TechnicalAnalysisPage,
+export const Route = createFileRoute('/endeksler/$id/teknik-analiz')({
+  component: EndeksTechnicalAnalysisPage,
 })
 
-function UserTierBadge({ tier }: { tier: string }) {
-  if (tier === 'subscriber') return null
-  return (
-    <div className="flex items-center gap-1 text-xs text-muted-foreground/60 px-3 py-1 rounded-full border border-border/30">
-      <Lock size={10} />
-      {tier === 'anonymous' ? 'Üyelere Özel' : 'Abonelere Özel'}
-    </div>
-  )
-}
+type TaData = {
+  trend: string;
+  score: number;
+  confidence: string;
+  rsi: { value: number; status: string };
+  macd: string;
+  bollinger_status: string;
+  sma: { sma_20: number; sma_50: number; sma_200: number };
+  support_resistance: { support: number; resistance: number };
+  atr_stop_loss: number;
+  rr_ratio: number;
+  beta: number;
+  market_breadth: { breadth: number; status: string };
+  market_regime: { regime: string; trend_direction: string; volatility_regime: string; adx: number; recommended_strategy: string };
+  signals: string[];
+  divergences: { rsi: { bullish: boolean; bearish: boolean }; macd: { bullish: boolean; bearish: boolean } };
+  score_components: { trend: number; momentum: number; volume: number };
+  candlestick_patterns: string[];
+  llm_summary_prompt: string;
+} | null;
 
 function LockedSection({
   tier,
@@ -46,9 +56,7 @@ function LockedSection({
 
   return (
     <div className="relative">
-      <div className="blur-sm pointer-events-none select-none opacity-30">
-        {children}
-      </div>
+      <div className="blur-sm pointer-events-none select-none opacity-30">{children}</div>
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="bg-background/90 backdrop-blur-sm border border-border/50 rounded-2xl p-6 text-center max-w-sm mx-auto shadow-lg">
           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
@@ -66,66 +74,74 @@ function LockedSection({
   )
 }
 
-function TechnicalAnalysisPage() {
-  const { ticker } = Route.useParams()
-  const { user, loading: authLoading } = useAuth()
-  const tickerUpper = ticker.toUpperCase()
-
-  // Determine access tier
+function EndeksTechnicalAnalysisPage() {
+  const { id } = Route.useParams()
+  const code = id.toUpperCase()
+  const { user } = useAuth()
   const userTier = !user ? 'anonymous' : user.tier === 'subscriber' ? 'subscriber' : 'member'
-
   const isMember = userTier === 'member' || userTier === 'subscriber'
-  const isSubscriber = userTier === 'subscriber'
 
-  const { data: companyRaw, isLoading: companyLoading } = useCompanyData(tickerUpper)
-  const { data: publicTa } = useTAPublicSummary(tickerUpper)
-  const { data: memberTa } = useTAMemberSummary(tickerUpper, isMember || isSubscriber)
+  const { data: indicesData } = useIndices()
+  const { data: taApiData } = useTASummary(code)
+  const { data: publicTa } = useTAPublicSummary(code)
+  useTAMemberSummary(code, isMember)
 
-  const stats = companyRaw?.stats || null
-  const taData = companyRaw?.taData || null
-  const fundamentalDetail = companyRaw?.fundamentalDetail || null
+  const priceDetails = useMemo(() => {
+    const liveIndex = indicesData?.find((item: any) => item.code?.toUpperCase() === code)
+    return {
+      name: getIndexName(code) || liveIndex?.name || code,
+      code,
+      price: liveIndex?.last_price ?? 0,
+      diffPercent: liveIndex?.diff_percent ?? 0,
+    }
+  }, [indicesData, code])
 
-  const weekChange = fundamentalDetail && stats?.price && fundamentalDetail.weekClose > 0
-    ? ((stats.price - fundamentalDetail.weekClose) / fundamentalDetail.weekClose) * 100 : null
-  const monthChange = fundamentalDetail && stats?.price && fundamentalDetail.monthClose > 0
-    ? ((stats.price - fundamentalDetail.monthClose) / fundamentalDetail.monthClose) * 100 : null
-  const yearChange = fundamentalDetail && stats?.price && fundamentalDetail.yearClose > 0
-    ? ((stats.price - fundamentalDetail.yearClose) / fundamentalDetail.yearClose) * 100 : null
-  const fmtPct = (v: number | null) => v != null ? `${v >= 0 ? '+' : ''}${v.toFixed(1)}%` : '-'
+  const taData = useMemo<TaData | null>(() => {
+    const tJson = taApiData
+    if (!tJson || tJson.error) return null
 
-  const loading = authLoading || companyLoading
+    const formatRsi = (val: any): { value: number; status: string } => {
+      const num = typeof val === "number" ? val : parseFloat(val)
+      return { value: isNaN(num) ? 50 : num, status: tJson.rsi_status || "Nötr" }
+    }
+    const rsiData = tJson.rsi && typeof tJson.rsi === 'object' && 'value' in tJson.rsi
+      ? tJson.rsi
+      : formatRsi(tJson.rsi)
+    const liveVal = priceDetails?.price || 10000
 
-  if (loading) {
-    return (
-      <div className="space-y-5">
-        <div className="h-[360px] w-full bg-muted/20 rounded-2xl animate-pulse" />
-        <div className="h-24 w-full bg-muted/20 rounded-2xl animate-pulse" />
-        <div className="h-48 w-full bg-muted/20 rounded-2xl animate-pulse" />
-      </div>
-    )
-  }
+    return {
+      trend: tJson.trend || "Nötr",
+      score: tJson.score ?? 50,
+      confidence: tJson.confidence || "Veri yok",
+      rsi: rsiData,
+      macd: tJson.macd || tJson.macd_status || "Nötr",
+      bollinger_status: tJson.bollinger_status || "Orta Bantta",
+      sma: { sma_20: tJson.sma?.sma_20 || liveVal, sma_50: tJson.sma?.sma_50 || liveVal, sma_200: tJson.sma?.sma_200 || liveVal },
+      support_resistance: { support: tJson.support_resistance?.support ?? tJson.support ?? (liveVal * 0.96), resistance: tJson.support_resistance?.resistance ?? tJson.resistance ?? (liveVal * 1.04) },
+      atr_stop_loss: tJson.atr_stop_loss || tJson.stop_loss || (liveVal * 0.03),
+      rr_ratio: tJson.rr_ratio || 0,
+      beta: tJson.beta ?? 1,
+      market_breadth: { breadth: tJson.market_breadth?.breadth ?? 50, status: tJson.market_breadth?.status || "Veri yok" },
+      market_regime: { regime: tJson.market_regime?.regime || "Veri yok", trend_direction: tJson.market_regime?.trend_direction || "Veri yok", volatility_regime: tJson.market_regime?.volatility_regime || "Veri yok", adx: tJson.market_regime?.adx ?? 0, recommended_strategy: tJson.market_regime?.recommended_strategy || "" },
+      signals: tJson.signals || [],
+      divergences: { rsi: tJson.divergences?.rsi || { bullish: false, bearish: false }, macd: tJson.divergences?.macd || { bullish: false, bearish: false } },
+      score_components: { trend: tJson.score_components?.trend ?? 0, momentum: tJson.score_components?.momentum ?? 0, volume: tJson.score_components?.volume ?? 0 },
+      candlestick_patterns: tJson.candlestick_patterns || [],
+      llm_summary_prompt: tJson.llm_summary_prompt || "",
+    }
+  }, [taApiData, priceDetails])
 
-  // ── PUBLIC TIER ─────────────────────────────────────────────
   const publicData = publicTa as any
 
   return (
     <div className="space-y-5">
-      <TradingViewChart symbol={tickerUpper} lastPrice={stats?.price || 0} />
+      <TradingViewChart symbol={code} lastPrice={priceDetails.price} />
 
-      {fundamentalDetail && stats && (
-        <div className="text-base text-muted-foreground">
-          Hafta: <span className={`font-semibold ${(weekChange ?? 0) >= 0 ? 'text-emerald-500' : 'text-destructive'}`}>{fmtPct(weekChange)}</span>
-          {' · '}Ay: <span className={`font-semibold ${(monthChange ?? 0) >= 0 ? 'text-emerald-500' : 'text-destructive'}`}>{fmtPct(monthChange)}</span>
-          {' · '}Yıl: <span className={`font-semibold ${(yearChange ?? 0) >= 0 ? 'text-emerald-500' : 'text-destructive'}`}>{fmtPct(yearChange)}</span>
-        </div>
-      )}
-
-      {/* ═══ PUBLIC TIER: Core Indicators ═══ */}
+      {/* Public Tier: Core Indicators */}
       {publicData && !publicData._blocked && (
         <div className="space-y-5">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-semibold text-foreground">Teknik Görünüm</h3>
-            <UserTierBadge tier={userTier} />
           </div>
 
           {publicData.score != null && (
@@ -145,8 +161,8 @@ function TechnicalAnalysisPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               { label: 'Trend', value: publicData.trend || 'Nötr', icon: <TrendingUp size={14} />, bull: (publicData.trend || '').toLowerCase().includes('bull') },
-              { label: 'RSI (14)', value: publicData.rsi != null ? publicData.rsi.toFixed(1) : '—', icon: <BarChart3 size={14} />, bull: null },
-              { label: 'MACD', value: publicData.macd_status || 'Nötr', icon: <Activity size={14} />, bull: publicData.macd_status === 'Bullish' ? true : publicData.macd_status === 'Bearish' ? false : null },
+              { label: 'RSI (14)', value: publicData.rsi != null ? publicData.rsi.toFixed(1) : '—', icon: <Info size={14} />, bull: null },
+              { label: 'MACD', value: publicData.macd_status || 'Nötr', icon: <TrendingUp size={14} />, bull: publicData.macd_status === 'Bullish' ? true : publicData.macd_status === 'Bearish' ? false : null },
               { label: 'Rejim', value: publicData.regime || '—', icon: <Gauge size={14} />, bull: null },
             ].map((item) => (
               <div key={item.label}>
@@ -158,35 +174,10 @@ function TechnicalAnalysisPage() {
               </div>
             ))}
           </div>
-
-          <div className="divide-y divide-border/15">
-            {publicData.sma && [
-              { label: 'SMA 20', value: publicData.sma.sma_20 ? `₺${publicData.sma.sma_20.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '—' },
-              { label: 'SMA 50', value: publicData.sma.sma_50 ? `₺${publicData.sma.sma_50.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '—' },
-              { label: 'SMA 200', value: publicData.sma.sma_200 ? `₺${publicData.sma.sma_200.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '—' },
-            ].filter(r => r.value !== '—').map((row) => (
-              <div key={row.label} className="flex justify-between items-center py-2.5">
-                <span className="text-base font-medium text-muted-foreground">{row.label}</span>
-                <span className="text-base font-semibold text-foreground font-mono">{row.value}</span>
-              </div>
-            ))}
-            {[
-              { label: 'Destek', value: publicData.nearest_support != null ? `₺${publicData.nearest_support.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : null },
-              { label: 'Direnç', value: publicData.nearest_resistance != null ? `₺${publicData.nearest_resistance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : null },
-            ].filter(r => r.value != null).map((row) => (
-              <div key={row.label} className="flex justify-between items-center py-2.5">
-                <span className="text-base font-medium text-muted-foreground flex items-center gap-1.5">
-                  {row.label === 'Destek' ? <Shield size={14} /> : <AlertTriangle size={14} />}
-                  {row.label}
-                </span>
-                <span className="text-base font-semibold text-foreground font-mono">{row.value}</span>
-              </div>
-            ))}
-          </div>
         </div>
       )}
 
-      {/* ═══ MEMBER TIER: Extended Analysis ═══ */}
+      {/* Member Tier: Extended TA */}
       <LockedSection tier={userTier} requiredTier="member">
         <div className="space-y-5 pt-2">
           <div className="flex items-center gap-2 pb-2 border-b border-border/30">
@@ -194,43 +185,35 @@ function TechnicalAnalysisPage() {
             <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Üyelere Özel Teknik Analiz</h3>
           </div>
 
-          {memberTa && !memberTa._blocked ? (
-            <MemberContent data={memberTa as any} />
-          ) : (
-            <MemberContent data={taData} />
-          )}
+          {taData && <EndeksMemberContent data={taData} />}
         </div>
       </LockedSection>
 
-      {/* ═══ SUBSCRIBER TIER: AI Report ═══ */}
+      {/* Subscriber Tier: AI Report */}
       <LockedSection tier={userTier} requiredTier="subscriber">
         <div className="space-y-5 pt-2">
           <div className="flex items-center gap-2 pb-2 border-b border-border/30">
             <Sparkles size={14} className="text-violet-500" />
             <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Abonelere Özel AI Analiz Raporu</h3>
           </div>
-          <CeoTaReport ticker={tickerUpper} />
+          <CeoTaReport ticker={code} unit="puan" />
         </div>
       </LockedSection>
     </div>
   )
 }
 
-function MemberContent({ data }: { data: any }) {
-  if (!data) {
-    return <p className="text-sm text-muted-foreground">Veri yüklenemedi.</p>
-  }
+function EndeksMemberContent({ data }: { data: TaData }) {
+  if (!data) return <p className="text-sm text-muted-foreground">Veri yüklenemedi.</p>
 
-  const regime = data.market_regime || data.regime || {}
+  const regime = data.market_regime || {}
   const divergences = data.divergences || {}
   const signals = data.signals || []
   const scoreComp = data.score_components || {}
   const breadth = data.market_breadth || {}
-  const bollingerStatus = data.bollinger_status || '—'
 
   return (
     <div className="space-y-4">
-      {/* Market Regime */}
       {regime.regime && (
         <div className="bg-card/30 border border-border/20 rounded-xl p-4 space-y-2">
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Piyasa Rejimi</span>
@@ -247,7 +230,6 @@ function MemberContent({ data }: { data: any }) {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* Score Components */}
         {scoreComp.trend != null && (
           <div className="space-y-3">
             <span className="text-xs font-semibold text-muted-foreground uppercase">Skor Bileşenleri</span>
@@ -269,14 +251,13 @@ function MemberContent({ data }: { data: any }) {
           </div>
         )}
 
-        {/* Divergences + Signals */}
         <div className="space-y-4">
           {signals.length > 0 && (
             <div>
               <span className="text-xs font-semibold text-muted-foreground uppercase block mb-2">Aktif Sinyaller</span>
               <div className="flex flex-wrap gap-1.5">
-                {signals.slice(0, 8).map((s: any, i: number) => (
-                  <SignalBadge key={i} signal={typeof s === 'string' ? s : s.label || ''} />
+                {signals.slice(0, 8).map((s, i) => (
+                  <SignalBadge key={i} signal={s} />
                 ))}
               </div>
             </div>
@@ -296,12 +277,11 @@ function MemberContent({ data }: { data: any }) {
         </div>
       </div>
 
-      {/* Additional indicators */}
       <div className="divide-y divide-border/15">
-        {bollingerStatus !== '—' && (
+        {data.bollinger_status !== '—' && (
           <div className="flex justify-between items-center py-2.5">
             <span className="text-base font-medium text-muted-foreground">Bollinger Bandı</span>
-            <span className="text-base font-semibold text-foreground">{bollingerStatus}</span>
+            <span className="text-base font-semibold text-foreground">{data.bollinger_status}</span>
           </div>
         )}
         {breadth.breadth != null && (
@@ -310,12 +290,26 @@ function MemberContent({ data }: { data: any }) {
             <span className="text-base font-semibold text-foreground">{breadth.breadth.toFixed(1)}% — {breadth.status || '—'}</span>
           </div>
         )}
-        {(regime.adx != null) && (
-          <div className="flex justify-between items-center py-2.5">
-            <span className="text-base font-medium text-muted-foreground">ADX Trend Gücü</span>
-            <span className={`text-base font-semibold font-mono ${regime.adx >= 25 ? 'text-emerald-500' : 'text-foreground'}`}>{regime.adx.toFixed(1)}</span>
+        <div className="grid grid-cols-2 gap-4 py-2.5">
+          <div>
+            <span className="text-xs md:text-sm text-muted-foreground font-semibold uppercase flex items-center gap-1 mb-0.5">
+              <AlertCircle size={12} className="text-destructive" /> Stop-Loss (1.5x ATR)
+            </span>
+            <span className="text-lg md:text-xl font-bold text-destructive font-mono block">
+              {data.atr_stop_loss.toLocaleString('tr-TR', { minimumFractionDigits: 0 })}
+            </span>
+            <span className="text-xs text-muted-foreground">Puan</span>
           </div>
-        )}
+          <div>
+            <span className="text-xs md:text-sm text-muted-foreground font-semibold uppercase flex items-center gap-1 mb-0.5">
+              <TrendingUp size={12} className="text-teal-600" /> Risk/Ödül
+            </span>
+            <span className="text-lg md:text-xl font-bold text-teal-600 font-mono block">
+              {data.rr_ratio.toFixed(2)}
+            </span>
+            <span className="text-xs text-muted-foreground">Oran</span>
+          </div>
+        </div>
       </div>
     </div>
   )

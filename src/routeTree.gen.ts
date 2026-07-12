@@ -25,7 +25,9 @@ import { Route as EndekslerIdRouteImport } from './routes/endeksler.$id'
 import { Route as ApiTickersRouteImport } from './routes/api/tickers'
 import { Route as ApiCheckoutRouteImport } from './routes/api/checkout'
 import { Route as HisseTickerIndexRouteImport } from './routes/hisse.$ticker.index'
+import { Route as EndekslerIdIndexRouteImport } from './routes/endeksler.$id.index'
 import { Route as HisseTickerTeknikAnalizRouteImport } from './routes/hisse.$ticker.teknik-analiz'
+import { Route as EndekslerIdTeknikAnalizRouteImport } from './routes/endeksler.$id.teknik-analiz'
 import { Route as ApiWebhooksPolarRouteImport } from './routes/api/webhooks/polar'
 import { Route as ApiUserCreditsRouteImport } from './routes/api/user/credits'
 import { Route as ApiModelsAvailableRouteImport } from './routes/api/models/available'
@@ -113,10 +115,20 @@ const HisseTickerIndexRoute = HisseTickerIndexRouteImport.update({
   path: '/',
   getParentRoute: () => HisseTickerRoute,
 } as any)
+const EndekslerIdIndexRoute = EndekslerIdIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => EndekslerIdRoute,
+} as any)
 const HisseTickerTeknikAnalizRoute = HisseTickerTeknikAnalizRouteImport.update({
   id: '/teknik-analiz',
   path: '/teknik-analiz',
   getParentRoute: () => HisseTickerRoute,
+} as any)
+const EndekslerIdTeknikAnalizRoute = EndekslerIdTeknikAnalizRouteImport.update({
+  id: '/teknik-analiz',
+  path: '/teknik-analiz',
+  getParentRoute: () => EndekslerIdRoute,
 } as any)
 const ApiWebhooksPolarRoute = ApiWebhooksPolarRouteImport.update({
   id: '/api/webhooks/polar',
@@ -160,7 +172,7 @@ export interface FileRoutesByFullPath {
   '/takip-listesi': typeof TakipListesiRoute
   '/api/checkout': typeof ApiCheckoutRoute
   '/api/tickers': typeof ApiTickersRoute
-  '/endeksler/$id': typeof EndekslerIdRoute
+  '/endeksler/$id': typeof EndekslerIdRouteWithChildren
   '/hisse/$ticker': typeof HisseTickerRouteWithChildren
   '/sektorler/$slug': typeof SektorlerSlugRoute
   '/endeksler/': typeof EndekslerIndexRoute
@@ -171,7 +183,9 @@ export interface FileRoutesByFullPath {
   '/api/models/available': typeof ApiModelsAvailableRoute
   '/api/user/credits': typeof ApiUserCreditsRoute
   '/api/webhooks/polar': typeof ApiWebhooksPolarRoute
+  '/endeksler/$id/teknik-analiz': typeof EndekslerIdTeknikAnalizRoute
   '/hisse/$ticker/teknik-analiz': typeof HisseTickerTeknikAnalizRoute
+  '/endeksler/$id/': typeof EndekslerIdIndexRoute
   '/hisse/$ticker/': typeof HisseTickerIndexRoute
 }
 export interface FileRoutesByTo {
@@ -183,7 +197,6 @@ export interface FileRoutesByTo {
   '/takip-listesi': typeof TakipListesiRoute
   '/api/checkout': typeof ApiCheckoutRoute
   '/api/tickers': typeof ApiTickersRoute
-  '/endeksler/$id': typeof EndekslerIdRoute
   '/sektorler/$slug': typeof SektorlerSlugRoute
   '/endeksler': typeof EndekslerIndexRoute
   '/profil': typeof ProfilIndexRoute
@@ -193,7 +206,9 @@ export interface FileRoutesByTo {
   '/api/models/available': typeof ApiModelsAvailableRoute
   '/api/user/credits': typeof ApiUserCreditsRoute
   '/api/webhooks/polar': typeof ApiWebhooksPolarRoute
+  '/endeksler/$id/teknik-analiz': typeof EndekslerIdTeknikAnalizRoute
   '/hisse/$ticker/teknik-analiz': typeof HisseTickerTeknikAnalizRoute
+  '/endeksler/$id': typeof EndekslerIdIndexRoute
   '/hisse/$ticker': typeof HisseTickerIndexRoute
 }
 export interface FileRoutesById {
@@ -208,7 +223,7 @@ export interface FileRoutesById {
   '/takip-listesi': typeof TakipListesiRoute
   '/api/checkout': typeof ApiCheckoutRoute
   '/api/tickers': typeof ApiTickersRoute
-  '/endeksler/$id': typeof EndekslerIdRoute
+  '/endeksler/$id': typeof EndekslerIdRouteWithChildren
   '/hisse/$ticker': typeof HisseTickerRouteWithChildren
   '/sektorler/$slug': typeof SektorlerSlugRoute
   '/endeksler/': typeof EndekslerIndexRoute
@@ -219,7 +234,9 @@ export interface FileRoutesById {
   '/api/models/available': typeof ApiModelsAvailableRoute
   '/api/user/credits': typeof ApiUserCreditsRoute
   '/api/webhooks/polar': typeof ApiWebhooksPolarRoute
+  '/endeksler/$id/teknik-analiz': typeof EndekslerIdTeknikAnalizRoute
   '/hisse/$ticker/teknik-analiz': typeof HisseTickerTeknikAnalizRoute
+  '/endeksler/$id/': typeof EndekslerIdIndexRoute
   '/hisse/$ticker/': typeof HisseTickerIndexRoute
 }
 export interface FileRouteTypes {
@@ -246,7 +263,9 @@ export interface FileRouteTypes {
     | '/api/models/available'
     | '/api/user/credits'
     | '/api/webhooks/polar'
+    | '/endeksler/$id/teknik-analiz'
     | '/hisse/$ticker/teknik-analiz'
+    | '/endeksler/$id/'
     | '/hisse/$ticker/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -258,7 +277,6 @@ export interface FileRouteTypes {
     | '/takip-listesi'
     | '/api/checkout'
     | '/api/tickers'
-    | '/endeksler/$id'
     | '/sektorler/$slug'
     | '/endeksler'
     | '/profil'
@@ -268,7 +286,9 @@ export interface FileRouteTypes {
     | '/api/models/available'
     | '/api/user/credits'
     | '/api/webhooks/polar'
+    | '/endeksler/$id/teknik-analiz'
     | '/hisse/$ticker/teknik-analiz'
+    | '/endeksler/$id'
     | '/hisse/$ticker'
   id:
     | '__root__'
@@ -293,7 +313,9 @@ export interface FileRouteTypes {
     | '/api/models/available'
     | '/api/user/credits'
     | '/api/webhooks/polar'
+    | '/endeksler/$id/teknik-analiz'
     | '/hisse/$ticker/teknik-analiz'
+    | '/endeksler/$id/'
     | '/hisse/$ticker/'
   fileRoutesById: FileRoutesById
 }
@@ -431,12 +453,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HisseTickerIndexRouteImport
       parentRoute: typeof HisseTickerRoute
     }
+    '/endeksler/$id/': {
+      id: '/endeksler/$id/'
+      path: '/'
+      fullPath: '/endeksler/$id/'
+      preLoaderRoute: typeof EndekslerIdIndexRouteImport
+      parentRoute: typeof EndekslerIdRoute
+    }
     '/hisse/$ticker/teknik-analiz': {
       id: '/hisse/$ticker/teknik-analiz'
       path: '/teknik-analiz'
       fullPath: '/hisse/$ticker/teknik-analiz'
       preLoaderRoute: typeof HisseTickerTeknikAnalizRouteImport
       parentRoute: typeof HisseTickerRoute
+    }
+    '/endeksler/$id/teknik-analiz': {
+      id: '/endeksler/$id/teknik-analiz'
+      path: '/teknik-analiz'
+      fullPath: '/endeksler/$id/teknik-analiz'
+      preLoaderRoute: typeof EndekslerIdTeknikAnalizRouteImport
+      parentRoute: typeof EndekslerIdRoute
     }
     '/api/webhooks/polar': {
       id: '/api/webhooks/polar'
@@ -483,13 +519,27 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface EndekslerIdRouteChildren {
+  EndekslerIdTeknikAnalizRoute: typeof EndekslerIdTeknikAnalizRoute
+  EndekslerIdIndexRoute: typeof EndekslerIdIndexRoute
+}
+
+const EndekslerIdRouteChildren: EndekslerIdRouteChildren = {
+  EndekslerIdTeknikAnalizRoute: EndekslerIdTeknikAnalizRoute,
+  EndekslerIdIndexRoute: EndekslerIdIndexRoute,
+}
+
+const EndekslerIdRouteWithChildren = EndekslerIdRoute._addFileChildren(
+  EndekslerIdRouteChildren,
+)
+
 interface EndekslerRouteChildren {
-  EndekslerIdRoute: typeof EndekslerIdRoute
+  EndekslerIdRoute: typeof EndekslerIdRouteWithChildren
   EndekslerIndexRoute: typeof EndekslerIndexRoute
 }
 
 const EndekslerRouteChildren: EndekslerRouteChildren = {
-  EndekslerIdRoute: EndekslerIdRoute,
+  EndekslerIdRoute: EndekslerIdRouteWithChildren,
   EndekslerIndexRoute: EndekslerIndexRoute,
 }
 
@@ -556,12 +606,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

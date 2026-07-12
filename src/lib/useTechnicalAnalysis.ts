@@ -1,0 +1,60 @@
+import { useQuery } from '@tanstack/react-query'
+
+const HONO_API = import.meta.env.VITE_HONO_API_URL || 'https://hono.jetborsa.com'
+
+function isMarketOpen(): boolean {
+  const now = new Date().toLocaleString('en-US', { timeZone: 'Europe/Istanbul', hour12: false })
+  const hour = parseInt(now.split(', ')[1]?.split(':')[0] || '0')
+  const weekday = new Date().toLocaleString('en-US', { timeZone: 'Europe/Istanbul', weekday: 'short' })
+  if (['Sat', 'Sun'].includes(weekday)) return false
+  return hour >= 9 && hour < 17
+}
+
+function marketStaleTime(openShort: number, closedLong: number): number {
+  return isMarketOpen() ? openShort : closedLong
+}
+
+async function fetchFromTA(endpoint: string) {
+  const res = await fetch(`${HONO_API}/api/v1/ta${endpoint}`)
+  if (!res.ok) {
+    if (res.status === 403) return { _blocked: true, _requires: 'subscriber' }
+    if (res.status === 404) return null
+    throw new Error(`TA API ${res.status}`)
+  }
+  return res.json()
+}
+
+function useTAPublicSummary(ticker: string) {
+  return useQuery({
+    queryKey: ['ta', 'public', ticker],
+    queryFn: () => fetchFromTA(`/public/${ticker}/summary`),
+    staleTime: marketStaleTime(300_000, 3_600_000),
+    gcTime: 30 * 60 * 1000,
+    retry: 2,
+    enabled: !!ticker,
+  })
+}
+
+function useTAMemberSummary(ticker: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ['ta', 'member', ticker],
+    queryFn: () => fetchFromTA(`/member/${ticker}/summary`),
+    staleTime: marketStaleTime(300_000, 3_600_000),
+    gcTime: 30 * 60 * 1000,
+    retry: 1,
+    enabled: !!ticker && enabled,
+  })
+}
+
+function useTAFullAnalysis(ticker: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ['ta', 'full', ticker],
+    queryFn: () => fetchFromTA(`/full/${ticker}`),
+    staleTime: 15 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
+    retry: 0,
+    enabled: !!ticker && enabled,
+  })
+}
+
+export { useTAPublicSummary, useTAMemberSummary, useTAFullAnalysis, fetchFromTA }
