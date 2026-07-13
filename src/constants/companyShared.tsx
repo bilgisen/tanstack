@@ -122,6 +122,32 @@ export function SignalBadge({ signal }: { signal: string }) {
   )
 }
 
+export const SLUG_TO_COMP_NAME: Record<string, string> = {
+  'bankacilik-finans': 'Bankacilik_Finans',
+  'sigortacilik': 'Sigortacilik',
+  'gyo-gayrimenkul': 'GYO',
+  'enerji-uretim-dagitim-petrol': 'Enerji_Altyapi',
+  'sanayi-metal-kimya': 'Sanayi_Metal_Kimya',
+  'insaat-yapi-malzemeleri': 'Insaat_Yapi',
+  'otomotiv-savunma-makine': 'Otomotiv_Savunma_Makine',
+  'teknoloji-iletisim': 'Teknoloji_Iletisim',
+  'gida-icecek-tarim': 'Gida_Icecek_Tarim',
+  'tuketim-perakende-tekstil': 'Tuketim_Perakende_Tekstil',
+  'ulasim-lojistik': 'Ulastirma_Lojistik',
+  'turizm-medya-eglence': 'Turizm_Medya_Eglence',
+  'holdingler': 'Holdingler',
+  'saglik-ilac': 'Saglik_Ilac',
+  'spor': 'Spor',
+  'diger': 'Diğer',
+}
+
+export function slugToCompName(slug: string): string {
+  return SLUG_TO_COMP_NAME[slug] || slug
+    .split('-')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join('_')
+}
+
 export async function fetchCompanyData(tickerUpper: string, slug: string) {
   const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com"
   const officialName = (companyNames as Record<string, string>)[tickerUpper] || tickerUpper

@@ -1,9 +1,11 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, Factory, Loader2, Trophy } from 'lucide-react'
+import { ArrowLeft, Factory, Loader2, Trophy, TrendingUp, BarChart3 } from 'lucide-react'
 import companyLogos from '../constants/companyLogos.json'
+import { slugToCompName } from '../constants/companyShared'
 
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
 import { useIndustryDetail } from '../lib/useCompanyData'
+import { useCompRankings, useCompSectorDetail } from '../lib/useCompData'
 
 export const Route = createFileRoute('/sektorler/$slug')({
   component: SektorSlugLayout,
@@ -35,10 +37,19 @@ function getScoreBg(score: number | null) {
   return 'bg-red-500/10'
 }
 
+function fmt(val: number | null | undefined, decimals = 2): string {
+  if (val == null) return '—'
+  return val.toLocaleString('tr-TR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
+}
+
 function SektorDetailPage() {
   const { slug } = Route.useParams()
   const navigate = useNavigate()
   const { data: industryData, isLoading: loading } = useIndustryDetail(slug)
+
+  const compName = slugToCompName(slug)
+  const { data: rankingsRaw, isLoading: rankingsLoading } = useCompRankings('sector', compName)
+  const { data: sectorDetailRaw, isLoading: detailLoading } = useCompSectorDetail(compName)
 
   const chatContext = `industry:${slug}`
   
@@ -72,6 +83,21 @@ function SektorDetailPage() {
   const activeCompanies = companies.filter(c => c.score !== null).length
   const hasScoreData = activeCompanies > 0
   const reliability = totalCompanies >= 10 ? 'HIGH' : totalCompanies >= 5 ? 'MEDIUM' : 'LOW'
+
+  const rankings = (rankingsRaw as any) || null
+  const sectorDetail = (sectorDetailRaw as any) || null
+
+  const rankedCompanies: ScoredCompany[] = rankings?.results
+    ? [...rankings.results]
+        .sort((a: any, b: any) => (b.composite_score || 0) - (a.composite_score || 0))
+        .map((r: any, i: number) => ({
+          rank: i + 1,
+          ticker: r.ticker,
+          name: r.ticker,
+          score: r.composite_score ?? null,
+          reliability: 'HIGH',
+        }))
+    : []
 
   if (loading) {
     return (
@@ -120,10 +146,89 @@ function SektorDetailPage() {
               <div className="text-2xl md:text-3xl font-bold text-green-600 tracking-tight">{activeCompanies}</div>
               <div className="text-[10px] text-muted-foreground font-medium uppercase">Skorlu Şirket</div>
             </div>
+            {rankings && (
+              <div className="text-right">
+                <div className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">{rankings.total || rankings.results?.length || 0}</div>
+                <div className="text-[10px] text-muted-foreground font-medium uppercase">Puanlanan</div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Companies */}
+        {/* Sector Benchmarks */}
+        {sectorDetail?.benchmarks && !detailLoading && (
+          <div className="border border-border/45 bg-card/20 rounded-2xl p-5">
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/30">
+              <BarChart3 size={14} className="text-primary" />
+              <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Sektör Benchmark</h3>
+              <span className="text-[10px] text-muted-foreground ml-auto">Medyan değerler</span>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {Object.entries(sectorDetail.benchmarks).slice(0, 8).map(([code, b]: [string, any]) => (
+                <div key={code} className="bg-muted/10 border border-border/20 rounded-xl px-3 py-2.5">
+                  <div className="text-[10px] text-muted-foreground uppercase tracking-wider">{code}</div>
+                  <div className="text-sm font-bold font-mono text-foreground mt-0.5">{fmt(b.median_ew)}</div>
+                  {b.p25 != null && b.p75 != null && (
+                    <div className="text-[9px] text-muted-foreground mt-0.5">
+                      P25: {fmt(b.p25)} · P75: {fmt(b.p75)}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* COMP Rankings */}
+        {rankedCompanies.length > 0 && !rankingsLoading && (
+          <div className="border border-border/45 bg-card/20 rounded-2xl p-5">
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/30">
+              <div className="w-6 h-6 rounded-md bg-primary/10 text-primary flex items-center justify-center">
+                <TrendingUp size={12} />
+              </div>
+              <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Temel Analiz Sıralaması</h3>
+              <span className="text-[10px] text-muted-foreground ml-auto">{rankings.total || rankedCompanies.length} şirket</span>
+            </div>
+
+            <div className="divide-y divide-white/5">
+              {rankedCompanies.map((company) => {
+                const logoFile = companyLogos[company.ticker as keyof typeof companyLogos]
+                return (
+                  <div
+                    key={company.ticker}
+                    onClick={() => navigate({ to: `/hisse/${company.ticker.toLowerCase()}` })}
+                    className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="text-xs font-mono text-muted-foreground w-5 text-right shrink-0">{company.rank}</span>
+                      {logoFile ? (
+                        <div className="h-8 w-8 rounded-md bg-white overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
+                          <img src={`/logos/${logoFile}`} alt={company.ticker} className="h-full w-full object-contain" />
+                        </div>
+                      ) : (
+                        <div className="h-8 w-8 rounded-md bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] shrink-0 border border-primary/10">
+                          {company.ticker.slice(0, 2)}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                          {company.ticker}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className={`text-lg font-black font-mono ${getScoreColor(company.score)} ${getScoreBg(company.score)} px-2.5 py-0.5 rounded-lg`}>
+                        {company.score != null ? company.score.toFixed(1) : '-'}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Companies (finveri) */}
         <div className="border border-border/45 bg-card/20 rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/30">
             <div className="w-6 h-6 rounded-md bg-primary/10 text-primary flex items-center justify-center">

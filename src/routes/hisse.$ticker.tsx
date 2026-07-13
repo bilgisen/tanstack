@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet } from '@tanstack/react-router'
-import { ArrowUp, ArrowDown, Activity, Info, Star, ChevronDown, ChevronUp, Clock } from 'lucide-react'
+import { ArrowUp, ArrowDown, Activity, Info, Star, ChevronDown, ChevronUp, Clock, BarChart3, FileText } from 'lucide-react'
 import companyNames from '../constants/companyNames.json'
 import companyLogos from '../constants/companyLogos.json'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
@@ -14,6 +14,8 @@ export const Route = createFileRoute('/hisse/$ticker')({
 const TABS = [
   { suffix: '', label: 'Genel Bakış', icon: Info },
   { suffix: '/teknik-analiz', label: 'Teknik Analiz', icon: Activity },
+  { suffix: '/temel-analiz', label: 'Temel Analiz', icon: BarChart3 },
+  { suffix: '/tablolar', label: 'Tablolar', icon: FileText },
 ]
 
 function CompanyLayout() {
