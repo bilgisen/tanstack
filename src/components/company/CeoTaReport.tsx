@@ -447,7 +447,7 @@ export function CeoTaReport({ ticker, unit = 'TL' }: CeoTaReportProps) {
           <Zap size={14} className="text-amber-500" />
           Senaryo Analizi
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="space-y-3">
           <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4 space-y-2.5">
             <div className="flex items-center justify-between">
               <span className="text-sm font-bold text-emerald-500 uppercase">{sc.positive.name}</span>
@@ -576,32 +576,6 @@ export function CeoTaReport({ ticker, unit = 'TL' }: CeoTaReportProps) {
           </div>
         </div>
       )}
-
-      {/* Teknik Skor Nasıl Hesaplandı */}
-      <div>
-        <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-          <Gauge size={14} className="text-primary" />
-          Teknik Skor Nasıl Hesaplandı?
-        </h3>
-        <div className="bg-card/30 border border-border/15 rounded-xl p-4 text-sm text-muted-foreground space-y-2 leading-relaxed">
-          <p>
-            Teknik skor, hissenin <strong className="text-foreground">Trend (50 puan)</strong>,{' '}
-            <strong className="text-foreground">Momentum (30 puan)</strong>,{' '}
-            <strong className="text-foreground">Hacim (20 puan)</strong> ve{' '}
-            <strong className="text-foreground">Formasyon (bonus)</strong> olmak üzere
-            dört ana bileşenin ağırlıklı toplamıdır.
-          </p>
-          <ul className="space-y-1 pl-4 list-disc">
-            <li><strong className="text-emerald-500">Trend (50p):</strong> EMA mesafesi, SMA kesişimleri ve ADX gücü. Güçlü trend = yüksek puan.</li>
-            <li><strong className="text-blue-500">Momentum (30p):</strong> RSI seviyesi, MACD histogram yönü ve Stokastik konumu. Uyumlu sinyaller = yüksek puan.</li>
-            <li><strong className="text-amber-500">Hacim (20p):</strong> MFI, OBV trendi ve hacim/ortalama oranı. Artan hacimli hareket = yüksek puan.</li>
-            <li><strong className="text-violet-500">Formasyon (bonus):</strong> Tespit edilen mum ve teknik formasyonların güvenilirlik puanı. Bonus puan eklenir veya düşülür.</li>
-          </ul>
-          <p className="text-xs text-muted-foreground/60 pt-1">
-            Skor 0-100 arasıdır. 70+ güçlü, 40-70 nötr, 40 altı zayıf teknik görünümü ifade eder.
-          </p>
-        </div>
-      </div>
 
       {/* Footer */}
       <div className="border-t border-border/15 pt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-muted-foreground">

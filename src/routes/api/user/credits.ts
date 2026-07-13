@@ -38,7 +38,7 @@ export const Route = createFileRoute('/api/user/credits')({
                 .insert(userCredits)
                 .values({
                   userId,
-                  tier: 'free',
+                  tier: 'pro',
                   monthlyHt: 5000,
                   usedHt: 0,
                   extraHt: 0,
