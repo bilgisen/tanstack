@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   AlertTriangle, Target, Shield, Activity, BarChart3,
-  Zap, Sparkles, TrendingUp, Gauge, Coins, LineChart, Clock, Info
+  Zap, Sparkles, TrendingUp, Gauge, Coins, LineChart, Clock
 } from 'lucide-react'
 
 interface CeoTaReportProps {
@@ -557,23 +557,6 @@ export function CeoTaReport({ ticker, unit = 'TL' }: CeoTaReportProps) {
               </li>
             ))}
           </ul>
-        </div>
-      )}
-
-      {/* AI Notlar - Key Takeaways */}
-      {report.ai_analysis?.notlar?.length > 0 && (
-        <div>
-          <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-            <Info size={14} className="text-blue-500" />
-            Öne Çıkanlar
-          </h3>
-          <div className="bg-card/30 border border-border/15 rounded-xl divide-y divide-border/10">
-            {report.ai_analysis.notlar.map((note: string, i: number) => (
-              <div key={i} className="p-3.5 text-sm text-foreground/80 leading-relaxed">
-                {note}
-              </div>
-            ))}
-          </div>
         </div>
       )}
 
