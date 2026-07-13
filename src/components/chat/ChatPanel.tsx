@@ -26,10 +26,14 @@ interface ChatPanelProps {
 }
 
 export function ChatPanel({ context, placeholder, onClose, user, sessionLoading, isMobile = false }: ChatPanelProps) {
-  const { messages, isLoading, sessions, activeSessionId, loadSession, deleteSession, clearChat } = useChatStore();
+  const { messages, isLoading, sessions, activeSessionId, loadSession, deleteSession, clearChat, init } = useChatStore();
   const { isChatMaximized, toggleChatMaximized } = useUIStore();
   const [historyOpen, setHistoryOpen] = useState(false);
   const historyRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    init()
+  }, [init])
 
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {

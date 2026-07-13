@@ -70,7 +70,7 @@ export function HTDashboard({ collapsed = false }: { collapsed?: boolean }) {
       <Link
         to="/profil"
         className="relative group w-9 h-9 flex items-center justify-center rounded-lg hover:bg-muted/40 transition-all duration-200 cursor-pointer border border-border/30"
-        title={`Bakiye: ${data.availableHT.toLocaleString()} HT (${data.tierDisplayName})`}
+        title={`Bakiye: ${data.availableHT.toLocaleString()} Jet Token (${data.tierDisplayName})`}
       >
         <Coins size={14} className="text-primary group-hover:scale-110 transition-transform duration-200" />
         <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-primary text-[8px] font-bold text-primary-foreground font-sans border border-background shadow-xs select-none">
@@ -89,7 +89,7 @@ export function HTDashboard({ collapsed = false }: { collapsed?: boolean }) {
       <div className="flex items-center justify-between relative z-10">
         <div className="flex items-center gap-2">
           <Coins size={15} className="text-primary animate-pulse" />
-          <span className="text-xs font-bold text-foreground">HToken Bakiyesi</span>
+          <span className="text-xs font-bold text-foreground">Jet Token Bakiyesi</span>
         </div>
         <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border ${getTierBadgeClass(data.tier)}`}>
           {data.tierDisplayName}
@@ -102,13 +102,13 @@ export function HTDashboard({ collapsed = false }: { collapsed?: boolean }) {
           <span className="text-2xl font-black text-foreground tracking-tight">
             {data.availableHT.toLocaleString()}
           </span>
-          <span className="text-xs font-bold text-primary">HT</span>
+          <span className="text-xs font-bold text-primary">Jet Token</span>
         </div>
         
         {data.extraHT > 0 && (
           <span className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
             <Zap size={9} className="text-amber-400 shrink-0 fill-amber-400" />
-            <span>({data.extraHT.toLocaleString()} HT ek kredi dahil)</span>
+            <span>({data.extraHT.toLocaleString()} Jet Token ek kredi dahil)</span>
           </span>
         )}
       </div>
@@ -122,7 +122,7 @@ export function HTDashboard({ collapsed = false }: { collapsed?: boolean }) {
           />
         </div>
         <div className="flex justify-between text-[10px] text-muted-foreground">
-          <span>Kalan Aylık: {Math.max(0, data.monthlyHT - data.usedHT).toLocaleString()} HT</span>
+          <span>Kalan Aylık: {Math.max(0, data.monthlyHT - data.usedHT).toLocaleString()} Jet Token</span>
           <span>%{data.usagePercent} Tüketildi</span>
         </div>
       </div>

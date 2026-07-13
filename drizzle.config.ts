@@ -16,6 +16,8 @@ export default defineConfig({
     "tariff_history",
     "user_credits",
     "usage_logs",
-    "webhook_events"
+    "webhook_events",
+    "chat_sessions",
+    "chat_messages"
   ],
 });

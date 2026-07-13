@@ -65,6 +65,36 @@ export const usageLogs = sqliteTable("usage_logs", {
   index("idx_usage_logs_created_at").on(table.createdAt)
 ]);
 
+export const chatSessions = sqliteTable("chat_sessions", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  ticker: text("ticker"),
+  context: text("context"),
+  title: text("title"),
+  messageCount: integer("message_count").default(0).notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(() => new Date()).$onUpdate(() => new Date()).notNull(),
+}, (table) => [
+  index("idx_chat_sessions_user_id").on(table.userId),
+  index("idx_chat_sessions_updated_at").on(table.updatedAt)
+]);
+
+export const chatMessages = sqliteTable("chat_messages", {
+  id: text("id").primaryKey(),
+  sessionId: text("session_id").notNull().references(() => chatSessions.id, { onDelete: "cascade" }),
+  role: text("role").notNull(),
+  text: text("text").notNull(),
+  context: text("context"),
+  suggestions: text("suggestions"),
+  widget: text("widget"),
+  inputTokens: integer("input_tokens"),
+  outputTokens: integer("output_tokens"),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
+}, (table) => [
+  index("idx_chat_messages_session_id").on(table.sessionId),
+  index("idx_chat_messages_created_at").on(table.createdAt)
+]);
+
 export const webhookEvents = sqliteTable("webhook_events", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   eventId: text("event_id").notNull().unique(),

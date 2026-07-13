@@ -1,6 +1,7 @@
 import { db } from "./db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, gte, sql, count } from "drizzle-orm";
 import { modelConfigs, userCredits, usageLogs } from "./schema";
+import { TIER_CONFIG } from "./tiers";
 
 interface HTCheckResult {
   ok: boolean;
@@ -58,11 +59,48 @@ export async function checkAndReserveHT(
       }
     }
 
+    // 2b. Monthly reset: if resetAt is in the past, reset usedHt
+    if (credits.resetAt && new Date(credits.resetAt) < new Date()) {
+      await db
+        .update(userCredits)
+        .set({
+          usedHt: 0,
+          resetAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          updatedAt: new Date(),
+        })
+        .where(eq(userCredits.userId, userId))
+      credits.usedHt = 0
+      credits.resetAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+    }
+
     // 3. Check if user's tier has access to this model
     const allowedTiers = model.allowedTiers || [];
     if (!allowedTiers.includes(credits.tier)) {
       console.warn(`[checkAndReserveHT] User tier '${credits.tier}' not allowed for model: ${modelId}`);
       return { ok: false, error: 'MODEL_NOT_ALLOWED' };
+    }
+
+    // 3b. Daily call limit enforcement
+    const tierCfg = (TIER_CONFIG as any)[credits.tier]
+    if (tierCfg?.dailyCallLimit != null) {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const tomorrow = new Date(today)
+      tomorrow.setDate(tomorrow.getDate() + 1)
+      const todayCount = await db
+        .select({ cnt: count() })
+        .from(usageLogs)
+        .where(
+          and(
+            eq(usageLogs.userId, userId),
+            gte(usageLogs.createdAt, today),
+            sql`${usageLogs.createdAt} < ${tomorrow}`,
+          )
+        )
+        .then((r: any[]) => r[0]?.cnt || 0)
+      if (todayCount >= tierCfg.dailyCallLimit) {
+        return { ok: false, error: 'DAILY_LIMIT', availableHT: (credits.monthlyHt - credits.usedHt) + credits.extraHt }
+      }
     }
 
     // 4. Calculate estimated HT cost
@@ -128,14 +166,28 @@ export async function chargeHT(params: {
     (outputTokens / 1000) * outputCost
   );
 
-  // 4. Retrieve current user credits
-  const credits = await db
+  // 4. Retrieve current user credits (with monthly reset)
+  let credits = await db
     .select()
     .from(userCredits)
     .where(eq(userCredits.userId, userId))
     .then((res: any[]) => res[0]);
 
   if (!credits) throw new Error(`Credits not found for user: ${userId}`);
+
+  // Monthly reset if needed
+  if (credits.resetAt && new Date(credits.resetAt) < new Date()) {
+    await db
+      .update(userCredits)
+      .set({
+        usedHt: 0,
+        resetAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        updatedAt: new Date(),
+      })
+      .where(eq(userCredits.userId, userId))
+    credits.usedHt = 0
+    credits.resetAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+  }
 
   let newExtraHT = credits.extraHt;
   let htToCharge = htCharged;

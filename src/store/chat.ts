@@ -28,11 +28,13 @@ interface ChatState {
   sessions: ChatSession[];
   activeSessionId: string | null;
   selectedModelId: string;
+  initialized: boolean;
   setSelectedModelId: (modelId: string) => void;
   sendMessage: (text: string, context: string) => Promise<void>;
   clearChat: () => void;
   loadSession: (id: string) => void;
   deleteSession: (id: string) => void;
+  init: () => Promise<void>;
 }
 
 const generateShortCode = (): string => {
@@ -78,28 +80,80 @@ export const useChatStore = create<ChatState>((set, get) => ({
   sessions: loadSessionsFromStorage(),
   activeSessionId: null,
   selectedModelId: "gemini-2.5-flash",
+  initialized: false,
 
   setSelectedModelId: (modelId: string) => set({ selectedModelId: modelId }),
 
   clearChat: () => set({ messages: [], activeSessionId: null }),
 
-  loadSession: (id: string) => {
-    const session = get().sessions.find(s => s.id === id);
-    if (session) {
-      set({
-        activeSessionId: id,
-        messages: session.messages
-      });
+  init: async () => {
+    if (get().initialized) return
+    try {
+      const res = await fetch('/api/chat/sessions?limit=50')
+      if (res.ok) {
+        const data = await res.json()
+        const remoteSessions: ChatSession[] = (data.sessions || []).map((s: any) => ({
+          id: s.id,
+          ticker: s.ticker || 'GLOBAL',
+          code: s.id.slice(0, 3).toUpperCase(),
+          date: new Date(s.createdAt).toISOString().slice(0, 10),
+          messages: [],
+          context: s.context || '',
+        }))
+        // Merge: remote sessions first, then local-only sessions (not yet saved to server)
+        const localIds = new Set(get().sessions.map(s => s.id))
+        const merged = [
+          ...remoteSessions,
+          ...get().sessions.filter(s => !localIds.has(s.id))
+        ]
+        set({ sessions: merged, initialized: true })
+        saveSessionsToStorage(merged)
+      }
+    } catch {
+      set({ initialized: true })
     }
   },
 
-  deleteSession: (id: string) => {
-    const updatedSessions = get().sessions.filter(s => s.id !== id);
-    set({ sessions: updatedSessions });
-    saveSessionsToStorage(updatedSessions);
+  loadSession: async (id: string) => {
+    const local = get().sessions.find(s => s.id === id)
+    if (!local) return
+
+    // Try to get messages from server first
+    try {
+      const res = await fetch(`/api/chat/sessions/${id}`)
+      if (res.ok) {
+        const data = await res.json()
+        const serverMessages: Message[] = (data.session?.messages || []).map((m: any) => ({
+          role: m.role,
+          text: m.text,
+          context: m.context || undefined,
+          suggestions: m.suggestions || undefined,
+          widget: m.widget || undefined,
+        }))
+        if (serverMessages.length > 0) {
+          local.messages = serverMessages
+        }
+      }
+    } catch {
+      // fallback to local messages
+    }
+
+    set({
+      activeSessionId: id,
+      messages: local.messages,
+    })
+  },
+
+  deleteSession: async (id: string) => {
+    try {
+      await fetch(`/api/chat/sessions/${id}`, { method: 'DELETE' })
+    } catch {}
+    const updatedSessions = get().sessions.filter(s => s.id !== id)
+    set({ sessions: updatedSessions })
+    saveSessionsToStorage(updatedSessions)
 
     if (get().activeSessionId === id) {
-      set({ activeSessionId: null, messages: [] });
+      set({ activeSessionId: null, messages: [] })
     }
   },
 
@@ -111,8 +165,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
     let currentSessions = [...get().sessions];
     let currentSession = currentSessions.find(s => s.id === currentSessionId);
 
+    let isNewSession = false
+
     // If no active session, create a new one
     if (!currentSession) {
+      isNewSession = true
       let ticker = "GLOBAL";
       if (context.startsWith("sirket:")) {
         ticker = context.split(":")[1].toUpperCase();
@@ -161,13 +218,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
       if (preCheckRes.ok) {
         const preCheckData = await preCheckRes.json();
-        if (!preCheckData.ok) {
+          if (!preCheckData.ok) {
           let errorMsg = "";
           if (preCheckData.error === 'MODEL_NOT_ALLOWED') {
             errorMsg = `Seçtiğiniz model olan **${selectedModelId.toUpperCase()}** bu abonelik paketinde kullanılamamaktadır. Lütfen [Profil ve Abonelik Paneli](/profil) sayfasından paketinizi yükseltin.`;
           } else if (preCheckData.error === 'INSUFFICIENT_HT') {
             const availableHT = preCheckData.availableHT || 0;
-            errorMsg = `Yetersiz HToken bakiyesi! Mevcut bakiyeniz: **${availableHT.toLocaleString()} HT**. Chatbot'u kullanmaya devam edebilmek için lütfen [Profil ve Abonelik Paneli](/profil) sayfasından paketinizi yükseltin veya ek kredi satın alın.`;
+            errorMsg = `Yetersiz Jet Token bakiyesi! Mevcut bakiyeniz: **${availableHT.toLocaleString()} Jet Token**. Chatbot'u kullanmaya devam edebilmek için lütfen [Profil ve Abonelik Paneli](/profil) sayfasından paketinizi yükseltin veya ek kredi satın alın.`;
+          } else if (preCheckData.error === 'DAILY_LIMIT') {
+            errorMsg = "Günlük kullanım limitinize ulaştınız. Sınırsız kullanım için lütfen [Profil ve Abonelik Paneli](/profil) sayfasından paketinizi yükseltin.";
           } else {
             errorMsg = "Sorgunuz bakiye yetersizliği veya yetkilendirme hatası nedeniyle işlenemedi. Lütfen profilinizden bakiye durumunuzu kontrol edin.";
           }
@@ -258,6 +317,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     const enrichedContext = `${context} | Aktif Liste: "${activeWatchlist?.name || 'Yok'}" | Tüm Takip Listeleri ve Güncel Fiyat/Değişim Verileri: ${watchlistsContext} | Desteklenen AI komutları: Bir hisseyi/endeksi takip listesine eklemek için cevabın sonuna [WATCHLIST_ADD:SEMBOL:hisse|endeks] veya çıkarmak için [WATCHLIST_REMOVE:SEMBOL] ekleyebilirsin. Örneğin: [WATCHLIST_ADD:THYAO:stock] veya [WATCHLIST_REMOVE:THYAO] veya [WATCHLIST_ADD:XU100:index].`;
 
+    // Build message history for multi-turn context (last 10 exchanges)
+    const historyMessages = get().messages
+      .slice(-20) // last 20 messages = ~10 user + ~10 assistant
+      .filter(m => m.role === 'user' || m.role === 'assistant')
+      .map(m => ({ role: m.role, text: m.text }))
+
     try {
       const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com";
       const response = await fetch(`${apiUrl}/api/ai/chat`, {
@@ -268,6 +333,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         body: JSON.stringify({
           message: trimmedText,
           context: enrichedContext,
+          history: historyMessages,
         }),
       });
 
@@ -330,7 +396,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       const newAssistantMessage: Message = { 
         role: "assistant", 
         text: replyText, 
-        context,
+        context: enrichedContext,
         suggestions: data.suggestions || [],
         widget: data.widget || null
       };
@@ -351,6 +417,30 @@ export const useChatStore = create<ChatState>((set, get) => ({
         messages: [...get().messages, newAssistantMessage]
       });
       saveSessionsToStorage(updatedSessions);
+
+      // Persist exchange to server
+      try {
+        await fetch('/api/chat/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: currentSessionId,
+            ticker: currentSession?.ticker,
+            context: enrichedContext,
+            title: isNewSession ? trimmedText.slice(0, 80) : undefined,
+            userMessage: { text: trimmedText, context },
+            assistantMessage: {
+              text: replyText,
+              suggestions: data.suggestions || [],
+              widget: data.widget || null,
+              inputTokens: data.usage?.inputTokens,
+              outputTokens: data.usage?.outputTokens,
+            },
+          }),
+        })
+      } catch (e) {
+        console.error('Failed to save chat to server:', e)
+      }
 
     } catch (error) {
       console.error(error);
@@ -375,6 +465,20 @@ export const useChatStore = create<ChatState>((set, get) => ({
         messages: [...get().messages, errorAssistantMessage]
       });
       saveSessionsToStorage(updatedSessions);
+
+      try {
+        await fetch('/api/chat/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: currentSessionId,
+            ticker: currentSession?.ticker,
+            context,
+            userMessage: { text: trimmedText, context },
+            assistantMessage: { text: errorAssistantMessage.text },
+          }),
+        })
+      } catch {}
     } finally {
       set({ isLoading: false });
     }

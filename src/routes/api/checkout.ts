@@ -91,7 +91,7 @@ export const Route = createFileRoute('/api/checkout')({
 
           return new Response(JSON.stringify({ 
             success: true, 
-            message: `Başarılı! Hesabınıza ${extraHTAmount.toLocaleString()} HT ek kredi yüklendi.`,
+            message: `Başarılı! Hesabınıza ${extraHTAmount.toLocaleString()} Jet Token ek kredi yüklendi.`,
             extraHT: credits.extraHt + extraHTAmount
           }), {
             headers: { 'Content-Type': 'application/json' }
