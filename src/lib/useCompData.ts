@@ -120,3 +120,34 @@ export function useCompSectorDetail(name: string) {
     enabled: !!name,
   })
 }
+
+export function useSectorGroups() {
+  return useQuery({
+    queryKey: ['comp', 'sector-groups'],
+    queryFn: () => fetchComp('/sectors'),
+    staleTime: 3_600_000,
+    gcTime: 86_400_000,
+  })
+}
+
+export type SectorGroupDetail = {
+  sector?: string
+  group?: string
+  company_count: number
+  benchmarks: Record<string, { median_ew: number; p25: number; p75: number; n_peers: number; reliability: string }>
+  sector_score: { equal_weight: number | null; market_cap_weighted: number | null }
+  leaderboard: Array<{
+    ticker: string
+    name: string
+    sector_main?: string
+    composite_score: number
+    reliability: string
+    market_cap: number | null
+    rank: number
+  }>
+}
+
+export type SectorGroupsResponse = {
+  sectors: Array<{ sector_main: string; cnt: number; consolidated: string | null; consolidated_name: string | null }>
+  groups: Array<{ key: string; name: string; count: number }>
+}

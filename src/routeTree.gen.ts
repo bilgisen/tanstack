@@ -26,16 +26,21 @@ import { Route as ApiTickersRouteImport } from './routes/api/tickers'
 import { Route as ApiCheckoutRouteImport } from './routes/api/checkout'
 import { Route as HisseTickerIndexRouteImport } from './routes/hisse.$ticker.index'
 import { Route as EndekslerIdIndexRouteImport } from './routes/endeksler.$id.index'
+import { Route as SektorlerSlugSectorSlugRouteImport } from './routes/sektorler.$slug.$sectorSlug'
 import { Route as HisseTickerTemelAnalizRouteImport } from './routes/hisse.$ticker.temel-analiz'
-import { Route as HisseTickerTablolarRouteImport } from './routes/hisse.$ticker.tablolar'
 import { Route as HisseTickerTeknikAnalizRouteImport } from './routes/hisse.$ticker.teknik-analiz'
+import { Route as HisseTickerTablolarRouteImport } from './routes/hisse.$ticker.tablolar'
+import { Route as HisseTickerSektorRouteImport } from './routes/hisse.$ticker.sektor'
 import { Route as EndekslerIdTeknikAnalizRouteImport } from './routes/endeksler.$id.teknik-analiz'
 import { Route as ApiWebhooksPolarRouteImport } from './routes/api/webhooks/polar'
 import { Route as ApiUserCreditsRouteImport } from './routes/api/user/credits'
 import { Route as ApiModelsAvailableRouteImport } from './routes/api/models/available'
+import { Route as ApiChatSessionsRouteImport } from './routes/api/chat/sessions'
+import { Route as ApiChatSaveRouteImport } from './routes/api/chat/save'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiAiPreCheckRouteImport } from './routes/api/ai/pre-check'
 import { Route as ApiAiChargeRouteImport } from './routes/api/ai/charge'
+import { Route as ApiChatSessionsIdRouteImport } from './routes/api/chat/sessions.$id'
 
 const TakipListesiRoute = TakipListesiRouteImport.update({
   id: '/takip-listesi',
@@ -122,9 +127,19 @@ const EndekslerIdIndexRoute = EndekslerIdIndexRouteImport.update({
   path: '/',
   getParentRoute: () => EndekslerIdRoute,
 } as any)
+const SektorlerSlugSectorSlugRoute = SektorlerSlugSectorSlugRouteImport.update({
+  id: '/$sectorSlug',
+  path: '/$sectorSlug',
+  getParentRoute: () => SektorlerSlugRoute,
+} as any)
 const HisseTickerTemelAnalizRoute = HisseTickerTemelAnalizRouteImport.update({
   id: '/temel-analiz',
   path: '/temel-analiz',
+  getParentRoute: () => HisseTickerRoute,
+} as any)
+const HisseTickerTeknikAnalizRoute = HisseTickerTeknikAnalizRouteImport.update({
+  id: '/teknik-analiz',
+  path: '/teknik-analiz',
   getParentRoute: () => HisseTickerRoute,
 } as any)
 const HisseTickerTablolarRoute = HisseTickerTablolarRouteImport.update({
@@ -132,9 +147,9 @@ const HisseTickerTablolarRoute = HisseTickerTablolarRouteImport.update({
   path: '/tablolar',
   getParentRoute: () => HisseTickerRoute,
 } as any)
-const HisseTickerTeknikAnalizRoute = HisseTickerTeknikAnalizRouteImport.update({
-  id: '/teknik-analiz',
-  path: '/teknik-analiz',
+const HisseTickerSektorRoute = HisseTickerSektorRouteImport.update({
+  id: '/sektor',
+  path: '/sektor',
   getParentRoute: () => HisseTickerRoute,
 } as any)
 const EndekslerIdTeknikAnalizRoute = EndekslerIdTeknikAnalizRouteImport.update({
@@ -157,6 +172,16 @@ const ApiModelsAvailableRoute = ApiModelsAvailableRouteImport.update({
   path: '/api/models/available',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiChatSessionsRoute = ApiChatSessionsRouteImport.update({
+  id: '/api/chat/sessions',
+  path: '/api/chat/sessions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiChatSaveRoute = ApiChatSaveRouteImport.update({
+  id: '/api/chat/save',
+  path: '/api/chat/save',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -172,6 +197,11 @@ const ApiAiChargeRoute = ApiAiChargeRouteImport.update({
   path: '/api/ai/charge',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiChatSessionsIdRoute = ApiChatSessionsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiChatSessionsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -186,21 +216,26 @@ export interface FileRoutesByFullPath {
   '/api/tickers': typeof ApiTickersRoute
   '/endeksler/$id': typeof EndekslerIdRouteWithChildren
   '/hisse/$ticker': typeof HisseTickerRouteWithChildren
-  '/sektorler/$slug': typeof SektorlerSlugRoute
+  '/sektorler/$slug': typeof SektorlerSlugRouteWithChildren
   '/endeksler/': typeof EndekslerIndexRoute
   '/profil/': typeof ProfilIndexRoute
   '/api/ai/charge': typeof ApiAiChargeRoute
   '/api/ai/pre-check': typeof ApiAiPreCheckRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/chat/save': typeof ApiChatSaveRoute
+  '/api/chat/sessions': typeof ApiChatSessionsRouteWithChildren
   '/api/models/available': typeof ApiModelsAvailableRoute
   '/api/user/credits': typeof ApiUserCreditsRoute
   '/api/webhooks/polar': typeof ApiWebhooksPolarRoute
   '/endeksler/$id/teknik-analiz': typeof EndekslerIdTeknikAnalizRoute
-  '/hisse/$ticker/temel-analiz': typeof HisseTickerTemelAnalizRoute
+  '/hisse/$ticker/sektor': typeof HisseTickerSektorRoute
   '/hisse/$ticker/tablolar': typeof HisseTickerTablolarRoute
   '/hisse/$ticker/teknik-analiz': typeof HisseTickerTeknikAnalizRoute
+  '/hisse/$ticker/temel-analiz': typeof HisseTickerTemelAnalizRoute
+  '/sektorler/$slug/$sectorSlug': typeof SektorlerSlugSectorSlugRoute
   '/endeksler/$id/': typeof EndekslerIdIndexRoute
   '/hisse/$ticker/': typeof HisseTickerIndexRoute
+  '/api/chat/sessions/$id': typeof ApiChatSessionsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -211,21 +246,26 @@ export interface FileRoutesByTo {
   '/takip-listesi': typeof TakipListesiRoute
   '/api/checkout': typeof ApiCheckoutRoute
   '/api/tickers': typeof ApiTickersRoute
-  '/sektorler/$slug': typeof SektorlerSlugRoute
+  '/sektorler/$slug': typeof SektorlerSlugRouteWithChildren
   '/endeksler': typeof EndekslerIndexRoute
   '/profil': typeof ProfilIndexRoute
   '/api/ai/charge': typeof ApiAiChargeRoute
   '/api/ai/pre-check': typeof ApiAiPreCheckRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/chat/save': typeof ApiChatSaveRoute
+  '/api/chat/sessions': typeof ApiChatSessionsRouteWithChildren
   '/api/models/available': typeof ApiModelsAvailableRoute
   '/api/user/credits': typeof ApiUserCreditsRoute
   '/api/webhooks/polar': typeof ApiWebhooksPolarRoute
   '/endeksler/$id/teknik-analiz': typeof EndekslerIdTeknikAnalizRoute
-  '/hisse/$ticker/temel-analiz': typeof HisseTickerTemelAnalizRoute
+  '/hisse/$ticker/sektor': typeof HisseTickerSektorRoute
   '/hisse/$ticker/tablolar': typeof HisseTickerTablolarRoute
   '/hisse/$ticker/teknik-analiz': typeof HisseTickerTeknikAnalizRoute
+  '/hisse/$ticker/temel-analiz': typeof HisseTickerTemelAnalizRoute
+  '/sektorler/$slug/$sectorSlug': typeof SektorlerSlugSectorSlugRoute
   '/endeksler/$id': typeof EndekslerIdIndexRoute
   '/hisse/$ticker': typeof HisseTickerIndexRoute
+  '/api/chat/sessions/$id': typeof ApiChatSessionsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -241,21 +281,26 @@ export interface FileRoutesById {
   '/api/tickers': typeof ApiTickersRoute
   '/endeksler/$id': typeof EndekslerIdRouteWithChildren
   '/hisse/$ticker': typeof HisseTickerRouteWithChildren
-  '/sektorler/$slug': typeof SektorlerSlugRoute
+  '/sektorler/$slug': typeof SektorlerSlugRouteWithChildren
   '/endeksler/': typeof EndekslerIndexRoute
   '/profil/': typeof ProfilIndexRoute
   '/api/ai/charge': typeof ApiAiChargeRoute
   '/api/ai/pre-check': typeof ApiAiPreCheckRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/chat/save': typeof ApiChatSaveRoute
+  '/api/chat/sessions': typeof ApiChatSessionsRouteWithChildren
   '/api/models/available': typeof ApiModelsAvailableRoute
   '/api/user/credits': typeof ApiUserCreditsRoute
   '/api/webhooks/polar': typeof ApiWebhooksPolarRoute
   '/endeksler/$id/teknik-analiz': typeof EndekslerIdTeknikAnalizRoute
-  '/hisse/$ticker/temel-analiz': typeof HisseTickerTemelAnalizRoute
+  '/hisse/$ticker/sektor': typeof HisseTickerSektorRoute
   '/hisse/$ticker/tablolar': typeof HisseTickerTablolarRoute
   '/hisse/$ticker/teknik-analiz': typeof HisseTickerTeknikAnalizRoute
+  '/hisse/$ticker/temel-analiz': typeof HisseTickerTemelAnalizRoute
+  '/sektorler/$slug/$sectorSlug': typeof SektorlerSlugSectorSlugRoute
   '/endeksler/$id/': typeof EndekslerIdIndexRoute
   '/hisse/$ticker/': typeof HisseTickerIndexRoute
+  '/api/chat/sessions/$id': typeof ApiChatSessionsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -278,15 +323,20 @@ export interface FileRouteTypes {
     | '/api/ai/charge'
     | '/api/ai/pre-check'
     | '/api/auth/$'
+    | '/api/chat/save'
+    | '/api/chat/sessions'
     | '/api/models/available'
     | '/api/user/credits'
     | '/api/webhooks/polar'
     | '/endeksler/$id/teknik-analiz'
-    | '/hisse/$ticker/temel-analiz'
+    | '/hisse/$ticker/sektor'
     | '/hisse/$ticker/tablolar'
     | '/hisse/$ticker/teknik-analiz'
+    | '/hisse/$ticker/temel-analiz'
+    | '/sektorler/$slug/$sectorSlug'
     | '/endeksler/$id/'
     | '/hisse/$ticker/'
+    | '/api/chat/sessions/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -303,15 +353,20 @@ export interface FileRouteTypes {
     | '/api/ai/charge'
     | '/api/ai/pre-check'
     | '/api/auth/$'
+    | '/api/chat/save'
+    | '/api/chat/sessions'
     | '/api/models/available'
     | '/api/user/credits'
     | '/api/webhooks/polar'
     | '/endeksler/$id/teknik-analiz'
-    | '/hisse/$ticker/temel-analiz'
+    | '/hisse/$ticker/sektor'
     | '/hisse/$ticker/tablolar'
     | '/hisse/$ticker/teknik-analiz'
+    | '/hisse/$ticker/temel-analiz'
+    | '/sektorler/$slug/$sectorSlug'
     | '/endeksler/$id'
     | '/hisse/$ticker'
+    | '/api/chat/sessions/$id'
   id:
     | '__root__'
     | '/'
@@ -332,15 +387,20 @@ export interface FileRouteTypes {
     | '/api/ai/charge'
     | '/api/ai/pre-check'
     | '/api/auth/$'
+    | '/api/chat/save'
+    | '/api/chat/sessions'
     | '/api/models/available'
     | '/api/user/credits'
     | '/api/webhooks/polar'
     | '/endeksler/$id/teknik-analiz'
-    | '/hisse/$ticker/temel-analiz'
+    | '/hisse/$ticker/sektor'
     | '/hisse/$ticker/tablolar'
     | '/hisse/$ticker/teknik-analiz'
+    | '/hisse/$ticker/temel-analiz'
+    | '/sektorler/$slug/$sectorSlug'
     | '/endeksler/$id/'
     | '/hisse/$ticker/'
+    | '/api/chat/sessions/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -358,6 +418,8 @@ export interface RootRouteChildren {
   ApiAiChargeRoute: typeof ApiAiChargeRoute
   ApiAiPreCheckRoute: typeof ApiAiPreCheckRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiChatSaveRoute: typeof ApiChatSaveRoute
+  ApiChatSessionsRoute: typeof ApiChatSessionsRouteWithChildren
   ApiModelsAvailableRoute: typeof ApiModelsAvailableRoute
   ApiUserCreditsRoute: typeof ApiUserCreditsRoute
   ApiWebhooksPolarRoute: typeof ApiWebhooksPolarRoute
@@ -484,11 +546,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EndekslerIdIndexRouteImport
       parentRoute: typeof EndekslerIdRoute
     }
+    '/sektorler/$slug/$sectorSlug': {
+      id: '/sektorler/$slug/$sectorSlug'
+      path: '/$sectorSlug'
+      fullPath: '/sektorler/$slug/$sectorSlug'
+      preLoaderRoute: typeof SektorlerSlugSectorSlugRouteImport
+      parentRoute: typeof SektorlerSlugRoute
+    }
     '/hisse/$ticker/temel-analiz': {
       id: '/hisse/$ticker/temel-analiz'
       path: '/temel-analiz'
       fullPath: '/hisse/$ticker/temel-analiz'
       preLoaderRoute: typeof HisseTickerTemelAnalizRouteImport
+      parentRoute: typeof HisseTickerRoute
+    }
+    '/hisse/$ticker/teknik-analiz': {
+      id: '/hisse/$ticker/teknik-analiz'
+      path: '/teknik-analiz'
+      fullPath: '/hisse/$ticker/teknik-analiz'
+      preLoaderRoute: typeof HisseTickerTeknikAnalizRouteImport
       parentRoute: typeof HisseTickerRoute
     }
     '/hisse/$ticker/tablolar': {
@@ -498,11 +574,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HisseTickerTablolarRouteImport
       parentRoute: typeof HisseTickerRoute
     }
-    '/hisse/$ticker/teknik-analiz': {
-      id: '/hisse/$ticker/teknik-analiz'
-      path: '/teknik-analiz'
-      fullPath: '/hisse/$ticker/teknik-analiz'
-      preLoaderRoute: typeof HisseTickerTeknikAnalizRouteImport
+    '/hisse/$ticker/sektor': {
+      id: '/hisse/$ticker/sektor'
+      path: '/sektor'
+      fullPath: '/hisse/$ticker/sektor'
+      preLoaderRoute: typeof HisseTickerSektorRouteImport
       parentRoute: typeof HisseTickerRoute
     }
     '/endeksler/$id/teknik-analiz': {
@@ -533,6 +609,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiModelsAvailableRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/chat/sessions': {
+      id: '/api/chat/sessions'
+      path: '/api/chat/sessions'
+      fullPath: '/api/chat/sessions'
+      preLoaderRoute: typeof ApiChatSessionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/chat/save': {
+      id: '/api/chat/save'
+      path: '/api/chat/save'
+      fullPath: '/api/chat/save'
+      preLoaderRoute: typeof ApiChatSaveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -553,6 +643,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/ai/charge'
       preLoaderRoute: typeof ApiAiChargeRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/api/chat/sessions/$id': {
+      id: '/api/chat/sessions/$id'
+      path: '/$id'
+      fullPath: '/api/chat/sessions/$id'
+      preLoaderRoute: typeof ApiChatSessionsIdRouteImport
+      parentRoute: typeof ApiChatSessionsRoute
     }
   }
 }
@@ -596,12 +693,24 @@ const ProfilRouteChildren: ProfilRouteChildren = {
 const ProfilRouteWithChildren =
   ProfilRoute._addFileChildren(ProfilRouteChildren)
 
+interface SektorlerSlugRouteChildren {
+  SektorlerSlugSectorSlugRoute: typeof SektorlerSlugSectorSlugRoute
+}
+
+const SektorlerSlugRouteChildren: SektorlerSlugRouteChildren = {
+  SektorlerSlugSectorSlugRoute: SektorlerSlugSectorSlugRoute,
+}
+
+const SektorlerSlugRouteWithChildren = SektorlerSlugRoute._addFileChildren(
+  SektorlerSlugRouteChildren,
+)
+
 interface SektorlerRouteChildren {
-  SektorlerSlugRoute: typeof SektorlerSlugRoute
+  SektorlerSlugRoute: typeof SektorlerSlugRouteWithChildren
 }
 
 const SektorlerRouteChildren: SektorlerRouteChildren = {
-  SektorlerSlugRoute: SektorlerSlugRoute,
+  SektorlerSlugRoute: SektorlerSlugRouteWithChildren,
 }
 
 const SektorlerRouteWithChildren = SektorlerRoute._addFileChildren(
@@ -609,21 +718,35 @@ const SektorlerRouteWithChildren = SektorlerRoute._addFileChildren(
 )
 
 interface HisseTickerRouteChildren {
-  HisseTickerTemelAnalizRoute: typeof HisseTickerTemelAnalizRoute
+  HisseTickerSektorRoute: typeof HisseTickerSektorRoute
   HisseTickerTablolarRoute: typeof HisseTickerTablolarRoute
   HisseTickerTeknikAnalizRoute: typeof HisseTickerTeknikAnalizRoute
+  HisseTickerTemelAnalizRoute: typeof HisseTickerTemelAnalizRoute
   HisseTickerIndexRoute: typeof HisseTickerIndexRoute
 }
 
 const HisseTickerRouteChildren: HisseTickerRouteChildren = {
-  HisseTickerTemelAnalizRoute: HisseTickerTemelAnalizRoute,
+  HisseTickerSektorRoute: HisseTickerSektorRoute,
   HisseTickerTablolarRoute: HisseTickerTablolarRoute,
   HisseTickerTeknikAnalizRoute: HisseTickerTeknikAnalizRoute,
+  HisseTickerTemelAnalizRoute: HisseTickerTemelAnalizRoute,
   HisseTickerIndexRoute: HisseTickerIndexRoute,
 }
 
 const HisseTickerRouteWithChildren = HisseTickerRoute._addFileChildren(
   HisseTickerRouteChildren,
+)
+
+interface ApiChatSessionsRouteChildren {
+  ApiChatSessionsIdRoute: typeof ApiChatSessionsIdRoute
+}
+
+const ApiChatSessionsRouteChildren: ApiChatSessionsRouteChildren = {
+  ApiChatSessionsIdRoute: ApiChatSessionsIdRoute,
+}
+
+const ApiChatSessionsRouteWithChildren = ApiChatSessionsRoute._addFileChildren(
+  ApiChatSessionsRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
@@ -641,6 +764,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAiChargeRoute: ApiAiChargeRoute,
   ApiAiPreCheckRoute: ApiAiPreCheckRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiChatSaveRoute: ApiChatSaveRoute,
+  ApiChatSessionsRoute: ApiChatSessionsRouteWithChildren,
   ApiModelsAvailableRoute: ApiModelsAvailableRoute,
   ApiUserCreditsRoute: ApiUserCreditsRoute,
   ApiWebhooksPolarRoute: ApiWebhooksPolarRoute,
@@ -648,12 +773,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

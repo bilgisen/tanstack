@@ -1,33 +1,19 @@
 import companyNames from './companyNames.json'
+import { SECTOR_GROUPS, groupKeyToSlug, groupKeyToDisplayName, sectorNameToSlug } from './sectorGroups'
 
 export function toSlug(name: string): string {
   return name
     .toLowerCase()
-    .replace(/i̇/g, 'i') // Handle İ → i̇ after lowercase (combining dot)
+    .replace(/i̇/g, 'i')
     .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
     .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
 }
 
-export const SLUG_TO_NAME: Record<string, string> = {
-  'saglik-ilac': 'Sağlık & İlaç',
-  'gida-icecek-tarim': 'Gıda & İçecek & Tarım',
-  'diger': 'Diğer',
-  'sanayi-metal-kimya': 'Sanayi & Metal & Kimya',
-  'holdingler': 'Holdingler',
-  'gyo-gayrimenkul': 'GYO (Gayrimenkul)',
-  'otomotiv-savunma-makine': 'Otomotiv & Savunma & Makine',
-  'turizm-medya-eglence': 'Turizm & Medya & Eğlence',
-  'sigortacilik': 'Sigortacılık',
-  'ulasim-lojistik': 'Ulaştırma & Lojistik',
-  'tuketim-perakende-tekstil': 'Tüketim & Perakende & Tekstil',
-  'insaat-yapi-malzemeleri': 'İnşaat & Yapı Malzemeleri',
-  'spor': 'Spor',
-  'bankacilik-finans': 'Bankacılık & Finans',
-  'enerji-uretim-dagitim-petrol': 'Enerji (Üretim + Dağıtım + Petrol)',
-  'teknoloji-iletisim': 'Teknoloji & İletişim',
-}
+export const SLUG_TO_NAME: Record<string, string> = Object.fromEntries(
+  Object.entries(SECTOR_GROUPS).map(([key, name]) => [groupKeyToSlug(key), name])
+)
 
 export type CompanyStats = {
   name: string
@@ -122,24 +108,9 @@ export function SignalBadge({ signal }: { signal: string }) {
   )
 }
 
-export const SLUG_TO_COMP_NAME: Record<string, string> = {
-  'bankacilik-finans': 'Bankacilik_Finans',
-  'sigortacilik': 'Sigortacilik',
-  'gyo-gayrimenkul': 'GYO',
-  'enerji-uretim-dagitim-petrol': 'Enerji_Altyapi',
-  'sanayi-metal-kimya': 'Sanayi_Metal_Kimya',
-  'insaat-yapi-malzemeleri': 'Insaat_Yapi',
-  'otomotiv-savunma-makine': 'Otomotiv_Savunma_Makine',
-  'teknoloji-iletisim': 'Teknoloji_Iletisim',
-  'gida-icecek-tarim': 'Gida_Icecek_Tarim',
-  'tuketim-perakende-tekstil': 'Tuketim_Perakende_Tekstil',
-  'ulasim-lojistik': 'Ulastirma_Lojistik',
-  'turizm-medya-eglence': 'Turizm_Medya_Eglence',
-  'holdingler': 'Holdingler',
-  'saglik-ilac': 'Saglik_Ilac',
-  'spor': 'Spor',
-  'diger': 'Diğer',
-}
+export const SLUG_TO_COMP_NAME: Record<string, string> = Object.fromEntries(
+  Object.keys(SECTOR_GROUPS).map((key) => [groupKeyToSlug(key), key])
+)
 
 export function slugToCompName(slug: string): string {
   return SLUG_TO_COMP_NAME[slug] || slug
@@ -151,7 +122,7 @@ export function slugToCompName(slug: string): string {
 export async function fetchCompanyData(tickerUpper: string, slug: string) {
   const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com"
   const officialName = (companyNames as Record<string, string>)[tickerUpper] || tickerUpper
-  const sectorName = SLUG_TO_NAME[slug] || slug
+  const sectorName = groupKeyToDisplayName(slugToCompName(slug)) || slug
 
   // Try batch endpoint first (single request for all data)
   try {

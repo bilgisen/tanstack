@@ -1,12 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useAuth } from '../hooks/useAuth'
 import { useCompScore, useCompProfile, useCompRatios, useCompTrends } from '../lib/useCompData'
 import { FaReport } from '../components/company/FaReport'
 import { ScoreGauge } from '../constants/companyShared'
 import { RatioScoreRing } from '../components/company/RatioScoreRing'
-import {
-  Lock, TrendingUp, Shield, Sparkles, Building2, BarChart3
-} from 'lucide-react'
+import { TrendingUp, Shield, Sparkles, Building2, BarChart3 } from 'lucide-react'
 
 export const Route = createFileRoute('/hisse/$ticker/temel-analiz')({
   component: FundamentalAnalysisPage,
@@ -38,36 +35,6 @@ function AbsoluteBadge({ label }: { label: string }) {
   )
 }
 
-function LockedSection({ tier, requiredTier, children }: { tier: string; requiredTier: 'member' | 'subscriber'; children: React.ReactNode }) {
-  const { login } = useAuth()
-  const isLocked = tier === 'anonymous' && requiredTier === 'member' ||
-    tier !== 'subscriber' && requiredTier === 'subscriber'
-  if (!isLocked) return <>{children}</>
-  return (
-    <div className="relative">
-      <div className="blur-sm pointer-events-none select-none opacity-30">{children}</div>
-      <div className="absolute inset-0 flex items-start justify-center pt-8">
-        <div className="bg-background/90 backdrop-blur-sm border border-border/50 rounded-2xl p-6 text-center w-72 mx-auto shadow-lg">
-          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-            <Lock size={16} className="text-primary" />
-          </div>
-          <h4 className="text-base font-bold text-foreground mb-1">Abonelere Özel</h4>
-          <p className="text-sm text-muted-foreground mb-5 leading-relaxed">Hemen bağlanın 1 hafta ücretsiz deneyin</p>
-          <button onClick={login} className="inline-flex items-center justify-center gap-2.5 w-full text-sm font-semibold bg-white text-[#1a1a2e] px-4 py-2.5 rounded-xl hover:bg-white/90 transition-colors border border-border/20">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-            </svg>
-            Google ile Bağlan
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 function fmt(val: number | null | undefined, decimals = 2): string {
   if (val == null) return '—'
   return val.toLocaleString('tr-TR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
@@ -75,16 +42,13 @@ function fmt(val: number | null | undefined, decimals = 2): string {
 
 function FundamentalAnalysisPage() {
   const { ticker } = Route.useParams()
-  const { user, loading: authLoading } = useAuth()
   const tickerUpper = ticker.toUpperCase()
-
-  const userTier = !user ? 'anonymous' : (user.tier === 'pro' || user.tier === 'ultimate') ? 'subscriber' : 'member'
 
   const { data: scoreData, isLoading: scoreLoading } = useCompScore(tickerUpper)
   const { data: profileData, isLoading: profileLoading } = useCompProfile(tickerUpper)
   const { data: ratiosData, isLoading: ratiosLoading } = useCompRatios(tickerUpper)
   const { data: trendsData } = useCompTrends(tickerUpper)
-  const loading = authLoading || scoreLoading || profileLoading || ratiosLoading
+  const loading = scoreLoading || profileLoading || ratiosLoading
 
   if (loading) {
     return (
@@ -109,16 +73,16 @@ function FundamentalAnalysisPage() {
   return (
     <div className="space-y-5">
 
-      {/* ═══ SCORE CARD ═══ */}
+      {/* ═══ SCORE ═══ */}
       {score && (
-        <div className="bg-gradient-to-br from-[#0f0f1a] to-[#1a1a2e] border border-border/40 rounded-2xl p-5 space-y-5">
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
               <Shield size={14} className="text-primary" />
               Temel Analiz Puanı
             </h3>
             {score.reliability && (
-              <span className="text-[10px] font-medium text-muted-foreground px-2 py-1 rounded-lg bg-muted/20 border border-border/20">
+              <span className="text-[10px] font-medium text-muted-foreground">
                 {score.reliability}
               </span>
             )}
@@ -145,14 +109,14 @@ function FundamentalAnalysisPage() {
 
             <div className="flex items-start gap-4 flex-wrap">
               {score.ranks?.sector && (
-                <div className="text-xs text-muted-foreground bg-muted/10 border border-border/20 rounded-xl px-3 py-2">
+                <div className="text-xs text-muted-foreground">
                   <div className="text-[10px] font-medium uppercase tracking-wider mb-0.5">Sektör Sırası</div>
                   <div className="text-sm font-bold text-foreground">%{fmt(score.ranks.sector.percentile, 0)}</div>
                   <div className="text-[10px]">{score.ranks.sector.n_peers} şirket</div>
                 </div>
               )}
               {score.ranks?.group && (
-                <div className="text-xs text-muted-foreground bg-muted/10 border border-border/20 rounded-xl px-3 py-2">
+                <div className="text-xs text-muted-foreground">
                   <div className="text-[10px] font-medium uppercase tracking-wider mb-0.5">Grup Sırası</div>
                   <div className="text-sm font-bold text-foreground">%{fmt(score.ranks.group.percentile, 0)}</div>
                   <div className="text-[10px]">{score.ranks.group.n_peers} şirket</div>
@@ -179,7 +143,7 @@ function FundamentalAnalysisPage() {
 
       {/* ═══ COMPANY PROFILE ═══ */}
       {profile && (
-        <div className="border border-border/40 rounded-2xl p-5 space-y-3">
+        <div className="space-y-3">
           <h3 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
             <Building2 size={14} className="text-primary" />
             Şirket Profili
@@ -203,7 +167,7 @@ function FundamentalAnalysisPage() {
 
       {/* ═══ KEY RATIOS ═══ */}
       {ratios && ratios.ratios && ratios.ratios.length > 0 && (
-        <div className="border border-border/40 rounded-2xl p-5 space-y-3">
+        <div className="space-y-3">
           <h3 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
             <BarChart3 size={14} className="text-primary" />
             Finansal Rasyolar
@@ -221,7 +185,7 @@ function FundamentalAnalysisPage() {
 
       {/* ═══ TRENDS ═══ */}
       {trends && trends.trends && Object.keys(trends.trends).length > 0 && (
-        <div className="border border-border/40 rounded-2xl p-5 space-y-3">
+        <div className="space-y-3">
           <h3 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
             <TrendingUp size={14} className="text-primary" />
             Rasyo Trendleri
@@ -251,16 +215,14 @@ function FundamentalAnalysisPage() {
         </div>
       )}
 
-      {/* ═══ AI FUNDAMENTAL ANALYSIS (LOCKED) ═══ */}
-      <LockedSection tier={userTier} requiredTier="subscriber">
-        <div className="space-y-5 pt-2">
-          <div className="flex items-center gap-2 pb-2 border-b border-border/30">
-            <Sparkles size={14} className="text-violet-500" />
-            <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Abonelere Özel AI Temel Analiz</h3>
-          </div>
-          <FaReport ticker={ticker} />
+      {/* ═══ AI FUNDAMENTAL ANALYSIS ═══ */}
+      <div className="space-y-4 pt-2">
+        <div className="flex items-center gap-2 pb-2 border-b border-border/30">
+          <Sparkles size={14} className="text-violet-500" />
+          <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">AI Temel Analiz</h3>
         </div>
-      </LockedSection>
+        <FaReport ticker={ticker} />
+      </div>
     </div>
   )
 }

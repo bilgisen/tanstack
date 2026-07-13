@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet } from '@tanstack/react-router'
-import { ArrowUp, ArrowDown, Activity, Info, Star, ChevronDown, ChevronUp, Clock, BarChart3, FileText } from 'lucide-react'
+import { ArrowUp, ArrowDown, Activity, Info, Star, ChevronDown, ChevronUp, Clock, BarChart3, FileText, Factory } from 'lucide-react'
 import companyNames from '../constants/companyNames.json'
 import companyLogos from '../constants/companyLogos.json'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
@@ -16,6 +16,7 @@ const TABS = [
   { suffix: '/teknik-analiz', label: 'Teknik Analiz', icon: Activity },
   { suffix: '/temel-analiz', label: 'Temel Analiz', icon: BarChart3 },
   { suffix: '/tablolar', label: 'Tablolar', icon: FileText },
+  { suffix: '/sektor', label: 'Sektör', icon: Factory },
 ]
 
 function CompanyLayout() {

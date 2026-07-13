@@ -1,23 +1,12 @@
-import { createFileRoute, Link, Outlet, useMatches, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, Factory, Loader2, BarChart3, TrendingUp, Building2 } from 'lucide-react'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { ArrowLeft, Factory, Loader2, BarChart3, TrendingUp } from 'lucide-react'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
-import { useCompSectorDetail, useSectorGroups } from '../lib/useCompData'
-import { slugToGroupKey, groupKeyToDisplayName, sectorNameToSlug } from '../constants/sectorGroups'
+import { useCompSectorDetail } from '../lib/useCompData'
+import { groupSlugToDisplayName } from '../constants/sectorGroups'
 
-export const Route = createFileRoute('/sektorler/$slug')({
-  component: SektorGroupLayout,
+export const Route = createFileRoute('/sektorler/$slug/$sectorSlug')({
+  component: SektorDetailPage,
 })
-
-function SektorGroupLayout() {
-  const matches = useMatches()
-  const hasSectorChild = matches.some(m => m.routeId === '/sektorler/$slug/$sectorSlug')
-
-  if (hasSectorChild) {
-    return <Outlet />
-  }
-
-  return <SektorGroupPage />
-}
 
 function fmt(val: number | null | undefined, decimals = 2): string {
   if (val == null) return '—'
@@ -47,29 +36,32 @@ function getScoreBg(score: number | null) {
   return 'bg-red-500/10'
 }
 
-function SektorGroupPage() {
-  const { slug } = Route.useParams()
+export function getSectorNameFromSlug(slug: string): string {
+  return slug
+    .split('-')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ')
+    .replace(/\s+/g, ' ')
+}
+
+function SektorDetailPage() {
+  const { slug, sectorSlug } = Route.useParams()
   const navigate = useNavigate()
-  const groupKey = slugToGroupKey(slug) || slug
-  const displayName = groupKeyToDisplayName(groupKey) || slug
+  const groupName = groupSlugToDisplayName(slug) || slug
+  const sectorName = getSectorNameFromSlug(sectorSlug)
 
-  const { data: sectorData, isLoading: loading } = useCompSectorDetail(groupKey)
-  const { data: groupsData } = useSectorGroups()
-
-  const sectorList = (groupsData?.sectors || [])
-    .filter((s: any) => s.consolidated === groupKey)
-    .sort((a: any, b: any) => (b.cnt || 0) - (a.cnt || 0))
+  const { data: sectorData, isLoading: loading } = useCompSectorDetail(sectorName)
 
   const detail = sectorData as any || {}
   const benchmarks: Record<string, any> = detail.benchmarks || {}
   const leaderboard: any[] = detail.leaderboard || []
   const companyCount = detail.company_count || 0
 
-  const chatContext = `sector-group:${slug}`
+  const chatContext = `sector:${sectorName}`
 
   if (loading) {
     return (
-      <PublicPageLayout context={chatContext} placeholder={`${displayName} hakkında bir soru sorun...`}>
+      <PublicPageLayout context={chatContext} placeholder={`${sectorName} sektörü hakkında bir soru sorun...`}>
         <div className="flex h-[360px] items-center justify-center text-muted-foreground font-medium text-xs gap-2 animate-pulse">
           <Loader2 className="animate-spin text-primary" size={16} />
           <span>Veriler yükleniyor, lütfen bekleyin...</span>
@@ -79,12 +71,12 @@ function SektorGroupPage() {
   }
 
   return (
-    <PublicPageLayout context={chatContext} placeholder={`${displayName} hakkında bir soru sorun...`}>
+    <PublicPageLayout context={chatContext} placeholder={`${sectorName} sektörü hakkında bir soru sorun...`}>
       <div className="space-y-6 animate-in fade-in duration-400 flex flex-col min-h-fit pb-32">
 
-        <Link to="/sektorler" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+        <Link to="/sektorler/$slug" params={{ slug }} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft size={14} />
-          Sektörlere Dön
+          {groupName}
         </Link>
 
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
@@ -93,8 +85,14 @@ function SektorGroupPage() {
               <Factory size={20} />
             </div>
             <div className="min-w-0">
-              <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Sektör Grubu</span>
-              <h1 className="text-base md:text-2xl font-bold text-foreground tracking-tight leading-none mt-1">{displayName}</h1>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
+                  <Link to="/sektorler/$slug" params={{ slug }} className="hover:text-foreground">{groupName}</Link>
+                  <span className="mx-1.5">·</span>
+                  Sektör
+                </span>
+              </div>
+              <h1 className="text-base md:text-2xl font-bold text-foreground tracking-tight leading-none mt-1">{sectorName}</h1>
             </div>
           </div>
           <div className="flex items-center gap-6 shrink-0">
@@ -103,15 +101,9 @@ function SektorGroupPage() {
               <div className="text-[10px] text-muted-foreground font-medium uppercase">Şirket</div>
             </div>
             <div className="text-right">
-              <div className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">{sectorList.length}</div>
-              <div className="text-[10px] text-muted-foreground font-medium uppercase">Alt Sektör</div>
+              <div className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">{leaderboard.length}</div>
+              <div className="text-[10px] text-muted-foreground font-medium uppercase">Skorlu</div>
             </div>
-            {detail.sector_score?.equal_weight != null && (
-              <div className="text-right">
-                <div className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">{fmt(detail.sector_score.equal_weight, 1)}</div>
-                <div className="text-[10px] text-muted-foreground font-medium uppercase">Ort. Skor</div>
-              </div>
-            )}
           </div>
         </div>
 
@@ -119,7 +111,7 @@ function SektorGroupPage() {
           <div>
             <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/30">
               <BarChart3 size={14} className="text-primary" />
-              <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Grup Benchmark</h3>
+              <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Sektör Benchmark</h3>
               <span className="text-[10px] text-muted-foreground ml-auto">Medyan değerler</span>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -136,39 +128,6 @@ function SektorGroupPage() {
           </div>
         )}
 
-        {sectorList.length > 0 && (
-          <div>
-            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/30">
-              <Building2 size={14} className="text-primary" />
-              <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Alt Sektörler</h3>
-              <span className="text-[10px] text-muted-foreground ml-auto">{sectorList.length} sektör</span>
-            </div>
-            <div className="divide-y divide-white/5">
-              {sectorList.map((s: any) => {
-                const sectorSlug = sectorNameToSlug(s.sector_main)
-                return (
-                  <Link
-                    key={s.sector_main}
-                    to="/sektorler/$slug/$sectorSlug"
-                    params={{ slug, sectorSlug }}
-                    className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-7 h-7 bg-primary/10 flex items-center justify-center text-primary text-[10px] shrink-0">
-                        <Factory size={12} />
-                      </div>
-                      <span className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
-                        {s.sector_main}
-                      </span>
-                    </div>
-                    <span className="text-xs text-muted-foreground shrink-0 ml-2">{s.cnt} şirket</span>
-                  </Link>
-                )
-              })}
-            </div>
-          </div>
-        )}
-
         {leaderboard.length > 0 && (
           <div>
             <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/30">
@@ -177,7 +136,7 @@ function SektorGroupPage() {
               <span className="text-[10px] text-muted-foreground ml-auto">{leaderboard.length} şirket</span>
             </div>
             <div className="divide-y divide-white/5">
-              {leaderboard.slice(0, 25).map((company: any) => (
+              {leaderboard.map((company: any) => (
                 <div
                   key={company.ticker}
                   onClick={() => navigate({ to: `/hisse/${company.ticker.toLowerCase()}` })}
@@ -200,6 +159,11 @@ function SektorGroupPage() {
                 </div>
               ))}
             </div>
+            {leaderboard.length === 0 && (
+              <div className="py-8 text-center text-sm text-muted-foreground">
+                Bu sektör için skorlu şirket bulunamadı.
+              </div>
+            )}
           </div>
         )}
 
