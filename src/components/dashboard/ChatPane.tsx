@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { ArrowUp } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { useChatStore } from "../../store/chat";
+import { CompanySearch } from "../chat/CompanySearch";
 
 interface ChatPaneProps {
   context?: string;
@@ -19,6 +20,7 @@ export function ChatPane({
   sessionLoading = false,
 }: ChatPaneProps) {
   const [input, setInput] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
   const { isLoading, sendMessage, clearChat } = useChatStore();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const navigate = useNavigate();
@@ -35,6 +37,7 @@ export function ChatPane({
     }
 
     setInput("");
+    setShowSearch(false);
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
     }
@@ -51,42 +54,64 @@ export function ChatPane({
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const textarea = e.target;
-    setInput(textarea.value);
+    const val = textarea.value;
+    setInput(val);
     textarea.style.height = "auto";
     textarea.style.height = `${Math.min(textarea.scrollHeight, 140)}px`;
+    // Show company search when typing potential company name (last word length >= 2)
+    const lastWord = val.trim().split(/\s+/).pop() || "";
+    setShowSearch(lastWord.length >= 2);
   };
 
   const handleFocus = () => {
-    // Scroll textarea into view on mobile when focused
     if (textareaRef.current && window.innerWidth < 768) {
       setTimeout(() => {
         textareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }, 300); // Delay for keyboard animation
+      }, 300);
     }
   };
 
-  return (
-    <div className={`flex items-end gap-2 bg-transparent px-5 py-4 w-full select-none ${className}`}>
-      <textarea
-        ref={textareaRef}
-        value={input}
-        onChange={handleChange}
-        onKeyDown={handleKeyDown}
-        onFocus={handleFocus}
-        disabled={isLoading}
-        placeholder={placeholder}
-        rows={1}
-        className="flex-1 bg-transparent border-none outline-none resize-none py-3 text-base text-foreground placeholder-muted-foreground/50 disabled:opacity-50 min-h-[44px] max-h-[140px] font-sans leading-relaxed touch-manipulation [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-      />
+  const handleSelectTicker = (ticker: string) => {
+    const parts = input.trim().split(/\s+/);
+    parts[parts.length - 1] = ticker;
+    setInput(parts.join(" ") + " ");
+    setShowSearch(false);
+    textareaRef.current?.focus();
+  };
 
-      <button
-        onClick={handleSend}
-        disabled={isLoading || !input.trim()}
-        className="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-white disabled:opacity-20 transition-all cursor-pointer shadow-sm shrink-0 self-end hover:brightness-110 active:scale-90 touch-manipulation"
-        title="Gönder"
-      >
-        <ArrowUp size={18} strokeWidth={2.5} />
-      </button>
+  return (
+    <div className={`relative flex flex-col w-full select-none ${className}`}>
+      {/* Company Search Dropdown */}
+      {showSearch && (
+        <CompanySearch
+          query={input.trim().split(/\s+/).pop() || ""}
+          onSelect={handleSelectTicker}
+          onClose={() => setShowSearch(false)}
+        />
+      )}
+
+      <div className="flex items-end gap-2 bg-transparent px-5 py-4 w-full">
+        <textarea
+          ref={textareaRef}
+          value={input}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          onFocus={handleFocus}
+          disabled={isLoading}
+          placeholder={placeholder}
+          rows={1}
+          className="flex-1 bg-transparent border-none outline-none resize-none py-3 text-base text-foreground placeholder-muted-foreground/50 disabled:opacity-50 min-h-[44px] max-h-[140px] font-sans leading-relaxed touch-manipulation [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        />
+
+        <button
+          onClick={handleSend}
+          disabled={isLoading || !input.trim()}
+          className="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-white disabled:opacity-20 transition-all cursor-pointer shadow-sm shrink-0 self-end hover:brightness-110 active:scale-90 touch-manipulation"
+          title="Gönder"
+        >
+          <ArrowUp size={18} strokeWidth={2.5} />
+        </button>
+      </div>
     </div>
   );
 }
