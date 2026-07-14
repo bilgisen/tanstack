@@ -7,7 +7,10 @@ import {
   ArrowUp,
   ArrowDown,
   Star,
+  Factory,
 } from 'lucide-react'
+import { useSectorGroups } from '../lib/useCompData'
+import { groupKeyToSlug, groupKeyToDisplayName } from '../constants/sectorGroups'
 import { ChatPanel } from '../components/chat/ChatPanel'
 import { ChatSheet } from '../components/chat/ChatSheet'
 import { useUIStore } from '../store/ui'
@@ -47,6 +50,7 @@ function LandingPage() {
 
   const { data: summaryData, isLoading: summaryLoading, isError: summaryError } = useMarketSummary()
   const { data: stocksData, isLoading: stocksLoading, isError: stocksError, error: stocksErrorObj } = useMarketStocks()
+  const { data: sectorGroupsData } = useSectorGroups()
 
   const indexData: IndexDisplay[] = useMemo(() => {
     if (!summaryData) return []
@@ -211,6 +215,39 @@ function LandingPage() {
               {!stocksLoading && !stocksError && topGainers.length === 0 && (
                 <div className="py-8 text-center text-sm text-muted-foreground">Bugün için veri bulunamadı.</div>
               )}
+            </div>
+          </section>
+
+          {/* Sektörler */}
+          <section className="px-4 md:px-6 py-4">
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                <Factory size={14} />
+              </div>
+              <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Sektörler</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {(sectorGroupsData?.groups || []).sort((a: any, b: any) => (b.count || 0) - (a.count || 0)).map((group: any) => {
+                const slug = groupKeyToSlug(group.key)
+                return (
+                  <Link
+                    key={group.key}
+                    to="/sektorler/$slug"
+                    params={{ slug }}
+                    className="flex items-center justify-between px-1 py-2.5 hover:bg-muted/20 transition-colors"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-7 h-7 bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                        <Factory size={13} />
+                      </div>
+                      <span className="text-sm font-semibold text-foreground truncate">
+                        {groupKeyToDisplayName(group.key) || group.name}
+                      </span>
+                    </div>
+                    <span className="text-xs text-muted-foreground shrink-0 ml-2">{group.count || '—'}</span>
+                  </Link>
+                )
+              })}
             </div>
           </section>
 
