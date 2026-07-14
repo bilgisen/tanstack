@@ -2,17 +2,11 @@ import { useMemo } from "react";
 import { marked } from "marked";
 import { useChatStore } from "../../store/chat";
 import { useUIStore } from "../../store/ui";
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Minus, 
-  ShieldAlert, 
-  ChevronRight, 
-  BarChart3, 
-  Activity, 
-  Compass 
-} from "lucide-react";
+import { BarChart3 } from "lucide-react";
 import { InteractiveWidget } from "./InteractiveWidget";
+import { CollapsibleSection } from "../chat/CollapsibleSection";
+import { MetricCardGrid } from "../chat/MetricCardGrid";
+import { SuggestionChips } from "../chat/SuggestionChips";
 
 interface MarkdownRendererProps {
   text: string;
@@ -183,65 +177,18 @@ export function MarkdownRenderer({ text, isAssistant, context = "global", sugges
 
       {/* 2. Zengin Teknik Dashboard / Kart Sunumu (Tables / Gauges) */}
       {metrics && (
-        <div className="mt-4 p-3.5 rounded-xl bg-muted/5 border border-border/10 grid grid-cols-2 sm:grid-cols-4 gap-3 shadow-xs">
-          
-          {/* Trend Card */}
-          {metrics.trend && (
-            <div className="flex flex-col gap-1 p-3 rounded-lg bg-card border border-border/10">
-              <span className="text-xs text-muted-foreground uppercase font-medium tracking-wider flex items-center gap-1.5">
-                <Activity size={12} className="text-muted-foreground" /> Trend
-              </span>
-              <span className={`text-sm font-semibold mt-1 flex items-center gap-1.5 ${
-                metrics.trend?.includes("Yükseliş") ? "text-emerald-500" : metrics.trend?.includes("Düşüş") ? "text-destructive" : "text-amber-500"
-              }`}>
-                {metrics.trend?.includes("Yükseliş") ? <TrendingUp size={14} /> : metrics.trend?.includes("Düşüş") ? <TrendingDown size={14} /> : <Minus size={14} />}
-                {metrics.trend?.split(" ")[0]}
-              </span>
-            </div>
-          )}
-
-          {/* RSI Gauge Card */}
-          {metrics.rsi && (
-            <div className="flex flex-col gap-1 p-3 rounded-lg bg-card border border-border/10">
-              <span className="text-xs text-muted-foreground uppercase font-medium tracking-wider flex items-center gap-1.5">
-                <BarChart3 size={12} className="text-muted-foreground" /> RSI
-              </span>
-              <span className="text-sm font-semibold mt-1 flex items-center gap-2">
-                {metrics.rsi}
-                <span className={`w-2 h-2 rounded-full ${
-                  parseFloat(metrics.rsi) > 70 ? "bg-destructive" : parseFloat(metrics.rsi) < 30 ? "bg-emerald-500" : "bg-primary/40"
-                }`} />
-              </span>
-            </div>
-          )}
-
-          {/* Destek / Direnç Aralığı Card */}
-          {(metrics.support || metrics.resistance) && (
-            <div className="flex flex-col gap-1 p-3 rounded-lg bg-card border border-border/10">
-              <span className="text-xs text-muted-foreground uppercase font-medium tracking-wider flex items-center gap-1.5">
-                <Compass size={12} className="text-muted-foreground" /> Destek/Direnç
-              </span>
-              <span className="text-sm font-semibold mt-1 truncate">
-                <span className="text-emerald-500">₺{metrics.support || "—"}</span>
-                <span className="text-muted-foreground mx-1">/</span>
-                <span className="text-destructive">₺{metrics.resistance || "—"}</span>
-              </span>
-            </div>
-          )}
-
-          {/* ATR Stop Loss Card */}
-          {metrics.stopLoss && (
-            <div className="flex flex-col gap-1 p-3 rounded-lg bg-card border border-border/10">
-              <span className="text-xs text-muted-foreground uppercase font-medium tracking-wider flex items-center gap-1.5">
-                <ShieldAlert size={12} className="text-muted-foreground" /> Stop-Loss
-              </span>
-              <span className="text-sm font-semibold text-destructive mt-1">
-                ₺{metrics.stopLoss}
-              </span>
-            </div>
-          )}
-
-        </div>
+        <CollapsibleSection title="Teknik Göstergeler" icon={<BarChart3 size={12} />} defaultOpen={true}>
+          <MetricCardGrid 
+            columns={4}
+            items={[
+              ...(metrics.trend ? [{ label: 'Trend', value: metrics.trend.split(" ")[0], color: metrics.trend.includes("Yükseliş") ? 'up' as const : metrics.trend.includes("Düşüş") ? 'down' as const : 'neutral' as const }] : []),
+              ...(metrics.rsi ? [{ label: 'RSI (14)', value: metrics.rsi, color: (parseFloat(metrics.rsi) > 70 ? 'down' as const : parseFloat(metrics.rsi) < 30 ? 'up' as const : 'neutral' as const) }] : []),
+              ...(metrics.support ? [{ label: 'Destek', value: `₺${metrics.support}`, color: 'up' as const, subtitle: 'En yakın' }] : []),
+              ...(metrics.resistance ? [{ label: 'Direnç', value: `₺${metrics.resistance}`, color: 'down' as const, subtitle: 'En yakın' }] : []),
+              ...(metrics.stopLoss ? [{ label: 'Stop-Loss', value: `₺${metrics.stopLoss}`, color: 'warning' as const, subtitle: 'ATR bazlı' }] : []),
+            ]}
+          />
+        </CollapsibleSection>
       )}
 
       {/* 2.5 Dinamik İnteraktif Widget */}
@@ -249,26 +196,13 @@ export function MarkdownRenderer({ text, isAssistant, context = "global", sugges
         <InteractiveWidget widget={widget} />
       )}
 
-      {/* 3. Konuyu Derinleştirecek Sade Önerilen Sorular */}
+      {/* 3. Konuyu Derinleştirecek Öneri Chipleri */}
       {questions.length > 0 && (
-        <div className="mt-5 pt-4 border-t border-border/10 space-y-3">
-          <span className="text-xs text-muted-foreground uppercase font-medium tracking-wider block select-none">
-            Sıradaki Adım Önerileri:
-          </span>
-          <div className="flex flex-col gap-2">
-            {questions.map((q, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleQuestionClick(q)}
-                disabled={isLoading}
-                className="w-full flex items-center justify-between text-left text-sm text-foreground/85 hover:text-primary hover:bg-primary/5 active:bg-primary/10 border border-border/10 hover:border-primary/20 rounded-xl px-4 py-3 transition-all duration-200 cursor-pointer disabled:opacity-50 group font-medium bg-card/40"
-              >
-                <span className="truncate pr-4">{q}</span>
-                <ChevronRight size={14} className="text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
-              </button>
-            ))}
-          </div>
-        </div>
+        <SuggestionChips 
+          suggestions={questions} 
+          onSelect={handleQuestionClick}
+          max={4}
+        />
       )}
     </div>
   );
