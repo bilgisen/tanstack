@@ -21,7 +21,7 @@ const config = defineConfig({
           vars: {
             "BETTER_AUTH_URL": "https://jetborsa.com",
             "VITE_HONO_API_URL": "https://hono.jetborsa.com",
-            "VITE_FINVERI_API_URL": "https://takapi.jetborsa.com"
+            "VITE_FINVERI_API_URL": "https://tekapi.jetborsa.com"
           },
           d1_databases: [
             {

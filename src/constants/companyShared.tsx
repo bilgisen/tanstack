@@ -219,7 +219,7 @@ export async function fetchCompanyData(tickerUpper: string, slug: string) {
     }
   } catch (e) { console.error('ta/summary fetch failed', e) }
 
-  const finveriUrl = import.meta.env.VITE_FINVERI_API_URL || "https://takapi.jetborsa.com"
+  const finveriUrl = import.meta.env.VITE_FINVERI_API_URL || "https://tekapi.jetborsa.com"
   let fundamental: FundamentalData = { fk: '-', roe: '-', currentRatio: '-', debtToEquity: '-', sector: sectorName }
   let fundamentalDetail: FundamentalDetail | null = null
   
