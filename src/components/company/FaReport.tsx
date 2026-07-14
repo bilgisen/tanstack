@@ -1,4 +1,4 @@
-import { useCompAnalysis, useCompSwot, useCompFundamentalReport, useCompContext } from '../../lib/useCompData'
+import { useCompAnalysis, useCompSwot, useCompFundamentalReport } from '../../lib/useCompData'
 import { ScoreGauge } from '../../constants/companyShared'
 import { TrendingUp, Shield, DollarSign, Target, Lightbulb, AlertTriangle, Sparkles, FileText } from 'lucide-react'
 
@@ -15,14 +15,11 @@ export function FaReport({ ticker }: FaReportProps) {
   const { data: analysisRaw, isLoading: analysisLoading } = useCompAnalysis(ticker)
   const { data: swotRaw, isLoading: swotLoading } = useCompSwot(ticker)
   const { data: reportRaw, isLoading: reportLoading } = useCompFundamentalReport(ticker)
-  const { data: contextRaw, isLoading: contextLoading } = useCompContext(ticker)
-
   const analysis = (analysisRaw as any) || null
   const swot = (swotRaw as any) || null
   const report = (reportRaw as any) || null
-  const ctx = (contextRaw as any) || null
 
-  const loading = analysisLoading || swotLoading || reportLoading || contextLoading
+  const loading = analysisLoading || swotLoading || reportLoading
 
   if (loading) {
     return (
@@ -34,7 +31,7 @@ export function FaReport({ ticker }: FaReportProps) {
     )
   }
 
-  if (!analysis && !report && !swot && !ctx) {
+  if (!analysis && !report && !swot) {
     return (
       <div className="text-center py-12 text-sm text-muted-foreground">
         Temel analiz verisi bulunamadı.
@@ -47,7 +44,6 @@ export function FaReport({ ticker }: FaReportProps) {
   const execSummary = report?.executive_summary || null
   const keyMetrics = analysis?.key_metrics || null
   const swotData = swot || null
-  const contextContent = ctx?.content || null
 
   const overallColors: Record<string, string> = {
     iyi: 'text-emerald-500',
@@ -60,10 +56,10 @@ export function FaReport({ ticker }: FaReportProps) {
 
       {/* Executive Summary */}
       {(execSummary || overall || scoreData) && (
-        <div className="bg-gradient-to-br from-[#0f0f1a] to-[#1a1a2e] border border-border/40 rounded-2xl p-5 space-y-4">
+        <div className="space-y-4">
           <div className="flex items-center gap-2">
             <FileText size={14} className="text-primary" />
-            <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Yönetici Özeti</h3>
+            <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Özet</h3>
           </div>
 
           <div className="flex items-start gap-4">
@@ -95,7 +91,7 @@ export function FaReport({ ticker }: FaReportProps) {
 
       {/* Key Metrics */}
       {keyMetrics && Object.keys(keyMetrics).length > 0 && (
-        <div className="border border-border/40 rounded-2xl p-5 space-y-3">
+        <div className="space-y-3">
           <div className="flex items-center gap-2">
             <Target size={14} className="text-primary" />
             <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Anahtar Metrikler</h3>
@@ -115,7 +111,7 @@ export function FaReport({ ticker }: FaReportProps) {
 
       {/* SWOT Analysis */}
       {swotData && (
-        <div className="border border-border/40 rounded-2xl p-5 space-y-4">
+        <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Lightbulb size={14} className="text-amber-500" />
             <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">SWOT Analizi</h3>
@@ -193,22 +189,9 @@ export function FaReport({ ticker }: FaReportProps) {
         </div>
       )}
 
-      {/* AI Context */}
-      {contextContent && (
-        <div className="border border-border/40 rounded-2xl p-5 space-y-3">
-          <div className="flex items-center gap-2">
-            <Sparkles size={14} className="text-violet-500" />
-            <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">AI Analiz Bağlamı</h3>
-          </div>
-          <div className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line max-h-[400px] overflow-y-auto">
-            {contextContent}
-          </div>
-        </div>
-      )}
-
       {/* Ratios from report */}
       {report?.ratios && Object.keys(report.ratios).length > 0 && (
-        <div className="border border-border/40 rounded-2xl p-5 space-y-3">
+        <div className="space-y-3">
           <div className="flex items-center gap-2">
             <DollarSign size={14} className="text-primary" />
             <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Tüm Rasyolar</h3>

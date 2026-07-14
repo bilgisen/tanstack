@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { ArrowLeft, Factory, Loader2, BarChart3, TrendingUp } from 'lucide-react'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
 import { useCompSectorDetail } from '../lib/useCompData'
-import { groupSlugToDisplayName } from '../constants/sectorGroups'
+import { groupSlugToDisplayName, slugToSectorName } from '../constants/sectorGroups'
 
 export const Route = createFileRoute('/sektorler/$slug/$sectorSlug')({
   component: SektorDetailPage,
@@ -48,7 +48,7 @@ function SektorDetailPage() {
   const { slug, sectorSlug } = Route.useParams()
   const navigate = useNavigate()
   const groupName = groupSlugToDisplayName(slug) || slug
-  const sectorName = getSectorNameFromSlug(sectorSlug)
+  const sectorName = slugToSectorName(sectorSlug) || getSectorNameFromSlug(sectorSlug)
 
   const { data: sectorData, isLoading: loading } = useCompSectorDetail(sectorName)
 

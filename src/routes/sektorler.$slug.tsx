@@ -57,7 +57,7 @@ function SektorGroupPage() {
   const { data: groupsData } = useSectorGroups()
 
   const sectorList = (groupsData?.sectors || [])
-    .filter((s: any) => s.consolidated === groupKey)
+    .filter((s: any) => s.consolidated === groupKey && s.sector_main !== displayName)
     .sort((a: any, b: any) => (b.cnt || 0) - (a.cnt || 0))
 
   const detail = sectorData as any || {}

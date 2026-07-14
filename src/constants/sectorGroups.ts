@@ -107,3 +107,17 @@ export function groupSlugToDisplayName(slug: string): string {
   const key = slugToGroupKey(slug)
   return key ? groupKeyToDisplayName(key) : slug
 }
+
+// Build reverse mapping: slug -> original sector name (with Turkish chars)
+const SLUG_TO_SECTOR_NAME: Record<string, string> = {}
+for (const name of Object.keys(SECTOR_CONSOLIDATION)) {
+  const slug = sectorNameToSlug(name)
+  // Only set if not already set, to respect insertion order
+  if (!SLUG_TO_SECTOR_NAME[slug]) {
+    SLUG_TO_SECTOR_NAME[slug] = name
+  }
+}
+
+export function slugToSectorName(slug: string): string | undefined {
+  return SLUG_TO_SECTOR_NAME[slug]
+}
