@@ -25,6 +25,7 @@ export interface ChatSession {
 interface ChatState {
   messages: Message[];
   isLoading: boolean;
+  streamingText: string | null;
   sessions: ChatSession[];
   activeSessionId: string | null;
   selectedModelId: string;
@@ -77,6 +78,7 @@ const saveSessionsToStorage = (sessions: ChatSession[]) => {
 export const useChatStore = create<ChatState>((set, get) => ({
   messages: [],
   isLoading: false,
+  streamingText: null,
   sessions: loadSessionsFromStorage(),
   activeSessionId: null,
   selectedModelId: "gemini-2.5-flash",
@@ -205,6 +207,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     // Monetization: Pre-Check balance and tier access
     const selectedModelId = get().selectedModelId || 'gemini-2.5-flash';
+    let preCheckPassed = false;
     try {
       const preCheckRes = await fetch("/api/ai/pre-check", {
         method: "POST",
@@ -218,7 +221,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
       if (preCheckRes.ok) {
         const preCheckData = await preCheckRes.json();
-          if (!preCheckData.ok) {
+        if (preCheckData.ok) {
+          preCheckPassed = true;
+        } else {
           let errorMsg = "";
           if (preCheckData.error === 'MODEL_NOT_ALLOWED') {
             errorMsg = `Seçtiğiniz model olan **${selectedModelId.toUpperCase()}** bu abonelik paketinde kullanılamamaktadır. Lütfen [Profil ve Abonelik Paneli](/profil) sayfasından paketinizi yükseltin.`;
@@ -227,8 +232,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
             errorMsg = `Yetersiz Jet Token bakiyesi! Mevcut bakiyeniz: **${availableHT.toLocaleString()} Jet Token**. Chatbot'u kullanmaya devam edebilmek için lütfen [Profil ve Abonelik Paneli](/profil) sayfasından paketinizi yükseltin veya ek kredi satın alın.`;
           } else if (preCheckData.error === 'DAILY_LIMIT') {
             errorMsg = "Günlük kullanım limitinize ulaştınız. Sınırsız kullanım için lütfen [Profil ve Abonelik Paneli](/profil) sayfasından paketinizi yükseltin.";
+          } else if (preCheckData.error === 'USER_NOT_FOUND') {
+            errorMsg = "Kullanıcı bilgileriniz bulunamadı. Lütfen sayfayı yenileyip tekrar deneyin. Sorun devam ederse [Profil ve Abonelik Paneli](/profil) sayfasını kontrol edin.";
           } else {
-            errorMsg = "Sorgunuz bakiye yetersizliği veya yetkilendirme hatası nedeniyle işlenemedi. Lütfen profilinizden bakiye durumunuzu kontrol edin.";
+            errorMsg = "Sorgunuz şu anda işlenemiyor. Lütfen sayfayı yenileyip tekrar deneyin.";
           }
 
           const errorAssistantMessage: Message = {
@@ -251,14 +258,18 @@ export const useChatStore = create<ChatState>((set, get) => ({
       console.error("Monetization precheck failed:", e);
     }
 
+    if (!preCheckPassed) {
+      console.log("[Chat] Pre-check not passed, proceeding without monetization");
+    }
+
     // Fetch latest prices for all stocks and indices to enrich context dynamically
-    // Client-side cache: only re-fetch if stale (>15s old)
+    // Client-side cache: only re-fetch if stale (>60s old)
     let marketItemsMap: Record<string, { price: number; change: number }> = {};
     
     const cachedPrices = (window as any).__chat_market_prices_cache;
     const cacheAge = cachedPrices ? Date.now() - cachedPrices.ts : Infinity;
     
-    if (cachedPrices && cacheAge < 15000) {
+    if (cachedPrices && cacheAge < 60000) {
       marketItemsMap = cachedPrices.data;
     } else {
       const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com";
@@ -299,23 +310,23 @@ export const useChatStore = create<ChatState>((set, get) => ({
       }
     }
 
-    // Enrich context with active watchlists to feed Gemini AI with real-time price & performance data
+    // Build watchlist data as a structured object for the AI
     const watchlists = useWatchlistStore.getState().watchlists;
     const activeWatchlistId = useWatchlistStore.getState().activeWatchlistId;
     const activeWatchlist = watchlists.find(w => w.id === activeWatchlistId) || watchlists[0];
     
-    const watchlistsContext = watchlists.map(w => {
-      const itemsStr = w.items.map(i => {
+    const watchlistPayload = activeWatchlist ? {
+      name: activeWatchlist.name,
+      items: activeWatchlist.items.map(i => {
         const live = marketItemsMap[i.symbol.toUpperCase()];
-        const priceStr = live 
-          ? `son fiyat: ${live.price} TRY, günlük değişim: ${live.change >= 0 ? '+' : ''}${live.change.toFixed(2)}%` 
-          : 'fiyat bilgisi alınamadı';
-        return `${i.symbol} (${i.type === 'index' ? 'Endeks' : 'Hisse'} - ${priceStr})`;
-      }).join(', ');
-      return `"${w.name}" listesi: [${itemsStr || 'Boş'}]`;
-    }).join('; ');
-
-    const enrichedContext = `${context} | Aktif Liste: "${activeWatchlist?.name || 'Yok'}" | Tüm Takip Listeleri ve Güncel Fiyat/Değişim Verileri: ${watchlistsContext} | Desteklenen AI komutları: Bir hisseyi/endeksi takip listesine eklemek için cevabın sonuna [WATCHLIST_ADD:SEMBOL:hisse|endeks] veya çıkarmak için [WATCHLIST_REMOVE:SEMBOL] ekleyebilirsin. Örneğin: [WATCHLIST_ADD:THYAO:stock] veya [WATCHLIST_REMOVE:THYAO] veya [WATCHLIST_ADD:XU100:index].`;
+        return {
+          symbol: i.symbol,
+          type: i.type,
+          price: live?.price || null,
+          change: live?.change || null,
+        };
+      }),
+    } : null;
 
     // Build message history for multi-turn context (last 10 exchanges)
     const historyMessages = get().messages
@@ -324,23 +335,65 @@ export const useChatStore = create<ChatState>((set, get) => ({
       .map(m => ({ role: m.role, text: m.text }))
 
     try {
+      set({ streamingText: "" });
       const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com";
-      const response = await fetch(`${apiUrl}/api/ai/chat`, {
+      const response = await fetch(`${apiUrl}/api/ai/chat/stream`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           message: trimmedText,
-          context: enrichedContext,
+          context,
+          watchlist: watchlistPayload,
           history: historyMessages,
         }),
       });
 
       if (!response.ok) throw new Error("API response error");
 
-      const data = await response.json();
-      let replyText = data.reply || "Bir hata oluştu.";
+      // Consume SSE stream
+      let replyText = "";
+      let dataSuggestions: string[] = [];
+      let dataWidget: any = null;
+      let usage: { inputTokens?: number; outputTokens?: number } = {};
+
+      const reader = response.body!.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const jsonStr = line.slice(6).trim();
+            if (!jsonStr) continue;
+            try {
+              const event = JSON.parse(jsonStr);
+              if (event.type === 'token') {
+                replyText += event.text;
+                set({ streamingText: replyText });
+              } else if (event.type === 'done') {
+                replyText = event.reply || replyText;
+                dataSuggestions = event.suggestions || [];
+                dataWidget = event.widget || null;
+                if (event.usage) usage = event.usage;
+              } else if (event.type === 'error') {
+                throw new Error(event.message);
+              }
+            } catch (e) {
+              if (e instanceof SyntaxError) continue;
+              throw e;
+            }
+          }
+        }
+      }
+      set({ streamingText: null });
 
       // Monetization: Charge HT
       try {
@@ -349,8 +402,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             modelId: selectedModelId,
-            inputTokens: data.usage?.inputTokens || (Math.ceil(trimmedText.length / 4) + 1000),
-            outputTokens: data.usage?.outputTokens || (replyText ? Math.ceil(replyText.length / 4) : 250),
+            inputTokens: usage?.inputTokens || (Math.ceil(trimmedText.length / 4) + 1000),
+            outputTokens: usage?.outputTokens || (replyText ? Math.ceil(replyText.length / 4) : 250),
             sessionId: currentSessionId,
             featureType: "chat"
           })
@@ -396,11 +449,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
       const newAssistantMessage: Message = { 
         role: "assistant", 
         text: replyText, 
-        context: enrichedContext,
-        suggestions: data.suggestions || [],
-        widget: data.widget || null
+        context,
+        suggestions: dataSuggestions,
+        widget: dataWidget
       };
-      
+
       // Update session with assistant reply
       const updatedSessions = get().sessions.map(s => {
         if (s.id === currentSessionId) {
@@ -426,15 +479,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
           body: JSON.stringify({
             sessionId: currentSessionId,
             ticker: currentSession?.ticker,
-            context: enrichedContext,
+            context,
             title: isNewSession ? trimmedText.slice(0, 80) : undefined,
             userMessage: { text: trimmedText, context },
             assistantMessage: {
               text: replyText,
-              suggestions: data.suggestions || [],
-              widget: data.widget || null,
-              inputTokens: data.usage?.inputTokens,
-              outputTokens: data.usage?.outputTokens,
+              suggestions: dataSuggestions,
+              widget: dataWidget,
+              inputTokens: usage?.inputTokens,
+              outputTokens: usage?.outputTokens,
             },
           }),
         })
@@ -444,6 +497,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     } catch (error) {
       console.error(error);
+      set({ streamingText: null });
       const errorAssistantMessage: Message = {
         role: "assistant",
         text: "Özür dilerim, şu an yanıt üretemiyorum. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.",
@@ -480,7 +534,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         })
       } catch {}
     } finally {
-      set({ isLoading: false });
+      set({ streamingText: null, isLoading: false });
     }
   },
 }));

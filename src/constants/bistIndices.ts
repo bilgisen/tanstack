@@ -62,5 +62,6 @@ export function getIndexSlug(code: string): string {
 }
 
 export function getIndexName(code: string): string {
+  if (!code) return ''
   return bistIndices[code.toUpperCase()] || code.toUpperCase()
 }

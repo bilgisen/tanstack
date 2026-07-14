@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet } from '@tanstack/react-router'
-import { Info, Activity } from 'lucide-react'
+import { Info, Activity, ArrowUp, ArrowDown, ChevronDown, ChevronUp, Clock } from 'lucide-react'
 import { useMemo } from 'react'
 import { Skeleton } from '../components/ui/skeleton'
 import { getIndexName } from '../constants/bistIndices'
@@ -17,7 +17,7 @@ const TABS = [
 const indexMetadataFallbacks: Record<string, any> = {
   xu030: { name: "BIST 30", price: 11250.40, diffPercent: 1.45 },
   xu100: { name: "BIST 100", price: 10240.20, diffPercent: 1.15 },
-  xu500: { name: "BIST 500", price: 12540.80, diffPercent: 0.95 },
+  xu050: { name: "BIST 50", price: 12540.80, diffPercent: 0.95 },
   xbank: { name: "BIST Banka", price: 14520.10, diffPercent: -2.15 },
 }
 
@@ -55,35 +55,63 @@ function EndeksLayout() {
 
   return (
     <div className="space-y-4 pb-8 animate-in fade-in duration-400">
-      {/* Heading */}
-      <div className="space-y-2 pb-3 border-b border-border/30">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <img src="/logos/bist.svg" alt="BIST" className="h-7 w-7 md:h-8 md:w-8 object-contain" />
-            <span className="text-xs md:text-sm text-muted-foreground font-mono font-semibold">{code}</span>
-            <h1 className="text-xl md:text-2xl font-bold text-foreground">{priceDetails.name}</h1>
+      {/* Heading — matches hisse ticker header design */}
+      <div className="space-y-1 pb-4 border-b border-border/30">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <img src="/logos/bist.svg" alt="BIST" className="h-9 w-9 rounded-sm object-contain bg-white shrink-0" />
+            <div className="min-w-0 space-y-0.5">
+              <span className="text-base text-muted-foreground font-light tracking-tight">{code}</span>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl md:text-2xl font-bold text-foreground tracking-tight truncate">{priceDetails.name}</h1>
+              </div>
+            </div>
           </div>
-          {indexDetail?.updateDate && (
-            <span className="text-sm md:text-base font-light text-muted-foreground shrink-0">
-              {indexDetail.updateDate.match(/(\d{2}):(\d{2})/)?.[0] || ''}
+          <div className="text-right shrink-0">
+            <span className="text-2xl md:text-3xl font-bold text-foreground tracking-tight block leading-none tabular-nums">
+              {priceDetails.price > 0
+                ? priceDetails.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                : '-'}
             </span>
-          )}
-        </div>
-
-        <div className="flex items-baseline gap-2.5 md:gap-3 flex-wrap">
-          <span className="text-3xl md:text-4xl font-bold text-foreground tabular-nums">
-            {priceDetails.price.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </span>
-          <span className={`text-xl md:text-2xl font-bold ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
-            {isUp ? '+' : ''}{priceDetails.diffPercent.toFixed(2)}%
-          </span>
+            <span className={`text-base md:text-lg font-bold inline-flex items-center gap-1 ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
+              {isUp ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
+              {isUp ? '+' : ''}{priceDetails.diffPercent.toFixed(2)}%
+            </span>
+          </div>
         </div>
 
         {indexDetail && (
-          <div className="flex items-center gap-4 md:gap-5 text-base md:text-lg text-muted-foreground">
-            <span>En Düşük {indexDetail.low?.toLocaleString('tr-TR', { minimumFractionDigits: 0 })}</span>
-            <span>En Yüksek {indexDetail.high?.toLocaleString('tr-TR', { minimumFractionDigits: 0 })}</span>
-            <span>Hacim {(indexDetail.volume / 1_000_000_000)?.toFixed(2)}B</span>
+          <div className="flex items-center justify-between text-sm text-muted-foreground px-1 pt-2">
+            <div className="flex items-center gap-4">
+              <span className="font-medium">
+                Hacim: <span className="text-foreground/70 font-semibold">
+                  {indexDetail.volume
+                    ? (indexDetail.volume / 1_000_000_000).toFixed(2) + 'B'
+                    : '-'}
+                </span>
+              </span>
+              <span className="flex items-center gap-0.5 text-destructive/70">
+                <ChevronDown size={12} />
+                <span className="text-foreground/70 font-semibold">
+                  {indexDetail.low?.toLocaleString('tr-TR', { minimumFractionDigits: 0 })}
+                </span>
+              </span>
+              <span className="flex items-center gap-0.5 text-emerald-500/70">
+                <ChevronUp size={12} />
+                <span className="text-foreground/70 font-semibold">
+                  {indexDetail.high?.toLocaleString('tr-TR', { minimumFractionDigits: 0 })}
+                </span>
+              </span>
+            </div>
+            {indexDetail.updateDate && (
+              <span className="flex items-center gap-1 text-xs text-muted-foreground/50">
+                <Clock size={14} />
+                {(() => {
+                  const m = indexDetail.updateDate.match(/(\d{2}):(\d{2})/)
+                  return m ? m[0] : ''
+                })()}
+              </span>
+            )}
           </div>
         )}
       </div>

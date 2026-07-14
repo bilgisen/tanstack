@@ -1,67 +1,18 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
-import useEmblaCarousel from 'embla-carousel-react'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Loader2, ArrowUp, ArrowDown } from 'lucide-react'
 import { getIndexName, getIndexSlug } from '../constants/bistIndices'
+import { useIndices } from '../lib/useMarketData'
+import { DataTable } from '../components/ui/data-table'
 
 export const Route = createFileRoute('/endeksler/')({
   component: EndekslerPage,
 })
 
-type IndexData = {
-  code: string
-  name: string
-  last_price: number
-  diff_percent: number
-  up: boolean
-}
-
-const TOP_INDICES = ['XU100', 'XU030', 'XU500', 'XBANK', 'XUSIN']
-
 function EndekslerPage() {
-  const [emblaRef] = useEmblaCarousel({ align: 'start', slidesToScroll: 1 })
+  const { data: indicesData, isLoading, isError } = useIndices()
+  const navigate = useNavigate()
 
-  const [indices, setIndices] = useState<Record<string, IndexData>>({})
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    let mounted = true
-    async function fetchData() {
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || 'https://hono.jetborsa.com'
-      try {
-        const res = await fetch(`${apiUrl}/api/market/indices`)
-        if (res.ok) {
-          const json = await res.json()
-          if (json?.data && Array.isArray(json.data)) {
-            const map: Record<string, IndexData> = {}
-            json.data.forEach((idx: any) => {
-              const code = idx.code?.toUpperCase()
-              if (code) {
-                map[code] = {
-                  code,
-                  name: getIndexName(code),
-                  last_price: idx.last_price ?? null,
-                  diff_percent: idx.diff_percent ?? null,
-                  up: (idx.diff_percent ?? 0) >= 0,
-                }
-              }
-            })
-            if (mounted) setIndices(map)
-          }
-        }
-      } catch (e) {
-        console.error('Failed fetching indices:', e)
-      }
-      if (mounted) setLoading(false)
-    }
-    fetchData()
-  }, [])
-
-  const topIndices = TOP_INDICES
-    .map(code => indices[code])
-    .filter(Boolean)
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
         <Loader2 className="animate-spin text-primary" size={24} />
@@ -69,45 +20,106 @@ function EndekslerPage() {
     )
   }
 
+  if (isError) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <p className="text-destructive text-sm">Veri alınamadı. Lütfen sayfayı yenileyin.</p>
+      </div>
+    )
+  }
+
+  let indices: any[] = []
+  try {
+    indices = (indicesData || [])
+      .map((item: any) => ({
+        code: item.code?.toUpperCase() || '',
+        name: getIndexName(item.code) || item.name || item.code,
+        last_price: item.last_price ?? 0,
+        diff_percent: item.diff_percent ?? 0,
+      }))
+      .filter((i: any) => i.code)
+  } catch (e) {
+    console.error('EndekslerPage: error processing indices data', e)
+  }
+
+  const columns = [
+    {
+      key: 'code',
+      header: 'Ticker',
+      sortable: true,
+      className: 'w-[100px]',
+      render: (item: any) => <span className="font-bold font-mono text-foreground">{item.code}</span>,
+    },
+    {
+      key: 'name',
+      header: 'Endeks',
+      sortable: true,
+      render: (item: any) => <span className="text-muted-foreground">{item.name}</span>,
+    },
+    {
+      key: 'last_price',
+      header: 'Son',
+      sortable: true,
+      sortKey: 'last_price',
+      className: 'text-right w-[140px]',
+      render: (item: any) =>
+        item.last_price > 0 ? (
+          <span className="font-mono font-semibold text-foreground tabular-nums">
+            {item.last_price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </span>
+        ) : (
+          <span className="text-muted-foreground">-</span>
+        ),
+    },
+    {
+      key: 'diff_percent',
+      header: 'Fark %',
+      sortable: true,
+      sortKey: 'diff_percent',
+      className: 'text-right w-[120px]',
+      render: (item: any) => {
+        const isUp = item.diff_percent >= 0
+        return (
+          <span className={`inline-flex items-center gap-1 font-bold ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
+            {isUp ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+            {isUp ? '+' : ''}{item.diff_percent.toFixed(2)}%
+          </span>
+        )
+      },
+    },
+    {
+      key: 'volume',
+      header: 'Hacim',
+      sortable: true,
+      sortKey: 'volume',
+      className: 'text-right w-[140px]',
+      render: (item: any) =>
+        item.volume > 0 ? (
+          <span className="font-mono text-muted-foreground tabular-nums">
+            {(item.volume / 1_000_000_000).toFixed(2).replace('.', ',')}B
+          </span>
+        ) : (
+          <span className="text-muted-foreground">-</span>
+        ),
+    },
+  ]
+
   return (
-    <div className="space-y-6 animate-in fade-in duration-400 max-w-5xl mx-auto py-2">
-      {/* Index Cards Carousel */}
-      <section>
-        <div className="overflow-hidden" ref={emblaRef}>
-          <div className="flex gap-3">
-            {topIndices.map((idx) => (
-              <Link
-                key={idx.code}
-                to="/endeksler/$id"
-                params={{ id: getIndexSlug(idx.code) }}
-                className="flex-none w-[200px] md:w-[240px] rounded-2xl p-4 bg-card/50 border border-border/40 hover:border-border/70 transition-all cursor-pointer group"
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-sm font-bold text-foreground truncate">{idx.name}</span>
-                  <span className={`text-sm font-bold ${idx.up ? 'text-emerald-500' : 'text-destructive'}`}>
-                    %{idx.up ? '+' : ''}{idx.diff_percent.toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xl font-bold text-foreground font-mono truncate">
-                    {idx.last_price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                  </span>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${idx.up ? 'bg-emerald-500' : 'bg-destructive'}`}>
-                    {idx.up ? <ArrowUp size={16} className="text-white" /> : <ArrowDown size={16} className="text-white" />}
-                  </div>
-                </div>
-              </Link>
-            ))}
-            {topIndices.length === 0 && (
-              <div className="flex-none w-[200px] md:w-[240px] rounded-2xl p-4 bg-card/30 border border-border/20">
-                <p className="text-xs text-muted-foreground">Veri yükleniyor...</p>
-              </div>
-            )}
-          </div>
+    <div className="space-y-5 animate-in fade-in duration-400 max-w-5xl mx-auto py-2">
+      <div className="flex items-center gap-2.5">
+        <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+          <ArrowUp size={14} />
         </div>
-      </section>
+        <h2 className="text-base font-bold text-foreground uppercase tracking-wider">Tüm Endeksler</h2>
+      </div>
 
-
+      <div className="rounded-2xl border border-border/20">
+        <DataTable
+          columns={columns}
+          data={indices}
+          onRowClick={(item) => navigate({ to: `/endeksler/${getIndexSlug(item.code)}` })}
+        />
+      </div>
     </div>
   )
 }

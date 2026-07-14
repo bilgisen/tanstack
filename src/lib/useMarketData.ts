@@ -58,6 +58,13 @@ async function fetchTASummary(code: string): Promise<any> {
   return await res.json()
 }
 
+async function fetchSektorDagilimi(code: string): Promise<any[]> {
+  const res = await fetch(`${API_URL}/api/market/indices/${code}/sector`)
+  if (!res.ok) return []
+  const json = await res.json()
+  return json?.data || []
+}
+
 async function fetchHistory(code: string, limit = 150): Promise<any[]> {
   const res = await fetch(`${API_URL}/api/market/symbol/${code}/history?limit=${limit}`)
   if (!res.ok) throw new Error(`Failed to fetch history for ${code}`)
@@ -85,11 +92,11 @@ export function useIndices() {
   return useQuery({
     queryKey: ['indices', 'all'],
     queryFn: fetchIndices,
-    staleTime: marketStaleTime(30_000, 3_600_000),
-    gcTime: 86_400_000,
-    refetchInterval: marketStaleTime(300_000, false),
-    placeholderData: (prev) => prev,
-    refetchOnReconnect: false,
+    staleTime: 0,
+    gcTime: 300_000,
+    refetchInterval: marketStaleTime(120_000, false),
+    refetchOnMount: 'always',
+    refetchOnReconnect: 'always',
   })
 }
 
@@ -97,12 +104,12 @@ export function useIndexDetail(code: string) {
   return useQuery({
     queryKey: ['indices', 'detail', code],
     queryFn: () => fetchIndexDetail(code),
-    staleTime: marketStaleTime(30_000, 3_600_000),
-    gcTime: 86_400_000,
-    refetchInterval: marketStaleTime(300_000, false),
+    staleTime: 0,
+    gcTime: 300_000,
+    refetchInterval: marketStaleTime(120_000, false),
     enabled: !!code,
-    placeholderData: (prev) => prev,
-    refetchOnReconnect: false,
+    refetchOnMount: 'always',
+    refetchOnReconnect: 'always',
   })
 }
 
@@ -126,6 +133,16 @@ export function useTASummary(code: string) {
     gcTime: 3_600_000,
     enabled: !!code,
     refetchOnReconnect: false,
+  })
+}
+
+export function useSektorDagilimi(code: string) {
+  return useQuery({
+    queryKey: ['sector', code],
+    queryFn: () => fetchSektorDagilimi(code),
+    staleTime: 3600_000,
+    gcTime: 3600_000,
+    enabled: !!code,
   })
 }
 

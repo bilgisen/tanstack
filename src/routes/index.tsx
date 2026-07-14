@@ -1,13 +1,13 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
-import useEmblaCarousel from 'embla-carousel-react'
 import { 
   Sparkles, 
   ArrowUp,
   ArrowDown,
   Star,
   Factory,
+  TrendingUp,
 } from 'lucide-react'
 import { useSectorGroups } from '../lib/useCompData'
 import { groupKeyToSlug, groupKeyToDisplayName } from '../constants/sectorGroups'
@@ -16,19 +16,14 @@ import { ChatSheet } from '../components/chat/ChatSheet'
 import { useUIStore } from '../store/ui'
 import companyLogos from '../constants/companyLogos.json'
 import companyNames from '../constants/companyNames.json'
-import { useMarketSummary, useMarketStocks } from '../lib/useMarketData'
+import { useMarketStocks, useIndices } from '../lib/useMarketData'
+import useEmblaCarousel from 'embla-carousel-react'
+import Autoplay from 'embla-carousel-autoplay'
+import { getIndexName, getIndexSlug } from '../constants/bistIndices'
 
 export const Route = createFileRoute('/')({
   component: LandingPage,
 })
-
-type IndexDisplay = {
-  id: string;
-  name: string;
-  code: string;
-  price: number;
-  diffPercent: number;
-}
 
 type StockRow = {
   ticker: string;
@@ -44,28 +39,10 @@ function LandingPage() {
   const navigate = useNavigate()
   const [isChatSheetOpen, setIsChatSheetOpen] = useState(false)
   
-  const [emblaRef] = useEmblaCarousel(
-    { align: 'start', slidesToScroll: 1 }
-  )
-
-  const { data: summaryData, isLoading: summaryLoading, isError: summaryError } = useMarketSummary()
   const { data: stocksData, isLoading: stocksLoading, isError: stocksError, error: stocksErrorObj } = useMarketStocks()
   const { data: sectorGroupsData } = useSectorGroups()
-
-  const indexData: IndexDisplay[] = useMemo(() => {
-    if (!summaryData) return []
-    const codes = ['XU100', 'XU030', 'XU500']
-    return codes.map((code, i) => {
-      const live = summaryData.find((s: any) => s.code?.toUpperCase() === code)
-      return {
-        id: code.toLowerCase(),
-        name: live?.name || code,
-        code,
-        price: live?.last_price ?? 0,
-        diffPercent: live?.diff_percent ?? 0,
-      }
-    })
-  }, [summaryData])
+  const { data: indicesData } = useIndices()
+  const [emblaRef] = useEmblaCarousel({ loop: true, dragFree: true, align: 'start' }, [Autoplay({ delay: 3000, stopOnMouseEnter: true })])
 
   const [topGainers, setTopGainers] = useState<StockRow[]>([])
   
@@ -129,36 +106,38 @@ function LandingPage() {
             </div>
           </section>
 
-          {/* Index Cards Carousel - Autoplay + Loop */}
+
+
+          {/* Endeksler Carousel */}
           <section className="px-4 md:px-6 py-4">
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                <TrendingUp size={14} />
+              </div>
+              <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Endeksler</h3>
+            </div>
             <div className="overflow-hidden" ref={emblaRef}>
               <div className="flex gap-3">
-                {[...indexData, ...indexData, ...indexData].map((idx, i) => {
-                  const isUp = idx.diffPercent >= 0;
-                  const routeTarget = `/endeksler/${idx.id}`;
-                  
+                {['XU100', 'XU030', 'XU050', 'XBANK', 'XUSIN', 'XYLDZ', 'XUMAL', 'XHARZ', 'XGMYO', 'XKOBI'].map((code) => {
+                  const idx = (indicesData || []).find((i: any) => i.code === code)
+                  if (!idx) return null
+                  const isUp = (idx.diff_percent ?? 0) >= 0
                   return (
-                    <Link
-                      key={`${idx.id}-${i}`}
-                      to={routeTarget}
-                      className="flex-none w-[200px] md:w-[240px] rounded-2xl p-4 bg-card/50 border border-white/5 hover:border-white/10 transition-all cursor-pointer group"
+                    <div
+                      key={idx.code}
+                      onClick={() => navigate({ to: `/endeksler/${getIndexSlug(idx.code)}` })}
+                      className="min-w-0 flex-[0_0_auto] w-[160px] rounded-2xl border border-border/20 p-4 cursor-pointer hover:bg-muted/30 transition-colors shrink-0"
                     >
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-sm font-bold text-foreground truncate">{idx.name}</span>
-                        <span className={`text-sm font-bold ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
-                          %{isUp ? '+' : ''}{idx.diffPercent.toFixed(2).replace('.', ',')}
-                        </span>
+                      <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">{idx.code}</div>
+                      <div className="text-lg font-bold font-mono tabular-nums text-foreground">
+                        {Number(idx.last_price || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xl font-bold text-foreground font-mono truncate">
-                          {idx.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </span>
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isUp ? 'bg-emerald-500' : 'bg-destructive'}`}>
-                          {isUp ? <ArrowUp size={16} className="text-white" /> : <ArrowDown size={16} className="text-white" />}
-                        </div>
+                      <div className={`flex items-center gap-1 mt-1 font-bold text-sm ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
+                        {isUp ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+                        {isUp ? '+' : ''}{Number(idx.diff_percent || 0).toFixed(2)}%
                       </div>
-                    </Link>
-                  );
+                    </div>
+                  )
                 })}
               </div>
             </div>

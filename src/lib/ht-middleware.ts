@@ -124,8 +124,7 @@ export async function checkAndReserveHT(
     return { ok: true, availableHT, estimatedCost: estimatedHT };
   } catch (error) {
     console.error('[checkAndReserveHT] Unexpected error:', error);
-    // Return a generic error instead of throwing
-    return { ok: false, error: 'USER_NOT_FOUND' };
+    throw error;
   }
 }
 

@@ -6,7 +6,6 @@ import { ChatPane } from "../dashboard/ChatPane";
 import { MarkdownRenderer } from "../dashboard/MarkdownRenderer";
 import { Logo } from "../layout/Logo";
 import { Bubble, BubbleContent } from "../ui/bubble";
-import { Marker } from "../ui/marker";
 import {
   MessageScroller,
   MessageScrollerButton,
@@ -26,7 +25,7 @@ interface ChatPanelProps {
 }
 
 export function ChatPanel({ context, placeholder, onClose, user, sessionLoading, isMobile = false }: ChatPanelProps) {
-  const { messages, isLoading, sessions, activeSessionId, loadSession, deleteSession, clearChat, init } = useChatStore();
+  const { messages, isLoading, streamingText, sessions, activeSessionId, loadSession, deleteSession, clearChat, init } = useChatStore();
   const { isChatMaximized, toggleChatMaximized } = useUIStore();
   const [historyOpen, setHistoryOpen] = useState(false);
   const historyRef = useRef<HTMLDivElement>(null);
@@ -200,7 +199,25 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading,
                 ))
               )}
 
-              {isLoading && (
+              {streamingText !== null && (
+                <MessageScrollerItem scrollAnchor>
+                  <div className="flex gap-2.5 justify-start">
+                    <div className="shrink-0 mt-1">
+                      <Logo size={22} variant="icon" />
+                    </div>
+                    <Bubble variant="secondary" align="start">
+                      <BubbleContent className="px-3.5 py-2.5 rounded-2xl rounded-tl-sm border border-border/30">
+                        <div className="text-sm whitespace-pre-wrap break-words leading-relaxed [&_*]:text-sm">
+                          {streamingText}
+                          <span className="inline-flex w-[2px] h-[1em] bg-primary ml-0.5 animate-pulse rounded-sm" />
+                        </div>
+                      </BubbleContent>
+                    </Bubble>
+                  </div>
+                </MessageScrollerItem>
+              )}
+
+              {isLoading && streamingText === null && (
                 <MessageScrollerItem scrollAnchor>
                   <div className="flex gap-2.5 justify-start">
                     <div className="shrink-0 mt-1">
