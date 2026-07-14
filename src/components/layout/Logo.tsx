@@ -48,9 +48,8 @@ function JetIconBranded({ size, className }: { size: number; className?: string 
 
 function BorsaText({ className, style, ...props }: React.HTMLAttributes<HTMLSpanElement>) {
   return (
-    <span className={className} style={{ letterSpacing: "0.06em", ...style }} {...props}>
-      <span className="font-bold text-primary">Jet</span>
-      <span className="font-semibold text-foreground">Borsa</span>
+    <span className={className} style={{ fontWeight: 700, letterSpacing: "0.04em", color: "var(--foreground)", ...style }} {...props}>
+      JetBorsa
     </span>
   );
 }
@@ -65,7 +64,7 @@ export function Logo({ size = 24, variant = "full", className, style }: LogoProp
   }
 
   // full = icon + "jetborsa" text side by side
-  const fontSize = size * 0.72;
+  const fontSize = size * 0.82;
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "4px", ...style }} className={className}>
       <JetIconBranded size={size} />

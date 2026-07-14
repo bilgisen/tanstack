@@ -35,7 +35,7 @@ export function Topbar() {
         {/* Left: Branding & Navigation */}
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2 select-none hover:opacity-95 transition-all">
-            <ResponsiveLogo mobileSize={24} className="text-foreground shrink-0" />
+            <ResponsiveLogo mobileSize={28} className="text-foreground shrink-0" />
           </Link>
           
           {/* Desktop Navigation */}
