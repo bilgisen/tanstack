@@ -7,7 +7,7 @@ function isMarketOpen(): boolean {
   const hour = parseInt(now.split(', ')[1]?.split(':')[0] || '0')
   const weekday = new Date().toLocaleString('en-US', { timeZone: 'Europe/Istanbul', weekday: 'short' })
   if (['Sat', 'Sun'].includes(weekday)) return false
-  return hour >= 9 && hour < 17
+  return hour >= 9 && hour < 18
 }
 
 function marketStaleTime(openShort: number, closedLong: number): number {
