@@ -109,6 +109,13 @@ export const Route = createFileRoute('/api/auth/$')({
             }
           });
 
+          // Fallback: if H3 event unavailable, keep cookies on response directly
+          if (!event && setCookies.length > 0) {
+            for (const cookie of setCookies) {
+              newHeaders.append("set-cookie", cookie);
+            }
+          }
+
           return new Response(res.body, {
             status: res.status,
             statusText: res.statusText,
@@ -158,6 +165,13 @@ export const Route = createFileRoute('/api/auth/$')({
               newHeaders.set(key, value);
             }
           });
+
+          // Fallback: if H3 event unavailable, keep cookies on response directly
+          if (!event && setCookies.length > 0) {
+            for (const cookie of setCookies) {
+              newHeaders.append("set-cookie", cookie);
+            }
+          }
 
           return new Response(res.body, {
             status: res.status,

@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
-import { ArrowUp } from "lucide-react";
-import { useNavigate } from "@tanstack/react-router";
+import { ArrowUp, LogIn } from "lucide-react";
 import { useChatStore } from "../../store/chat";
 import { CompanySearch } from "../chat/CompanySearch";
+import { authClient } from "../../lib/auth-client";
 
 interface ChatPaneProps {
   context?: string;
@@ -23,18 +23,27 @@ export function ChatPane({
   const [showSearch, setShowSearch] = useState(false);
   const { isLoading, sendMessage, clearChat } = useChatStore();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const navigate = useNavigate();
+
+  const handleLogin = async () => {
+    try {
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: window.location.href,
+      });
+    } catch (err) {
+      console.error("Login failed:", err);
+    }
+  };
 
   const handleSend = async () => {
     const textToSend = input.trim();
     if (!textToSend || isLoading) return;
 
-    if (!user) {
-      if (!sessionLoading) {
-        navigate({ to: "/" as any });
-      }
+    if (!user && !sessionLoading) {
+      handleLogin();
       return;
     }
+    if (!user) return;
 
     setInput("");
     setShowSearch(false);

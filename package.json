@@ -32,6 +32,7 @@
     "drizzle-orm": "^0.45.2",
     "embla-carousel-autoplay": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
+    "framer-motion": "^12.42.2",
     "h3": "latest",
     "klinecharts": "9.8.12",
     "lightweight-charts": "^5.2.0",

@@ -13,6 +13,7 @@ import { useSectorGroups } from '../lib/useCompData'
 import { groupKeyToSlug, groupKeyToDisplayName } from '../constants/sectorGroups'
 import { ChatPanel } from '../components/chat/ChatPanel'
 import { ChatSheet } from '../components/chat/ChatSheet'
+import CTA from '../components/ui/cta'
 import { useUIStore } from '../store/ui'
 import companyLogos from '../constants/companyLogos.json'
 import companyNames from '../constants/companyNames.json'
@@ -142,6 +143,9 @@ function LandingPage() {
               </div>
             </div>
           </section>
+
+          {/* CTA */}
+          {!user && <CTA onLogin={handleLogin} />}
 
           {/* Günün Yıldızları */}
           <section className="px-4 md:px-6 py-4">
