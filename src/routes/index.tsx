@@ -199,7 +199,7 @@ function LandingPage() {
           </section>
 
           {/* Hero2 - CTA */}
-          {!sessionLoading && !user && (
+          {!user && (
             <section className="relative w-full py-16 px-6 flex flex-col items-center text-center overflow-hidden">
               <div className="absolute top-[-20%] left-[-10%] w-[80vw] h-[80vw] rounded-full bg-primary/5 blur-[120px] pointer-events-none -z-10 animate-pulse" />
               <div className="max-w-3xl mx-auto">
