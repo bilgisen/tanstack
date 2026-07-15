@@ -1,34 +1,13 @@
 import { ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
-import { useMemo, useState, useEffect } from "react";
-
-const BAR_COUNT = 16;
-
-function randomBars() {
-  return Array.from({ length: BAR_COUNT }, (_, i) => ({
-    id: i,
-    h: 20 + Math.random() * 60,
-    up: Math.random() > 0.45,
-    peak: 20 + Math.random() * 80,
-    delay: Math.random() * 3,
-    dur: 2 + Math.random() * 3,
-  }))
-}
 
 const CTA = ({ onLogin }: { onLogin?: () => void }) => {
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
-
-  const bars = useMemo(() => randomBars(), [])
-
   return (
     <div className="px-0 py-12 sm:px-6">
       <div className="mx-auto max-w-5xl border-y bg-muted/50 p-1 sm:rounded-xl sm:border-x">
-        <div className="relative flex flex-col justify-between gap-0 overflow-hidden border bg-background px-6 md:px-10 sm:rounded-lg md:flex-row md:gap-8">
-          {/* Circuit Board Pattern */}
+        <div className="relative flex flex-col items-center text-center overflow-hidden border bg-background px-6 py-12 sm:rounded-lg sm:px-12">
           <div
-            className="pointer-events-none absolute inset-0 -top-0.5 -left-1 z-0 not-dark:opacity-60"
+            className="pointer-events-none absolute inset-0 z-0 not-dark:opacity-60"
             style={{
               backgroundImage: `
                 repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(75, 85, 99, 0.08) 19px, rgba(75, 85, 99, 0.08) 20px, transparent 20px, transparent 39px, rgba(75, 85, 99, 0.08) 39px, rgba(75, 85, 99, 0.08) 40px),
@@ -40,70 +19,20 @@ const CTA = ({ onLogin }: { onLogin?: () => void }) => {
             }}
           />
 
-          {/* Left: Text */}
-          <div className="relative isolate pt-10 pb-0 md:pb-10 z-10">
+          <div className="relative z-10 max-w-lg">
             <h2 className="font-bold text-3xl tracking-tight lg:text-4xl/[1.15]">
               Borsanın röntgenini çekin
             </h2>
-            <p className="mt-2 text-muted-foreground text-lg sm:mt-3 lg:text-xl max-w-md">
+            <p className="mt-3 text-muted-foreground text-lg lg:text-xl">
               Borsa İstanbul uzmanı tek yapay zekanın yeteneklerini ücretsiz keşfedin.
             </p>
-            <Button className="mt-5 sm:mt-8" size="lg" onClick={onLogin}>
+            <Button className="mt-8" size="lg" onClick={onLogin}>
               Google'la bağlan <ArrowUpRight />
             </Button>
             <p className="mt-2 text-xs text-muted-foreground/60">
               30 gün ücretsiz kullanın. Kredi kartı gerekmez.
             </p>
           </div>
-
-          {/* Right: Animated Candlesticks */}
-          {mounted && (
-            <div className="relative isolate mt-6 md:mt-0 md:self-end flex items-end gap-[3px] md:gap-[4px] px-2 pb-4 md:pb-6 h-36 md:h-44">
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[200px] h-[120px] bg-primary/10 rounded-full blur-[60px] pointer-events-none" />
-
-              {bars.map((bar) => (
-                <motion.div
-                  key={bar.id}
-                  className="w-[6px] md:w-[8px] rounded-t-sm relative"
-                  style={{
-                    backgroundColor: bar.up ? 'rgb(34 197 94)' : 'rgb(239 68 68)',
-                    originY: 1,
-                  }}
-                  animate={{
-                    height: [`${bar.h}%`, `${bar.peak}%`, `${bar.h}%`],
-                  }}
-                  transition={{
-                    duration: bar.dur,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                    delay: bar.delay,
-                  }}
-                />
-              ))}
-
-              <div className="absolute w-1.5 h-1.5 rounded-full bg-primary/40" style={{ top: '15%', right: '20%' }}>
-                <motion.div
-                  className="w-full h-full rounded-full bg-inherit"
-                  animate={{ y: [0, -8, 0], opacity: [0.3, 0.8, 0.3] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                />
-              </div>
-              <div className="absolute w-1 h-1 rounded-full bg-emerald-400/40" style={{ top: '40%', right: '10%' }}>
-                <motion.div
-                  className="w-full h-full rounded-full bg-inherit"
-                  animate={{ y: [0, -12, 0], opacity: [0.2, 0.7, 0.2] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                />
-              </div>
-              <div className="absolute w-1 h-1 rounded-full bg-red-400/40" style={{ top: '25%', right: '35%' }}>
-                <motion.div
-                  className="w-full h-full rounded-full bg-inherit"
-                  animate={{ y: [0, -6, 0], opacity: [0.2, 0.6, 0.2] }}
-                  transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                />
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

@@ -144,9 +144,6 @@ function LandingPage() {
             </div>
           </section>
 
-          {/* CTA */}
-          {!sessionLoading && !user && <CTA onLogin={handleLogin} />}
-
           {/* Günün Yıldızları */}
           <section className="px-4 md:px-6 py-4">
             <div className="flex items-center gap-2.5 mb-4">
@@ -233,6 +230,9 @@ function LandingPage() {
               })}
             </div>
           </section>
+
+          {/* CTA */}
+          {!sessionLoading && !user && <CTA onLogin={handleLogin} />}
 
         </div>
       </div>
