@@ -145,7 +145,7 @@ function LandingPage() {
           </section>
 
           {/* CTA */}
-          {!user && <CTA onLogin={handleLogin} />}
+          {!sessionLoading && !user && <CTA onLogin={handleLogin} />}
 
           {/* Günün Yıldızları */}
           <section className="px-4 md:px-6 py-4">
