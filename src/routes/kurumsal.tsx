@@ -143,7 +143,7 @@ function KurumsalPage() {
               </div>
               <ul className="space-y-3 mb-8 flex-1">
                 <li className="flex items-center gap-3 text-sm"><Check size={16} className="text-primary shrink-0" /> 10 kullanıcıya kadar</li>
-                <li className="flex items-center gap-3 text-sm"><Check size={16} className="text-primary shrink-0" /> 50.000 HT/ay</li>
+                <li className="flex items-center gap-3 text-sm"><Check size={16} className="text-primary shrink-0" /> 50.000 JT/ay</li>
                 <li className="flex items-center gap-3 text-sm"><Check size={16} className="text-primary shrink-0" /> E-posta desteği</li>
                 <li className="flex items-center gap-3 text-sm"><Check size={16} className="text-primary shrink-0" /> Temel API erişimi</li>
               </ul>
@@ -167,7 +167,7 @@ function KurumsalPage() {
               </div>
               <ul className="space-y-3 mb-8 flex-1">
                 <li className="flex items-center gap-3 text-sm"><Check size={16} className="text-primary shrink-0" /> 50 kullanıcıya kadar</li>
-                <li className="flex items-center gap-3 text-sm"><Check size={16} className="text-primary shrink-0" /> 250.000 HT/ay</li>
+                <li className="flex items-center gap-3 text-sm"><Check size={16} className="text-primary shrink-0" /> 250.000 JT/ay</li>
                 <li className="flex items-center gap-3 text-sm"><Check size={16} className="text-primary shrink-0" /> Öncelikli destek</li>
                 <li className="flex items-center gap-3 text-sm"><Check size={16} className="text-primary shrink-0" /> Tam API erişimi</li>
                 <li className="flex items-center gap-3 text-sm"><Check size={16} className="text-primary shrink-0" /> Özel dashboard</li>
@@ -189,7 +189,7 @@ function KurumsalPage() {
               </div>
               <ul className="space-y-3 mb-8 flex-1">
                 <li className="flex items-center gap-3 text-sm"><Check size={16} className="text-primary shrink-0" /> Sınırsız kullanıcı</li>
-                <li className="flex items-center gap-3 text-sm"><Check size={16} className="text-primary shrink-0" /> Sınırsız HT</li>
+                <li className="flex items-center gap-3 text-sm"><Check size={16} className="text-primary shrink-0" /> Sınırsız JT</li>
                 <li className="flex items-center gap-3 text-sm"><Check size={16} className="text-primary shrink-0" /> 7/24 destek</li>
                 <li className="flex items-center gap-3 text-sm"><Check size={16} className="text-primary shrink-0" /> Özel API</li>
                 <li className="flex items-center gap-3 text-sm"><Check size={16} className="text-primary shrink-0" /> On-premise seçenek</li>

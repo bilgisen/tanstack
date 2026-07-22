@@ -38,10 +38,10 @@ export const Route = createFileRoute('/api/user/credits')({
                 .insert(userCredits)
                 .values({
                   userId,
-                  tier: 'pro',
-                  monthlyHt: 5000,
-                  usedHt: 0,
-                  extraHt: 0,
+                  tier: 'free',
+                  monthlyJt: 5000,
+                  usedJt: 0,
+                  extraJt: 0,
                   resetAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
                 })
                 .returning()
@@ -54,19 +54,19 @@ export const Route = createFileRoute('/api/user/credits')({
           console.warn("Database connection or query failed in GET /api/user/credits, falling back to mock credits:", dbErr);
         }
 
-        const monthlyHT = credits?.monthlyHt ?? 5000;
-        const usedHT = credits?.usedHt ?? 0;
-        const extraHT = credits?.extraHt ?? 0;
-        const availableHT = (monthlyHT - usedHT) + extraHT;
-        const usagePercent = Math.min(100, Math.round((usedHT / Math.max(1, monthlyHT)) * 100));
+        const monthlyJT = credits?.monthlyJt ?? 5000;
+        const usedJT = credits?.usedJt ?? 0;
+        const extraJT = credits?.extraJt ?? 0;
+        const availableJT = (monthlyJT - usedJT) + extraJT;
+        const usagePercent = Math.min(100, Math.round((usedJT / Math.max(1, monthlyJT)) * 100));
 
         return new Response(JSON.stringify({
           tier: credits?.tier ?? 'free',
           tierDisplayName: TIER_CONFIG[(credits?.tier || 'free') as keyof typeof TIER_CONFIG]?.displayName || credits?.tier,
-          monthlyHT,
-          usedHT,
-          extraHT,
-          availableHT,
+          monthlyJT,
+          usedJT,
+          extraJT,
+          availableJT,
           usagePercent,
           resetAt: credits?.resetAt || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         }), {

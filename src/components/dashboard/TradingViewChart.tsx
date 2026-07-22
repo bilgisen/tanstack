@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { memo } from "react";
 import { createChart, ColorType, CandlestickSeries, HistogramSeries } from "lightweight-charts";
 import type { IChartApi } from "lightweight-charts";
 import { Loader2 } from "lucide-react";
@@ -18,13 +19,12 @@ interface HistoricalDataPoint {
   volume?: number;
 }
 
-export function TradingViewChart({
+export const TradingViewChart = memo(function TradingViewChart({
   symbol,
   lastPrice = 100.0,
 }: TradingViewChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const { data: historyApiData, isLoading: historyLoading } = useHistory(symbol, 150);
 
@@ -87,7 +87,6 @@ export function TradingViewChart({
     let chart: IChartApi | null = null;
 
     async function initChart() {
-      setLoading(true);
       setError(false);
 
       let rawData: HistoricalDataPoint[] = [];
@@ -122,7 +121,6 @@ export function TradingViewChart({
       rawData.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
 
       if (!isMounted) return;
-      setLoading(false);
 
       // Determine active theme colors dynamically
       const isDark = document.documentElement.classList.contains("dark");
@@ -259,7 +257,7 @@ export function TradingViewChart({
       
       {/* Main Canvas Body */}
       <div className="relative flex-1 w-full min-h-[300px] md:aspect-video md:min-h-0">
-        {loading && (
+        {historyLoading && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/55 backdrop-blur-xs z-20 gap-3 animate-in fade-in duration-200">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
               <Loader2 className="animate-spin text-primary shrink-0" size={20} />
@@ -285,4 +283,4 @@ export function TradingViewChart({
       </div>
     </div>
   );
-}
+});

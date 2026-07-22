@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 const HONO_API = import.meta.env.VITE_HONO_API_URL || 'https://hono.jetborsa.com'
+const MARKET_API = '/api/market'
 
 function isMarketOpen(): boolean {
   const now = new Date().toLocaleString('en-US', { timeZone: 'Europe/Istanbul', hour12: false })
@@ -55,7 +56,7 @@ export function useCompanyData(ticker: string) {
   return useQuery({
     queryKey: ['company', 'data', ticker],
     queryFn: async () => {
-      const res = await fetch(`${HONO_API}/api/market/symbol/${ticker}/company-data`)
+      const res = await fetch(`${MARKET_API}/symbol/${ticker}/company-data`)
       if (!res.ok) throw new Error(`Failed to fetch company data for ${ticker}`)
       return await res.json()
     },
@@ -70,7 +71,7 @@ export function useCompanyRatios(ticker: string) {
   return useQuery({
     queryKey: ['company', 'ratios', ticker],
     queryFn: async () => {
-      const res = await fetch(`${HONO_API}/api/market/symbol/${ticker}/fundamental`)
+      const res = await fetch(`${MARKET_API}/symbol/${ticker}/fundamental`)
       if (!res.ok) throw new Error(`Failed to fetch ratios for ${ticker}`)
       return await res.json()
     },
@@ -85,7 +86,7 @@ export function useCompanyProfile(ticker: string) {
   return useQuery({
     queryKey: ['company', 'profile', ticker],
     queryFn: async () => {
-      const res = await fetch(`${HONO_API}/api/market/symbol/${ticker}/company-profile`)
+      const res = await fetch(`${MARKET_API}/symbol/${ticker}/company-profile`)
       if (!res.ok) throw new Error(`Failed to fetch company profile for ${ticker}`)
       return await res.json() as {
         ticker: string
@@ -109,7 +110,7 @@ export function useCompanyQuote(ticker: string) {
   return useQuery({
     queryKey: ['company', 'quote', ticker],
     queryFn: async () => {
-      const res = await fetch(`${HONO_API}/api/market/symbol/${ticker}`)
+      const res = await fetch(`${MARKET_API}/symbol/${ticker}`)
       if (!res.ok) throw new Error(`Failed to fetch quote for ${ticker}`)
       return await res.json()
     },

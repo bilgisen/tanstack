@@ -61,8 +61,7 @@ export function CeoTaReport({ ticker, unit = 'TL' }: CeoTaReportProps) {
       setLoading(true)
       setError(false)
       try {
-        const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com"
-        const res = await fetch(`${apiUrl}/api/market/symbol/${ticker.toUpperCase()}/ta/ceo-report`)
+        const res = await fetch(`/api/market/symbol/${ticker.toUpperCase()}/ta/ceo-report`)
         if (res.ok) {
           const data = await res.json()
           if (data && !data.error) {

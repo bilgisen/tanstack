@@ -18,7 +18,7 @@ function hasRequiredTier(userTier: Tier | null, requiredVariant: 'anonymous' | '
   }
   
   if (requiredVariant === 'subscriber') {
-    return userTier === 'pro' || userTier === 'ultimate'
+    return userTier === 'jetabone' || userTier === 'proabone'
   }
   
   return false

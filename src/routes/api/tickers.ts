@@ -17,6 +17,19 @@ function getCloudflareEnv(): any {
   return null
 }
 
+function isMarketOpen(): boolean {
+  const now = new Date()
+  const ist = new Date(now.getTime() + 3 * 60 * 60 * 1000)
+  const day = ist.getUTCDay()
+  const min = ist.getUTCHours() * 60 + ist.getUTCMinutes()
+  if (day === 0 || day === 6) return false
+  return min >= 9 * 60 + 10 && min < 18 * 60 + 10
+}
+
+function cacheTtl(): number {
+  return isMarketOpen() ? 60 : 300
+}
+
 export const Route = createFileRoute('/api/tickers')({
   server: {
     handlers: {
@@ -48,7 +61,7 @@ export const Route = createFileRoute('/api/tickers')({
           const etag = response.headers.get('ETag') || ''
           if (kv) {
             try {
-              await kv.put(cacheKey, JSON.stringify({ data, etag, timestamp: Date.now() }), { expirationTtl: 86400 })
+              await kv.put(cacheKey, JSON.stringify({ data, etag, timestamp: Date.now() }), { expirationTtl: cacheTtl() })
             } catch {}
           }
           return new Response(JSON.stringify(data), {

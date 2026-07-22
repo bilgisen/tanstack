@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { createFileRoute } from '@tanstack/react-router'
 import { auth } from '../../../lib/auth'
-import { chargeHT } from '../../../lib/ht-middleware'
+import { chargeJT } from '../../../lib/jt-middleware'
 
 export const Route = createFileRoute('/api/ai/charge')({
   server: {
@@ -30,7 +30,7 @@ export const Route = createFileRoute('/api/ai/charge')({
 
         let chargeResult;
         try {
-          chargeResult = await chargeHT({
+          chargeResult = await chargeJT({
             userId: session.user.id,
             modelId,
             inputTokens,
@@ -39,9 +39,9 @@ export const Route = createFileRoute('/api/ai/charge')({
             featureType
           });
         } catch (dbErr) {
-          console.warn("Database error in chargeHT, falling back to mock charge success:", dbErr);
+          console.warn("Database error in chargeJT, falling back to mock charge success:", dbErr);
           chargeResult = {
-            htCharged: 10,
+            jtCharged: 10,
             actualCostUsd: 0.0001,
             remainingAvailable: 4990
           };

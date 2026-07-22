@@ -1,8 +1,9 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { ArrowUp, LogIn } from "lucide-react";
 import { useChatStore } from "../../store/chat";
 import { CompanySearch } from "../chat/CompanySearch";
 import { authClient } from "../../lib/auth-client";
+import { useAuth } from "../../hooks/useAuth";
 
 interface ChatPaneProps {
   context?: string;
@@ -21,7 +22,16 @@ export function ChatPane({
 }: ChatPaneProps) {
   const [input, setInput] = useState("");
   const [showSearch, setShowSearch] = useState(false);
-  const { isLoading, sendMessage, clearChat } = useChatStore();
+  const { isLoading, sendMessage, clearChat, setUserTier } = useChatStore();
+
+  // Fallback auth when user prop isn't passed (e.g. PublicPageLayout)
+  const { user: authUser } = useAuth();
+  const effectiveUser = user || authUser;
+
+  // Sync user tier to chat store on mount/change
+  useEffect(() => {
+    setUserTier(effectiveUser?.tier || 'free');
+  }, [effectiveUser?.tier, setUserTier]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleLogin = async () => {
@@ -39,11 +49,11 @@ export function ChatPane({
     const textToSend = input.trim();
     if (!textToSend || isLoading) return;
 
-    if (!user && !sessionLoading) {
+    if (!effectiveUser && !sessionLoading) {
       handleLogin();
       return;
     }
-    if (!user) return;
+    if (!effectiveUser) return;
 
     setInput("");
     setShowSearch(false);

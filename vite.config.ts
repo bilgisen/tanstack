@@ -14,6 +14,7 @@ const config = defineConfig({
       compatibilityDate: "2024-11-01",
       routeRules: {
         "/**": { headers: { "Cache-Control": "public, max-age=60, s-maxage=60" } },
+        "/api/market/**": { proxy: "https://hono.jetborsa.com/api/market/**" },
       },
       cloudflare: {
         wrangler: {
@@ -21,7 +22,8 @@ const config = defineConfig({
           vars: {
             "BETTER_AUTH_URL": "https://jetborsa.com",
             "VITE_HONO_API_URL": "https://hono.jetborsa.com",
-            "VITE_FINVERI_API_URL": "https://tekapi.jetborsa.com"
+            "VITE_FINVERI_API_URL": "https://tekapi.jetborsa.com",
+            "POLAR_SERVER": "production"
           },
           d1_databases: [
             {

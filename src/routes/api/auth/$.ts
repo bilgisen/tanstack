@@ -81,7 +81,11 @@ export const Route = createFileRoute('/api/auth/$')({
 
         try {
           const res = await auth.handler(request);
-          
+
+          // Detect OAuth callback (/callback/ in path) — always redirect to /profil
+          const reqUrl = new URL(request.url);
+          const isOAuthCallback = reqUrl.pathname.includes('/callback/');
+
           // Get individual cookies (without merging them with commas)
           let setCookies: string[] = [];
           if (typeof res.headers.getSetCookie === "function") {
@@ -99,6 +103,29 @@ export const Route = createFileRoute('/api/auth/$')({
             for (const cookie of setCookies) {
               appendResponseHeader(event, 'set-cookie', cookie);
             }
+          }
+
+          // For OAuth callbacks: force redirect to /profil regardless of Better Auth's response
+          if (isOAuthCallback && res.status < 400) {
+            const redirectHeaders = new Headers();
+            res.headers.forEach((value: string, key: string) => {
+              if (key.toLowerCase() !== "set-cookie" && key.toLowerCase() !== "location") {
+                redirectHeaders.set(key, value);
+              }
+            });
+            redirectHeaders.set('location', '/profil');
+
+            if (!event && setCookies.length > 0) {
+              for (const cookie of setCookies) {
+                redirectHeaders.append("set-cookie", cookie);
+              }
+            }
+
+            return new Response(null, {
+              status: 302,
+              statusText: 'Found',
+              headers: redirectHeaders,
+            });
           }
 
           // Strip set-cookie from standard response headers to prevent Nitro folding them

@@ -3,51 +3,38 @@
 export const TIER_CONFIG = {
   free: {
     displayName: 'Üye',
-    monthlyHT: 5_000,
+    monthlyJT: 5_000,
     dailyCallLimit: 20,
     watchlistLimit: 5,
     historyDays: 7,
-    canBuyExtra: false,
     price: 0,
     currency: 'TL',
   },
-  standard: {
-    displayName: 'Standart',
-    monthlyHT: 10_000,
-    dailyCallLimit: 100,
-    watchlistLimit: 25,
-    historyDays: 30,
-    canBuyExtra: true,
-    price: 399,
+  jetabone: {
+    displayName: 'JetAbone',
+    monthlyJT: 100_000,
+    dailyCallLimit: 200,
+    watchlistLimit: 50,
+    historyDays: 90,
+    price: 799,
     currency: 'TL',
+    polarProductId: '21cce3c0-6541-4e3d-81be-d8287e78eb0f',
   },
-  pro: {
-    displayName: 'Pro',
-    monthlyHT: 50_000,
-    dailyCallLimit: 500,
-    watchlistLimit: 100,
-    historyDays: null, // unlimited
-    canBuyExtra: true,
+  proabone: {
+    displayName: 'ProAbone',
+    monthlyJT: 500_000,
+    dailyCallLimit: null,
+    watchlistLimit: null,
+    historyDays: null,
     price: 1499,
     currency: 'TL',
-  },
-  ultimate: {
-    displayName: 'Ultimate',
-    monthlyHT: 200_000,
-    dailyCallLimit: null, // unlimited
-    watchlistLimit: null, // unlimited
-    historyDays: null, // unlimited
-    canBuyExtra: true,
-    price: 4999,
-    currency: 'TL',
+    polarProductId: '575bb0d5-44c3-49d6-aaba-fa8a9b0cc08c',
   },
 } as const;
 
 export type Tier = keyof typeof TIER_CONFIG;
 
-// Extra HT Pricing Config
-export const EXTRA_HT_PRICING = {
-  amount: 10_000,
-  price: 449, // 10.000 HT ek kredi = 449 TL (Standart pakete göre orantılı)
-  currency: 'TL',
-} as const;
+export const TIER_POLAR_MAP: Record<string, { price: number; monthlyJT: number; polarProductId: string }> = {
+  jetabone: { price: 799, monthlyJT: 100_000, polarProductId: '21cce3c0-6541-4e3d-81be-d8287e78eb0f' },
+  proabone: { price: 1499, monthlyJT: 500_000, polarProductId: '575bb0d5-44c3-49d6-aaba-fa8a9b0cc08c' },
+};

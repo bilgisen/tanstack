@@ -120,13 +120,12 @@ export function slugToCompName(slug: string): string {
 }
 
 export async function fetchCompanyData(tickerUpper: string, slug: string) {
-  const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com"
   const officialName = (companyNames as Record<string, string>)[tickerUpper] || tickerUpper
   const sectorName = groupKeyToDisplayName(slugToCompName(slug)) || slug
 
   // Try batch endpoint first (single request for all data)
   try {
-    const res = await fetch(`${apiUrl}/api/market/symbol/${tickerUpper}/company-data`)
+    const res = await fetch(`/api/market/symbol/${tickerUpper}/company-data`)
     if (res.ok) {
       const json = await res.json()
       if (json.success && json.stats) {
@@ -154,7 +153,7 @@ export async function fetchCompanyData(tickerUpper: string, slug: string) {
 
   try {
     // Use faster /api/market/symbol/{ticker} endpoint instead of summary-card
-    const res = await fetch(`${apiUrl}/api/market/symbol/${tickerUpper}`)
+    const res = await fetch(`/api/market/symbol/${tickerUpper}`)
     if (res.ok) {
       const json = await res.json()
       if (json && !json.error) {
@@ -173,7 +172,7 @@ export async function fetchCompanyData(tickerUpper: string, slug: string) {
 
   let taData: TaData = null
   try {
-    const res = await fetch(`${apiUrl}/api/market/symbol/${tickerUpper}/ta/summary`)
+    const res = await fetch(`/api/market/symbol/${tickerUpper}/ta/summary`)
     if (res.ok) {
       const json = await res.json()
       if (json && !json.error) {

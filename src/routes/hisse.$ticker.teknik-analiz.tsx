@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { TradingViewChart } from '../components/dashboard/TradingViewChart'
 import { CeoTaReport } from '../components/company/CeoTaReport'
+import { LockedSection } from '../components/company/LockedSection'
 import { ScoreGauge } from '../constants/companyShared'
 import { useCompanyData } from '../lib/useCompanyData'
 import { useTAPublicSummary } from '../lib/useTechnicalAnalysis'
@@ -121,14 +122,16 @@ function TechnicalAnalysisPage() {
         </div>
       )}
 
-      {/* ═══ AI Report ═══ */}
-      <div className="space-y-4 pt-2">
-        <div className="flex items-center gap-2 pb-2 border-b border-border/30">
-          <Sparkles size={14} className="text-violet-500" />
-          <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">AI Teknik Analiz</h3>
+      {/* ═══ AI Report (Subscriber-only) ═══ */}
+      <LockedSection variant="subscriber">
+        <div className="space-y-4 pt-2">
+          <div className="flex items-center gap-2 pb-2 border-b border-border/30">
+            <Sparkles size={14} className="text-violet-500" />
+            <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">AI Teknik Analiz</h3>
+          </div>
+          <CeoTaReport ticker={tickerUpper} />
         </div>
-        <CeoTaReport ticker={tickerUpper} />
-      </div>
+      </LockedSection>
     </div>
   )
 }

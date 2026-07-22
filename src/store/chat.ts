@@ -30,7 +30,9 @@ interface ChatState {
   activeSessionId: string | null;
   selectedModelId: string;
   initialized: boolean;
+  userTier: string;
   setSelectedModelId: (modelId: string) => void;
+  setUserTier: (tier: string) => void;
   sendMessage: (text: string, context: string) => Promise<void>;
   clearChat: () => void;
   loadSession: (id: string) => void;
@@ -75,6 +77,13 @@ const saveSessionsToStorage = (sessions: ChatSession[]) => {
   }
 };
 
+function mapTierToAuth(tier: string): string | null {
+  if (tier === 'proabone') return 'proabone';
+  if (tier === 'jetabone') return 'jetabone';
+  if (tier === 'free') return 'member';
+  return null;
+}
+
 export const useChatStore = create<ChatState>((set, get) => ({
   messages: [],
   isLoading: false,
@@ -83,8 +92,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
   activeSessionId: null,
   selectedModelId: "gemini-2.5-flash",
   initialized: false,
+  userTier: 'free',
 
   setSelectedModelId: (modelId: string) => set({ selectedModelId: modelId }),
+
+  setUserTier: (tier: string) => set({ userTier: tier }),
 
   clearChat: () => set({ messages: [], activeSessionId: null }),
 
@@ -337,6 +349,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
     try {
       set({ streamingText: "" });
       const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com";
+
+      // Enrich request with user tier for tier-gated prompt
+      const authBackend = mapTierToAuth(get().userTier);
+      const authorization = authBackend ? `Bearer ${authBackend}_token` : '';
+
       const response = await fetch(`${apiUrl}/api/ai/chat/stream`, {
         method: "POST",
         headers: {
@@ -347,6 +364,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
           context,
           watchlist: watchlistPayload,
           history: historyMessages,
+          authorization,
         }),
       });
 

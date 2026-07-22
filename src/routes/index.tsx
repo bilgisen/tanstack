@@ -8,6 +8,10 @@ import {
   Star,
   Factory,
   TrendingUp,
+  Settings2,
+  Blocks,
+  ChartPie,
+  MessageCircle,
 } from 'lucide-react'
 import { useSectorGroups } from '../lib/useCompData'
 import { groupKeyToSlug, groupKeyToDisplayName } from '../constants/sectorGroups'
@@ -117,31 +121,43 @@ function LandingPage() {
               </div>
               <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Endeksler</h3>
             </div>
-            <div className="overflow-hidden" ref={emblaRef}>
-              <div className="flex gap-3">
-                {['XU100', 'XU030', 'XU050', 'XBANK', 'XUSIN', 'XYLDZ', 'XUMAL', 'XHARZ', 'XGMYO', 'XKOBI'].map((code) => {
-                  const idx = (indicesData || []).find((i: any) => i.code === code)
-                  if (!idx) return null
-                  const isUp = (idx.diff_percent ?? 0) >= 0
-                  return (
-                    <div
-                      key={idx.code}
-                      onClick={() => navigate({ to: `/endeksler/${getIndexSlug(idx.code)}` })}
-                      className="min-w-0 flex-[0_0_auto] w-[160px] rounded-2xl border border-border/20 p-4 cursor-pointer hover:bg-muted/30 transition-colors shrink-0"
-                    >
-                      <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">{idx.code}</div>
-                      <div className="text-lg font-bold font-mono tabular-nums text-foreground">
-                        {Number(idx.last_price || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+            {indicesData ? (
+              <div className="overflow-hidden" ref={emblaRef}>
+                <div className="flex gap-3">
+                  {['XU100', 'XU030', 'XU050', 'XBANK', 'XUSIN', 'XYLDZ', 'XUMAL', 'XHARZ', 'XGMYO', 'XKOBI'].map((code) => {
+                    const idx = indicesData.find((i: any) => i.code === code)
+                    if (!idx) return null
+                    const isUp = (idx.diff_percent ?? 0) >= 0
+                    return (
+                      <div
+                        key={idx.code}
+                        onClick={() => navigate({ to: `/endeksler/${getIndexSlug(idx.code)}` })}
+                        className="min-w-0 flex-[0_0_auto] w-[160px] rounded-2xl border border-border/20 p-4 cursor-pointer hover:bg-muted/30 transition-colors shrink-0"
+                      >
+                        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">{idx.code}</div>
+                        <div className="text-lg font-bold font-mono tabular-nums text-foreground">
+                          {Number(idx.last_price || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                        </div>
+                        <div className={`flex items-center gap-1 mt-1 font-bold text-sm ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
+                          {isUp ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+                          {isUp ? '+' : ''}{Number(idx.diff_percent || 0).toFixed(2)}%
+                        </div>
                       </div>
-                      <div className={`flex items-center gap-1 mt-1 font-bold text-sm ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
-                        {isUp ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
-                        {isUp ? '+' : ''}{Number(idx.diff_percent || 0).toFixed(2)}%
-                      </div>
-                    </div>
-                  )
-                })}
+                    )
+                  })}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="flex gap-3">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="min-w-0 flex-[0_0_auto] w-[160px] rounded-2xl border border-border/20 p-4 animate-pulse">
+                    <div className="h-3 w-12 rounded bg-muted mb-3" />
+                    <div className="h-6 w-20 rounded bg-muted mb-2" />
+                    <div className="h-4 w-14 rounded bg-muted" />
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
 
           {/* Günün Yıldızları */}
@@ -202,30 +218,32 @@ function LandingPage() {
           {!user && (
             <section className="relative w-full py-16 px-6 flex flex-col items-center text-center overflow-hidden">
               <div className="absolute top-[-20%] left-[-10%] w-[80vw] h-[80vw] rounded-full bg-primary/5 blur-[120px] pointer-events-none -z-10 animate-pulse" />
-              <div className="max-w-3xl mx-auto">
+              <div className="max-w-5xl mx-auto">
                 <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
                   Borsanın röntgenini çekin
                 </h2>
-                <p className="text-muted-foreground max-w-xl mx-auto mb-6 text-lg leading-relaxed">
+                <p className="text-muted-foreground max-w-2xl mx-auto mb-10 text-lg leading-relaxed">
                   Borsa İstanbul uzmanı tek yapay zekanın yeteneklerini ücretsiz keşfedin.
                 </p>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                  <button
-                    onClick={handleLogin}
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-opacity cursor-pointer"
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#fff"/>
-                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#fff"/>
-                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#fff"/>
-                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#fff"/>
-                    </svg>
-                    <span>Google'la bağlan</span>
-                  </button>
+
+                <div className="mx-auto mt-10 grid max-w-(--breakpoint-lg) gap-4 sm:grid-cols-2">
+                  {[
+                    { icon: Settings2, title: 'Teknik Analiz', description: 'Grafikler, indikatörler ve işlem hacmi ile derinlemesine teknik inceleme.' },
+                    { icon: ChartPie, title: 'Temel Analiz', description: 'Finansal tablolar, rasyolar ve nakit akışı ile şirket değerleme.' },
+                    { icon: Blocks, title: 'Sektör İnceleme', description: 'Sektör bazında büyüme, karlılık ve piyasa karşılaştırmaları.' },
+                    { icon: MessageCircle, title: 'Şirket Karşılaştırma', description: 'Birden çok hisseyi yan yana getirerek performans ve rasyo analizi.' },
+                  ].map((feature) => (
+                    <div key={feature.title} className="flex flex-col rounded-sm border p-6 text-left">
+                      <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                        <feature.icon className="size-5" />
+                      </div>
+                      <span className="font-medium text-lg">{feature.title}</span>
+                      <p className="mt-1 text-[15px] text-foreground/80">{feature.description}</p>
+                    </div>
+                  ))}
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground/60">
-                  30 gün ücretsiz kullanın. Kredi kartı gerekmez.
-                </p>
+
+
               </div>
             </section>
           )}

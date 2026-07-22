@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { createFileRoute } from '@tanstack/react-router'
 import { auth } from '../../../lib/auth'
-import { checkAndReserveHT } from '../../../lib/ht-middleware'
+import { checkAndReserveJT } from '../../../lib/jt-middleware'
 
 export const Route = createFileRoute('/api/ai/pre-check')({
   server: {
@@ -29,7 +29,7 @@ export const Route = createFileRoute('/api/ai/pre-check')({
             });
           }
 
-          const check = await checkAndReserveHT(
+          const check = await checkAndReserveJT(
             session.user.id,
             modelId,
             estimatedInputTokens || 1000,

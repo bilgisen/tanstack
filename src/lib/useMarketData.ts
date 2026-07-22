@@ -1,7 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
 
-const API_URL = import.meta.env.VITE_HONO_API_URL || 'https://hono.jetborsa.com'
-
 function isMarketOpen(): boolean {
   const now = new Date().toLocaleString('en-US', { timeZone: 'Europe/Istanbul', hour12: false })
   const hour = parseInt(now.split(', ')[1]?.split(':')[0] || '0')
@@ -24,49 +22,51 @@ type SummaryItem = {
   diff_percent: number
 }
 
+const API_BASE = '/api/market'
+
 async function fetchStocks(): Promise<StockItem[]> {
-  const res = await fetch(`${API_URL}/api/market/stocks`)
+  const res = await fetch(`${API_BASE}/stocks`)
   if (!res.ok) throw new Error('Failed to fetch stocks')
   const json = await res.json()
   return json?.data || []
 }
 
 async function fetchSummary(): Promise<SummaryItem[]> {
-  const res = await fetch(`${API_URL}/api/market/summary`)
+  const res = await fetch(`${API_BASE}/summary`)
   if (!res.ok) throw new Error('Failed to fetch summary')
   const json = await res.json()
   return json?.data || []
 }
 
 async function fetchIndices(): Promise<any[]> {
-  const res = await fetch(`${API_URL}/api/market/indices`)
+  const res = await fetch(`${API_BASE}/indices`)
   if (!res.ok) throw new Error('Failed to fetch indices')
   const json = await res.json()
   return json?.data || []
 }
 
 async function fetchIndexDetail(code: string): Promise<any> {
-  const res = await fetch(`${API_URL}/api/market/indices/${code}`)
+  const res = await fetch(`${API_BASE}/indices/${code}`)
   if (!res.ok) throw new Error(`Failed to fetch index detail for ${code}`)
   const json = await res.json()
   return json?.data || null
 }
 
 async function fetchTASummary(code: string): Promise<any> {
-  const res = await fetch(`${API_URL}/api/market/symbol/${code}/ta/summary`)
+  const res = await fetch(`${API_BASE}/symbol/${code}/ta/summary`)
   if (!res.ok) throw new Error(`Failed to fetch TA summary for ${code}`)
   return await res.json()
 }
 
 async function fetchSektorDagilimi(code: string): Promise<any[]> {
-  const res = await fetch(`${API_URL}/api/market/indices/${code}/sector`)
+  const res = await fetch(`${API_BASE}/indices/${code}/sector`)
   if (!res.ok) return []
   const json = await res.json()
   return json?.data || []
 }
 
 async function fetchHistory(code: string, limit = 150): Promise<any[]> {
-  const res = await fetch(`${API_URL}/api/market/symbol/${code}/history?limit=${limit}`)
+  const res = await fetch(`${API_BASE}/symbol/${code}/history?limit=${limit}`)
   if (!res.ok) throw new Error(`Failed to fetch history for ${code}`)
   const json = await res.json()
   return json?.data || json?.history || (Array.isArray(json) ? json : [])

@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 interface UserCredits {
   tier: string;
   tierDisplayName: string;
-  monthlyHT: number;
-  usedHT: number;
-  extraHT: number;
-  availableHT: number;
+  monthlyJT: number;
+  usedJT: number;
+  extraJT: number;
+  availableJT: number;
   usagePercent: number;
 }
 
@@ -22,7 +22,7 @@ export function useAuth() {
       setCreditsLoading(true);
       fetch('/api/user/credits')
         .then(res => res.json())
-        .then(data => {
+        .then((data: any) => {
           if (data.tier) {
             setCredits(data);
           }
