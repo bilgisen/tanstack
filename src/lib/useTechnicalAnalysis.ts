@@ -18,8 +18,7 @@ async function fetchFromTA(endpoint: string) {
   const res = await fetch(`${HONO_API}/api/v1/ta${endpoint}`)
   if (!res.ok) {
     if (res.status === 403) return { _blocked: true, _requires: 'subscriber' }
-    if (res.status === 404) return null
-    throw new Error(`TA API ${res.status}`)
+    return null
   }
   return res.json()
 }

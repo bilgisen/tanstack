@@ -34,13 +34,15 @@ function EndeksTechnicalAnalysisPage() {
 
 
   const publicData = publicTa as any
+  const hasData = !!publicData && !publicData._blocked
+  const isBlocked = !!publicData?._blocked
 
   return (
     <div className="space-y-5">
       <TradingViewChart symbol={code} lastPrice={priceDetails.price} />
 
       {/* Public Tier: Core Indicators */}
-      {publicData && !publicData._blocked && (
+      {hasData && (
         <div className="space-y-5">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-semibold text-foreground">Teknik Görünüm</h3>
@@ -79,16 +81,25 @@ function EndeksTechnicalAnalysisPage() {
         </div>
       )}
 
-      {/* Subscriber Tier: AI Report */}
-      <LockedSection variant="subscriber">
-        <div className="space-y-5 pt-2">
-          <div className="flex items-center gap-2 pb-2 border-b border-border/30">
-            <Sparkles size={14} className="text-violet-500" />
-            <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Abonelere Özel AI Analiz Raporu</h3>
-          </div>
-          <CeoTaReport ticker={code} unit="puan" />
+      {/* No data fallback */}
+      {!publicData && (
+        <div className="text-center py-16 text-muted-foreground">
+          <p className="text-base">Bu endeks için teknik veri bulunamadı.</p>
         </div>
-      </LockedSection>
+      )}
+
+      {/* Subscriber Tier: AI Report (only when base TA data exists) */}
+      {(hasData || isBlocked) && (
+        <LockedSection variant="subscriber">
+          <div className="space-y-5 pt-2">
+            <div className="flex items-center gap-2 pb-2 border-b border-border/30">
+              <Sparkles size={14} className="text-violet-500" />
+              <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Abonelere Özel AI Analiz Raporu</h3>
+            </div>
+            <CeoTaReport ticker={code} unit="puan" />
+          </div>
+        </LockedSection>
+      )}
     </div>
   )
 }

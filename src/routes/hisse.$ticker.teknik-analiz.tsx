@@ -46,6 +46,8 @@ function TechnicalAnalysisPage() {
 
   // ── PUBLIC TIER ─────────────────────────────────────────────
   const publicData = publicTa as any
+  const hasData = !!publicData && !publicData._blocked
+  const isBlocked = !!publicData?._blocked
 
   return (
     <div className="space-y-5">
@@ -60,7 +62,7 @@ function TechnicalAnalysisPage() {
       )}
 
       {/* ═══ PUBLIC TIER: Core Indicators ═══ */}
-      {publicData && !publicData._blocked && (
+      {hasData && (
         <div className="space-y-5">
           <h3 className="text-base font-semibold text-foreground">Teknik Görünüm</h3>
 
@@ -122,16 +124,25 @@ function TechnicalAnalysisPage() {
         </div>
       )}
 
-      {/* ═══ AI Report (Subscriber-only) ═══ */}
-      <LockedSection variant="subscriber">
-        <div className="space-y-4 pt-2">
-          <div className="flex items-center gap-2 pb-2 border-b border-border/30">
-            <Sparkles size={14} className="text-violet-500" />
-            <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">AI Teknik Analiz</h3>
-          </div>
-          <CeoTaReport ticker={tickerUpper} />
+      {/* No data fallback */}
+      {!publicData && (
+        <div className="text-center py-16 text-muted-foreground">
+          <p className="text-base">Bu hisse için teknik veri bulunamadı.</p>
         </div>
-      </LockedSection>
+      )}
+
+      {/* ═══ AI Report (Subscriber-only, only when base TA data exists) ═══ */}
+      {(hasData || isBlocked) && (
+        <LockedSection variant="subscriber">
+          <div className="space-y-4 pt-2">
+            <div className="flex items-center gap-2 pb-2 border-b border-border/30">
+              <Sparkles size={14} className="text-violet-500" />
+              <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">AI Teknik Analiz</h3>
+            </div>
+            <CeoTaReport ticker={tickerUpper} />
+          </div>
+        </LockedSection>
+      )}
     </div>
   )
 }
