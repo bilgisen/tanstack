@@ -23,9 +23,7 @@ const config = defineConfig({
             "BETTER_AUTH_URL": "https://jetborsa.com",
             "VITE_HONO_API_URL": "https://hono.jetborsa.com",
             "VITE_FINVERI_API_URL": "https://tekapi.jetborsa.com",
-            "POLAR_SERVER": "production",
-            "POLAR_ACCESS_TOKEN": "polar_oat_OEuqQCRI8hRBYBV247e4e75I2VTDNkD6r05JV1S3YaF",
-            "POLAR_WEBHOOK_SECRET": "whsec_x47CANThtDyy98fxCfLwNSQxzmIdzwx0klXhW31wbmt"
+            "POLAR_SERVER": "production"
           },
           d1_databases: [
             {

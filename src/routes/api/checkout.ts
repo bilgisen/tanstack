@@ -11,7 +11,7 @@ export const Route = createFileRoute('/api/checkout')({
           return Response.json({ error: 'Missing products parameter' }, { status: 400 })
         }
 
-        const accessToken = process.env.POLAR_ACCESS_TOKEN || 'polar_oat_OEuqQCRI8hRBYBV247e4e75I2VTDNkD6r05JV1S3YaF'
+        const accessToken = process.env.POLAR_ACCESS_TOKEN
         const server = (process.env.POLAR_SERVER as 'production' | 'sandbox') || 'production'
 
         const polar = new Polar({

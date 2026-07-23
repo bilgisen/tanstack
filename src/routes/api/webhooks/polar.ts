@@ -28,95 +28,105 @@ async function upsertCredits(userId: string, values: Record<string, any>) {
 export const Route = createFileRoute('/api/webhooks/polar')({
   server: {
     handlers: {
-      POST: Webhooks({
-        webhookSecret: process.env.POLAR_WEBHOOK_SECRET!,
-        onOrderPaid: async (event) => {
-          const data = (event as any).data
-          const userId = data.customer?.external_id
-          const productId = data.product?.id || data.subscription?.product?.id || data.product_id
-          if (!userId || !productId) return
+      POST: async ({ request }) => {
+        const webhookSecret = process.env.POLAR_WEBHOOK_SECRET
+        if (!webhookSecret) {
+          console.error('[Polar Webhook] Missing POLAR_WEBHOOK_SECRET')
+          return Response.json({ error: 'Missing webhook secret' }, { status: 500 })
+        }
 
-          const tierInfo = PRODUCT_TIER_MAP[productId]
-          if (!tierInfo) return
+        const handler = Webhooks({
+          webhookSecret,
+          onOrderPaid: async (event) => {
+            const data = (event as any).data
+            const userId = data.customer?.external_id
+            const productId = data.product?.id || data.subscription?.product?.id || data.product_id
+            if (!userId || !productId) return
 
-          const sub = data.subscription
-          const periodEnd = sub?.current_period_end
-            ? new Date(sub.current_period_end)
-            : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+            const tierInfo = PRODUCT_TIER_MAP[productId]
+            if (!tierInfo) return
 
-          await upsertCredits(userId, {
-            tier: tierInfo.tier,
-            monthlyJt: tierInfo.monthlyJT,
-            usedJt: 0,
-            polarSubId: sub?.id || data.subscription_id || null,
-            polarSubStatus: 'active',
-            polarSubCurrentPeriodEnd: periodEnd,
-            resetAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-            updatedAt: new Date(),
-          })
-        },
-        onSubscriptionActive: async (event) => {
-          const data = (event as any).data
-          const userId = data.customer?.external_id
-          const productId = data.product?.id || data.product_id
-          if (!userId || !productId) return
+            const sub = data.subscription
+            const periodEnd = sub?.current_period_end
+              ? new Date(sub.current_period_end)
+              : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
 
-          const tierInfo = PRODUCT_TIER_MAP[productId]
-          if (!tierInfo) return
-
-          const periodEnd = data.current_period_end
-            ? new Date(data.current_period_end)
-            : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-
-          await upsertCredits(userId, {
-            tier: tierInfo.tier,
-            monthlyJt: tierInfo.monthlyJT,
-            usedJt: 0,
-            polarSubId: data.id,
-            polarSubStatus: 'active',
-            polarSubCurrentPeriodEnd: periodEnd,
-            resetAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-            updatedAt: new Date(),
-          })
-        },
-        onSubscriptionCanceled: async (event) => {
-          const data = (event as any).data
-          const userId = data.customer?.external_id
-          if (!userId) return
-
-          await db
-            .update(userCredits)
-            .set({
-              polarSubStatus: 'canceled',
-              polarSubCurrentPeriodEnd: data.current_period_end
-                ? new Date(data.current_period_end)
-                : undefined,
-              updatedAt: new Date(),
-            })
-            .where(eq(userCredits.userId, userId))
-        },
-        onSubscriptionRevoked: async (event) => {
-          const data = (event as any).data
-          const userId = data.customer?.external_id
-          if (!userId) return
-
-          await db
-            .update(userCredits)
-            .set({
-              tier: FREE_TIER.tier,
-              monthlyJt: FREE_TIER.monthlyJT,
+            await upsertCredits(userId, {
+              tier: tierInfo.tier,
+              monthlyJt: tierInfo.monthlyJT,
               usedJt: 0,
-              polarSubId: null,
-              polarSubStatus: 'revoked',
-              polarSubCurrentPeriodEnd: data.current_period_end
-                ? new Date(data.current_period_end)
-                : undefined,
-              updatedAt: new Date(),
+              polarSubId: sub?.id || data.subscription_id || null,
+              polarSubStatus: 'active',
+              polarSubCurrentPeriodEnd: periodEnd,
               resetAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+              updatedAt: new Date(),
             })
-            .where(eq(userCredits.userId, userId))
-        },
-      }),
+          },
+          onSubscriptionActive: async (event) => {
+            const data = (event as any).data
+            const userId = data.customer?.external_id
+            const productId = data.product?.id || data.product_id
+            if (!userId || !productId) return
+
+            const tierInfo = PRODUCT_TIER_MAP[productId]
+            if (!tierInfo) return
+
+            const periodEnd = data.current_period_end
+              ? new Date(data.current_period_end)
+              : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+
+            await upsertCredits(userId, {
+              tier: tierInfo.tier,
+              monthlyJt: tierInfo.monthlyJT,
+              usedJt: 0,
+              polarSubId: data.id,
+              polarSubStatus: 'active',
+              polarSubCurrentPeriodEnd: periodEnd,
+              resetAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+              updatedAt: new Date(),
+            })
+          },
+          onSubscriptionCanceled: async (event) => {
+            const data = (event as any).data
+            const userId = data.customer?.external_id
+            if (!userId) return
+
+            await db
+              .update(userCredits)
+              .set({
+                polarSubStatus: 'canceled',
+                polarSubCurrentPeriodEnd: data.current_period_end
+                  ? new Date(data.current_period_end)
+                  : undefined,
+                updatedAt: new Date(),
+              })
+              .where(eq(userCredits.userId, userId))
+          },
+          onSubscriptionRevoked: async (event) => {
+            const data = (event as any).data
+            const userId = data.customer?.external_id
+            if (!userId) return
+
+            await db
+              .update(userCredits)
+              .set({
+                tier: FREE_TIER.tier,
+                monthlyJt: FREE_TIER.monthlyJT,
+                usedJt: 0,
+                polarSubId: null,
+                polarSubStatus: 'revoked',
+                polarSubCurrentPeriodEnd: data.current_period_end
+                  ? new Date(data.current_period_end)
+                  : undefined,
+                updatedAt: new Date(),
+                resetAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+              })
+              .where(eq(userCredits.userId, userId))
+          },
+        })
+
+        return handler({ request })
+      },
     },
   },
 })

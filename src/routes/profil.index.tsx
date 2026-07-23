@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useAuth } from '../hooks/useAuth'
 import { TIER_CONFIG, type Tier } from '../lib/tiers'
+import { Badge } from '../components/ui/badge'
 import {
   Mail,
   Calendar,
@@ -135,9 +136,10 @@ function ProfilePage() {
           </h1>
 
           <div className="flex items-center gap-3 mt-1.5">
-            <span className="text-xs px-3 py-1 rounded-full bg-primary/10 text-primary font-bold border border-primary/20 capitalize">
-              {tierConfig.displayName}
-            </span>
+            <Badge variant={userTier === 'free' ? 'secondary' : 'default'} className="capitalize">
+              {getTierIcon(userTier)}
+              <span className="ml-1">{tierConfig.displayName}</span>
+            </Badge>
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <Mail size={11} />
               <span>{user?.email}</span>
@@ -167,10 +169,10 @@ function ProfilePage() {
                   JetBorsa topluluğuna hoş geldiniz. <strong className="text-foreground">JetAbone</strong> abonelik planını ücretsiz deneyebilirsiniz.
                 </p>
                 <div className="flex items-center gap-2 mt-3">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold border border-primary/20">
+                  <Badge variant="outline" className="gap-1.5 text-xs font-bold">
                     <Clock size={12} />
                     <span>Deneme süresi: <span className="text-primary">{trialDaysLeft}</span> gün</span>
-                  </div>
+                  </Badge>
                 </div>
               </div>
             </div>
@@ -241,9 +243,9 @@ function ProfilePage() {
               : 'border-border/20 bg-card hover:border-primary/20 hover:bg-muted/20'
           }`}>
             {userTier === 'jetabone' && (
-              <span className="inline-block mb-2 bg-primary/20 text-primary font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider border border-primary/30">
+              <Badge variant="default" className="mb-2 uppercase tracking-wider text-[9px]">
                 Aktif
-              </span>
+              </Badge>
             )}
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -273,13 +275,13 @@ function ProfilePage() {
               : 'border-blue-500/30 bg-card hover:border-blue-500/50 hover:bg-muted/20'
           }`}>
             <div className="flex items-center gap-2 mb-2">
-              <span className="bg-blue-600 text-white font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider">
+              <Badge className="bg-blue-600 text-white border-blue-600 uppercase tracking-wider text-[9px]">
                 Popüler
-              </span>
+              </Badge>
               {userTier === 'proabone' && (
-                <span className="bg-primary/20 text-primary font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider border border-primary/30">
+                <Badge variant="default" className="uppercase tracking-wider text-[9px]">
                   Aktif
-                </span>
+                </Badge>
               )}
             </div>
             <div className="flex items-center justify-between mb-4">

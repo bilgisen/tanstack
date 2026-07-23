@@ -90,13 +90,19 @@ export const useChatStore = create<ChatState>((set, get) => ({
   streamingText: null,
   sessions: loadSessionsFromStorage(),
   activeSessionId: null,
-  selectedModelId: "gemini-2.5-flash",
+  selectedModelId: "gemini-2.5-flash-lite",
   initialized: false,
   userTier: 'free',
 
   setSelectedModelId: (modelId: string) => set({ selectedModelId: modelId }),
 
-  setUserTier: (tier: string) => set({ userTier: tier }),
+  setUserTier: (tier: string) => {
+    const state = get()
+    const newModel = tier !== 'free' && state.selectedModelId === 'gemini-2.5-flash-lite'
+      ? 'gemini-2.5-flash'
+      : state.selectedModelId
+    set({ userTier: tier, selectedModelId: newModel })
+  },
 
   clearChat: () => set({ messages: [], activeSessionId: null }),
 
@@ -218,7 +224,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     saveSessionsToStorage(currentSessions);
 
     // Monetization: Pre-Check balance and tier access
-    const selectedModelId = get().selectedModelId || 'gemini-2.5-flash';
+    const selectedModelId = get().selectedModelId || 'gemini-2.5-flash-lite';
     let preCheckPassed = false;
     try {
       const preCheckRes = await fetch("/api/ai/pre-check", {
