@@ -1,5 +1,6 @@
 import { createFileRoute, Link, Outlet, useMatches } from '@tanstack/react-router'
 import { Loader2, ChevronRight, Factory } from 'lucide-react'
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
 import { useSectorGroups } from '../lib/useCompData'
 import { groupKeyToSlug, groupKeyToDisplayName, SECTOR_GROUPS } from '../constants/sectorGroups'
@@ -7,6 +8,12 @@ import { groupKeyToSlug, groupKeyToDisplayName, SECTOR_GROUPS } from '../constan
 export const Route = createFileRoute('/sektorler')({
   component: SektorlerPage,
 })
+
+const GROUP_COLORS = [
+  '#494fdf', '#22c55e', '#f59e0b', '#8b5cf6', '#06b6d4',
+  '#f43f5e', '#0ea5e9', '#f97316', '#14b8a6', '#64748b',
+  '#e11d48', '#6366f1', '#d946ef', '#84cc16', '#78716c',
+]
 
 function SektorlerPage() {
   const matches = useMatches()
@@ -23,6 +30,12 @@ function SektorlerPage() {
     return <Outlet />
   }
 
+  const pieData = groups.map((g: any) => ({
+    name: groupKeyToDisplayName(g.key) || g.name,
+    nameTr: groupKeyToDisplayName(g.key) || g.name,
+    value: g.count || 0,
+  }))
+
   return (
     <PublicPageLayout context="sektorler" placeholder="Sektörler hakkında bir soru sorun...">
       {loading ? (
@@ -34,7 +47,7 @@ function SektorlerPage() {
         <div className="space-y-6 animate-in fade-in duration-400 flex flex-col min-h-fit pb-32">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
             <div className="flex items-center gap-3.5 min-w-0">
-              <div className="h-12 w-12 bg-primary/10 border border-primary/15 flex items-center justify-center text-primary shrink-0">
+              <div className="h-12 w-12 bg-primary/10 flex items-center justify-center text-primary shrink-0">
                 <Factory size={20} />
               </div>
               <div className="min-w-0">
@@ -54,7 +67,33 @@ function SektorlerPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {totalCompanies > 0 && (
+            <div className="flex flex-col md:flex-row items-center gap-8 pb-4 border-b border-border/20">
+              <div className="w-full max-w-[220px] shrink-0">
+                <ResponsiveContainer width="100%" height={220}>
+                  <PieChart>
+                    <Pie data={pieData.filter((d: any) => d.value > 0)} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={90} paddingAngle={1.5} strokeWidth={0}>
+                      {pieData.filter((d: any) => d.value > 0).map((_: any, i: number) => (
+                        <Cell key={i} fill={GROUP_COLORS[i % GROUP_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(val: any) => `${val} şirket`} contentStyle={{ background: 'var(--popover)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '13px' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex-1 w-full grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-1.5 text-sm">
+                {pieData.filter((d: any) => d.value > 0).slice(0, 12).map((item: any, i: number) => (
+                  <div key={i} className="flex items-center gap-2 min-w-0">
+                    <span className="inline-block w-2 h-2 shrink-0" style={{ backgroundColor: GROUP_COLORS[i % GROUP_COLORS.length] }} />
+                    <span className="text-muted-foreground truncate text-xs">{item.nameTr}</span>
+                    <span className="font-mono font-semibold tabular-nums text-foreground text-xs ml-auto">{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {groups.map((group: any) => {
               const displayName = groupKeyToDisplayName(group.key) || group.name
               const slug = groupKeyToSlug(group.key)
@@ -63,17 +102,15 @@ function SektorlerPage() {
                   key={group.key}
                   to="/sektorler/$slug"
                   params={{ slug }}
-                  className="group flex items-center justify-between transition-all hover:bg-muted/20 cursor-pointer px-1 py-2"
+                  className="group flex items-center justify-between transition-all hover:bg-muted/20 px-3 py-2.5"
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-9 h-9 bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
-                      <Factory size={16} />
+                    <div className="w-8 h-8 bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
+                      <Factory size={14} />
                     </div>
                     <div className="min-w-0 flex-1">
                       <h3 className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">{displayName}</h3>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">
-                        {group.count || '—'} şirket
-                      </p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">{group.count || '—'} şirket</p>
                     </div>
                   </div>
                   <ChevronRight size={14} className="text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0 ml-2" />
@@ -83,9 +120,7 @@ function SektorlerPage() {
           </div>
 
           {groups.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">
-              Sektör verisi yüklenemedi.
-            </div>
+            <div className="text-center py-12 text-muted-foreground">Sektör verisi yüklenemedi.</div>
           )}
         </div>
       )}

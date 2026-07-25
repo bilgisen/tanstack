@@ -125,10 +125,10 @@ export function FaReport({ ticker }: FaReportProps) {
                   <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Güçlü Yönler</span>
                 </div>
                 <ul className="space-y-1">
-                  {swotData.strengths.map((s: string, i: number) => (
+                  {swotData.strengths.map((s: any, i: number) => (
                     <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
                       <span className="text-emerald-500 mt-0.5">•</span>
-                      {s}
+                      {s.item || s}
                     </li>
                   ))}
                 </ul>
@@ -142,10 +142,10 @@ export function FaReport({ ticker }: FaReportProps) {
                   <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider">Zayıf Yönler</span>
                 </div>
                 <ul className="space-y-1">
-                  {swotData.weaknesses.map((w: string, i: number) => (
+                  {swotData.weaknesses.map((w: any, i: number) => (
                     <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
                       <span className="text-red-500 mt-0.5">•</span>
-                      {w}
+                      {w.item || w}
                     </li>
                   ))}
                 </ul>
@@ -159,10 +159,10 @@ export function FaReport({ ticker }: FaReportProps) {
                   <span className="text-[10px] font-bold text-blue-500 uppercase tracking-wider">Fırsatlar</span>
                 </div>
                 <ul className="space-y-1">
-                  {swotData.opportunities.map((o: string, i: number) => (
+                  {swotData.opportunities.map((o: any, i: number) => (
                     <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
                       <span className="text-blue-500 mt-0.5">•</span>
-                      {o}
+                      {o.item || o}
                     </li>
                   ))}
                 </ul>
@@ -176,10 +176,10 @@ export function FaReport({ ticker }: FaReportProps) {
                   <span className="text-[10px] font-bold text-orange-500 uppercase tracking-wider">Tehditler</span>
                 </div>
                 <ul className="space-y-1">
-                  {swotData.threats.map((t: string, i: number) => (
+                  {swotData.threats.map((t: any, i: number) => (
                     <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
                       <span className="text-orange-500 mt-0.5">•</span>
-                      {t}
+                      {t.item || t}
                     </li>
                   ))}
                 </ul>
