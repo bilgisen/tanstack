@@ -33,7 +33,7 @@
 - [x] 5.1 — Çoklu filtre UI (sektör, fiyat, P/E, PD/DD, vb.)
 - [x] 5.2 — Filtre sonuçları tablosu + sıralama
 - [x] 5.3 — UI iyileştirmeleri, responsive, mobil dostu
-- [x] 5.4 — Rasyo bazlı filtreleme (BLOCKED: backend tarafında /screener/filter endpoint'i henüz hazır değil)
+- [x] 5.4 — Rasyo bazlı filtreleme (backend `/screener/filter` + frontend `useCompScreener` + ratio UI)
 
 ## Faz 6: Sektörler ✅
 - [x] Sektör grup listesi (14 grup: BIST 30, Banka, Holding, GYO, vb.)
@@ -67,8 +67,8 @@
 
 ### Yüksek Öncelik
 | İş | Durum | Not |
-|---|---|---|
-| **Faz 5.4 — Tarama rasyo filtreleri** | 🔴 Bloke | Backend `/screener/filter` endpoint hazır değil |
+|---|---|---|---|
+| **Faz 5.4 — Tarama rasyo filtreleri** | ✅ | Backend `/screener/filter` + frontend `useCompScreener` + ratio UI deployed |
 | **DB view migration (D1 → haftalık)** | ✅ | `0003_spotty_warbound.sql` production D1'a uygulandı |
 | **routeTree.gen.ts `as any`** | 🟢 Safe | 35 adet, TanStack Router codegen çıktısı |
 | **lib/auth.ts `any`** | 🟢 Safe | Proxy pattern, library type overload uyumsuzluğu |

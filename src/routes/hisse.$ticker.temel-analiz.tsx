@@ -53,6 +53,18 @@ function FundamentalAnalysisPage() {
     )
   }
 
+  if (!scoreData && !profileData && !ratiosData) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <Shield size={40} className="text-muted-foreground/30 mb-4" />
+        <h2 className="text-sm font-bold text-foreground mb-1">Veri Bulunamadı</h2>
+        <p className="text-xs text-muted-foreground max-w-sm">
+          {tickerUpper} için temel analiz verisi henüz hesaplanmamış. Skor hesaplama süreci 5-10 dakika sürebilir.
+        </p>
+      </div>
+    )
+  }
+
   const pillarLabels: Record<string, string> = {
     finansal_saglik: 'Finansal Sağlık', karlilik_buyume: 'Karlılık & Büyüme', degerleme: 'Değerleme',
   }
@@ -71,6 +83,7 @@ function FundamentalAnalysisPage() {
   const trendPeriods: string[] = []
   const trendSeries: { name: string; data: Record<string, number | null>; color: string }[] = []
   trendData.forEach(([code, t], idx: number) => {
+    if (!Array.isArray(t)) return
     const series: Record<string, number | null> = {}
     t.forEach((v) => {
       if (!trendPeriods.includes(v.period)) trendPeriods.push(v.period)

@@ -293,6 +293,32 @@ export function useCompRankings(scope: string, name?: string) {
   })
 }
 
+export type ScreenerFilters = {
+  sector?: string
+  group?: string
+  q?: string
+  score_min?: number
+  score_max?: number
+  sort_by?: string
+  sort_dir?: string
+  [key: string]: string | number | undefined
+}
+
+export function useCompScreener(filters: ScreenerFilters) {
+  const qs = new URLSearchParams()
+  for (const [k, v] of Object.entries(filters)) {
+    if (v !== undefined && v !== '' && v !== null) qs.set(k, String(v))
+  }
+  const qstr = qs.toString()
+  return useQuery<Record<string, unknown> | null>({
+    queryKey: ['comp', 'screener', qstr],
+    queryFn: () => fetchComp<Record<string, unknown>>(`/screener/filter?${qstr}`),
+    staleTime: 300_000,
+    gcTime: 3_600_000,
+    enabled: true,
+  })
+}
+
 export function useCompSectorDetail(name: string) {
   return useQuery<SectorGroupDetail | null>({
     queryKey: ['comp', 'sector', name],

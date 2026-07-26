@@ -1,6 +1,5 @@
 import { createFileRoute, Link, Outlet, useMatches, useNavigate } from '@tanstack/react-router'
 import { ArrowLeft, Factory, Loader2, BarChart3, TrendingUp, Building2 } from 'lucide-react'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
 import { useCompSectorDetail, useSectorGroups } from '../lib/useCompData'
 import { slugToGroupKey, groupKeyToDisplayName, sectorNameToSlug } from '../constants/sectorGroups'
@@ -34,6 +33,14 @@ const BENCHMARK_LABELS: Record<string, string> = {
   eps: 'HBK', book_per_share: 'Defter Değeri', inventory_turnover: 'Stok Devir Hızı',
 }
 
+const BENCHMARK_CATEGORIES: Record<string, string> = {
+  pe: 'Değerleme', pb: 'Değerleme', ev_ebitda: 'Değerleme', ev_sales: 'Değerleme',
+  current_ratio: 'Likidite', cash_ratio: 'Likidite', debt_equity: 'Fin. Sağlık', interest_coverage: 'Fin. Sağlık',
+  roe: 'Karlılık', roa: 'Karlılık', net_margin: 'Karlılık', gross_margin: 'Karlılık',
+  profit_growth: 'Büyüme',
+  eps: 'Hisse Başı', book_per_share: 'Hisse Başı', inventory_turnover: 'Verimlilik',
+}
+
 function SektorGroupPage() {
   const { slug } = Route.useParams()
   const navigate = useNavigate()
@@ -53,22 +60,15 @@ function SektorGroupPage() {
 
   const chatContext = `sector-group:${slug}`
 
-  const benchEntries = Object.entries(benchmarks).slice(0, 10).map(([code, b]) => ({
-    code,
-    label: BENCHMARK_LABELS[code] || code,
-    median: b.median_ew,
-    p25: b.p25,
-    p75: b.p75,
+  const benchEntries = Object.entries(benchmarks).map(([code, b]) => ({
+    code, label: BENCHMARK_LABELS[code] || code, category: BENCHMARK_CATEGORIES[code] || 'Diğer',
+    median: b.median_ew, p25: b.p25, p75: b.p75,
   }))
 
-  const leaderData = leaderboard.slice(0, 15).map(c => ({
-    name: c.ticker,
-    score: c.composite_score || 0,
-    ticker: c.ticker,
-  })).reverse()
+  const categories = [...new Set(benchEntries.map(b => b.category))]
 
   const hasBenchmarks = benchEntries.length > 0
-  const hasLeaderboard = leaderData.length > 0
+  const hasLeaderboard = leaderboard.length > 0
 
   if (loading) {
     return (
@@ -122,86 +122,38 @@ function SektorGroupPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
+          {/* Benchmark cards */}
           {hasBenchmarks && (
-            <div className="space-y-3">
+            <div className="space-y-3 col-span-1 lg:col-span-2">
               <div className="flex items-center gap-2 pb-2 border-b border-border/20">
                 <BarChart3 size={14} className="text-primary" />
                 <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Benchmark</h3>
-                <span className="text-[10px] text-muted-foreground ml-auto">Medyan değerler</span>
+                <span className="text-[10px] text-muted-foreground ml-auto">Grup medyan değerleri</span>
               </div>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={benchEntries} layout="vertical" margin={{ top: 0, right: 0, left: 80, bottom: 0 }}>
-                    <XAxis type="number" tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
-                    <YAxis type="category" dataKey="label" tick={{ fontSize: 10, fill: 'var(--foreground)' }} axisLine={false} tickLine={false} width={75} />
-                    <Tooltip
-                      formatter={(val) => typeof val === 'number' ? fmt(val) : val}
-                      contentStyle={{ background: 'var(--popover)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '12px' }}
-                    />
-                    <Bar dataKey="median" radius={[0, 3, 3, 0]} maxBarSize={16}>
-                      {benchEntries.map((_, i) => (
-                        <Cell key={i} fill={i % 2 === 0 ? 'var(--primary)' : 'var(--primary)'} fillOpacity={0.7 - (i * 0.05)} />
+              <div className="space-y-4">
+                {categories.map(cat => (
+                  <div key={cat}>
+                    <h4 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">{cat}</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                      {benchEntries.filter(b => b.category === cat).map(b => (
+                        <div key={b.code} className="p-2.5 bg-muted/10 border border-border/10">
+                          <div className="text-[10px] text-muted-foreground uppercase tracking-wider">{b.label}</div>
+                          <div className="text-sm font-bold font-mono text-foreground mt-0.5">{fmt(b.median, 2)}</div>
+                          <div className="text-[9px] text-muted-foreground mt-0.5">
+                            P25: {fmt(b.p25, 2)} · P75: {fmt(b.p75, 2)}
+                          </div>
+                        </div>
                       ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
 
-          {hasBenchmarks && benchEntries.length >= 3 && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 pb-2 border-b border-border/20">
-                <BarChart3 size={14} className="text-primary" />
-                <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Karşılaştırma</h3>
-                <span className="text-[10px] text-muted-foreground ml-auto">P25 · Medyan · P75</span>
-              </div>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart data={benchEntries.slice(0, 6).map(b => ({
-                    ...b,
-                    normalized: b.median !== 0 ? Math.min(Math.abs(b.median) / Math.max(...benchEntries.slice(0, 6).map(x => Math.abs(x.median)))) * 100 : 0,
-                  }))}>
-                    <PolarGrid stroke="var(--border)" />
-                    <PolarAngleAxis dataKey="label" tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }} />
-                    <PolarRadiusAxis tick={false} axisLine={false} />
-                    <Radar name="Medyan" dataKey="median" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.15} strokeWidth={1.5} />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          )}
-
-          {hasLeaderboard && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 pb-2 border-b border-border/20">
-                <TrendingUp size={14} className="text-primary" />
-                <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Sıralama</h3>
-                <span className="text-[10px] text-muted-foreground ml-auto">{leaderboard.length} şirket</span>
-              </div>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={leaderData} layout="vertical" margin={{ top: 0, right: 30, left: 50, bottom: 0 }}>
-                    <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
-                    <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fontWeight: 600, fill: 'var(--foreground)' }} axisLine={false} tickLine={false} width={45} />
-                    <Tooltip
-                      formatter={(val) => typeof val === 'number' ? val.toFixed(1) : String(val)}
-                      contentStyle={{ background: 'var(--popover)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '12px' }}
-                      cursor={{ fill: 'var(--muted)', opacity: 0.3 }}
-                    />
-                    <Bar dataKey="score" radius={[0, 3, 3, 0]} maxBarSize={12} onClick={(entry) => { const e = entry as { ticker?: string } | undefined; if (e?.ticker) navigate({ to: `/hisse/${e.ticker.toLowerCase()}` }) }} style={{ cursor: 'pointer' }}>
-                      {leaderData.map((_, i) => (
-                        <Cell key={i} fill={i >= leaderData.length - 3 ? 'var(--destructive)' : i >= leaderData.length - 5 ? 'var(--primary)' : 'var(--primary)'} fillOpacity={0.5 + (i / leaderData.length) * 0.5} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          )}
-
+          {/* Sub-sectors */}
           {sectorList.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center gap-2 pb-2 border-b border-border/20">
@@ -209,7 +161,7 @@ function SektorGroupPage() {
                 <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Alt Sektörler</h3>
                 <span className="text-[10px] text-muted-foreground ml-auto">{sectorList.length} sektör</span>
               </div>
-              <div className="divide-y divide-border/10">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
                 {sectorList.map(s => {
                   const sectorSlug = sectorNameToSlug(s.sector_main)
                   return (
@@ -217,9 +169,9 @@ function SektorGroupPage() {
                       key={s.sector_main}
                       to="/sektorler/$slug/$sectorSlug"
                       params={{ slug, sectorSlug }}
-                      className="flex items-center justify-between py-2.5 px-1 hover:bg-muted/20 transition-colors"
+                      className="flex items-center justify-between px-2.5 py-2 bg-muted/10 border border-border/10 hover:border-primary/20 transition-colors"
                     >
-                      <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex items-center gap-2.5 min-w-0">
                         <div className="w-6 h-6 bg-primary/10 flex items-center justify-center text-primary text-[10px] shrink-0">
                           <Factory size={11} />
                         </div>
@@ -230,6 +182,54 @@ function SektorGroupPage() {
                   )
                 })}
               </div>
+            </div>
+          )}
+
+          {/* Leaderboard table */}
+          {hasLeaderboard && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 pb-2 border-b border-border/20">
+                <TrendingUp size={14} className="text-primary" />
+                <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Sıralama</h3>
+                <span className="text-[10px] text-muted-foreground ml-auto">{leaderboard.length} şirket</span>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-border/10">
+                      <th className="text-left py-2 pr-2 text-muted-foreground font-medium uppercase tracking-wider text-[10px] w-8">#</th>
+                      <th className="text-left py-2 pr-4 text-muted-foreground font-medium uppercase tracking-wider text-[10px]">Hisse</th>
+                      <th className="text-left py-2 pr-4 text-muted-foreground font-medium uppercase tracking-wider text-[10px]">Şirket</th>
+                      <th className="text-right py-2 px-2 text-muted-foreground font-medium uppercase tracking-wider text-[10px]">Skor</th>
+                      <th className="text-right py-2 px-2 text-muted-foreground font-medium uppercase tracking-wider text-[10px]">Fin. Sağlık</th>
+                      <th className="text-right py-2 px-2 text-muted-foreground font-medium uppercase tracking-wider text-[10px]">Karlılık</th>
+                      <th className="text-right py-2 px-2 text-muted-foreground font-medium uppercase tracking-wider text-[10px]">Değerleme</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {leaderboard.slice(0, 50).map((r: Record<string, unknown>, i: number) => {
+                      const score = (r.composite_score ?? 0) as number
+                      const scoreColor = score >= 70 ? 'text-emerald-400' : score >= 40 ? 'text-yellow-400' : 'text-red-400'
+                      const ticker = r.ticker as string
+                      return (
+                        <tr key={ticker} className="border-b border-border/5 hover:bg-muted/5 transition-colors cursor-pointer"
+                          onClick={() => navigate({ to: `/hisse/${ticker.toLowerCase()}/temel-analiz` })}>
+                          <td className="py-1.5 pr-2 font-mono text-muted-foreground text-[10px]">{i + 1}</td>
+                          <td className="py-1.5 pr-4 font-mono font-bold text-foreground">{ticker}</td>
+                          <td className="py-1.5 pr-4 text-muted-foreground truncate max-w-[200px]">{r.name as string || '—'}</td>
+                          <td className={`py-1.5 px-2 font-mono font-bold text-right ${scoreColor}`}>{fmt(score, 0)}</td>
+                          <td className="py-1.5 px-2 font-mono text-right text-muted-foreground">{r.pillar_finansal_saglik != null ? fmt(r.pillar_finansal_saglik as number, 0) : '—'}</td>
+                          <td className="py-1.5 px-2 font-mono text-right text-muted-foreground">{r.pillar_karlilik_buyume != null ? fmt(r.pillar_karlilik_buyume as number, 0) : '—'}</td>
+                          <td className="py-1.5 px-2 font-mono text-right text-muted-foreground">{r.pillar_degerleme != null ? fmt(r.pillar_degerleme as number, 0) : '—'}</td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              {leaderboard.length > 50 && (
+                <div className="text-center text-[10px] text-muted-foreground">İlk 50 sonuç gösteriliyor ({leaderboard.length} toplam)</div>
+              )}
             </div>
           )}
 
