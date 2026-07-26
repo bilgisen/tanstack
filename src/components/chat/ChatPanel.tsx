@@ -14,12 +14,13 @@ import {
   MessageScrollerProvider,
   MessageScrollerViewport,
 } from "../ui/message-scroller";
+import type { UserProfile } from "../../hooks/useAuth";
 
 interface ChatPanelProps {
   context: string;
   placeholder?: string;
   onClose?: () => void;
-  user?: any;
+  user?: UserProfile | null;
   sessionLoading?: boolean;
   isMobile?: boolean; // For mobile-specific scrollbar hiding
 }

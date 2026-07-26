@@ -2,8 +2,10 @@ import { createFileRoute, Link, Outlet, useMatches } from '@tanstack/react-route
 import { Loader2, ChevronRight, Factory } from 'lucide-react'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
-import { useSectorGroups } from '../lib/useCompData'
+import { useSectorGroups, type SectorGroupsResponse } from '../lib/useCompData'
 import { groupKeyToSlug, groupKeyToDisplayName, SECTOR_GROUPS } from '../constants/sectorGroups'
+
+type SectorGroupItem = SectorGroupsResponse['groups'][number]
 
 export const Route = createFileRoute('/sektorler')({
   component: SektorlerPage,
@@ -20,17 +22,17 @@ function SektorlerPage() {
   const { data, isLoading: loading } = useSectorGroups()
   const hasChildRoute = matches.some(m => m.routeId === '/sektorler/$slug')
 
-  const groups = (data?.groups || Object.entries(SECTOR_GROUPS).map(([key, name]) => ({
+  const groups: SectorGroupItem[] = (data?.groups || Object.entries(SECTOR_GROUPS).map(([key, name]) => ({
     key, name, count: 0
-  }))).sort((a: any, b: any) => (b.count || 0) - (a.count || 0))
+  }))).sort((a, b) => (b.count || 0) - (a.count || 0))
 
-  const totalCompanies = groups.reduce((sum: number, g: any) => sum + (g.count || 0), 0)
+  const totalCompanies = groups.reduce((sum, g) => sum + (g.count || 0), 0)
 
   if (hasChildRoute) {
     return <Outlet />
   }
 
-  const pieData = groups.map((g: any) => ({
+  const pieData = groups.map(g => ({
     name: groupKeyToDisplayName(g.key) || g.name,
     nameTr: groupKeyToDisplayName(g.key) || g.name,
     value: g.count || 0,
@@ -72,17 +74,17 @@ function SektorlerPage() {
               <div className="w-full max-w-[220px] shrink-0">
                 <ResponsiveContainer width="100%" height={220}>
                   <PieChart>
-                    <Pie data={pieData.filter((d: any) => d.value > 0)} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={90} paddingAngle={1.5} strokeWidth={0}>
-                      {pieData.filter((d: any) => d.value > 0).map((_: any, i: number) => (
+                    <Pie data={pieData.filter(d => d.value > 0)} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={90} paddingAngle={1.5} strokeWidth={0}>
+                      {pieData.filter(d => d.value > 0).map((_, i) => (
                         <Cell key={i} fill={GROUP_COLORS[i % GROUP_COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(val: any) => `${val} şirket`} contentStyle={{ background: 'var(--popover)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '13px' }} />
+                    <Tooltip formatter={(val) => `${val} şirket`} contentStyle={{ background: 'var(--popover)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '13px' }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
               <div className="flex-1 w-full grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-1.5 text-sm">
-                {pieData.filter((d: any) => d.value > 0).slice(0, 12).map((item: any, i: number) => (
+                {pieData.filter(d => d.value > 0).slice(0, 12).map((item, i) => (
                   <div key={i} className="flex items-center gap-2 min-w-0">
                     <span className="inline-block w-2 h-2 shrink-0" style={{ backgroundColor: GROUP_COLORS[i % GROUP_COLORS.length] }} />
                     <span className="text-muted-foreground truncate text-xs">{item.nameTr}</span>
@@ -94,7 +96,7 @@ function SektorlerPage() {
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {groups.map((group: any) => {
+            {groups.map(group => {
               const displayName = groupKeyToDisplayName(group.key) || group.name
               const slug = groupKeyToSlug(group.key)
               return (

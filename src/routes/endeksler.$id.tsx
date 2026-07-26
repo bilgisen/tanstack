@@ -14,7 +14,7 @@ const TABS = [
   { suffix: '/teknik-analiz', label: 'Teknik Analiz', icon: Activity },
 ]
 
-const indexMetadataFallbacks: Record<string, any> = {
+const indexMetadataFallbacks: Record<string, { name: string; price: number; diffPercent: number }> = {
   xu030: { name: "BIST 30", price: 11250.40, diffPercent: 1.45 },
   xu100: { name: "BIST 100", price: 10240.20, diffPercent: 1.15 },
   xu050: { name: "BIST 50", price: 12540.80, diffPercent: 0.95 },
@@ -29,7 +29,7 @@ function EndeksLayout() {
   const { data: indexDetail, isLoading: detailLoading } = useIndexDetail(code)
 
   const priceDetails = useMemo(() => {
-    const liveIndex = indicesData?.find((item: any) => item.code?.toUpperCase() === code)
+    const liveIndex = indicesData?.find(item => item.code?.toUpperCase() === code)
     const fallback = indexMetadataFallbacks[id.toLowerCase()]
     return {
       name: getIndexName(code) || liveIndex?.name || code,

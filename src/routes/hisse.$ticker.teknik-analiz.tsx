@@ -4,7 +4,7 @@ import { CeoTaReport } from '../components/company/CeoTaReport'
 import { LockedSection } from '../components/company/LockedSection'
 import { ScoreGauge } from '../constants/companyShared'
 import { useCompanyData } from '../lib/useCompanyData'
-import { useTAPublicSummary } from '../lib/useTechnicalAnalysis'
+import { useTAPublicSummary, type TAPublicSummary } from '../lib/useTechnicalAnalysis'
 import {
   Activity, TrendingUp, BarChart3, AlertTriangle,
   Shield, Gauge, Sparkles
@@ -45,7 +45,7 @@ function TechnicalAnalysisPage() {
   }
 
   // ── PUBLIC TIER ─────────────────────────────────────────────
-  const publicData = publicTa as any
+  const publicData = publicTa as TAPublicSummary | null | undefined
   const hasData = !!publicData && !publicData._blocked
   const isBlocked = !!publicData?._blocked
 

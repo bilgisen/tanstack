@@ -2,7 +2,9 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useCompScore, useCompProfile, useCompRatios, useCompTrends } from '../lib/useCompData'
 import { FaReport } from '../components/company/FaReport'
 import { ScoreGauge } from '../constants/companyShared'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LineChart, Line, CartesianGrid, Legend } from 'recharts'
+import { getRatioLabel } from '../constants/ratios'
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, LineChart, Line, CartesianGrid, Legend } from 'recharts'
+import { SafeTooltip } from '../components/ui/typed-tooltip'
 import { TrendingUp, Shield, Building2, BarChart3, Sparkles } from 'lucide-react'
 
 export const Route = createFileRoute('/hisse/$ticker/temel-analiz')({
@@ -51,35 +53,30 @@ function FundamentalAnalysisPage() {
     )
   }
 
-  const score = (scoreData as any) || null
-  const profile = (profileData as any) || null
-  const ratios = (ratiosData as any) || null
-  const trends = (trendsData as any) || null
-
   const pillarLabels: Record<string, string> = {
     finansal_saglik: 'Finansal Sağlık', karlilik_buyume: 'Karlılık & Büyüme', degerleme: 'Değerleme',
   }
-  const pillarKeys = score?.pillars ? Object.entries(score.pillars) : []
-  const pillarChartData = pillarKeys.map(([key, p]: [string, any]) => ({
+  const pillarKeys = scoreData?.pillars ? Object.entries(scoreData.pillars) : []
+  const pillarChartData = pillarKeys.map(([key, p]) => ({
     name: pillarLabels[key] || key, score: Math.round(p.score),
   }))
 
-  const ratiosList = ratios?.ratios || []
-  const ratioChartData = ratiosList.slice(0, 10).map((r: any) => ({
-    name: r.name || r.code, value: r.value,
+  const ratiosList = ratiosData?.ratios || []
+  const ratioChartData = ratiosList.map((r) => ({
+    name: getRatioLabel(r.code), value: r.value,
     sectorValue: r.sector_context?.median,
   }))
 
-  const trendData = trends?.trends ? Object.entries(trends.trends).slice(0, 4) : []
+  const trendData = trendsData?.trends ? Object.entries(trendsData.trends).slice(0, 4) : []
   const trendPeriods: string[] = []
   const trendSeries: { name: string; data: Record<string, number | null>; color: string }[] = []
-  trendData.forEach(([code, t]: [string, any], idx: number) => {
+  trendData.forEach(([code, t], idx: number) => {
     const series: Record<string, number | null> = {}
-    t.values.forEach((v: any) => {
+    t.forEach((v) => {
       if (!trendPeriods.includes(v.period)) trendPeriods.push(v.period)
       series[v.period] = v.value
     })
-    trendSeries.push({ name: t.name || code, data: series, color: TREND_COLORS[idx % TREND_COLORS.length] })
+    trendSeries.push({ name: code, data: series, color: TREND_COLORS[idx % TREND_COLORS.length] })
   })
   trendPeriods.sort()
   const trendChartData = trendPeriods.map((period) => {
@@ -92,38 +89,38 @@ function FundamentalAnalysisPage() {
     <div className="space-y-6">
 
       {/* ═══ SCORE + PILLARS ═══ */}
-      {score && (
+      {scoreData && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-border/20">
               <Shield size={14} className="text-primary" />
               <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Temel Analiz Puanı</h3>
-              {score.reliability && <span className="text-[10px] text-muted-foreground ml-auto">{score.reliability}</span>}
+              {scoreData.reliability && <span className="text-[10px] text-muted-foreground ml-auto">{scoreData.reliability}</span>}
             </div>
 
             <div className="flex items-center gap-5">
-              <ScoreGauge score={Math.round(score.composite_score)} size={80} />
+              <ScoreGauge score={Math.round(scoreData.composite_score)} size={80} />
               <div className="space-y-1">
-                <div className="text-base font-bold text-foreground">{score.company_name || tickerUpper}</div>
-                {score.sector && <div className="text-xs text-muted-foreground">{score.sector}</div>}
-                {score.absolute && (
+                <div className="text-base font-bold text-foreground">{scoreData.company_name || tickerUpper}</div>
+                {scoreData.sector && <div className="text-xs text-muted-foreground">{scoreData.sector}</div>}
+                {scoreData.absolute && (
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-sm font-mono font-semibold text-foreground">{fmt(score.absolute.score)}</span>
-                    <AbsoluteBadge label={score.absolute.label} />
+                    <span className="text-sm font-mono font-semibold text-foreground">{fmt(scoreData.absolute.score)}</span>
+                    <AbsoluteBadge label={scoreData.absolute.label} />
                   </div>
                 )}
                 <div className="flex items-center gap-4 pt-1">
-                  {score.ranks?.sector && (
+                  {scoreData.ranks?.sector && (
                     <div className="text-xs text-muted-foreground">
                       <span className="text-[10px] font-medium uppercase tracking-wider">Sektör </span>
-                      <span className="text-sm font-bold text-foreground">%{fmt(score.ranks.sector.percentile, 0)}</span>
-                      <span className="text-[10px] ml-1">({score.ranks.sector.n_peers} şirket)</span>
+                      <span className="text-sm font-bold text-foreground">%{fmt(scoreData.ranks.sector.percentile, 0)}</span>
+                      <span className="text-[10px] ml-1">({scoreData.ranks.sector.n_peers} şirket)</span>
                     </div>
                   )}
-                  {score.ranks?.group && (
+                  {scoreData.ranks?.group && (
                     <div className="text-xs text-muted-foreground">
                       <span className="text-[10px] font-medium uppercase tracking-wider">Grup </span>
-                      <span className="text-sm font-bold text-foreground">%{fmt(score.ranks.group.percentile, 0)}</span>
+                      <span className="text-sm font-bold text-foreground">%{fmt(scoreData.ranks.group.percentile, 0)}</span>
                     </div>
                   )}
                 </div>
@@ -142,8 +139,8 @@ function FundamentalAnalysisPage() {
                   <BarChart data={pillarChartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                     <XAxis dataKey="name" tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
                     <YAxis domain={[0, 100]} tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
-                    <Tooltip
-                      formatter={(val: any) => `${val}`}
+                    <SafeTooltip
+                      formatter={(val) => `${val}`}
                       contentStyle={{ background: 'var(--popover)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '12px' }}
                     />
                     <Bar dataKey="score" radius={[3, 3, 0, 0]} maxBarSize={40}>
@@ -161,24 +158,24 @@ function FundamentalAnalysisPage() {
 
       {/* ═══ PROFILE + RATIOS ═══ */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {profile && (
+        {profileData && (
           <div className="space-y-3">
             <div className="flex items-center gap-2 pb-2 border-b border-border/20">
               <Building2 size={14} className="text-primary" />
               <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Şirket Profili</h3>
             </div>
             <div className="grid grid-cols-2 gap-3 text-sm">
-              {profile.sector_main && (
-                <div><div className="text-[10px] text-muted-foreground uppercase tracking-wider">Sektör</div><div className="font-semibold text-foreground mt-0.5">{profile.sector_main}</div></div>
+              {profileData.sector_main && (
+                <div><div className="text-[10px] text-muted-foreground uppercase tracking-wider">Sektör</div><div className="font-semibold text-foreground mt-0.5">{profileData.sector_main}</div></div>
               )}
-              {profile.industry && (
-                <div><div className="text-[10px] text-muted-foreground uppercase tracking-wider">Endüstri</div><div className="font-semibold text-foreground mt-0.5">{profile.industry}</div></div>
+              {profileData.industry && (
+                <div><div className="text-[10px] text-muted-foreground uppercase tracking-wider">Endüstri</div><div className="font-semibold text-foreground mt-0.5">{profileData.industry}</div></div>
               )}
-              {profile.financial_group_label && (
-                <div><div className="text-[10px] text-muted-foreground uppercase tracking-wider">Finansal Grup</div><div className="font-semibold text-foreground mt-0.5">{profile.financial_group_label}</div></div>
+              {profileData.financial_group_label && (
+                <div><div className="text-[10px] text-muted-foreground uppercase tracking-wider">Finansal Grup</div><div className="font-semibold text-foreground mt-0.5">{profileData.financial_group_label}</div></div>
               )}
-              {profile.market_data?.market_cap && (
-                <div><div className="text-[10px] text-muted-foreground uppercase tracking-wider">Piyasa Değeri</div><div className="font-semibold text-foreground mt-0.5">₺{fmt(profile.market_data.market_cap, 0)}</div></div>
+              {profileData.market_data?.market_cap && (
+                <div><div className="text-[10px] text-muted-foreground uppercase tracking-wider">Piyasa Değeri</div><div className="font-semibold text-foreground mt-0.5">₺{fmt(profileData.market_data.market_cap, 0)}</div></div>
               )}
             </div>
           </div>
@@ -191,18 +188,18 @@ function FundamentalAnalysisPage() {
               <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Temel Rasyolar</h3>
               <span className="text-[10px] text-muted-foreground ml-auto">Şirket · Sektör Medyan</span>
             </div>
-            <div className="h-52">
+            <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={ratioChartData.slice(0, 6)} layout="vertical" margin={{ top: 0, right: 40, left: 90, bottom: 0 }}>
+                <BarChart data={ratioChartData} layout="vertical" margin={{ top: 0, right: 40, left: 110, bottom: 0 }}>
                   <XAxis type="number" tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
-                  <YAxis type="category" dataKey="name" tick={{ fontSize: 9, fill: 'var(--foreground)' }} axisLine={false} tickLine={false} width={85} />
-                    <Tooltip
-                      formatter={(val: any) => fmt(val)}
+                  <YAxis type="category" dataKey="name" tick={{ fontSize: 9, fill: 'var(--foreground)' }} axisLine={false} tickLine={false} width={105} />
+                    <SafeTooltip
+                      formatter={(val) => fmt(typeof val === 'number' ? val : Number(val))}
                       contentStyle={{ background: 'var(--popover)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '12px' }}
                     />
                   <Legend wrapperStyle={{ fontSize: '10px', color: 'var(--muted-foreground)' }} />
                   <Bar dataKey="value" name="Şirket" radius={[0, 3, 3, 0]} maxBarSize={10} fill="var(--primary)" fillOpacity={0.8} />
-                  {ratioChartData.some((r: any) => r.sectorValue != null) && (
+                  {ratioChartData.some(r => r.sectorValue != null) && (
                     <Bar dataKey="sectorValue" name="Sektör Medyan" radius={[0, 3, 3, 0]} maxBarSize={10} fill="#22c55e" fillOpacity={0.6} />
                   )}
                 </BarChart>
@@ -225,7 +222,7 @@ function FundamentalAnalysisPage() {
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.4} />
                 <XAxis dataKey="period" tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
-                <Tooltip
+                <SafeTooltip
                   contentStyle={{ background: 'var(--popover)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '12px' }}
                 />
                 <Legend wrapperStyle={{ fontSize: '10px', color: 'var(--muted-foreground)' }} />

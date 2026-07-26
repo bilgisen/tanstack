@@ -92,22 +92,16 @@ export const TradingViewChart = memo(function TradingViewChart({
       let rawData: HistoricalDataPoint[] = [];
       
       if (historyApiData && Array.isArray(historyApiData) && historyApiData.length > 0) {
-        rawData = historyApiData.map((item: any) => {
-          let timeStr = "";
-          if (item.time) {
-            timeStr = typeof item.time === "string" ? item.time.split("T")[0] : new Date(item.time).toISOString().split("T")[0];
-          } else if (item.date) {
-            timeStr = typeof item.date === "string" ? item.date.split("T")[0] : new Date(item.date).toISOString().split("T")[0];
-          } else if (item.Date) {
-            timeStr = typeof item.Date === "string" ? item.Date.split("T")[0] : new Date(item.Date).toISOString().split("T")[0];
-          }
+        rawData = historyApiData.map((item: Record<string, unknown>) => {
+          const timeRaw = item.time ?? item.date ?? item.Date;
+          const timeStr = typeof timeRaw === "string" ? timeRaw.split("T")[0] : "";
           return {
             time: timeStr,
-            open: Number(item.open || item.Open || item.last_price || lastPrice),
-            high: Number(item.high || item.High || item.last_price || lastPrice),
-            low: Number(item.low || item.Low || item.last_price || lastPrice),
-            close: Number(item.close || item.Close || item.last_price || lastPrice),
-            volume: Number(item.volume || item.Volume || 0),
+            open: Number(item.open ?? item.Open ?? item.last_price ?? lastPrice),
+            high: Number(item.high ?? item.High ?? item.last_price ?? lastPrice),
+            low: Number(item.low ?? item.Low ?? item.last_price ?? lastPrice),
+            close: Number(item.close ?? item.Close ?? item.last_price ?? lastPrice),
+            volume: Number(item.volume ?? item.Volume ?? 0),
           };
         }).filter((item) => item.time && !isNaN(item.close));
       }

@@ -73,7 +73,7 @@ export function RatioRadar({ data, size = 240 }: RatioRadarProps) {
       <path
         d={sectorPath}
         fill="currentColor"
-        className="text-muted-foreground/8"
+        fillOpacity={0.08}
         stroke="currentColor"
         className="text-muted-foreground/30"
         strokeWidth={1}
@@ -84,7 +84,7 @@ export function RatioRadar({ data, size = 240 }: RatioRadarProps) {
       <path
         d={companyPath}
         fill="currentColor"
-        className="text-primary/15"
+        fillOpacity={0.15}
         stroke="currentColor"
         className="text-primary"
         strokeWidth={1.5}

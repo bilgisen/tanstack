@@ -146,7 +146,6 @@ describe("Bug Condition Exploration - Sektör Verilerinin Yanlış Okunması", (
     };
 
     const currentResult = simulateCurrentCodeBehavior(mockApiResponse);
-    const expectedResult = simulateExpectedBehavior(mockApiResponse);
 
     // **BEKLENEN**: Bu assertion BAŞARISIZ OLMALI (bug'ı kanıtlar)
     expect(currentResult.sectorName).toBe("Gıda");

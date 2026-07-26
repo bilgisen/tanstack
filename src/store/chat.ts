@@ -1,6 +1,17 @@
 import { create } from 'zustand';
 import { useWatchlistStore } from './watchlist';
 
+interface MarketCache {
+  data: Record<string, { price: number; change: number }>;
+  ts: number;
+}
+
+declare global {
+  interface Window {
+    __chat_market_prices_cache?: MarketCache;
+  }
+}
+
 export type Message = {
   role: "user" | "assistant";
   text: string;
@@ -9,7 +20,7 @@ export type Message = {
   widget?: {
     type: 'comparison' | 'ratio_chart' | 'calculator';
     title: string;
-    data: any;
+    data: Record<string, unknown>;
   } | null;
 };
 
@@ -112,7 +123,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       const res = await fetch('/api/chat/sessions?limit=50')
       if (res.ok) {
         const data = await res.json()
-        const remoteSessions: ChatSession[] = (data.sessions || []).map((s: any) => ({
+        const remoteSessions: ChatSession[] = (data.sessions || []).map((s: { id: string; ticker?: string; createdAt: string; context?: string }) => ({
           id: s.id,
           ticker: s.ticker || 'GLOBAL',
           code: s.id.slice(0, 3).toUpperCase(),
@@ -143,7 +154,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       const res = await fetch(`/api/chat/sessions/${id}`)
       if (res.ok) {
         const data = await res.json()
-        const serverMessages: Message[] = (data.session?.messages || []).map((m: any) => ({
+        const serverMessages: Message[] = (data.session?.messages || []).map((m: { role: 'user' | 'assistant'; text: string; context?: string; suggestions?: string[]; widget?: Record<string, unknown> }) => ({
           role: m.role,
           text: m.text,
           context: m.context || undefined,
@@ -225,7 +236,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     // Monetization: Pre-Check balance and tier access
     const selectedModelId = get().selectedModelId || 'gemini-2.5-flash-lite';
-    let preCheckPassed = false;
     try {
       const preCheckRes = await fetch("/api/ai/pre-check", {
         method: "POST",
@@ -239,9 +249,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
       if (preCheckRes.ok) {
         const preCheckData = await preCheckRes.json();
-        if (preCheckData.ok) {
-          preCheckPassed = true;
-        } else {
+        if (!preCheckData.ok) {
           let errorMsg = "";
           if (preCheckData.error === 'MODEL_NOT_ALLOWED') {
             errorMsg = `Seçtiğiniz model olan **${selectedModelId.toUpperCase()}** bu abonelik paketinde kullanılamamaktadır. Lütfen [Profil ve Abonelik Paneli](/profil) sayfasından paketinizi yükseltin.`;
@@ -276,15 +284,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
       console.error("Monetization precheck failed:", e);
     }
 
-    if (!preCheckPassed) {
-      console.log("[Chat] Pre-check not passed, proceeding without monetization");
-    }
-
     // Fetch latest prices for all stocks and indices to enrich context dynamically
     // Client-side cache: only re-fetch if stale (>60s old)
     let marketItemsMap: Record<string, { price: number; change: number }> = {};
     
-    const cachedPrices = (window as any).__chat_market_prices_cache;
+    const cachedPrices = window.__chat_market_prices_cache;
     const cacheAge = cachedPrices ? Date.now() - cachedPrices.ts : Infinity;
     
     if (cachedPrices && cacheAge < 60000) {
@@ -300,7 +304,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         if (stocksRes.status === 'fulfilled' && stocksRes.value.ok) {
           const json = await stocksRes.value.json();
           if (json.data && Array.isArray(json.data)) {
-            json.data.forEach((stock: any) => {
+            json.data.forEach((stock: { code: string; last_price?: number; diff_percent?: number }) => {
               marketItemsMap[stock.code.toUpperCase()] = {
                 price: stock.last_price || 0,
                 change: stock.diff_percent || 0
@@ -311,7 +315,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         if (summaryRes.status === 'fulfilled' && summaryRes.value.ok) {
           const json = await summaryRes.value.json();
           if (json.data && Array.isArray(json.data)) {
-            json.data.forEach((index: any) => {
+            json.data.forEach((index: { code: string; last_price?: number; diff_percent?: number }) => {
               marketItemsMap[index.code.toUpperCase()] = {
                 price: index.last_price || 0,
                 change: index.diff_percent || 0
@@ -319,7 +323,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
             });
           }
         }
-        (window as any).__chat_market_prices_cache = { data: marketItemsMap, ts: Date.now() };
+        window.__chat_market_prices_cache = { data: marketItemsMap, ts: Date.now() };
       } catch (e) {
         if (cachedPrices) {
           marketItemsMap = cachedPrices.data; // fallback to stale cache
@@ -379,7 +383,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       // Consume SSE stream
       let replyText = "";
       let dataSuggestions: string[] = [];
-      let dataWidget: any = null;
+      let dataWidget: { type: 'comparison' | 'ratio_chart' | 'calculator'; title: string; data: Record<string, unknown> } | null = null;
       let usage: { inputTokens?: number; outputTokens?: number } = {};
 
       const reader = response.body!.getReader();

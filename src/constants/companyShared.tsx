@@ -1,5 +1,5 @@
 import companyNames from './companyNames.json'
-import { SECTOR_GROUPS, groupKeyToSlug, groupKeyToDisplayName, sectorNameToSlug } from './sectorGroups'
+import { SECTOR_GROUPS, groupKeyToSlug, groupKeyToDisplayName } from './sectorGroups'
 
 export function toSlug(name: string): string {
   return name

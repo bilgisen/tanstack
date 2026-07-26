@@ -39,18 +39,17 @@ function SektorDetailPage() {
 
   const { data: sectorData, isLoading: loading } = useCompSectorDetail(sectorName)
 
-  const detail = sectorData as any || {}
-  const benchmarks: Record<string, any> = detail.benchmarks || {}
-  const leaderboard: any[] = detail.leaderboard || []
-  const companyCount = detail.company_count || 0
+  const companyCount = sectorData?.company_count || 0
+  const benchmarks = sectorData?.benchmarks || {}
+  const leaderboard = sectorData?.leaderboard || []
 
   const chatContext = `sector:${sectorName}`
 
-  const benchEntries = Object.entries(benchmarks).slice(0, 10).map(([code, b]: [string, any]) => ({
+  const benchEntries = Object.entries(benchmarks).slice(0, 10).map(([code, b]) => ({
     code, label: BENCHMARK_LABELS[code] || code, median: b.median_ew, p25: b.p25, p75: b.p75,
   }))
 
-  const leaderData = leaderboard.slice(0, 15).map((c: any) => ({
+  const leaderData = leaderboard.slice(0, 15).map(c => ({
     name: c.ticker, score: c.composite_score || 0, ticker: c.ticker,
   })).reverse()
 
@@ -119,7 +118,7 @@ function SektorDetailPage() {
                     <XAxis type="number" tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
                     <YAxis type="category" dataKey="label" tick={{ fontSize: 10, fill: 'var(--foreground)' }} axisLine={false} tickLine={false} width={75} />
                     <Tooltip
-                      formatter={(val: any) => fmt(val)}
+                      formatter={(val) => typeof val === 'number' ? fmt(val) : val}
                       contentStyle={{ background: 'var(--popover)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '12px' }}
                     />
                     <Bar dataKey="median" radius={[0, 3, 3, 0]} maxBarSize={14}>
@@ -146,11 +145,11 @@ function SektorDetailPage() {
                     <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
                     <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fontWeight: 600, fill: 'var(--foreground)' }} axisLine={false} tickLine={false} width={45} />
                     <Tooltip
-                      formatter={(val: any) => `${typeof val === 'number' ? val.toFixed(1) : val}`}
+                      formatter={(val) => typeof val === 'number' ? val.toFixed(1) : String(val)}
                       contentStyle={{ background: 'var(--popover)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '12px' }}
                       cursor={{ fill: 'var(--muted)', opacity: 0.3 }}
                     />
-                    <Bar dataKey="score" radius={[0, 3, 3, 0]} maxBarSize={12} onClick={(entry: any) => entry?.ticker && navigate({ to: `/hisse/${entry.ticker.toLowerCase()}` })} style={{ cursor: 'pointer' }}>
+                    <Bar dataKey="score" radius={[0, 3, 3, 0]} maxBarSize={12} onClick={(entry) => { const e = entry as { ticker?: string } | undefined; if (e?.ticker) navigate({ to: `/hisse/${e.ticker.toLowerCase()}` }) }} style={{ cursor: 'pointer' }}>
                       {leaderData.map((_, i) => (
                         <Cell key={i} fill="var(--primary)" fillOpacity={0.4 + (i / leaderData.length) * 0.6} />
                       ))}

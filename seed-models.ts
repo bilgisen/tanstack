@@ -13,11 +13,11 @@ const models = [
     provider: 'google',
     modelId: 'gemini-2.5-flash-lite',
     displayName: 'Gemini 2.5 Flash Lite',
-    inputCostPer1k: '0.0003',
-    outputCostPer1k: '0.00015',
-    htPer1kInput: '0.3',
-    htPer1kOutput: '0.5',
-    markupFactor: '10.0',
+    inputCostPer1k: 0.0003,
+    outputCostPer1k: 0.00015,
+    htPer1kInput: 0.3,
+    htPer1kOutput: 0.5,
+    markupFactor: 10.0,
     allowedTiers: ['free'],
     isActive: true,
   },
@@ -25,11 +25,11 @@ const models = [
     provider: 'google',
     modelId: 'gemini-2.5-flash',
     displayName: 'Gemini 2.5 Flash',
-    inputCostPer1k: '0.00075',
-    outputCostPer1k: '0.0003',
-    htPer1kInput: '0.5',
-    htPer1kOutput: '1.0',
-    markupFactor: '10.0',
+    inputCostPer1k: 0.00075,
+    outputCostPer1k: 0.0003,
+    htPer1kInput: 0.5,
+    htPer1kOutput: 1.0,
+    markupFactor: 10.0,
     allowedTiers: ['jetabone', 'proabone'],
     isActive: true,
   },
@@ -52,14 +52,31 @@ async function seedModels() {
         await db
           .update(modelConfigs)
           .set({
-            ...model,
+            inputCostPer1k: model.inputCostPer1k,
+            outputCostPer1k: model.outputCostPer1k,
+            htPer1kInput: model.htPer1kInput,
+            htPer1kOutput: model.htPer1kOutput,
+            markupFactor: model.markupFactor,
+            allowedTiers: JSON.stringify(model.allowedTiers),
+            isActive: model.isActive,
             updatedAt: new Date(),
             updatedBy: 'seed-script',
           })
           .where(eq(modelConfigs.modelId, model.modelId));
       } else {
         console.log(`+ Inserting model ${model.modelId}...`);
-        await db.insert(modelConfigs).values(model);
+        await db.insert(modelConfigs).values({
+          provider: model.provider,
+          modelId: model.modelId,
+          displayName: model.displayName,
+          inputCostPer1k: model.inputCostPer1k,
+          outputCostPer1k: model.outputCostPer1k,
+          htPer1kInput: model.htPer1kInput,
+          htPer1kOutput: model.htPer1kOutput,
+          markupFactor: model.markupFactor,
+          allowedTiers: JSON.stringify(model.allowedTiers),
+          isActive: model.isActive,
+        });
       }
     } catch (error) {
       console.error(`✗ Error seeding model ${model.modelId}:`, error);

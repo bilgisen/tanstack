@@ -23,7 +23,7 @@ interface RatioData {
   sectorMedian: number;
 }
 
-interface InteractiveWidgetProps {
+export interface InteractiveWidgetProps {
   widget?: {
     type: 'comparison' | 'ratio_chart' | 'calculator';
     title: string;

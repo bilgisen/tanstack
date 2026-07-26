@@ -20,7 +20,43 @@ type SummaryItem = {
   code: string
   last_price: number
   diff_percent: number
+  name?: string
+  title?: string
 }
+
+type IndexItem = {
+  code: string
+  last_price: number
+  diff_percent: number
+  name?: string
+}
+
+type IndexDetailData = {
+  last?: number
+  high?: number
+  low?: number
+  open?: number
+  close?: number
+  volume?: number
+  change?: number
+  changePercent?: number
+  weekClose?: number
+  monthClose?: number
+  yearClose?: number
+  updateDate?: string
+  components?: unknown[]
+  sector_distribution?: unknown[]
+  [key: string]: unknown
+}
+
+type SektorItem = {
+  sector_name?: string
+  ratio?: number
+  code?: string
+  [key: string]: unknown
+}
+
+type HistoryItem = Record<string, unknown>
 
 const API_BASE = '/api/market'
 
@@ -38,34 +74,34 @@ async function fetchSummary(): Promise<SummaryItem[]> {
   return json?.data || []
 }
 
-async function fetchIndices(): Promise<any[]> {
+async function fetchIndices(): Promise<IndexItem[]> {
   const res = await fetch(`${API_BASE}/indices`)
   if (!res.ok) throw new Error('Failed to fetch indices')
   const json = await res.json()
   return json?.data || []
 }
 
-async function fetchIndexDetail(code: string): Promise<any> {
+async function fetchIndexDetail(code: string): Promise<IndexDetailData | null> {
   const res = await fetch(`${API_BASE}/indices/${code}`)
   if (!res.ok) throw new Error(`Failed to fetch index detail for ${code}`)
   const json = await res.json()
   return json?.data || null
 }
 
-async function fetchTASummary(code: string): Promise<any> {
+async function fetchTASummary(code: string): Promise<Record<string, unknown>> {
   const res = await fetch(`${API_BASE}/symbol/${code}/ta/summary`)
   if (!res.ok) throw new Error(`Failed to fetch TA summary for ${code}`)
   return await res.json()
 }
 
-async function fetchSektorDagilimi(code: string): Promise<any[]> {
+async function fetchSektorDagilimi(code: string): Promise<SektorItem[]> {
   const res = await fetch(`${API_BASE}/indices/${code}/sector`)
   if (!res.ok) return []
   const json = await res.json()
   return json?.data || []
 }
 
-async function fetchHistory(code: string, limit = 150): Promise<any[]> {
+async function fetchHistory(code: string, limit = 150): Promise<HistoryItem[]> {
   const res = await fetch(`${API_BASE}/symbol/${code}/history?limit=${limit}`)
   if (!res.ok) throw new Error(`Failed to fetch history for ${code}`)
   const json = await res.json()
@@ -76,13 +112,17 @@ function marketStaleTime(openShort: number, closedLong: number): number {
   return isMarketOpen() ? openShort : closedLong
 }
 
+function marketRefetchInterval(openShort: number, closedLong: number | false): number | false {
+  return isMarketOpen() ? openShort : closedLong
+}
+
 export function useMarketStocks() {
   return useQuery({
     queryKey: ['market', 'stocks'],
     queryFn: fetchStocks,
     staleTime: marketStaleTime(10_000, 3_600_000),
     gcTime: 86_400_000,
-    refetchInterval: marketStaleTime(120_000, false),
+    refetchInterval: marketRefetchInterval(120_000, false),
     placeholderData: (prev) => prev,
     refetchOnReconnect: false,
   })
@@ -94,7 +134,7 @@ export function useIndices() {
     queryFn: fetchIndices,
     staleTime: 0,
     gcTime: 300_000,
-    refetchInterval: marketStaleTime(120_000, false),
+    refetchInterval: marketRefetchInterval(120_000, false),
     refetchOnMount: 'always',
     refetchOnReconnect: 'always',
   })
@@ -106,7 +146,7 @@ export function useIndexDetail(code: string) {
     queryFn: () => fetchIndexDetail(code),
     staleTime: 0,
     gcTime: 300_000,
-    refetchInterval: marketStaleTime(120_000, false),
+    refetchInterval: marketRefetchInterval(120_000, false),
     enabled: !!code,
     refetchOnMount: 'always',
     refetchOnReconnect: 'always',
@@ -119,7 +159,7 @@ export function useMarketSummary() {
     queryFn: fetchSummary,
     staleTime: marketStaleTime(10_000, 3_600_000),
     gcTime: 86_400_000,
-    refetchInterval: marketStaleTime(120_000, false),
+    refetchInterval: marketRefetchInterval(120_000, false),
     placeholderData: (prev) => prev,
     refetchOnReconnect: false,
   })

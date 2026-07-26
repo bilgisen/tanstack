@@ -25,7 +25,7 @@ function EndeksOverviewPage() {
   }, [])
 
   const priceDetails = useMemo(() => {
-    const liveIndex = indicesData?.find((item: any) => item.code?.toUpperCase() === code)
+    const liveIndex = indicesData?.find(item => item.code?.toUpperCase() === code)
     return {
       name: getIndexName(code) || liveIndex?.name || code,
       code,
@@ -47,28 +47,31 @@ function EndeksOverviewPage() {
     <div className="space-y-5">
       {chartReady && <TradingViewChart symbol={code} lastPrice={priceDetails.price} />}
 
-      {indexDetail && (
-        <div className="flex items-baseline gap-3 md:gap-4 flex-wrap text-base md:text-lg text-muted-foreground pb-3 border-b border-border/30">
-          Haftalık: <span className={(indexDetail.weekClose ? ((indexDetail.last - indexDetail.weekClose) / indexDetail.weekClose) * 100 : 0) >= 0 ? 'text-emerald-500' : 'text-destructive'}>
-            {(indexDetail.weekClose ? ((indexDetail.last - indexDetail.weekClose) / indexDetail.weekClose) * 100 : 0) >= 0 ? '+' : ''}
-            {(indexDetail.weekClose ? ((indexDetail.last - indexDetail.weekClose) / indexDetail.weekClose) * 100 : 0).toFixed(2)}%
-          </span>
-          {'  '}Ay: <span className={(indexDetail.monthClose ? ((indexDetail.last - indexDetail.monthClose) / indexDetail.monthClose) * 100 : 0) >= 0 ? 'text-emerald-500' : 'text-destructive'}>
-            {(indexDetail.monthClose ? ((indexDetail.last - indexDetail.monthClose) / indexDetail.monthClose) * 100 : 0) >= 0 ? '+' : ''}
-            {(indexDetail.monthClose ? ((indexDetail.last - indexDetail.monthClose) / indexDetail.monthClose) * 100 : 0).toFixed(2)}%
-          </span>
-          {'  '}Yıl: <span className={(indexDetail.yearClose ? ((indexDetail.last - indexDetail.yearClose) / indexDetail.yearClose) * 100 : 0) >= 0 ? 'text-emerald-500' : 'text-destructive'}>
-            {(indexDetail.yearClose ? ((indexDetail.last - indexDetail.yearClose) / indexDetail.yearClose) * 100 : 0) >= 0 ? '+' : ''}
-            {(indexDetail.yearClose ? ((indexDetail.last - indexDetail.yearClose) / indexDetail.yearClose) * 100 : 0).toFixed(2)}%
-          </span>
-        </div>
-      )}
+      {indexDetail && (() => {
+        const last = indexDetail.last ?? 0
+        return (
+          <div className="flex items-baseline gap-3 md:gap-4 flex-wrap text-base md:text-lg text-muted-foreground pb-3 border-b border-border/30">
+            Haftalık: <span className={(indexDetail.weekClose ? ((last - indexDetail.weekClose) / indexDetail.weekClose) * 100 : 0) >= 0 ? 'text-emerald-500' : 'text-destructive'}>
+              {(indexDetail.weekClose ? ((last - indexDetail.weekClose) / indexDetail.weekClose) * 100 : 0) >= 0 ? '+' : ''}
+              {(indexDetail.weekClose ? ((last - indexDetail.weekClose) / indexDetail.weekClose) * 100 : 0).toFixed(2)}%
+            </span>
+            {'  '}Ay: <span className={(indexDetail.monthClose ? ((last - indexDetail.monthClose) / indexDetail.monthClose) * 100 : 0) >= 0 ? 'text-emerald-500' : 'text-destructive'}>
+              {(indexDetail.monthClose ? ((last - indexDetail.monthClose) / indexDetail.monthClose) * 100 : 0) >= 0 ? '+' : ''}
+              {(indexDetail.monthClose ? ((last - indexDetail.monthClose) / indexDetail.monthClose) * 100 : 0).toFixed(2)}%
+            </span>
+            {'  '}Yıl: <span className={(indexDetail.yearClose ? ((last - indexDetail.yearClose) / indexDetail.yearClose) * 100 : 0) >= 0 ? 'text-emerald-500' : 'text-destructive'}>
+              {(indexDetail.yearClose ? ((last - indexDetail.yearClose) / indexDetail.yearClose) * 100 : 0) >= 0 ? '+' : ''}
+              {(indexDetail.yearClose ? ((last - indexDetail.yearClose) / indexDetail.yearClose) * 100 : 0).toFixed(2)}%
+            </span>
+          </div>
+        )
+      })()}
 
       {sektorData && sektorData.length > 0 && (
         <div className="space-y-3">
           <h3 className="text-sm md:text-base font-bold text-foreground uppercase tracking-wider">Sektör Dağılımı</h3>
           <div className="p-4 md:p-6 rounded-xl border border-border/30">
-            <SektorPieChart data={sektorData} />
+            <SektorPieChart data={sektorData.map(s => ({ nameTr: s.sector_name ?? '', value: s.ratio ?? 0 }))} />
           </div>
         </div>
       )}

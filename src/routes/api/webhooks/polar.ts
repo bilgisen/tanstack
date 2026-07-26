@@ -11,7 +11,7 @@ const PRODUCT_TIER_MAP: Record<string, { tier: string; monthlyJT: number }> = {
 
 const FREE_TIER = { tier: 'free', monthlyJT: 5_000 }
 
-async function upsertCredits(userId: string, values: Record<string, any>) {
+async function upsertCredits(userId: string, values: Omit<Partial<typeof userCredits.$inferInsert>, 'resetAt'> & { resetAt: Date }) {
   const existing = await db
     .select()
     .from(userCredits)

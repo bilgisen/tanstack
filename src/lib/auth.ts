@@ -47,7 +47,7 @@ function getAuth() {
         defaultCookieAttributes: {
           sameSite: "lax",
           httpOnly: true,
-          secure: true, // Workers.dev üzerinde HTTPS zorunlu olduğu için
+          secure: true,
         },
       },
       plugins: [

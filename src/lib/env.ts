@@ -1,24 +1,25 @@
+type NitroEvent = {
+  context?: Record<string, unknown>
+  req?: { runtime?: { cloudflare?: { env?: Record<string, string> } } }
+}
+
 export function ensureEnv() {
   try {
-    // Access the global AsyncLocalStorage stored by TanStack Start
     const storageKey = Symbol.for("tanstack-start:event-storage");
-    const storage = (globalThis as any)[storageKey];
-    const store = storage?.getStore();
+    const storage = (globalThis as Record<symbol, unknown>)[storageKey] as { getStore?: () => unknown } | undefined;
+    const store = storage?.getStore?.() as { h3Event?: NitroEvent } | NitroEvent | undefined;
     
-    // In TanStack Start, the store contains the h3Event wrapper or the raw event
-    const event = store?.h3Event || store;
+    const event: NitroEvent | undefined = store && 'h3Event' in store ? store.h3Event : store as NitroEvent | undefined;
     
     if (event) {
-      // Support both Nitro v2 (event.context.cloudflare) and Nitro v3 (event.req.runtime.cloudflare)
-      const cf = (event.context as any)?.cloudflare || (event as any).req?.runtime?.cloudflare;
+      const cf = event.context?.cloudflare as { env?: Record<string, string> } | undefined
+        || event.req?.runtime?.cloudflare;
       if (cf && cf.env) {
         for (const [key, value] of Object.entries(cf.env)) {
           if (value && typeof value === "string") {
             process.env[key] = value;
           }
         }
-        
-        // D1 connection uses the DB binding directly, no env mapping needed
       }
     }
   } catch (error) {
@@ -26,14 +27,15 @@ export function ensureEnv() {
   }
 }
 
-export function getCloudflareEnv(): any {
+export function getCloudflareEnv(): Record<string, string> | null {
   try {
     const storageKey = Symbol.for("tanstack-start:event-storage");
-    const storage = (globalThis as any)[storageKey];
-    const store = storage?.getStore();
-    const event = store?.h3Event || store;
+    const storage = (globalThis as Record<symbol, unknown>)[storageKey] as { getStore?: () => unknown } | undefined;
+    const store = storage?.getStore?.() as { h3Event?: NitroEvent } | NitroEvent | undefined;
+    const event: NitroEvent | undefined = store && 'h3Event' in store ? store.h3Event : store as NitroEvent | undefined;
     if (event) {
-      const cf = (event.context as any)?.cloudflare || (event as any).req?.runtime?.cloudflare;
+      const cf = event.context?.cloudflare as { env?: Record<string, string> } | undefined
+        || event.req?.runtime?.cloudflare;
       if (cf && cf.env) {
         return cf.env;
       }

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import {
   AlertTriangle, Target, Shield, Activity, BarChart3,
-  Zap, Sparkles, TrendingUp, Gauge, Coins, LineChart, Clock
+  Zap, Sparkles, TrendingUp, Gauge, LineChart, Clock
 } from 'lucide-react'
+import type { CeoReportResponse } from '../../lib/useCompData'
 
 interface CeoTaReportProps {
   ticker: string
@@ -51,7 +52,7 @@ function ProbabilityBadge({ prob }: { prob: string }) {
 }
 
 export function CeoTaReport({ ticker, unit = 'TL' }: CeoTaReportProps) {
-  const [report, setReport] = useState<any>(null)
+  const [report, setReport] = useState<CeoReportResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [reportUnit, setReportUnit] = useState(unit)
@@ -405,18 +406,18 @@ export function CeoTaReport({ ticker, unit = 'TL' }: CeoTaReportProps) {
       </div>
 
       {/* Patterns */}
-      {(report.patterns?.candlestick?.length > 0 || report.patterns?.chart?.length > 0) && (
+      {!!report.patterns && ((report.patterns.candlestick?.length ?? 0) > 0 || (report.patterns.chart?.length ?? 0) > 0) && (
         <div>
           <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
             <Sparkles size={14} className="text-violet-500" />
             Formasyonlar ({report.patterns.active_count} aktif)
           </h3>
           <div className="space-y-3">
-            {report.patterns.candlestick?.length > 0 && (
+            {!!report.patterns.candlestick && report.patterns.candlestick.length > 0 && (
               <div>
                 <span className="text-xs text-muted-foreground uppercase font-semibold mb-2 block">Mum Formasyonları</span>
                 <div className="flex flex-wrap gap-1.5">
-                  {report.patterns.candlestick.slice(0, 6).map((p: any, i: number) => (
+                  {report.patterns.candlestick.slice(0, 6).map((p, i) => (
                     <span key={i} className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${p.direction === 'Bullish' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : p.direction === 'Bearish' ? 'bg-destructive/10 border-destructive/20 text-destructive' : 'bg-muted/20 border-border/20 text-muted-foreground'}`}>
                       {p.name} ({p.reliability})
                     </span>
@@ -424,11 +425,11 @@ export function CeoTaReport({ ticker, unit = 'TL' }: CeoTaReportProps) {
                 </div>
               </div>
             )}
-            {report.patterns.chart?.length > 0 && (
+            {!!report.patterns.chart && report.patterns.chart.length > 0 && (
               <div>
                 <span className="text-xs text-muted-foreground uppercase font-semibold mb-2 block">Teknik Formasyonlar</span>
                 <div className="flex flex-wrap gap-1.5">
-                  {report.patterns.chart.slice(0, 4).map((p: any, i: number) => (
+                  {report.patterns.chart.slice(0, 4).map((p, i) => (
                     <span key={i} className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${p.direction === 'Bullish' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : p.direction === 'Bearish' ? 'bg-destructive/10 border-destructive/20 text-destructive' : 'bg-muted/20 border-border/20 text-muted-foreground'}`}>
                       {p.name} (güv:{p.confidence})
                     </span>
@@ -511,11 +512,11 @@ export function CeoTaReport({ ticker, unit = 'TL' }: CeoTaReportProps) {
             <p className="text-sm text-foreground/80 leading-relaxed">
               {report.izlenmesi_gerekenler.not}
             </p>
-            {report.izlenmesi_gerekenler.kritik_seviyeler?.length > 0 && (
+            {!!report.izlenmesi_gerekenler.kritik_seviyeler && report.izlenmesi_gerekenler.kritik_seviyeler.length > 0 && (
               <div>
                 <span className="text-xs font-semibold text-muted-foreground uppercase block mb-1.5">Kritik Seviyeler</span>
                 <ul className="space-y-1">
-                  {report.izlenmesi_gerekenler.kritik_seviyeler.map((s: string, i: number) => (
+                  {report.izlenmesi_gerekenler.kritik_seviyeler.map((s, i) => (
                     <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
                       <span className="text-cyan-500 mt-0.5 shrink-0">▸</span>{s}
                     </li>
@@ -523,11 +524,11 @@ export function CeoTaReport({ ticker, unit = 'TL' }: CeoTaReportProps) {
                 </ul>
               </div>
             )}
-            {report.izlenmesi_gerekenler.izlenecek_konular?.length > 0 && (
+            {!!report.izlenmesi_gerekenler.izlenecek_konular && report.izlenmesi_gerekenler.izlenecek_konular.length > 0 && (
               <div>
                 <span className="text-xs font-semibold text-muted-foreground uppercase block mb-1.5">İzlenecek Konular</span>
                 <ul className="space-y-1">
-                  {report.izlenmesi_gerekenler.izlenecek_konular.map((s: string, i: number) => (
+                  {report.izlenmesi_gerekenler.izlenecek_konular.map((s, i) => (
                     <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
                       <span className="text-cyan-500 mt-0.5 shrink-0">▸</span>{s}
                     </li>
@@ -540,14 +541,14 @@ export function CeoTaReport({ ticker, unit = 'TL' }: CeoTaReportProps) {
       )}
 
       {/* AI Sonuç - Action Tips */}
-      {report.ai_analysis?.sonuc?.length > 0 && (
+      {report.ai_analysis && report.ai_analysis.sonuc && report.ai_analysis.sonuc.length > 0 && (
         <div className="border border-emerald-500/20 bg-emerald-500/5 rounded-2xl p-5 space-y-3">
           <h3 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
             <Zap size={14} className="text-emerald-500" />
             Sonuç & Aksiyon İpuçları
           </h3>
           <ul className="space-y-3">
-            {report.ai_analysis.sonuc.map((tip: string, i: number) => (
+            {report.ai_analysis.sonuc.map((tip, i) => (
               <li key={i} className="flex items-start gap-3 text-sm">
                 <span className="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/15 text-emerald-500 flex items-center justify-center text-xs font-bold">
                   {i + 1}

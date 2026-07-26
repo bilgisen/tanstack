@@ -3,7 +3,7 @@ import { marked } from "marked";
 import { useChatStore } from "../../store/chat";
 import { useUIStore } from "../../store/ui";
 import { BarChart3 } from "lucide-react";
-import { InteractiveWidget } from "./InteractiveWidget";
+import { InteractiveWidget, type InteractiveWidgetProps } from "./InteractiveWidget";
 import { CollapsibleSection } from "../chat/CollapsibleSection";
 import { MetricCardGrid } from "../chat/MetricCardGrid";
 import { SuggestionChips } from "../chat/SuggestionChips";
@@ -13,7 +13,7 @@ interface MarkdownRendererProps {
   isAssistant: boolean;
   context?: string;
   suggestions?: string[];
-  widget?: any;
+  widget?: InteractiveWidgetProps['widget'];
 }
 
 export interface ExtractedMetrics {

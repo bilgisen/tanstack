@@ -2,6 +2,24 @@ import { useQuery } from '@tanstack/react-query'
 
 const HONO_API = import.meta.env.VITE_HONO_API_URL || 'https://hono.jetborsa.com'
 
+export type TAPublicSummary = {
+  score?: number
+  trend?: string
+  confidence?: string
+  summary_text?: string
+  rsi?: number
+  macd_status?: string
+  regime?: string
+  sma?: { sma_20?: number; sma_50?: number; sma_200?: number }
+  nearest_support?: number
+  nearest_resistance?: number
+  _blocked?: boolean
+  _requires?: string
+  [key: string]: unknown
+}
+
+type TAResponse = TAPublicSummary | null
+
 function isMarketOpen(): boolean {
   const now = new Date().toLocaleString('en-US', { timeZone: 'Europe/Istanbul', hour12: false })
   const hour = parseInt(now.split(', ')[1]?.split(':')[0] || '0')
@@ -14,13 +32,13 @@ function marketStaleTime(openShort: number, closedLong: number): number {
   return isMarketOpen() ? openShort : closedLong
 }
 
-async function fetchFromTA(endpoint: string) {
+async function fetchFromTA(endpoint: string): Promise<TAResponse> {
   const res = await fetch(`${HONO_API}/api/v1/ta${endpoint}`)
   if (!res.ok) {
     if (res.status === 403) return { _blocked: true, _requires: 'subscriber' }
     return null
   }
-  return res.json()
+  return res.json() as Promise<TAPublicSummary>
 }
 
 function useTAPublicSummary(ticker: string) {

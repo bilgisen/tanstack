@@ -22,7 +22,7 @@ function EndeksTechnicalAnalysisPage() {
   const { data: publicTa } = useTAPublicSummary(code)
 
   const priceDetails = useMemo(() => {
-    const liveIndex = indicesData?.find((item: any) => item.code?.toUpperCase() === code)
+    const liveIndex = indicesData?.find(item => item.code?.toUpperCase() === code)
     return {
       name: getIndexName(code) || liveIndex?.name || code,
       code,
@@ -33,9 +33,8 @@ function EndeksTechnicalAnalysisPage() {
 
 
 
-  const publicData = publicTa as any
-  const hasData = !!publicData && !publicData._blocked
-  const isBlocked = !!publicData?._blocked
+  const hasData = !!publicTa && !publicTa._blocked
+  const isBlocked = !!publicTa?._blocked
 
   return (
     <div className="space-y-5">
@@ -48,26 +47,26 @@ function EndeksTechnicalAnalysisPage() {
             <h3 className="text-base font-semibold text-foreground">Teknik Görünüm</h3>
           </div>
 
-          {publicData.score != null && (
+          {publicTa?.score != null && (
             <div className="flex items-center gap-3">
-              <ScoreGauge score={publicData.score} />
+              <ScoreGauge score={publicTa.score} />
               <div>
-                <div className="text-sm font-semibold text-foreground">{publicData.trend || 'Nötr'} trend</div>
-                <div className="text-xs text-muted-foreground">{publicData.confidence || '—'} güven</div>
+                <div className="text-sm font-semibold text-foreground">{publicTa.trend || 'Nötr'} trend</div>
+                <div className="text-xs text-muted-foreground">{publicTa.confidence || '—'} güven</div>
               </div>
             </div>
           )}
 
-          {publicData.summary_text && (
-            <p className="text-sm text-muted-foreground leading-relaxed">{publicData.summary_text}</p>
+          {publicTa?.summary_text && (
+            <p className="text-sm text-muted-foreground leading-relaxed">{publicTa.summary_text}</p>
           )}
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { label: 'Trend', value: publicData.trend || 'Nötr', icon: <TrendingUp size={14} />, bull: (publicData.trend || '').toLowerCase().includes('bull') },
-              { label: 'RSI (14)', value: publicData.rsi != null ? publicData.rsi.toFixed(1) : '—', icon: <Info size={14} />, bull: null },
-              { label: 'MACD', value: publicData.macd_status || 'Nötr', icon: <TrendingUp size={14} />, bull: publicData.macd_status === 'Bullish' ? true : publicData.macd_status === 'Bearish' ? false : null },
-              { label: 'Rejim', value: publicData.regime || '—', icon: <Gauge size={14} />, bull: null },
+              { label: 'Trend', value: publicTa?.trend || 'Nötr', icon: <TrendingUp size={14} />, bull: ((publicTa?.trend || '')).toLowerCase().includes('bull') },
+              { label: 'RSI (14)', value: publicTa?.rsi != null ? publicTa.rsi.toFixed(1) : '—', icon: <Info size={14} />, bull: null },
+              { label: 'MACD', value: publicTa?.macd_status || 'Nötr', icon: <TrendingUp size={14} />, bull: publicTa?.macd_status === 'Bullish' ? true : publicTa?.macd_status === 'Bearish' ? false : null },
+              { label: 'Rejim', value: publicTa?.regime || '—', icon: <Gauge size={14} />, bull: null },
             ].map((item) => (
               <div key={item.label}>
                 <div className="flex items-center gap-1.5 mb-1">
@@ -82,7 +81,7 @@ function EndeksTechnicalAnalysisPage() {
       )}
 
       {/* No data fallback */}
-      {!publicData && (
+      {!publicTa && (
         <div className="text-center py-16 text-muted-foreground">
           <p className="text-base">Bu endeks için teknik veri bulunamadı.</p>
         </div>

@@ -2,19 +2,11 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { Loader2, Factory, BarChart3, TrendingUp, ArrowUp, ArrowDown, Minus, ChevronRight } from 'lucide-react'
 import { useCompScore, useCompProfile } from '../lib/useCompData'
 import { groupKeyToSlug, groupKeyToDisplayName, sectorNameToGroupKey } from '../constants/sectorGroups'
+import { getRatioLabel, HIGHER_IS_BETTER, RATIO_DEFS, type RatioCategory } from '../constants/ratios'
 
 export const Route = createFileRoute('/hisse/$ticker/sektor')({
   component: CompanySektorPage,
 })
-
-const RATIO_LABELS: Record<string, string> = {
-  pe: 'F/K', pb: 'PD/DD', ev_ebitda: 'FD/FAVÖK', ev_sales: 'FD/Satışlar',
-  current_ratio: 'Cari Oran', cash_ratio: 'Nakit Oranı', debt_equity: 'Borç/Özkaynak',
-  interest_coverage: 'Faiz Karş. Oranı',
-  roe: 'ROE', roa: 'ROA', net_margin: 'Net Kar Marjı', gross_margin: 'Brüt Kar Marjı',
-  profit_growth: 'Kar Büyümesi',
-  eps: 'HBK', book_per_share: 'Defter Değeri', inventory_turnover: 'Stok Devir Hızı',
-}
 
 function fmt(val: number | null | undefined, decimals = 2): string {
   if (val == null) return '—'
@@ -70,9 +62,7 @@ function CompanySektorPage() {
   const { data: profileData, isLoading: profileLoading } = useCompProfile(tickerUpper)
 
   const loading = scoreLoading || profileLoading
-  const score = (scoreData as any) || null
-  const profile = (profileData as any) || null
-  const sectorName = profile?.sector || score?.sector || ''
+  const sectorName = scoreData?.sector || profileData?.sector || ''
   const groupKey = sectorNameToGroupKey(sectorName)
   const groupSlug = groupKey ? groupKeyToSlug(groupKey) : null
 
@@ -85,7 +75,7 @@ function CompanySektorPage() {
     )
   }
 
-  if (!score && !profile) {
+  if (!scoreData && !profileData) {
     return (
       <div className="py-12 text-center text-sm text-muted-foreground">
         Sektör verisi bulunamadı.
@@ -93,10 +83,10 @@ function CompanySektorPage() {
     )
   }
 
-  const benchmarks = score?.pillars
-  const ranks = score?.ranks || {}
-  const bench = score?.benchmark || {}
-  const ratios = score?.ratios || {}
+  const benchmarks = scoreData?.pillars
+  const ranks = scoreData?.ranks || {}
+  const bench = scoreData?.benchmark || {}
+  const ratiosMap = scoreData?.ratios || {}
 
   const pillarMedians: Record<string, number | null> = {}
   if (benchmarks) {
@@ -110,14 +100,10 @@ function CompanySektorPage() {
     }
   }
 
-  const higherIsBetter: Record<string, boolean> = {
-    current_ratio: true, cash_ratio: true, debt_equity: false, interest_coverage: true,
-    roe: true, roa: true, net_margin: true, gross_margin: true, profit_growth: true,
-    pe: false, pb: false, ev_ebitda: false, ev_sales: false,
-  }
+  const higherIsBetter = HIGHER_IS_BETTER
 
-  const priorityRatios = ['pe', 'pb', 'ev_ebitda', 'roe', 'net_margin', 'current_ratio', 'debt_equity']
-  const availableRatios = priorityRatios.filter(rc => ratios[rc] != null)
+  const priorityCodes = RATIO_DEFS.map(d => d.code)
+  const availableRatios = priorityCodes.filter(rc => ratiosMap[rc] != null)
 
   return (
     <div className="space-y-5 animate-in fade-in duration-400">
@@ -144,7 +130,7 @@ function CompanySektorPage() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 pt-3 border-t border-border/20">
             <div className="text-center">
-              <div className="text-lg font-black text-foreground">{score?.composite_score != null ? score.composite_score.toFixed(1) : '—'}</div>
+              <div className="text-lg font-black text-foreground">{scoreData?.composite_score != null ? scoreData.composite_score.toFixed(1) : '—'}</div>
               <div className="text-[10px] text-muted-foreground font-medium uppercase">Skor</div>
             </div>
             <div className="text-center">
@@ -156,7 +142,7 @@ function CompanySektorPage() {
               <div className="text-[10px] text-muted-foreground font-medium uppercase">Yüzdelik (Grup)</div>
             </div>
             <div className="text-center">
-              <div className="text-lg font-black text-foreground">{bench.n_peers || '—'}</div>
+              <div className="text-lg font-black text-foreground">{bench.n_peers != null ? String(bench.n_peers) : '—'}</div>
               <div className="text-[10px] text-muted-foreground font-medium uppercase">Emsal Şirket</div>
             </div>
           </div>
@@ -170,17 +156,26 @@ function CompanySektorPage() {
             <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Sektör Karşılaştırması</h3>
             <span className="text-[10px] text-muted-foreground ml-auto">Şirket · Sektör Medyanı</span>
           </div>
-          <div>
-            {availableRatios.map(rc => (
-              <ComparisonRow
-                key={rc}
-                label={RATIO_LABELS[rc] || rc}
-                companyVal={ratios[rc]}
-                peerMedian={pillarMedians[rc] ?? null}
-                higherIsBetter={higherIsBetter[rc]}
-              />
-            ))}
-          </div>
+          {(['degerleme', 'karlilik', 'finansal_saglik', 'likidite', 'verimlilik', 'buyume', 'hisse_basi'] as RatioCategory[]).map(cat => {
+            const catRatios = availableRatios.filter(rc => RATIO_DEFS.find(d => d.code === rc)?.category === cat)
+            if (catRatios.length === 0) return null
+            return (
+              <div key={cat} className="mb-4">
+                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2 pb-1 border-b border-border/10">
+                  {cat === 'degerleme' ? 'Değerleme' : cat === 'karlilik' ? 'Karlılık' : cat === 'finansal_saglik' ? 'Finansal Sağlık' : cat === 'likidite' ? 'Likidite' : cat === 'verimlilik' ? 'Verimlilik' : cat === 'buyume' ? 'Büyüme' : 'Hisse Başı'}
+                </div>
+                {catRatios.map(rc => (
+                  <ComparisonRow
+                    key={rc}
+                    label={getRatioLabel(rc)}
+                    companyVal={ratiosMap[rc]}
+                    peerMedian={pillarMedians[rc] ?? null}
+                    higherIsBetter={higherIsBetter[rc]}
+                  />
+                ))}
+              </div>
+            )
+          })}
         </div>
       )}
 

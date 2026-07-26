@@ -56,18 +56,15 @@ export const Route = createRootRoute({
   component: RootDocument,
 })
 
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useUIStore } from "../store/ui"
 import { ToastContainer } from "../components/ui/ToastContainer"
 
 function RootDocument() {
   const theme = useUIStore((s) => s.theme)
   const hydrateFromStorage = useUIStore((s) => s.hydrateFromStorage)
-  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
-    
     // Hydrate sidebar states from localStorage after mount
     hydrateFromStorage()
     

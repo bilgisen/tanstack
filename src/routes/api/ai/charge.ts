@@ -42,7 +42,7 @@ export const Route = createFileRoute('/api/ai/charge')({
           console.warn("Database error in chargeJT, falling back to mock charge success:", dbErr);
           chargeResult = {
             jtCharged: 10,
-            actualCostUsd: 0.0001,
+            actualCostUsd: '0.0001',
             remainingAvailable: 4990
           };
         }

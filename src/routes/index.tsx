@@ -24,7 +24,7 @@ import companyNames from '../constants/companyNames.json'
 import { useMarketStocks, useIndices } from '../lib/useMarketData'
 import useEmblaCarousel from 'embla-carousel-react'
 import Autoplay from 'embla-carousel-autoplay'
-import { getIndexName, getIndexSlug } from '../constants/bistIndices'
+import { getIndexSlug } from '../constants/bistIndices'
 
 export const Route = createFileRoute('/')({
   component: LandingPage,
@@ -44,7 +44,7 @@ function LandingPage() {
   const navigate = useNavigate()
   const [isChatSheetOpen, setIsChatSheetOpen] = useState(false)
   
-  const { data: stocksData, isLoading: stocksLoading, isError: stocksError, error: stocksErrorObj } = useMarketStocks()
+  const { data: stocksData, isLoading: stocksLoading, isError: stocksError } = useMarketStocks()
   const { data: sectorGroupsData } = useSectorGroups()
   const { data: indicesData } = useIndices()
   const [emblaRef] = useEmblaCarousel({ loop: true, dragFree: true, align: 'start' }, [Autoplay({ delay: 3000, stopOnMouseEnter: true })])
@@ -54,8 +54,8 @@ function LandingPage() {
   useEffect(() => {
     if (stocksData) {
       const allStocks: StockRow[] = stocksData
-        .filter((s: any) => s.code && s.last_price !== undefined)
-        .map((s: any) => ({
+        .filter(s => s.code && s.last_price !== undefined)
+        .map(s => ({
           ticker: s.code.toUpperCase(),
           name: (companyNames as Record<string, string>)[s.code.toUpperCase()] || s.code.toUpperCase(),
           price: Number(s.last_price),
@@ -125,7 +125,7 @@ function LandingPage() {
               <div className="overflow-hidden" ref={emblaRef}>
                 <div className="flex gap-3">
                   {['XU100', 'XU030', 'XU050', 'XBANK', 'XUSIN', 'XYLDZ', 'XUMAL', 'XHARZ', 'XGMYO', 'XKOBI'].map((code) => {
-                    const idx = indicesData.find((i: any) => i.code === code)
+                    const idx = indicesData.find(i => i.code === code)
                     if (!idx) return null
                     const isUp = (idx.diff_percent ?? 0) >= 0
                     return (
@@ -257,7 +257,7 @@ function LandingPage() {
               <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Sektörler</h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {(sectorGroupsData?.groups || []).sort((a: any, b: any) => (b.count || 0) - (a.count || 0)).map((group: any) => {
+              {(sectorGroupsData?.groups || []).sort((a, b) => (b.count || 0) - (a.count || 0)).map(group => {
                 const slug = groupKeyToSlug(group.key)
                 return (
                   <Link

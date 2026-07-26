@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import * as fc from "fast-check";
 
 /**
@@ -63,7 +63,7 @@ function generateSectorDetailUrl(slug: string): string {
  * Şirket ticker'ından detay sayfası URL'i oluşturma
  * Bu routing mantığı korunmalıdır
  */
-function generateCompanyDetailUrl(sectorSlug: string, companyTicker: string): string {
+function generateCompanyDetailUrl(_sectorSlug: string, companyTicker: string): string {
   return `/hisse/${companyTicker.toLowerCase()}`;
 }
 

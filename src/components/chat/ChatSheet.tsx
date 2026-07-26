@@ -1,12 +1,13 @@
 import { useEffect } from "react";
 import { ChatPanel } from "./ChatPanel";
+import type { UserProfile } from "../../hooks/useAuth";
 
 interface ChatSheetProps {
   isOpen: boolean;
   onClose: () => void;
   context: string;
   placeholder?: string;
-  user?: any;
+  user?: UserProfile | null;
   sessionLoading?: boolean;
 }
 

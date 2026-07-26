@@ -51,17 +51,17 @@ function WatchlistPage() {
   const [isSearchFocused, setIsSearchFocused] = useState(false)
 
   const marketItems: Record<string, MarketItem> = {}
-  ;(stocksData || []).forEach((stock: any) => {
+  ;(stocksData || []).forEach(stock => {
     marketItems[stock.code.toUpperCase()] = {
       code: stock.code,
-      name: stock.name,
+      name: stock.name || stock.code,
       last_price: stock.last_price || 0,
       diff_percent: stock.diff_percent || 0,
       volume: stock.volume,
       type: 'stock'
     }
   })
-  ;(summaryData || []).forEach((index: any) => {
+  ;(summaryData || []).forEach(index => {
     marketItems[index.code.toUpperCase()] = {
       code: index.code,
       name: index.name || index.title || `${index.code} Endeksi`,
@@ -327,7 +327,7 @@ function WatchlistPage() {
                         className="hover:bg-muted/40 transition-colors group"
                       >
                         <td className="px-6 py-3.5 font-bold text-foreground">
-                          <Link to={itemUrl as any} className="text-primary hover:underline font-mono">
+                          <Link to={itemUrl} className="text-primary hover:underline font-mono">
                             {item.code}
                           </Link>
                         </td>

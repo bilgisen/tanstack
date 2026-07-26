@@ -1,15 +1,15 @@
 import { useRef, useState, useEffect } from "react";
-import { ArrowUp, LogIn } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 import { useChatStore } from "../../store/chat";
 import { CompanySearch } from "../chat/CompanySearch";
 import { authClient } from "../../lib/auth-client";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth, type UserProfile } from "../../hooks/useAuth";
 
 interface ChatPaneProps {
   context?: string;
   placeholder?: string;
   className?: string;
-  user?: any;
+  user?: UserProfile | null;
   sessionLoading?: boolean;
 }
 
@@ -22,7 +22,7 @@ export function ChatPane({
 }: ChatPaneProps) {
   const [input, setInput] = useState("");
   const [showSearch, setShowSearch] = useState(false);
-  const { isLoading, sendMessage, clearChat, setUserTier } = useChatStore();
+  const { isLoading, sendMessage, setUserTier } = useChatStore();
 
   // Fallback auth when user prop isn't passed (e.g. PublicPageLayout)
   const { user: authUser } = useAuth();
@@ -105,7 +105,7 @@ export function ChatPane({
         <CompanySearch
           query={input.trim().split(/\s+/).pop() || ""}
           onSelect={handleSelectTicker}
-          onClose={() => setShowSearch(false)}
+
         />
       )}
 

@@ -9,12 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TaramaRouteImport } from './routes/tarama'
 import { Route as TakipListesiRouteImport } from './routes/takip-listesi'
+import { Route as SiralamalarRouteImport } from './routes/siralamalar'
 import { Route as SektorlerRouteImport } from './routes/sektorler'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as NedenJetborsaRouteImport } from './routes/neden-jetborsa'
 import { Route as NasilCalisirRouteImport } from './routes/nasil-calisir'
 import { Route as KurumsalRouteImport } from './routes/kurumsal'
+import { Route as KarsilastirRouteImport } from './routes/karsilastir'
 import { Route as EndekslerRouteImport } from './routes/endeksler'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfilIndexRouteImport } from './routes/profil.index'
@@ -42,9 +45,19 @@ import { Route as ApiAiPreCheckRouteImport } from './routes/api/ai/pre-check'
 import { Route as ApiAiChargeRouteImport } from './routes/api/ai/charge'
 import { Route as ApiChatSessionsIdRouteImport } from './routes/api/chat/sessions.$id'
 
+const TaramaRoute = TaramaRouteImport.update({
+  id: '/tarama',
+  path: '/tarama',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TakipListesiRoute = TakipListesiRouteImport.update({
   id: '/takip-listesi',
   path: '/takip-listesi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SiralamalarRoute = SiralamalarRouteImport.update({
+  id: '/siralamalar',
+  path: '/siralamalar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SektorlerRoute = SektorlerRouteImport.update({
@@ -70,6 +83,11 @@ const NasilCalisirRoute = NasilCalisirRouteImport.update({
 const KurumsalRoute = KurumsalRouteImport.update({
   id: '/kurumsal',
   path: '/kurumsal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KarsilastirRoute = KarsilastirRouteImport.update({
+  id: '/karsilastir',
+  path: '/karsilastir',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EndekslerRoute = EndekslerRouteImport.update({
@@ -206,12 +224,15 @@ const ApiChatSessionsIdRoute = ApiChatSessionsIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/endeksler': typeof EndekslerRouteWithChildren
+  '/karsilastir': typeof KarsilastirRoute
   '/kurumsal': typeof KurumsalRoute
   '/nasil-calisir': typeof NasilCalisirRoute
   '/neden-jetborsa': typeof NedenJetborsaRoute
   '/profil': typeof ProfilRouteWithChildren
   '/sektorler': typeof SektorlerRouteWithChildren
+  '/siralamalar': typeof SiralamalarRoute
   '/takip-listesi': typeof TakipListesiRoute
+  '/tarama': typeof TaramaRoute
   '/api/checkout': typeof ApiCheckoutRoute
   '/api/tickers': typeof ApiTickersRoute
   '/endeksler/$id': typeof EndekslerIdRouteWithChildren
@@ -239,11 +260,14 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/karsilastir': typeof KarsilastirRoute
   '/kurumsal': typeof KurumsalRoute
   '/nasil-calisir': typeof NasilCalisirRoute
   '/neden-jetborsa': typeof NedenJetborsaRoute
   '/sektorler': typeof SektorlerRouteWithChildren
+  '/siralamalar': typeof SiralamalarRoute
   '/takip-listesi': typeof TakipListesiRoute
+  '/tarama': typeof TaramaRoute
   '/api/checkout': typeof ApiCheckoutRoute
   '/api/tickers': typeof ApiTickersRoute
   '/sektorler/$slug': typeof SektorlerSlugRouteWithChildren
@@ -271,12 +295,15 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/endeksler': typeof EndekslerRouteWithChildren
+  '/karsilastir': typeof KarsilastirRoute
   '/kurumsal': typeof KurumsalRoute
   '/nasil-calisir': typeof NasilCalisirRoute
   '/neden-jetborsa': typeof NedenJetborsaRoute
   '/profil': typeof ProfilRouteWithChildren
   '/sektorler': typeof SektorlerRouteWithChildren
+  '/siralamalar': typeof SiralamalarRoute
   '/takip-listesi': typeof TakipListesiRoute
+  '/tarama': typeof TaramaRoute
   '/api/checkout': typeof ApiCheckoutRoute
   '/api/tickers': typeof ApiTickersRoute
   '/endeksler/$id': typeof EndekslerIdRouteWithChildren
@@ -307,12 +334,15 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/endeksler'
+    | '/karsilastir'
     | '/kurumsal'
     | '/nasil-calisir'
     | '/neden-jetborsa'
     | '/profil'
     | '/sektorler'
+    | '/siralamalar'
     | '/takip-listesi'
+    | '/tarama'
     | '/api/checkout'
     | '/api/tickers'
     | '/endeksler/$id'
@@ -340,11 +370,14 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/karsilastir'
     | '/kurumsal'
     | '/nasil-calisir'
     | '/neden-jetborsa'
     | '/sektorler'
+    | '/siralamalar'
     | '/takip-listesi'
+    | '/tarama'
     | '/api/checkout'
     | '/api/tickers'
     | '/sektorler/$slug'
@@ -371,12 +404,15 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/endeksler'
+    | '/karsilastir'
     | '/kurumsal'
     | '/nasil-calisir'
     | '/neden-jetborsa'
     | '/profil'
     | '/sektorler'
+    | '/siralamalar'
     | '/takip-listesi'
+    | '/tarama'
     | '/api/checkout'
     | '/api/tickers'
     | '/endeksler/$id'
@@ -406,12 +442,15 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   EndekslerRoute: typeof EndekslerRouteWithChildren
+  KarsilastirRoute: typeof KarsilastirRoute
   KurumsalRoute: typeof KurumsalRoute
   NasilCalisirRoute: typeof NasilCalisirRoute
   NedenJetborsaRoute: typeof NedenJetborsaRoute
   ProfilRoute: typeof ProfilRouteWithChildren
   SektorlerRoute: typeof SektorlerRouteWithChildren
+  SiralamalarRoute: typeof SiralamalarRoute
   TakipListesiRoute: typeof TakipListesiRoute
+  TaramaRoute: typeof TaramaRoute
   ApiCheckoutRoute: typeof ApiCheckoutRoute
   ApiTickersRoute: typeof ApiTickersRoute
   HisseTickerRoute: typeof HisseTickerRouteWithChildren
@@ -427,11 +466,25 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tarama': {
+      id: '/tarama'
+      path: '/tarama'
+      fullPath: '/tarama'
+      preLoaderRoute: typeof TaramaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/takip-listesi': {
       id: '/takip-listesi'
       path: '/takip-listesi'
       fullPath: '/takip-listesi'
       preLoaderRoute: typeof TakipListesiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/siralamalar': {
+      id: '/siralamalar'
+      path: '/siralamalar'
+      fullPath: '/siralamalar'
+      preLoaderRoute: typeof SiralamalarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sektorler': {
@@ -467,6 +520,13 @@ declare module '@tanstack/react-router' {
       path: '/kurumsal'
       fullPath: '/kurumsal'
       preLoaderRoute: typeof KurumsalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/karsilastir': {
+      id: '/karsilastir'
+      path: '/karsilastir'
+      fullPath: '/karsilastir'
+      preLoaderRoute: typeof KarsilastirRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/endeksler': {
@@ -752,12 +812,15 @@ const ApiChatSessionsRouteWithChildren = ApiChatSessionsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   EndekslerRoute: EndekslerRouteWithChildren,
+  KarsilastirRoute: KarsilastirRoute,
   KurumsalRoute: KurumsalRoute,
   NasilCalisirRoute: NasilCalisirRoute,
   NedenJetborsaRoute: NedenJetborsaRoute,
   ProfilRoute: ProfilRouteWithChildren,
   SektorlerRoute: SektorlerRouteWithChildren,
+  SiralamalarRoute: SiralamalarRoute,
   TakipListesiRoute: TakipListesiRoute,
+  TaramaRoute: TaramaRoute,
   ApiCheckoutRoute: ApiCheckoutRoute,
   ApiTickersRoute: ApiTickersRoute,
   HisseTickerRoute: HisseTickerRouteWithChildren,

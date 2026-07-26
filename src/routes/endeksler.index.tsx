@@ -2,7 +2,15 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Loader2, ArrowUp, ArrowDown } from 'lucide-react'
 import { getIndexName, getIndexSlug } from '../constants/bistIndices'
 import { useIndices } from '../lib/useMarketData'
-import { DataTable } from '../components/ui/data-table'
+import { DataTable, type Column } from '../components/ui/data-table'
+
+type ProcessedIndex = {
+  code: string
+  name: string
+  last_price: number
+  diff_percent: number
+  volume: number | undefined
+}
 
 export const Route = createFileRoute('/endeksler/')({
   component: EndekslerPage,
@@ -28,33 +36,34 @@ function EndekslerPage() {
     )
   }
 
-  let indices: any[] = []
+  let indices: ProcessedIndex[] = []
   try {
     indices = (indicesData || [])
-      .map((item: any) => ({
+      .map(item => ({
         code: item.code?.toUpperCase() || '',
         name: getIndexName(item.code) || item.name || item.code,
         last_price: item.last_price ?? 0,
         diff_percent: item.diff_percent ?? 0,
+        volume: (item as Record<string, unknown>).volume as number | undefined,
       }))
-      .filter((i: any) => i.code)
+      .filter(i => i.code)
   } catch (e) {
     console.error('EndekslerPage: error processing indices data', e)
   }
 
-  const columns = [
+  const columns: Column<ProcessedIndex>[] = [
     {
       key: 'code',
       header: 'Ticker',
       sortable: true,
       className: 'w-[100px]',
-      render: (item: any) => <span className="font-bold font-mono text-foreground">{item.code}</span>,
+      render: (item) => <span className="font-bold font-mono text-foreground">{item.code}</span>,
     },
     {
       key: 'name',
       header: 'Endeks',
       sortable: true,
-      render: (item: any) => <span className="text-muted-foreground">{item.name}</span>,
+      render: (item) => <span className="text-muted-foreground">{item.name}</span>,
     },
     {
       key: 'last_price',
@@ -62,7 +71,7 @@ function EndekslerPage() {
       sortable: true,
       sortKey: 'last_price',
       className: 'text-right w-[140px]',
-      render: (item: any) =>
+      render: (item) =>
         item.last_price > 0 ? (
           <span className="font-mono font-semibold text-foreground tabular-nums">
             {item.last_price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -77,7 +86,7 @@ function EndekslerPage() {
       sortable: true,
       sortKey: 'diff_percent',
       className: 'text-right w-[120px]',
-      render: (item: any) => {
+      render: (item) => {
         const isUp = item.diff_percent >= 0
         return (
           <span className={`inline-flex items-center gap-1 font-bold ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
@@ -93,10 +102,10 @@ function EndekslerPage() {
       sortable: true,
       sortKey: 'volume',
       className: 'text-right w-[140px]',
-      render: (item: any) =>
-        item.volume > 0 ? (
+      render: (item) =>
+        (item.volume ?? 0) > 0 ? (
           <span className="font-mono text-muted-foreground tabular-nums">
-            {(item.volume / 1_000_000_000).toFixed(2).replace('.', ',')}B
+            {((item.volume ?? 0) / 1_000_000_000).toFixed(2).replace('.', ',')}B
           </span>
         ) : (
           <span className="text-muted-foreground">-</span>

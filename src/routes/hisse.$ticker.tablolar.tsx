@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useCompStatements } from '../lib/useCompData'
-import { DataTable } from '../components/ui/data-table'
+import { DataTable, type Column } from '../components/ui/data-table'
 import { FileText, AlertCircle } from 'lucide-react'
 
 export const Route = createFileRoute('/hisse/$ticker/tablolar')({
@@ -13,7 +13,6 @@ interface StatementItem {
   period_key: string
   value_try: number | null
   financial_group_label?: string
-  [key: string]: any
 }
 
 interface GroupSection {
@@ -69,7 +68,8 @@ function FinancialStatementsPage() {
   const tickerUpper = ticker.toUpperCase()
   const { data: raw, isLoading } = useCompStatements(tickerUpper)
 
-  const grouped = (raw as any)?.grouped || (raw as any)?.data?.grouped || null
+  const rawRecord = raw as Record<string, unknown> | null
+  const grouped = (rawRecord?.grouped || (rawRecord?.data as Record<string, unknown> | undefined)?.grouped) as GroupedData | null
 
   const sections: [string, GroupSection][] = grouped
     ? Object.entries(grouped as GroupedData)
@@ -109,11 +109,11 @@ function FinancialStatementsPage() {
         const { rows, periods } = pivotStatements(section.items)
         if (rows.length === 0 || periods.length === 0) return null
 
-        const columns: any[] = [
+        const columns: Column<PivotRow>[] = [
           {
             key: 'item_desc_tr',
             header: 'Kalem',
-            render: (row: PivotRow) => (
+            render: (row) => (
               <span className="text-sm font-medium text-foreground">{row.item_desc_tr}</span>
             ),
             className: 'sticky left-0 bg-background min-w-[200px] md:min-w-[280px]',
@@ -125,7 +125,7 @@ function FinancialStatementsPage() {
               <span className="font-mono text-sm tabular-nums">{fmt(row[p] as number | null)}</span>
             ),
             className: 'text-right min-w-[100px] md:min-w-[120px]',
-          })),
+          } as Column<PivotRow>)),
         ]
 
         return (

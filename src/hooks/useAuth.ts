@@ -1,6 +1,20 @@
 import { useSession, signIn, signOut } from '../lib/auth-client';
 import { useEffect, useState } from 'react';
 
+export interface UserProfile {
+  id: string;
+  email: string;
+  emailVerified: boolean;
+  name: string;
+  image?: string | null;
+  tier: string;
+  credits: UserCredits | null;
+  user_metadata: {
+    avatar_url?: string | null;
+    full_name?: string;
+  };
+}
+
 interface UserCredits {
   tier: string;
   tierDisplayName: string;
@@ -21,10 +35,10 @@ export function useAuth() {
     if (data?.user) {
       setCreditsLoading(true);
       fetch('/api/user/credits')
-        .then(res => res.json())
-        .then((data: any) => {
-          if (data.tier) {
-            setCredits(data);
+        .then(res => res.json() as Promise<Record<string, unknown>>)
+        .then(data => {
+          if (data && typeof data === 'object' && 'tier' in data) {
+            setCredits(data as unknown as UserCredits);
           }
         })
         .catch(err => {

@@ -70,9 +70,6 @@ export const Route = createFileRoute('/api/auth/$')({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const incomingCookie = request.headers.get("cookie") || "none";
-        console.log(`[Auth API GET] ${request.method} ${request.url} | Incoming Cookies: ${incomingCookie}`);
-        
         // Get the active H3 event context if available
         const storageKey = Symbol.for("tanstack-start:event-storage");
         const storage = (globalThis as any)[storageKey];
@@ -96,8 +93,6 @@ export const Route = createFileRoute('/api/auth/$')({
               setCookies = [rawSetCookie];
             }
           }
-          console.log(`[Auth API GET Response] Status: ${res.status} | Outgoing Set-Cookie:`, setCookies);
-
           // If we have cookies and an active H3 event, set them directly on the event
           if (setCookies.length > 0 && event) {
             for (const cookie of setCookies) {
@@ -154,9 +149,6 @@ export const Route = createFileRoute('/api/auth/$')({
         }
       },
       POST: async ({ request }) => {
-        const incomingCookie = request.headers.get("cookie") || "none";
-        console.log(`[Auth API POST] ${request.method} ${request.url} | Incoming Cookies: ${incomingCookie}`);
-        
         // Get the active H3 event context if available
         const storageKey = Symbol.for("tanstack-start:event-storage");
         const storage = (globalThis as any)[storageKey];
@@ -176,8 +168,6 @@ export const Route = createFileRoute('/api/auth/$')({
               setCookies = [rawSetCookie];
             }
           }
-          console.log(`[Auth API POST Response] Status: ${res.status} | Outgoing Set-Cookie:`, setCookies);
-
           // If we have cookies and an active H3 event, set them directly on the event
           if (setCookies.length > 0 && event) {
             for (const cookie of setCookies) {

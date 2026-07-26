@@ -10,12 +10,11 @@ interface TickerMatch {
 interface CompanySearchProps {
   query: string;
   onSelect: (ticker: string) => void;
-  onClose?: () => void;
 }
 
 const SEARCH_API = "https://hono.paraanaliz.workers.dev/api/ai/ticker-search";
 
-export function CompanySearch({ query, onSelect, onClose }: CompanySearchProps) {
+export function CompanySearch({ query, onSelect }: CompanySearchProps) {
   const [results, setResults] = useState<TickerMatch[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -46,32 +45,6 @@ export function CompanySearch({ query, onSelect, onClose }: CompanySearchProps) 
       controller.abort();
     };
   }, [query]);
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (results.length === 0) return;
-
-    switch (e.key) {
-      case "ArrowDown":
-        e.preventDefault();
-        setSelectedIndex(i => Math.min(i + 1, results.length - 1));
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        setSelectedIndex(i => Math.max(i - 1, 0));
-        break;
-      case "Enter":
-      case "Tab":
-        e.preventDefault();
-        if (results[selectedIndex]) {
-          onSelect(results[selectedIndex].code);
-        }
-        break;
-      case "Escape":
-        e.preventDefault();
-        onClose?.();
-        break;
-    }
-  };
 
   if (results.length === 0) return null;
 

@@ -21,7 +21,7 @@ export async function checkAndReserveJT(
       .select()
       .from(modelConfigs)
       .where(and(eq(modelConfigs.modelId, modelId), eq(modelConfigs.isActive, true)))
-      .then((res: any[]) => res[0]);
+      .then((res) => res[0]);
 
     if (!model) {
       console.warn(`[checkAndReserveJT] Model not found or inactive: ${modelId}`);
@@ -32,10 +32,9 @@ export async function checkAndReserveJT(
       .select()
       .from(userCredits)
       .where(eq(userCredits.userId, userId))
-      .then((res: any[]) => res[0]);
+      .then((res) => res[0]);
 
     if (!credits) {
-      console.log(`[checkAndReserveJT] Auto-provisioning credits for user: ${userId}`);
       try {
         credits = await db
           .insert(userCredits)
@@ -48,8 +47,7 @@ export async function checkAndReserveJT(
             resetAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
           })
           .returning()
-          .then((res: any[]) => res[0]);
-        console.log(`[checkAndReserveJT] Credits auto-provisioned for user: ${userId}`);
+          .then((res) => res[0]);
       } catch (err) {
         console.error("[checkAndReserveJT] Failed to auto-provision user credits:", err);
         return { ok: false, error: 'USER_NOT_FOUND' };
@@ -69,13 +67,13 @@ export async function checkAndReserveJT(
       credits.resetAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
     }
 
-    const allowedTiers = model.allowedTiers || [];
+    const allowedTiers: string[] = JSON.parse(model.allowedTiers || '[]');
     if (!allowedTiers.includes(credits.tier)) {
       console.warn(`[checkAndReserveJT] User tier '${credits.tier}' not allowed for model: ${modelId}`);
       return { ok: false, error: 'MODEL_NOT_ALLOWED' };
     }
 
-    const tierCfg = (TIER_CONFIG as any)[credits.tier]
+    const tierCfg = TIER_CONFIG[credits.tier as keyof typeof TIER_CONFIG]
     if (tierCfg?.dailyCallLimit != null) {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
@@ -91,14 +89,14 @@ export async function checkAndReserveJT(
             sql`${usageLogs.createdAt} < ${tomorrow}`,
           )
         )
-        .then((r: any[]) => r[0]?.cnt || 0)
+        .then((r) => r[0]?.cnt || 0)
       if (todayCount >= tierCfg.dailyCallLimit) {
         return { ok: false, error: 'DAILY_LIMIT', availableJT: (credits.monthlyJt - credits.usedJt) + credits.extraJt }
       }
     }
 
-    const inputRate = parseFloat(model.htPer1kInput);
-    const outputRate = parseFloat(model.htPer1kOutput);
+    const inputRate = model.htPer1kInput;
+    const outputRate = model.htPer1kOutput;
 
     const estimatedJT = Math.ceil(
       (estimatedInputTokens / 1000) * inputRate +
@@ -112,7 +110,6 @@ export async function checkAndReserveJT(
       return { ok: false, error: 'INSUFFICIENT_JT', availableJT, estimatedCost: estimatedJT };
     }
 
-    console.log(`[checkAndReserveJT] Check passed. Available JT: ${availableJT}, Estimated cost: ${estimatedJT}`);
     return { ok: true, availableJT, estimatedCost: estimatedJT };
   } catch (error) {
     console.error('[checkAndReserveJT] Unexpected error:', error);
@@ -134,30 +131,27 @@ export async function chargeJT(params: {
     .select()
     .from(modelConfigs)
     .where(eq(modelConfigs.modelId, modelId))
-    .then((res: any[]) => res[0]);
+    .then((res) => res[0]);
 
   if (!model) throw new Error(`Model not found: ${modelId}`);
 
-  const inputRate = parseFloat(model.htPer1kInput);
-  const outputRate = parseFloat(model.htPer1kOutput);
-  const inputCost = parseFloat(model.inputCostPer1k);
-  const outputCost = parseFloat(model.outputCostPer1k);
+  const inputRate = model.htPer1kInput;
+  const outputRate = model.htPer1kOutput;
+  const inputCost = model.inputCostPer1k;
+  const outputCost = model.outputCostPer1k;
 
   const jtCharged = Math.ceil(
     (inputTokens / 1000) * inputRate +
     (outputTokens / 1000) * outputRate
   );
 
-  const actualCostUsd = String(
-    (inputTokens / 1000) * inputCost +
-    (outputTokens / 1000) * outputCost
-  );
+  const actualCostUsd = (inputTokens / 1000) * inputCost + (outputTokens / 1000) * outputCost;
 
   let credits = await db
     .select()
     .from(userCredits)
     .where(eq(userCredits.userId, userId))
-    .then((res: any[]) => res[0]);
+    .then((res) => res[0]);
 
   if (!credits) throw new Error(`Credits not found for user: ${userId}`);
 
@@ -187,7 +181,7 @@ export async function chargeJT(params: {
 
   const newUsedJt = credits.usedJt + jtToCharge;
 
-  await db.transaction(async (tx: any) => {
+  await db.transaction(async (tx) => {
     await tx
       .update(userCredits)
       .set({
@@ -209,7 +203,7 @@ export async function chargeJT(params: {
     });
   });
 
-  return { jtCharged, actualCostUsd, remainingAvailable: (credits.monthlyJt - newUsedJt) + newExtraJT };
+  return { jtCharged, actualCostUsd: String(actualCostUsd), remainingAvailable: (credits.monthlyJt - newUsedJt) + newExtraJT };
 }
 
 export class JTAccessError extends Error {

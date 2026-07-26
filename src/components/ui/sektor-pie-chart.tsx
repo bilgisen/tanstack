@@ -1,4 +1,5 @@
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
+import { SafeTooltip } from './typed-tooltip'
 
 const COLORS = [
   '#3b82f6', '#22c55e', '#f59e0b', '#8b5cf6', '#06b6d4',
@@ -35,8 +36,8 @@ export function SektorPieChart({ data }: { data: SectorItem[] }) {
                 <Cell key={i} fill={COLORS[i % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip
-              formatter={(value: number) => `${((value / total) * 100).toFixed(1)}%`}
+            <SafeTooltip
+              formatter={(value): string => `${((Number(value ?? 0) / total) * 100).toFixed(1)}%`}
               contentStyle={{
                 background: 'hsl(var(--popover))',
                 border: '1px solid hsl(var(--border))',

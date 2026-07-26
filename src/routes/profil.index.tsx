@@ -48,7 +48,7 @@ function ProfilePage() {
     try {
       const res = await fetch('/api/user/credits')
       if (res.ok) {
-        const json: any = await res.json()
+        const json = await res.json() as UserCredits
         setCredits(json)
       }
     } catch (e) {
@@ -73,7 +73,7 @@ function ProfilePage() {
     window.location.href = `/api/checkout?${params}`
   }
 
-  const rawTier = credits?.tier || (user as any)?.tier || 'free'
+  const rawTier = credits?.tier || user?.tier || 'free'
   const userTier: Tier = Object.keys(TIER_CONFIG).includes(rawTier) ? rawTier as Tier : 'free'
   const tierConfig = TIER_CONFIG[userTier]
 
