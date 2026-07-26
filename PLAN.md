@@ -69,7 +69,7 @@
 | İş | Durum | Not |
 |---|---|---|
 | **Faz 5.4 — Tarama rasyo filtreleri** | 🔴 Bloke | Backend `/screener/filter` endpoint hazır değil |
-| **DB view migration (D1 → haftalık)** | 🟡 Beklemede | apply-migration.ts çalıştırılacak |
+| **DB view migration (D1 → haftalık)** | ✅ | `0003_spotty_warbound.sql` production D1'a uygulandı |
 | **routeTree.gen.ts `as any`** | 🟢 Safe | 35 adet, TanStack Router codegen çıktısı |
 | **lib/auth.ts `any`** | 🟢 Safe | Proxy pattern, library type overload uyumsuzluğu |
 
