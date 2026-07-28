@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { History, Loader2, Maximize2, Minimize2, Plus, X } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 import { useChatStore } from "../../store/chat";
 import { useUIStore } from "../../store/ui";
 import { ChatPane } from "../dashboard/ChatPane";
@@ -14,6 +15,9 @@ import {
   MessageScrollerProvider,
   MessageScrollerViewport,
 } from "../ui/message-scroller";
+import { SuggestionChips } from "./SuggestionChips";
+import { CapabilitiesSection } from "./CapabilitiesSection";
+import { getPageSuggestions } from "../../lib/pageContextSuggestions";
 import type { UserProfile } from "../../hooks/useAuth";
 
 interface ChatPanelProps {
@@ -26,10 +30,51 @@ interface ChatPanelProps {
 }
 
 export function ChatPanel({ context, placeholder, onClose, user, sessionLoading, isMobile = false }: ChatPanelProps) {
-  const { messages, isLoading, streamingText, sessions, activeSessionId, loadSession, deleteSession, clearChat, init } = useChatStore();
-  const { isChatMaximized, toggleChatMaximized } = useUIStore();
+  const { messages, isLoading, streamingText, sessions, activeSessionId, loadSession, deleteSession, clearChat, init, sendMessage } = useChatStore();
+  const { isChatMaximized, toggleChatMaximized, openRightSidebar } = useUIStore();
   const [historyOpen, setHistoryOpen] = useState(false);
   const historyRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+
+  const pageCtx = useMemo(() => getPageSuggestions(context), [context]);
+
+  // Smart navigation: some suggestions imply a page/tab change
+  const tryNavigateFromSuggestion = (question: string) => {
+    const q = question.toLowerCase()
+    const isSirket = context.startsWith("sirket:")
+    const parts = context.split(":")
+    const ticker = parts[1]?.toLowerCase() || ""
+    const currentSubpage = parts[2] || "genel-bakis"
+
+    // Handle endeks navigation
+    if (context.startsWith("endeks:")) {
+      const endeksId = parts[1]?.toLowerCase() || ""
+      if (q.includes("teknik") && endeksId) {
+        navigate({ to: `/endeksler/${endeksId}/teknik-analiz` } as any)
+      }
+      return
+    }
+
+    if (!isSirket || !ticker) return
+
+    let targetSubpage = ""
+    if (q.includes("teknik analiz")) targetSubpage = "teknik-analiz"
+    else if (q.includes("finansal analiz") || q.includes("rasyo") || q.includes("temel")) targetSubpage = "temel-analiz"
+    else if (q.includes("bilanço") || q.includes("tablo")) targetSubpage = "tablolar"
+    else if (q.includes("sektör") || q.includes("sektordeki")) targetSubpage = "sektor"
+
+    // Only navigate if the target is different from current
+    if (targetSubpage && targetSubpage !== currentSubpage) {
+      navigate({ to: `/hisse/${ticker}/${targetSubpage}` } as any)
+    }
+  }
+
+  const handleSuggestionClick = async (q: string) => {
+    if (isLoading) return;
+    tryNavigateFromSuggestion(q);
+    openRightSidebar();
+    await sendMessage(q, context);
+  };
 
   useEffect(() => {
     init()
@@ -49,10 +94,17 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading,
     <div className="flex flex-col h-full bg-background relative font-sans [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
       {/* 1. Header - Fixed height, no shrink */}
       <div
-        className="h-14 flex items-center justify-between px-5 border-b border-border/50 bg-background/95 backdrop-blur-md flex-shrink-0 select-none z-10 relative"
+        className={`flex items-center justify-between border-b border-border/50 bg-background/95 backdrop-blur-md flex-shrink-0 select-none z-10 relative ${
+          isMobile ? "h-11 px-3" : "h-14 px-5"
+        }`}
         ref={historyRef}
       >
         <span className="text-sm font-normal text-foreground">Araştır</span>
+        {context !== 'global' && (
+          <div className="absolute left-1/2 -translate-x-1/2 text-[10px] text-muted-foreground/60 font-medium uppercase tracking-wider truncate max-w-[40%] select-none">
+            {pageCtx.title}
+          </div>
+        )}
 
         <div className="flex items-center gap-1.5">
           <button
@@ -151,27 +203,41 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading,
               WebkitOverflowScrolling: 'touch'
             } as React.CSSProperties : undefined}
           >
-            <MessageScrollerContent className="gap-4 p-5">
+            <MessageScrollerContent className={`${isMobile ? "gap-3 p-3" : "gap-4 p-5"}`}>
               {messages.length === 0 ? (
-                <MessageScrollerItem className="flex items-center justify-center min-h-[300px]">
-                  <div className="flex flex-col items-center text-center p-6 space-y-4 max-w-md mx-auto select-none opacity-80">
-                    <Logo size={44} variant="icon" />
-                    <div className="space-y-1">
-                      <h5 className="text-base font-semibold text-foreground">Araştırmaya Başlayın</h5>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        Hisseler, rasyolar, bilançolar ve teknik formasyonlar hakkında sorularınızı sorun.
-                        BIST odaklı yapay zeka analiz etsin.
+                <MessageScrollerItem className={`flex items-start justify-center ${isMobile ? "min-h-[200px] pt-1" : "min-h-[300px] pt-2"}`}>
+                  <div className={`flex flex-col items-center text-center select-none w-full ${
+                    isMobile ? "p-3 pb-2 space-y-1" : "p-4 sm:p-6 pb-4 space-y-2 max-w-md mx-auto"
+                  }`}>
+                    <Logo size={isMobile ? 24 : 32} variant="icon" />
+                    <div className="space-y-0.5 mt-0.5">
+                      <h6 className={`font-semibold text-foreground ${isMobile ? "text-xs" : "text-sm"}`}>
+                        {pageCtx.title}
+                      </h6>
+                      <p className={`text-muted-foreground leading-relaxed ${isMobile ? "text-[10px]" : "text-xs"}`}>
+                        {pageCtx.description}
                       </p>
+                    </div>
+                    <div className="w-full space-y-2">
+                      <SuggestionChips
+                        suggestions={pageCtx.suggestions}
+                        onSelect={handleSuggestionClick}
+                        max={isMobile ? 3 : 4}
+                      />
+                      <CapabilitiesSection
+                        capabilities={pageCtx.capabilities}
+                        onSelect={handleSuggestionClick}
+                      />
                     </div>
                   </div>
                 </MessageScrollerItem>
               ) : (
                 messages.map((msg, idx) => (
                   <MessageScrollerItem key={idx}>
-                    <div className={`flex gap-2.5 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                    <div className={`flex gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                       {msg.role === "assistant" && (
-                        <div className="shrink-0 mt-1">
-                          <Logo size={22} variant="icon" />
+                        <div className="shrink-0 mt-0.5">
+                          <Logo size={isMobile ? 18 : 22} variant="icon" />
                         </div>
                       )}
 
@@ -180,7 +246,7 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading,
                         align={msg.role === "user" ? "end" : "start"}
                       >
                         <BubbleContent
-                          className={`px-3.5 py-2.5 rounded-2xl ${
+                          className={`${isMobile ? "px-2.5 py-2" : "px-3.5 py-2.5"} rounded-2xl ${
                             msg.role === "user"
                               ? "rounded-tr-sm"
                               : "rounded-tl-sm border border-border/30"
@@ -202,13 +268,13 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading,
 
               {streamingText !== null && (
                 <MessageScrollerItem scrollAnchor>
-                  <div className="flex gap-2.5 justify-start">
-                    <div className="shrink-0 mt-1">
-                      <Logo size={22} variant="icon" />
+                  <div className="flex gap-2 justify-start">
+                    <div className="shrink-0 mt-0.5">
+                      <Logo size={isMobile ? 18 : 22} variant="icon" />
                     </div>
                     <Bubble variant="secondary" align="start">
-                      <BubbleContent className="px-3.5 py-2.5 rounded-2xl rounded-tl-sm border border-border/30">
-                        <div className="text-sm whitespace-pre-wrap break-words leading-relaxed [&_*]:text-sm">
+                      <BubbleContent className={`${isMobile ? "px-2.5 py-2" : "px-3.5 py-2.5"} rounded-2xl rounded-tl-sm border border-border/30`}>
+                        <div className={`whitespace-pre-wrap break-words leading-relaxed ${isMobile ? "text-xs" : "text-sm"} [&_*]:text-sm`}>
                           {streamingText}
                           <span className="inline-flex w-[2px] h-[1em] bg-primary ml-0.5 animate-pulse rounded-sm" />
                         </div>
@@ -220,14 +286,14 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading,
 
               {isLoading && streamingText === null && (
                 <MessageScrollerItem scrollAnchor>
-                  <div className="flex gap-2.5 justify-start">
-                    <div className="shrink-0 mt-1">
-                      <Logo size={22} variant="icon" />
+                  <div className="flex gap-2 justify-start">
+                    <div className="shrink-0 mt-0.5">
+                      <Logo size={isMobile ? 18 : 22} variant="icon" />
                     </div>
                     <Bubble variant="muted" align="start">
-                      <BubbleContent className="px-3.5 py-2.5 rounded-2xl rounded-tl-sm border border-border/30 flex items-center gap-2">
-                        <Loader2 size={13} className="animate-spin text-primary" />
-                        <span className="text-sm text-muted-foreground">
+                      <BubbleContent className={`${isMobile ? "px-2.5 py-2" : "px-3.5 py-2.5"} rounded-2xl rounded-tl-sm border border-border/30 flex items-center gap-2`}>
+                        <Loader2 size={isMobile ? 11 : 13} className="animate-spin text-primary" />
+                        <span className={`text-muted-foreground ${isMobile ? "text-[11px]" : "text-sm"}`}>
                           Analiz raporu hazırlıyor...
                         </span>
                       </BubbleContent>

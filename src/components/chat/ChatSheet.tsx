@@ -61,10 +61,10 @@ export function ChatSheet({ isOpen, onClose, context, placeholder, user, session
       >
         {/* Drag Handle */}
         <div 
-          className="flex justify-center py-3.5 cursor-pointer flex-shrink-0 border-b border-border/10 bg-card rounded-t-[28px]" 
+          className="flex justify-center py-2.5 cursor-pointer flex-shrink-0 border-b border-border/10 bg-card rounded-t-[20px]" 
           onClick={onClose}
         >
-          <div className="w-12 h-1.5 rounded-full bg-muted-foreground/30 hover:bg-muted-foreground/50 transition-colors" />
+          <div className="w-10 h-1 rounded-full bg-muted-foreground/25 hover:bg-muted-foreground/40 transition-colors" />
         </div>
 
         {/* ChatPanel - Takes remaining space */}

@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet } from '@tanstack/react-router'
+import { createFileRoute, Link, Outlet, useLocation } from '@tanstack/react-router'
 import { ArrowUp, ArrowDown, Activity, Info, Star, ChevronDown, ChevronUp, Clock, BarChart3, FileText, Factory } from 'lucide-react'
 import companyNames from '../constants/companyNames.json'
 import companyLogos from '../constants/companyLogos.json'
@@ -25,7 +25,11 @@ function CompanyLayout() {
   const displayName = (companyNames as Record<string, string>)[tickerUpper] || tickerUpper
   const logoFile = companyLogos[tickerUpper as keyof typeof companyLogos]
 
-  const { data: quote, isLoading: loading } = useCompanyQuote(tickerUpper)
+  const location = useLocation()
+  const subpage = location.pathname.replace(`/hisse/${ticker.toLowerCase()}`, '').replace('/', '') || 'genel-bakis'
+  const chatContext = `sirket:${tickerUpper}:${subpage}`
+
+  const { data: quote, isLoading: loading, isError } = useCompanyQuote(tickerUpper)
 
   const { watchlists, addItem, removeItem } = useWatchlistStore()
   const defaultWatchlist = watchlists.find(w => w.isDefault) || watchlists[0]
@@ -40,10 +44,20 @@ function CompanyLayout() {
     }
   }
 
-  const chatContext = `sirket:${tickerUpper}`
   const basePath = `/hisse/${ticker.toLowerCase()}`
 
   const stats = quote ? { name: displayName, code: tickerUpper, price: quote.last_price || 0, diffPercent: quote.diff_percent || 0, high: 0, low: 0, open: 0, close: 0, volume: '-' } : null
+
+  if (isError) {
+    return (
+      <PublicPageLayout context={chatContext} placeholder={`${tickerUpper} hakkında bir soru sorun...`}>
+        <div className="flex flex-col items-center justify-center min-h-[360px] text-center space-y-4">
+          <div className="text-4xl font-bold text-muted-foreground/20">{tickerUpper}</div>
+          <p className="text-sm text-muted-foreground">Bu hisse senedi için veri bulunamadı. Hisse kodu hatalı olabilir veya henüz işlem görmüyor olabilir.</p>
+        </div>
+      </PublicPageLayout>
+    )
+  }
 
   if (loading || !stats) {
     return (

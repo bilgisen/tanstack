@@ -131,7 +131,9 @@ export function extractMetricsFromText(text: string): ExtractedMetrics | null {
 export function MarkdownRenderer({ text, isAssistant, context = "global", suggestions, widget }: MarkdownRendererProps) {
   const { sendMessage, isLoading } = useChatStore();
   const { openRightSidebar } = useUIStore();
-  
+
+  const ticker = context.startsWith("sirket:") ? context.split(":")[1] : null;
+
   // Extract questions and clean text
   const { cleanText, questions } = useMemo(() => {
     if (!isAssistant) return { cleanText: text, questions: [] };
@@ -163,6 +165,21 @@ export function MarkdownRenderer({ text, isAssistant, context = "global", sugges
     await sendMessage(q, context);
   };
 
+  const handleMetricClick = async (label: string, value: string) => {
+    if (isLoading) return;
+    const q = ticker
+      ? `${ticker} için ${label}: ${value} — bu ne anlama geliyor, nasıl yorumlanmalı?`
+      : `${label}: ${value} — bu ne anlama geliyor?`;
+    openRightSidebar();
+    await sendMessage(q, context);
+  };
+
+  const handleWidgetAction = async (label: string, payload?: string) => {
+    if (isLoading) return;
+    openRightSidebar();
+    await sendMessage(label, payload ? `sirket:${payload}:genel-bakis` : context);
+  };
+
   if (!isAssistant) {
     return <div className="whitespace-pre-wrap text-base sm:text-[15px] leading-relaxed text-foreground">{text}</div>;
   }
@@ -180,6 +197,7 @@ export function MarkdownRenderer({ text, isAssistant, context = "global", sugges
         <CollapsibleSection title="Teknik Göstergeler" icon={<BarChart3 size={12} />} defaultOpen={true}>
           <MetricCardGrid 
             columns={4}
+            onCardClick={handleMetricClick}
             items={[
               ...(metrics.trend ? [{ label: 'Trend', value: metrics.trend.split(" ")[0], color: metrics.trend.includes("Yükseliş") ? 'up' as const : metrics.trend.includes("Düşüş") ? 'down' as const : 'neutral' as const }] : []),
               ...(metrics.rsi ? [{ label: 'RSI (14)', value: metrics.rsi, color: (parseFloat(metrics.rsi) > 70 ? 'down' as const : parseFloat(metrics.rsi) < 30 ? 'up' as const : 'neutral' as const) }] : []),
@@ -193,7 +211,7 @@ export function MarkdownRenderer({ text, isAssistant, context = "global", sugges
 
       {/* 2.5 Dinamik İnteraktif Widget */}
       {isAssistant && widget && (
-        <InteractiveWidget widget={widget} />
+        <InteractiveWidget widget={widget} onWidgetAction={handleWidgetAction} />
       )}
 
       {/* 3. Konuyu Derinleştirecek Öneri Chipleri */}

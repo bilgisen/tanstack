@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useCompScore, useCompProfile, useCompRatios, useCompTrends } from '../lib/useCompData'
-import { FaReport } from '../components/company/FaReport'
+import { useCompFundamentals } from '../lib/useCompData'
+import { AiReport } from '../components/company/AiReport'
 import { ScoreGauge } from '../constants/companyShared'
-import { getRatioLabel } from '../constants/ratios'
+import { getRatioDef } from '../constants/ratios'
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, LineChart, Line, CartesianGrid, Legend } from 'recharts'
 import { SafeTooltip } from '../components/ui/typed-tooltip'
 import { TrendingUp, Shield, Building2, BarChart3, Sparkles } from 'lucide-react'
@@ -36,24 +36,19 @@ const TREND_COLORS = ['var(--primary)', '#22c55e', '#f59e0b', '#f43f5e', '#06b6d
 function FundamentalAnalysisPage() {
   const { ticker } = Route.useParams()
   const tickerUpper = ticker.toUpperCase()
+  const { data, isLoading } = useCompFundamentals(tickerUpper, 'abone')
 
-  const { data: scoreData, isLoading: scoreLoading } = useCompScore(tickerUpper)
-  const { data: profileData, isLoading: profileLoading } = useCompProfile(tickerUpper)
-  const { data: ratiosData, isLoading: ratiosLoading } = useCompRatios(tickerUpper)
-  const { data: trendsData } = useCompTrends(tickerUpper)
-  const loading = scoreLoading || profileLoading || ratiosLoading
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="space-y-5">
-        <div className="h-48 w-full bg-muted/20 animate-pulse" />
-        <div className="h-32 w-full bg-muted/20 animate-pulse" />
-        <div className="h-64 w-full bg-muted/20 animate-pulse" />
+        <div className="h-48 w-full bg-muted/20 animate-pulse rounded-2xl" />
+        <div className="h-32 w-full bg-muted/20 animate-pulse rounded-2xl" />
+        <div className="h-64 w-full bg-muted/20 animate-pulse rounded-2xl" />
       </div>
     )
   }
 
-  if (!scoreData && !profileData && !ratiosData) {
+  if (!data) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <Shield size={40} className="text-muted-foreground/30 mb-4" />
@@ -68,24 +63,28 @@ function FundamentalAnalysisPage() {
   const pillarLabels: Record<string, string> = {
     finansal_saglik: 'Finansal Sağlık', karlilik_buyume: 'Karlılık & Büyüme', degerleme: 'Değerleme',
   }
-  const pillarKeys = scoreData?.pillars ? Object.entries(scoreData.pillars) : []
+  const pillarKeys = data.pillars ? Object.entries(data.pillars) : []
   const pillarChartData = pillarKeys.map(([key, p]) => ({
     name: pillarLabels[key] || key, score: Math.round(p.score),
   }))
 
-  const ratiosList = ratiosData?.ratios || []
-  const ratioChartData = ratiosList.map((r) => ({
-    name: getRatioLabel(r.code), value: r.value,
-    sectorValue: r.sector_context?.median,
-  }))
+  const ratioEntries = Object.entries(data.ratios || {})
+  const ratioChartData = ratioEntries.map(([code, r]) => {
+    const def = getRatioDef(code)
+    return {
+      name: def?.label || r.name || code,
+      value: r.value ?? 0,
+      sectorValue: r.sector_context?.median,
+    }
+  })
 
-  const trendData = trendsData?.trends ? Object.entries(trendsData.trends).slice(0, 4) : []
+  const trendData = data.trends?.trends ? Object.entries(data.trends.trends).slice(0, 4) : []
   const trendPeriods: string[] = []
   const trendSeries: { name: string; data: Record<string, number | null>; color: string }[] = []
   trendData.forEach(([code, t], idx: number) => {
-    if (!Array.isArray(t)) return
+    if (!t.values) return
     const series: Record<string, number | null> = {}
-    t.forEach((v) => {
+    t.values.forEach((v: { period: string; value: number }) => {
       if (!trendPeriods.includes(v.period)) trendPeriods.push(v.period)
       series[v.period] = v.value
     })
@@ -102,38 +101,38 @@ function FundamentalAnalysisPage() {
     <div className="space-y-6">
 
       {/* ═══ SCORE + PILLARS ═══ */}
-      {scoreData && (
+      {data.composite_score != null && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-border/20">
               <Shield size={14} className="text-primary" />
               <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Temel Analiz Puanı</h3>
-              {scoreData.reliability && <span className="text-[10px] text-muted-foreground ml-auto">{scoreData.reliability}</span>}
+              {data.reliability && <span className="text-[10px] text-muted-foreground ml-auto">{data.reliability}</span>}
             </div>
 
             <div className="flex items-center gap-5">
-              <ScoreGauge score={Math.round(scoreData.composite_score)} size={80} />
+              <ScoreGauge score={Math.round(data.composite_score)} size={80} />
               <div className="space-y-1">
-                <div className="text-base font-bold text-foreground">{scoreData.company_name || tickerUpper}</div>
-                {scoreData.sector && <div className="text-xs text-muted-foreground">{scoreData.sector}</div>}
-                {scoreData.absolute && (
+                <div className="text-base font-bold text-foreground">{data.company_name || tickerUpper}</div>
+                {data.sector && <div className="text-xs text-muted-foreground">{data.sector}</div>}
+                {data.absolute && (
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-sm font-mono font-semibold text-foreground">{fmt(scoreData.absolute.score)}</span>
-                    <AbsoluteBadge label={scoreData.absolute.label} />
+                    <span className="text-sm font-mono font-semibold text-foreground">{fmt(data.absolute.score)}</span>
+                    <AbsoluteBadge label={data.absolute.label} />
                   </div>
                 )}
                 <div className="flex items-center gap-4 pt-1">
-                  {scoreData.ranks?.sector && (
+                  {data.ranks?.sector && (
                     <div className="text-xs text-muted-foreground">
                       <span className="text-[10px] font-medium uppercase tracking-wider">Sektör </span>
-                      <span className="text-sm font-bold text-foreground">%{fmt(scoreData.ranks.sector.percentile, 0)}</span>
-                      <span className="text-[10px] ml-1">({scoreData.ranks.sector.n_peers} şirket)</span>
+                      <span className="text-sm font-bold text-foreground">%{fmt(data.ranks.sector.percentile, 0)}</span>
+                      <span className="text-[10px] ml-1">({data.ranks.sector.n_peers} şirket)</span>
                     </div>
                   )}
-                  {scoreData.ranks?.group && (
+                  {data.ranks?.group && (
                     <div className="text-xs text-muted-foreground">
                       <span className="text-[10px] font-medium uppercase tracking-wider">Grup </span>
-                      <span className="text-sm font-bold text-foreground">%{fmt(scoreData.ranks.group.percentile, 0)}</span>
+                      <span className="text-sm font-bold text-foreground">%{fmt(data.ranks.group.percentile, 0)}</span>
                     </div>
                   )}
                 </div>
@@ -171,24 +170,24 @@ function FundamentalAnalysisPage() {
 
       {/* ═══ PROFILE + RATIOS ═══ */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {profileData && (
+        {data.profile && (
           <div className="space-y-3">
             <div className="flex items-center gap-2 pb-2 border-b border-border/20">
               <Building2 size={14} className="text-primary" />
               <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Şirket Profili</h3>
             </div>
             <div className="grid grid-cols-2 gap-3 text-sm">
-              {profileData.sector_main && (
-                <div><div className="text-[10px] text-muted-foreground uppercase tracking-wider">Sektör</div><div className="font-semibold text-foreground mt-0.5">{profileData.sector_main}</div></div>
+              {data.profile.sector_main && (
+                <div><div className="text-[10px] text-muted-foreground uppercase tracking-wider">Sektör</div><div className="font-semibold text-foreground mt-0.5">{data.profile.sector_main}</div></div>
               )}
-              {profileData.industry && (
-                <div><div className="text-[10px] text-muted-foreground uppercase tracking-wider">Endüstri</div><div className="font-semibold text-foreground mt-0.5">{profileData.industry}</div></div>
+              {data.profile.industry && (
+                <div><div className="text-[10px] text-muted-foreground uppercase tracking-wider">Endüstri</div><div className="font-semibold text-foreground mt-0.5">{data.profile.industry}</div></div>
               )}
-              {profileData.financial_group_label && (
-                <div><div className="text-[10px] text-muted-foreground uppercase tracking-wider">Finansal Grup</div><div className="font-semibold text-foreground mt-0.5">{profileData.financial_group_label}</div></div>
+              {data.profile.financial_group_label && (
+                <div><div className="text-[10px] text-muted-foreground uppercase tracking-wider">Finansal Grup</div><div className="font-semibold text-foreground mt-0.5">{data.profile.financial_group_label}</div></div>
               )}
-              {profileData.market_data?.market_cap && (
-                <div><div className="text-[10px] text-muted-foreground uppercase tracking-wider">Piyasa Değeri</div><div className="font-semibold text-foreground mt-0.5">₺{fmt(profileData.market_data.market_cap, 0)}</div></div>
+              {data.profile.market_cap != null && (
+                <div><div className="text-[10px] text-muted-foreground uppercase tracking-wider">Piyasa Değeri</div><div className="font-semibold text-foreground mt-0.5">₺{fmt(data.profile.market_cap, 0)}</div></div>
               )}
             </div>
           </div>
@@ -248,13 +247,41 @@ function FundamentalAnalysisPage() {
         </div>
       )}
 
+      {/* ═══ KEY INSIGHTS (Öne Çıkanlar) ═══ */}
+      {data.key_insights.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 pb-2 border-b border-border/20">
+            <Sparkles size={14} className="text-amber-500" />
+            <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Öne Çıkanlar</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {data.key_insights.map((insight, i) => {
+              const catColor: Record<string, string> = {
+                strength: 'border-l-emerald-500 bg-emerald-500/5',
+                weakness: 'border-l-red-500 bg-red-500/5',
+                positive_trend: 'border-l-blue-500 bg-blue-500/5',
+                negative_trend: 'border-l-orange-500 bg-orange-500/5',
+                data_quality: 'border-l-gray-500 bg-gray-500/5',
+              }
+              const barColor = catColor[insight.category] || 'border-l-muted bg-muted/5'
+              return (
+                <div key={i} className={`border-l-2 pl-3 py-1.5 ${barColor}`}>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{insight.category === 'strength' ? 'Güçlü Yön' : insight.category === 'weakness' ? 'Zayıf Yön' : insight.category === 'positive_trend' ? 'Olumlu Trend' : insight.category === 'negative_trend' ? 'Olumsuz Trend' : 'Veri'}</span>
+                  <p className="text-xs text-foreground mt-0.5">{insight.insight}</p>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       {/* ═══ AI FA REPORT ═══ */}
       <div className="space-y-4 pt-2">
         <div className="flex items-center gap-2 pb-2 border-b border-border/20">
           <Sparkles size={14} className="text-violet-500" />
-          <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">AI Temel Analiz</h3>
+          <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">AI Temel Analiz Raporu</h3>
         </div>
-        <FaReport ticker={ticker} />
+        <AiReport ticker={ticker} />
       </div>
     </div>
   )

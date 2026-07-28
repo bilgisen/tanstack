@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { ArrowUp } from "lucide-react";
 import { useChatStore } from "../../store/chat";
 import { CompanySearch } from "../chat/CompanySearch";
@@ -24,17 +24,16 @@ export function ChatPane({
   const [showSearch, setShowSearch] = useState(false);
   const { isLoading, sendMessage, setUserTier } = useChatStore();
 
-  // Fallback auth when user prop isn't passed (e.g. PublicPageLayout)
   const { user: authUser } = useAuth();
   const effectiveUser = user || authUser;
 
-  // Sync user tier to chat store on mount/change
   useEffect(() => {
     setUserTier(effectiveUser?.tier || 'free');
   }, [effectiveUser?.tier, setUserTier]);
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleLogin = async () => {
+  const handleLogin = useCallback(async () => {
     try {
       await authClient.signIn.social({
         provider: "google",
@@ -43,26 +42,24 @@ export function ChatPane({
     } catch (err) {
       console.error("Login failed:", err);
     }
-  };
+  }, []);
 
-  const handleSend = async () => {
-    const textToSend = input.trim();
-    if (!textToSend || isLoading) return;
-
+  const sendText = useCallback(async (text: string) => {
+    if (!text || isLoading) return;
     if (!effectiveUser && !sessionLoading) {
       handleLogin();
       return;
     }
     if (!effectiveUser) return;
-
     setInput("");
     setShowSearch(false);
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
     }
+    await sendMessage(text, context);
+  }, [isLoading, effectiveUser, sessionLoading, handleLogin, sendMessage, context]);
 
-    await sendMessage(textToSend, context);
-  };
+  const handleSend = () => sendText(input.trim());
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -77,9 +74,8 @@ export function ChatPane({
     setInput(val);
     textarea.style.height = "auto";
     textarea.style.height = `${Math.min(textarea.scrollHeight, 140)}px`;
-    // Show company search when typing potential company name (last word length >= 2)
     const lastWord = val.trim().split(/\s+/).pop() || "";
-    setShowSearch(lastWord.length >= 2);
+    setShowSearch(lastWord.length >= 2 && !val.endsWith("?"));
   };
 
   const handleFocus = () => {
@@ -98,14 +94,19 @@ export function ChatPane({
     textareaRef.current?.focus();
   };
 
+  const handleAskAI = (ticker: string) => {
+    setShowSearch(false);
+    sendText(`${ticker} hakkında güncel analiz ve özet ver.`);
+  };
+
   return (
     <div className={`relative flex flex-col w-full select-none ${className}`}>
-      {/* Company Search Dropdown */}
       {showSearch && (
         <CompanySearch
           query={input.trim().split(/\s+/).pop() || ""}
           onSelect={handleSelectTicker}
-
+          onAskAI={handleAskAI}
+          onClose={() => setShowSearch(false)}
         />
       )}
 

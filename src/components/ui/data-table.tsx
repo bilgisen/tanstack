@@ -62,7 +62,7 @@ export function DataTable<T extends Record<string, any>>({
 
   return (
     <div className={cn("w-full overflow-auto", className)}>
-      <table className="w-full caption-bottom text-sm">
+      <table className="w-full caption-bottom">
         {!hideHeader && (
           <thead>
             <tr className="border-b border-border/40">

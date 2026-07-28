@@ -39,6 +39,7 @@ export interface InteractiveWidgetProps {
       label?: string;
     };
   } | null;
+  onWidgetAction?: (label: string, payload?: string) => void;
 }
 
 // Helper to format price values to use "₺" prefix instead of "TL" suffix
@@ -51,7 +52,7 @@ const formatPrice = (priceStr?: string) => {
   return clean;
 };
 
-export function InteractiveWidget({ widget }: InteractiveWidgetProps) {
+export function InteractiveWidget({ widget, onWidgetAction }: InteractiveWidgetProps) {
   if (!widget) return null;
 
   const { type, title, data } = widget;
@@ -71,13 +72,14 @@ export function InteractiveWidget({ widget }: InteractiveWidgetProps) {
       {/* Widget Body */}
       <div className="p-5">
         {type === 'comparison' && data.companies && (
-          <ComparisonWidget companies={data.companies} />
+          <ComparisonWidget companies={data.companies} onWidgetAction={onWidgetAction} />
         )}
         {type === 'ratio_chart' && data.ratios && (
           <RatioChartWidget 
             companyName={data.company || "Şirket"} 
             sectorName={data.sector || "Sektör"} 
             ratios={data.ratios} 
+            onWidgetAction={onWidgetAction}
           />
         )}
         {type === 'calculator' && (
@@ -97,7 +99,7 @@ export function InteractiveWidget({ widget }: InteractiveWidgetProps) {
 /* ============================================================================
    1. COMPARISON WIDGET
    ============================================================================ */
-function ComparisonWidget({ companies }: { companies: ComparisonCompany[] }) {
+function ComparisonWidget({ companies, onWidgetAction }: { companies: ComparisonCompany[]; onWidgetAction?: (label: string, payload?: string) => void }) {
   // Parse numeric values helper for highlighting better metrics
   const parseNum = (str?: string) => {
     if (!str) return NaN;
@@ -165,7 +167,12 @@ function ComparisonWidget({ companies }: { companies: ComparisonCompany[] }) {
             <th className="p-3">Hisse</th>
             {companies.map((c, idx) => (
               <th key={idx} className="p-3 text-center border-l border-border/10 font-bold text-foreground text-sm">
-                {c.name}
+                <button
+                  onClick={() => onWidgetAction?.(`${c.name} detaylı analiz`, c.name)}
+                  className="hover:text-primary transition-colors cursor-pointer"
+                >
+                  {c.name}
+                </button>
               </th>
             ))}
           </tr>
@@ -176,7 +183,12 @@ function ComparisonWidget({ companies }: { companies: ComparisonCompany[] }) {
             <td className="p-3 font-medium text-muted-foreground">Son Fiyat</td>
             {companies.map((c, idx) => (
               <td key={idx} className="p-3 text-center border-l border-border/10 font-medium text-foreground">
-                {formatPrice(c.price)}
+                <button
+                  onClick={() => onWidgetAction?.(`${c.name} fiyat değerlendirmesi`, c.name)}
+                  className="hover:text-primary transition-colors cursor-pointer"
+                >
+                  {formatPrice(c.price)}
+                </button>
               </td>
             ))}
           </tr>
@@ -195,7 +207,12 @@ function ComparisonWidget({ companies }: { companies: ComparisonCompany[] }) {
                 <td key={idx} className={`p-3 text-center border-l border-border/10 ${
                   isBest ? "text-emerald-500 font-semibold" : "text-foreground font-normal"
                 }`}>
-                  {c.fk || "—"}
+                  <button
+                    onClick={() => onWidgetAction?.(`${c.name} F/K oranı analizi`, c.name)}
+                    className={`${isBest ? "text-emerald-500" : "text-foreground"} hover:text-primary transition-colors cursor-pointer`}
+                  >
+                    {c.fk || "—"}
+                  </button>
                   {isBest && <span className="text-[10px] block text-emerald-500/80 font-medium">(Ucuz)</span>}
                 </td>
               );
@@ -216,7 +233,12 @@ function ComparisonWidget({ companies }: { companies: ComparisonCompany[] }) {
                 <td key={idx} className={`p-3 text-center border-l border-border/10 ${
                   isBest ? "text-emerald-500 font-semibold" : "text-foreground font-normal"
                 }`}>
-                  {c.pddd || "—"}
+                  <button
+                    onClick={() => onWidgetAction?.(`${c.name} PD/DD oranı değerlendirmesi`, c.name)}
+                    className={`${isBest ? "text-emerald-500" : "text-foreground"} hover:text-primary transition-colors cursor-pointer`}
+                  >
+                    {c.pddd || "—"}
+                  </button>
                   {isBest && <span className="text-[10px] block text-emerald-500/80 font-medium">(İdeal)</span>}
                 </td>
               );
@@ -237,7 +259,12 @@ function ComparisonWidget({ companies }: { companies: ComparisonCompany[] }) {
                 <td key={idx} className={`p-3 text-center border-l border-border/10 ${
                   isBest ? "text-emerald-500 font-semibold" : "text-foreground font-normal"
                 }`}>
-                  {c.roe || "—"}
+                  <button
+                    onClick={() => onWidgetAction?.(`${c.name} ROE kârlılık analizi`, c.name)}
+                    className={`${isBest ? "text-emerald-500" : "text-foreground"} hover:text-primary transition-colors cursor-pointer`}
+                  >
+                    {c.roe || "—"}
+                  </button>
                   {isBest && <span className="text-[10px] block text-emerald-500/80 font-medium">(Yüksek Kâr)</span>}
                 </td>
               );
@@ -262,7 +289,12 @@ function ComparisonWidget({ companies }: { companies: ComparisonCompany[] }) {
                 <td key={idx} className={`p-3 text-center border-l border-border/10 ${scoreColor} ${
                   isBest ? "font-semibold" : "font-normal"
                 }`}>
-                  {c.health ? `${c.health} / 100` : "—"}
+                  <button
+                    onClick={() => onWidgetAction?.(`${c.name} mali sağlık skoru değerlendirmesi`, c.name)}
+                    className={`${scoreColor} hover:text-primary transition-colors cursor-pointer`}
+                  >
+                    {c.health ? `${c.health} / 100` : "—"}
+                  </button>
                   {isBest && <span className="text-[10px] block text-emerald-500/80 font-medium">(En Güçlü)</span>}
                 </td>
               );
@@ -277,7 +309,7 @@ function ComparisonWidget({ companies }: { companies: ComparisonCompany[] }) {
 /* ============================================================================
    2. RATIO CHART WIDGET
    ============================================================================ */
-function RatioChartWidget({ companyName, sectorName, ratios }: { companyName: string; sectorName: string; ratios: RatioData[] }) {
+function RatioChartWidget({ companyName, sectorName, ratios, onWidgetAction }: { companyName: string; sectorName: string; ratios: RatioData[]; onWidgetAction?: (label: string, payload?: string) => void }) {
   return (
     <div className="space-y-4">
       {/* Legend */}
@@ -308,7 +340,12 @@ function RatioChartWidget({ companyName, sectorName, ratios }: { companyName: st
           return (
             <div key={idx} className="space-y-2">
               <div className="flex justify-between items-center text-sm">
-                <span className="font-medium text-foreground">{r.name}</span>
+                <button
+                  onClick={() => onWidgetAction?.(`${r.name} oranı yorumu: ${companyName} vs ${sectorName}`, companyName)}
+                  className="font-medium text-foreground hover:text-primary transition-colors cursor-pointer text-left"
+                >
+                  {r.name}
+                </button>
                 <span className={`text-xs px-2 py-0.5 rounded-md ${
                   isBetter ? "bg-emerald-500/10 text-emerald-400" : "bg-muted text-muted-foreground"
                 }`}>

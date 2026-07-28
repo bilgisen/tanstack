@@ -1,16 +1,10 @@
-import { useCompAnalysis, useCompSwot, useCompFundamentalReport, type AnalysisScore } from '../../lib/useCompData'
+import { useCompAnalysis, useCompFundamentalReport, type AnalysisScore } from '../../lib/useCompData'
 import { ScoreGauge } from '../../constants/companyShared'
 import { getRatioLabel } from '../../constants/ratios'
-import { TrendingUp, Shield, Target, Lightbulb, AlertTriangle, Sparkles, FileText } from 'lucide-react'
+import { Shield, Target, Sparkles, FileText } from 'lucide-react'
 
 interface FaReportProps {
   ticker: string
-}
-
-type SwotEntry = { item: string } | string
-
-function swotText(entry: SwotEntry): string {
-  return typeof entry === 'string' ? entry : entry.item
 }
 
 function fmt(val: number | null | undefined, decimals = 2): string {
@@ -20,10 +14,9 @@ function fmt(val: number | null | undefined, decimals = 2): string {
 
 export function FaReport({ ticker }: FaReportProps) {
   const { data: analysis, isLoading: analysisLoading } = useCompAnalysis(ticker)
-  const { data: swot, isLoading: swotLoading } = useCompSwot(ticker)
   const { data: report, isLoading: reportLoading } = useCompFundamentalReport(ticker)
 
-  const loading = analysisLoading || swotLoading || reportLoading
+  const loading = analysisLoading || reportLoading
 
   if (loading) {
     return (
@@ -35,7 +28,7 @@ export function FaReport({ ticker }: FaReportProps) {
     )
   }
 
-  if (!analysis && !report && !swot) {
+  if (!analysis && !report) {
     return (
       <div className="text-center py-12 text-sm text-muted-foreground">
         Temel analiz verisi bulunamadı.
@@ -113,82 +106,35 @@ export function FaReport({ ticker }: FaReportProps) {
         </div>
       )}
 
-      {/* SWOT Analysis */}
-      {swot && (
-        <div className="space-y-4">
+      {/* Öne Çıkanlar */}
+      {analysis?.key_insights && analysis.key_insights.length > 0 && (
+        <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <Lightbulb size={14} className="text-amber-500" />
-            <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">SWOT Analizi</h3>
+            <Sparkles size={14} className="text-amber-500" />
+            <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Öne Çıkanlar</h3>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {swot.strengths && swot.strengths.length > 0 && (
-              <div className="bg-emerald-500/5 border border-emerald-500/15 rounded-xl p-3">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <TrendingUp size={12} className="text-emerald-500" />
-                  <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Güçlü Yönler</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {analysis.key_insights.map((insight, i) => {
+              const catColor: Record<string, string> = {
+                strength: 'border-l-emerald-500 bg-emerald-500/5',
+                weakness: 'border-l-red-500 bg-red-500/5',
+                positive_trend: 'border-l-blue-500 bg-blue-500/5',
+                negative_trend: 'border-l-orange-500 bg-orange-500/5',
+                data_quality: 'border-l-gray-500 bg-gray-500/5',
+              }
+              const barColor = catColor[insight.category] || 'border-l-muted bg-muted/5'
+              return (
+                <div key={i} className={`border-l-2 pl-3 py-1.5 ${barColor}`}>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+                    {insight.category === 'strength' ? 'Güçlü Yön' :
+                     insight.category === 'weakness' ? 'Zayıf Yön' :
+                     insight.category === 'positive_trend' ? 'Olumlu Trend' :
+                     insight.category === 'negative_trend' ? 'Olumsuz Trend' : 'Veri'}
+                  </span>
+                  <p className="text-xs text-foreground mt-0.5">{insight.insight}</p>
                 </div>
-                <ul className="space-y-1">
-                  {swot.strengths.map((s, i) => (
-                    <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
-                      <span className="text-emerald-500 mt-0.5">•</span>
-                      {swotText(s)}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {swot.weaknesses && swot.weaknesses.length > 0 && (
-              <div className="bg-red-500/5 border border-red-500/15 rounded-xl p-3">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <AlertTriangle size={12} className="text-red-500" />
-                  <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider">Zayıf Yönler</span>
-                </div>
-                <ul className="space-y-1">
-                  {swot.weaknesses.map((w, i) => (
-                    <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
-                      <span className="text-red-500 mt-0.5">•</span>
-                      {swotText(w)}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {swot.opportunities && swot.opportunities.length > 0 && (
-              <div className="bg-blue-500/5 border border-blue-500/15 rounded-xl p-3">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <Sparkles size={12} className="text-blue-500" />
-                  <span className="text-[10px] font-bold text-blue-500 uppercase tracking-wider">Fırsatlar</span>
-                </div>
-                <ul className="space-y-1">
-                  {swot.opportunities.map((o, i) => (
-                    <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
-                      <span className="text-blue-500 mt-0.5">•</span>
-                      {swotText(o)}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {swot.threats && swot.threats.length > 0 && (
-              <div className="bg-orange-500/5 border border-orange-500/15 rounded-xl p-3">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <AlertTriangle size={12} className="text-orange-500" />
-                  <span className="text-[10px] font-bold text-orange-500 uppercase tracking-wider">Tehditler</span>
-                </div>
-                <ul className="space-y-1">
-                  {swot.threats.map((t, i) => (
-                    <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
-                      <span className="text-orange-500 mt-0.5">•</span>
-                      {swotText(t)}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+              )
+            })}
           </div>
         </div>
       )}

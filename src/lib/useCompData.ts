@@ -15,6 +15,9 @@ export interface AnalysisScore {
 export interface AnalysisResponse {
   score?: AnalysisScore
   key_metrics?: Record<string, { name: string; value: number }>
+  key_insights?: Array<{ insight: string; category: string; importance: number; data?: Record<string, unknown> }>
+  executive_summary?: string
+  sector_position?: { sector_rank: number; n_peers: number }
 }
 
 export interface CompScorePillar {
@@ -370,6 +373,9 @@ export type SectorGroupDetail = {
     name: string
     sector_main?: string
     composite_score: number
+    pillar_finansal_saglik: number | null
+    pillar_karlilik_buyume: number | null
+    pillar_degerleme: number | null
     reliability: string
     market_cap: number | null
     rank: number
@@ -379,4 +385,114 @@ export type SectorGroupDetail = {
 export type SectorGroupsResponse = {
   sectors: Array<{ sector_main: string; cnt: number; consolidated: string | null; consolidated_name: string | null }>
   groups: Array<{ key: string; name: string; count: number }>
+}
+
+export interface RelationalSignal {
+  pattern_id: string
+  category: 'confirming' | 'conflicting' | 'warning' | 'opportunity'
+  polarity: 'confirming' | 'conflicting'
+  ratios_involved: string[]
+  narrative_hint: string
+  severity: number
+  ratio_details: Record<string, { value: number | null; percentile: number | null; sector_median: number | null } | null>
+}
+
+export interface CompFundamentalsResponse {
+  ticker: string
+  company_name: string
+  sector: string | null
+  composite_score: number | null
+  reliability: string | null
+  pillars: Record<string, CompScorePillar> | null
+  absolute: { score: number; label: string } | null
+  ranks: {
+    sector?: { percentile: number; n_peers: number }
+    group?: { percentile: number; n_peers: number }
+  } | null
+  financial_health: { composite_score: number; absolute_score: number | null; absolute_label: string | null } | null
+  sector_position: { benchmark_source: string; benchmark_name: string; n_peers: number; sector_rank: number; sector_percentile: number } | null
+  profile: {
+    sector_main: string | null
+    industry: string | null
+    financial_group_label: string | null
+    market_cap: number | null
+  } | null
+  ratios: Record<string, {
+    value: number | null
+    name: string
+    category: string
+    higher_is_better: boolean
+    sector_context?: { median: number; p25: number; p75: number; percentile: number; position: string }
+    absolute_score?: number
+    interpretation?: string
+    locked?: boolean
+  }>
+  trends: {
+    periods: string[]
+    n_periods: number
+    trends: Record<string, {
+      values: Array<{ period: string; value: number }>
+      direction: string
+      momentum: string
+      qoq_change: number | null
+      yoy_change: number | null
+      cagr: number | null
+      volatility: number | null
+      n_periods: number
+      missing_periods: number
+    }>
+    sector_comparison: Record<string, { sector_median: number }> | null
+  } | null
+  key_insights: Array<{ insight: string; category: string; importance: number; data?: Record<string, unknown> }>
+  relational_signals: RelationalSignal[]
+  risk_assessment: {
+    composite_risk_score: number
+    risk_level: string
+    indicators: Record<string, { score: number; level: string; factors: Array<{ factor: string; value: number; threshold: number; status: string }> }>
+    risk_trends: Record<string, string> | null
+    mitigation_factors: string[] | null
+  } | null
+  metadata: {
+    period: string | null
+    data_completeness: number | null
+    missing_ratios: string[]
+    available_sections?: string[]
+  }
+}
+
+export interface FaNarrativeSection {
+  id: string
+  title: string
+  content: string
+  signals_used: string[]
+  visual_hint: string
+  ratios_referenced: string[]
+}
+
+export interface FaNarrativeReport {
+  ticker: string
+  report_type: string
+  generated_at: string
+  sections: FaNarrativeSection[]
+  has_ai_enhancement: boolean
+}
+
+export function useCompFaReport(ticker: string) {
+  return useQuery<FaNarrativeReport | null>({
+    queryKey: ['comp', 'fa-report', ticker],
+    queryFn: () => fetchComp<FaNarrativeReport>(`/ai/fa-report/${ticker}`),
+    staleTime: 3_600_000,
+    gcTime: 86_400_000,
+    enabled: !!ticker,
+  })
+}
+
+export function useCompFundamentals(ticker: string, scope: 'public' | 'member' | 'abone' = 'member') {
+  return useQuery<CompFundamentalsResponse | null>({
+    queryKey: ['comp', 'fundamentals', ticker, scope],
+    queryFn: () => fetchComp<CompFundamentalsResponse>(`/fundamentals/${ticker}?scope=${scope}`),
+    staleTime: 3_600_000,
+    gcTime: 86_400_000,
+    enabled: !!ticker,
+  })
 }

@@ -8,6 +8,7 @@ interface MetricItem {
 interface MetricCardGridProps {
   items: MetricItem[]
   columns?: 2 | 3 | 4
+  onCardClick?: (label: string, value: string) => void
 }
 
 const colorClasses: Record<string, string> = {
@@ -17,7 +18,7 @@ const colorClasses: Record<string, string> = {
   warning: 'text-amber-500',
 }
 
-export function MetricCardGrid({ items, columns = 3 }: MetricCardGridProps) {
+export function MetricCardGrid({ items, columns = 3, onCardClick }: MetricCardGridProps) {
   if (items.length === 0) return null
 
   return (
@@ -25,7 +26,11 @@ export function MetricCardGrid({ items, columns = 3 }: MetricCardGridProps) {
       style={{ gridTemplateColumns: `repeat(${Math.min(columns, items.length)}, minmax(0, 1fr))` }}
     >
       {items.map((item, i) => (
-        <div key={i} className="bg-muted/10 border border-border/15 rounded-xl px-3 py-2.5 text-center">
+        <button
+          key={i}
+          onClick={() => onCardClick?.(item.label, item.value)}
+          className="bg-muted/10 border border-border/15 rounded-xl px-3 py-2.5 text-center transition-all duration-200 hover:bg-primary/10 hover:border-primary/30 hover:shadow-sm active:scale-95 cursor-pointer"
+        >
           <div className={`text-lg font-bold font-mono ${colorClasses[item.color || 'neutral']}`}>
             {item.value}
           </div>
@@ -35,7 +40,7 @@ export function MetricCardGrid({ items, columns = 3 }: MetricCardGridProps) {
           {item.subtitle && (
             <div className="text-[9px] text-muted-foreground/60 mt-0.5">{item.subtitle}</div>
           )}
-        </div>
+        </button>
       ))}
     </div>
   )

@@ -1,4 +1,4 @@
-import { HeadContent, Scripts, createRootRoute, Outlet } from "@tanstack/react-router"
+import { HeadContent, Scripts, createRootRoute, Outlet, useNavigate } from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
 import { QueryClientProvider } from "@tanstack/react-query"
@@ -63,6 +63,7 @@ import { ToastContainer } from "../components/ui/ToastContainer"
 function RootDocument() {
   const theme = useUIStore((s) => s.theme)
   const hydrateFromStorage = useUIStore((s) => s.hydrateFromStorage)
+  const navigate = useNavigate()
 
   useEffect(() => {
     // Hydrate sidebar states from localStorage after mount
@@ -94,6 +95,18 @@ function RootDocument() {
       return () => media.removeEventListener('change', listener)
     }
   }, [theme, hydrateFromStorage])
+
+  // Global app-navigate handler for seamless cross-page navigation triggered by AI
+  useEffect(() => {
+    const handleNavigate = (e: Event) => {
+      const detail = (e as CustomEvent).detail
+      if (detail?.path) {
+        navigate({ to: detail.path } as any)
+      }
+    }
+    window.addEventListener('app-navigate', handleNavigate)
+    return () => window.removeEventListener('app-navigate', handleNavigate)
+  }, [navigate])
 
   return (
     <html lang="tr" suppressHydrationWarning>
