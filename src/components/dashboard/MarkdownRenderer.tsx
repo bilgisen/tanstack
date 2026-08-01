@@ -1,18 +1,34 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { marked } from "marked";
+import { BarChart3, ExternalLink } from "lucide-react";
 import { useChatStore } from "../../store/chat";
 import { useUIStore } from "../../store/ui";
-import { BarChart3 } from "lucide-react";
-import { InteractiveWidget, type InteractiveWidgetProps } from "./InteractiveWidget";
+import { isKnownTicker, loadMarketTickers } from "../../lib/marketTickers";
 import { CollapsibleSection } from "../chat/CollapsibleSection";
 import { MetricCardGrid } from "../chat/MetricCardGrid";
 import { SuggestionChips } from "../chat/SuggestionChips";
+import { InteractiveWidget  } from "./InteractiveWidget";
+import type {InteractiveWidgetProps} from "./InteractiveWidget";
+
+function extractMentionedTickers(text: string, contextSymbol: string | null): Array<string> {
+  const upper = text.toUpperCase();
+  const words = upper.split(/[^A-Z0-9ÇŞĞÜÖİ]/);
+  const found = new Set<string>();
+  for (const w of words) {
+    if (w.length >= 3 && w.length <= 5 && isKnownTicker(w)) {
+      found.add(w);
+    }
+  }
+  // Remove context symbol if present (already on that page)
+  if (contextSymbol) found.delete(contextSymbol);
+  return Array.from(found);
+}
 
 interface MarkdownRendererProps {
   text: string;
   isAssistant: boolean;
   context?: string;
-  suggestions?: string[];
+  suggestions?: Array<string>;
   widget?: InteractiveWidgetProps['widget'];
 }
 
@@ -25,10 +41,10 @@ export interface ExtractedMetrics {
 }
 
 // 1. Parser helpers
-export function extractSuggestedQuestions(text: string): { cleanText: string, questions: string[] } {
+export function extractSuggestedQuestions(text: string, context: string = "global"): { cleanText: string, questions: Array<string> } {
   const lines = text.split("\n");
-  const mainLines: string[] = [];
-  const questions: string[] = [];
+  const mainLines: Array<string> = [];
+  const questions: Array<string> = [];
   
   let inQuestionsSection = false;
   
@@ -63,11 +79,45 @@ export function extractSuggestedQuestions(text: string): { cleanText: string, qu
     };
   }
   
-  // Fallback: Generate smart questions based on ticker keywords detected in text
-  const keywords = text.toUpperCase();
-  const fallbackQuestions: string[] = [];
+  // Fallback: context-aware smart questions based on the current page context
+  const isSector = /^(industry|sector|sector-group|sektor):/i.test(context) || context === 'sektorler';
+  const isIndex = context.startsWith("endeks:");
+  const isCompany = context.startsWith("sirket:");
+  const contextTicker = context.startsWith("sirket:") ? context.split(":")[1]?.toUpperCase() : null;
   
-  if (keywords.includes("EREGL")) {
+  if (isSector) {
+    // Sector page — no technical analysis data here; keep questions sector-focused
+    return {
+      cleanText: text,
+      questions: [
+        "Sektördeki şirketleri PD/DD rasyosuna göre iskontolu/pahalı diye ayır?",
+        "Bu sektörde en yüksek ROE'ye sahip şirketler hangileri?",
+        "Sektörün genel değerleme görünümü medyan rasyolara göre nasıl?"
+      ]
+    };
+  }
+  
+  if (isIndex) {
+    return {
+      cleanText: text,
+      questions: [
+        "Bu endeksin bugün öne çıkan bileşen hisseleri hangileri?",
+        "Bu endeksi diğer endekslerle karşılaştır",
+        "Bu endeks için güncel destek ve direnç seviyeleri nerede?"
+      ]
+    };
+  }
+  
+  const keywords = text.toUpperCase();
+  const fallbackQuestions: Array<string> = [];
+  
+  if (contextTicker) {
+    fallbackQuestions.push(
+      `${contextTicker} için güncel destek ve direnç seviyeleri nelerdir?`,
+      `${contextTicker} temel rasyoları (F/K, PD/DD, ROE) sektörün neresinde?`,
+      `${contextTicker} sektöründeki konumunu rakipleriyle karşılaştır`
+    );
+  } else if (keywords.includes("EREGL")) {
     fallbackQuestions.push("EREGL için güncel destek ve direnç seviyeleri nelerdir?");
     fallbackQuestions.push("Ereğli Demir Çelik'in kârlılık ve bilanço beklentileri nasıl?");
     fallbackQuestions.push("EREGL için ATR bazlı teknik stop-loss seviyesi nedir?");
@@ -87,10 +137,14 @@ export function extractSuggestedQuestions(text: string): { cleanText: string, qu
     fallbackQuestions.push("BIST 100 endeksinde ralli sürer mi, direnç bölgesi neresi?");
     fallbackQuestions.push("Endeksin RSI aşırı alım bölgesinde mi, düzeltme yakın mı?");
     fallbackQuestions.push("Hangi sektörler endeksin üzerinde getiri sağlayabilir?");
+  } else if (isCompany) {
+    fallbackQuestions.push("Bu analizdeki temel göstergeleri daha detaylı açıklayabilir misin?");
+    fallbackQuestions.push("Bu hissenin sektördeki konumu ve rakipleriyle kıyası nasıl?");
+    fallbackQuestions.push("Bu hisse için destek, direnç ve stop-loss seviyeleri nerede konumlanıyor?");
   } else {
-    fallbackQuestions.push("Bu analizdeki teknik göstergeleri daha detaylı açıklayabilir misin?");
-    fallbackQuestions.push("Hisse senedinin orta vadeli hareketli ortalamaları (SMA) ne durumda?");
-    fallbackQuestions.push("Bu hisse için stop-loss ve risk seviyeleri nerede konumlanıyor?");
+    fallbackQuestions.push("Bugün en çok kazandıran hisseler hangileri?");
+    fallbackQuestions.push("BIST 100 teknik göstergeleri ne durumda?");
+    fallbackQuestions.push("Hangi sektörler bugün öne çıktı?");
   }
   
   return {
@@ -132,7 +186,21 @@ export function MarkdownRenderer({ text, isAssistant, context = "global", sugges
   const { sendMessage, isLoading } = useChatStore();
   const { openRightSidebar } = useUIStore();
 
-  const ticker = context.startsWith("sirket:") ? context.split(":")[1] : null;
+  const contextSymbol = context.startsWith("sirket:")
+    ? context.split(":")[1]?.toUpperCase() ?? null
+    : context.startsWith("endeks:")
+      ? context.split(":")[1]?.toUpperCase() ?? null
+      : null;
+
+  // Load the full BIST ticker list once for dynamic ticker detection
+  const [marketLoaded, setMarketLoaded] = useState(false);
+  useEffect(() => {
+    let mounted = true;
+    loadMarketTickers().then(() => {
+      if (mounted) setMarketLoaded(true);
+    });
+    return () => { mounted = false; };
+  }, []);
 
   // Extract questions and clean text
   const { cleanText, questions } = useMemo(() => {
@@ -140,8 +208,14 @@ export function MarkdownRenderer({ text, isAssistant, context = "global", sugges
     if (suggestions && suggestions.length > 0) {
       return { cleanText: text, questions: suggestions };
     }
-    return extractSuggestedQuestions(text);
-  }, [text, isAssistant, suggestions]);
+    return extractSuggestedQuestions(text, context);
+  }, [text, isAssistant, suggestions, context]);
+
+  // Extract tickers mentioned in the response for navigation buttons
+  const mentionedTickers = useMemo(() => {
+    if (!isAssistant) return [];
+    return extractMentionedTickers(cleanText, contextSymbol);
+  }, [cleanText, isAssistant, contextSymbol, marketLoaded]);
 
   // Extract financial indicators for rich UI presentations
   const metrics = useMemo(() => {
@@ -167,8 +241,8 @@ export function MarkdownRenderer({ text, isAssistant, context = "global", sugges
 
   const handleMetricClick = async (label: string, value: string) => {
     if (isLoading) return;
-    const q = ticker
-      ? `${ticker} için ${label}: ${value} — bu ne anlama geliyor, nasıl yorumlanmalı?`
+    const q = contextSymbol
+      ? `${contextSymbol} için ${label}: ${value} — bu ne anlama geliyor, nasıl yorumlanmalı?`
       : `${label}: ${value} — bu ne anlama geliyor?`;
     openRightSidebar();
     await sendMessage(q, context);
@@ -178,6 +252,11 @@ export function MarkdownRenderer({ text, isAssistant, context = "global", sugges
     if (isLoading) return;
     openRightSidebar();
     await sendMessage(label, payload ? `sirket:${payload}:genel-bakis` : context);
+  };
+
+  const handleNavigate = (symbol: string) => {
+    const path = symbol.startsWith('X') ? `/endeksler/${symbol.toLowerCase()}` : `/hisse/${symbol.toLowerCase()}`;
+    window.dispatchEvent(new CustomEvent('app-navigate', { detail: { path } }));
   };
 
   if (!isAssistant) {
@@ -210,11 +289,27 @@ export function MarkdownRenderer({ text, isAssistant, context = "global", sugges
       )}
 
       {/* 2.5 Dinamik İnteraktif Widget */}
-      {isAssistant && widget && (
+      {widget && (
         <InteractiveWidget widget={widget} onWidgetAction={handleWidgetAction} />
       )}
 
-      {/* 3. Konuyu Derinleştirecek Öneri Chipleri */}
+      {/* 3. Navigation buttons for tickers mentioned in the response */}
+      {mentionedTickers.length > 0 && (
+        <div className="flex flex-wrap gap-2 pt-1">
+          {mentionedTickers.map(sym => (
+            <button
+              key={sym}
+              onClick={() => handleNavigate(sym)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-colors cursor-pointer"
+            >
+              <ExternalLink size={12} />
+              {sym}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* 4. Konuyu Derinleştirecek Öneri Chipleri */}
       {questions.length > 0 && (
         <SuggestionChips 
           suggestions={questions} 

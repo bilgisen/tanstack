@@ -1,8 +1,9 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { useCompScreener, useSectorGroups, type SectorGroupsResponse, type ScreenerFilters } from '../lib/useCompData'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { useMemo, useState } from 'react'
+import { ChevronDown, Filter, Search, SlidersHorizontal } from 'lucide-react'
+import {   useCompScreener, useSectorGroups } from '../lib/useCompData'
 import { RATIO_DEFS } from '../constants/ratios'
-import { useState, useMemo } from 'react'
-import { Search, Filter, ChevronDown, SlidersHorizontal } from 'lucide-react'
+import type {ScreenerFilters, SectorGroupsResponse} from '../lib/useCompData';
 
 type ScreenerResult = Record<string, unknown> & {
   ticker: string
@@ -13,6 +14,8 @@ type ScreenerResult = Record<string, unknown> & {
   pillar_karlilik_buyume?: number | null
   pillar_degerleme?: number | null
   ratios?: Record<string, number | null>
+  percentiles?: Record<string, number | null>
+  peer_medians?: Record<string, number | null>
 }
 
 export const Route = createFileRoute('/tarama')({
@@ -44,7 +47,7 @@ function TaramaPage() {
   const [scoreMax, setScoreMax] = useState(100)
   const [showFilters, setShowFilters] = useState(false)
   const [showRatios, setShowRatios] = useState(false)
-  const [selectedRatios, setSelectedRatios] = useState<string[]>(['pe', 'pb', 'roe', 'debt_equity'])
+  const [selectedRatios, setSelectedRatios] = useState<Array<string>>(['pe', 'pb', 'roe', 'debt_equity'])
   const [ratioMin, setRatioMin] = useState<Record<string, string>>({})
   const [ratioMax, setRatioMax] = useState<Record<string, string>>({})
   const [sortKey, setSortKey] = useState('composite_score')
@@ -76,10 +79,10 @@ function TaramaPage() {
 
   const { data: screenerData, isLoading } = useCompScreener(filters)
 
-  const results = (screenerData as { results?: ScreenerResult[] } | null)?.results || []
+  const results = (screenerData as { results?: Array<ScreenerResult> } | null)?.results || []
 
   function setFilter(key: string, val: string) {
-    const params = { sector: filterSector || '', group: filterGroup || '', q: searchQuery || '' } as { sector: string; group: string; q: string }
+    const params = { sector: filterSector || '', group: filterGroup || '', q: searchQuery || '' }
     if (key === 'sector') params.sector = val
     else if (key === 'group') { params.group = val; params.sector = '' }
     else if (key === 'q') params.q = val
@@ -214,7 +217,11 @@ function TaramaPage() {
                   <SortHeader label={PILLAR_LABELS.degerleme} sort="pillar_degerleme" />
                   {selectedRatios.map(code => {
                     const def = RATIO_DEFS.find(r => r.code === code)
-                    return <SortHeader key={code} label={def?.label || code} sort={`ratios.${code}`} />
+                    return (
+                      <th key={code} className="py-2 px-2 text-right text-muted-foreground font-medium uppercase tracking-wider text-[10px]">
+                        {def?.label || code}
+                      </th>
+                    )
                   })}
                 </tr>
               </thead>
@@ -225,7 +232,9 @@ function TaramaPage() {
                   results.slice(0, 100).map((r: ScreenerResult, i: number) => {
                     const score = r.composite_score ?? 0
                     const scoreColor = score >= 70 ? 'text-emerald-400' : score >= 40 ? 'text-yellow-400' : 'text-red-400'
-                    const ratios = (r.ratios || {}) as Record<string, number | null>
+                    const ratios = (r.ratios || {})
+                    const percentiles = (r.percentiles || {})
+                    const peerMedians = (r.peer_medians || {})
                     return (
                       <tr key={r.ticker} className="border-b border-border/5 hover:bg-muted/5 transition-colors">
                         <td className="py-1.5 pr-2 font-mono text-muted-foreground text-[10px]">{i + 1}</td>
@@ -239,11 +248,21 @@ function TaramaPage() {
                         <td className="py-1.5 px-2 font-mono text-right text-muted-foreground">{r.pillar_finansal_saglik != null ? fmt(r.pillar_finansal_saglik, 0) : '—'}</td>
                         <td className="py-1.5 px-2 font-mono text-right text-muted-foreground">{r.pillar_karlilik_buyume != null ? fmt(r.pillar_karlilik_buyume, 0) : '—'}</td>
                         <td className="py-1.5 px-2 font-mono text-right text-muted-foreground">{r.pillar_degerleme != null ? fmt(r.pillar_degerleme, 0) : '—'}</td>
-                        {selectedRatios.map(code => (
-                          <td key={code} className="py-1.5 px-2 font-mono text-right text-muted-foreground">
-                            {ratios[code] != null ? fmt(ratios[code], 2) : '—'}
-                          </td>
-                        ))}
+                        {selectedRatios.map(code => {
+                          const pct = percentiles[code]
+                          const med = peerMedians[code]
+                          return (
+                            <td key={code} className="py-1.5 px-2 text-right" title={med != null ? `Sektör medyanı: ${fmt(med, 2)}` : undefined}>
+                              <div className="font-mono text-muted-foreground">{ratios[code] != null ? fmt(ratios[code], 2) : '—'}</div>
+                              {pct != null && (
+                                <div className={`font-mono text-[9px] leading-tight ${pct >= 50 ? 'text-emerald-400/80' : 'text-red-400/80'}`}>
+                                  %{pct.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}
+                                  {med != null && <span className="text-muted-foreground/60"> · {fmt(med, 2)}</span>}
+                                </div>
+                              )}
+                            </td>
+                          )
+                        })}
                       </tr>
                     )
                   })

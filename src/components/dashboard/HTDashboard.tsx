@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { Coins, Sparkles, ChevronRight, Zap } from 'lucide-react'
+import { ChevronRight, Coins, Sparkles, Zap } from 'lucide-react'
 
 interface CreditsData {
   tier: string;

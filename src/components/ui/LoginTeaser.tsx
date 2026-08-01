@@ -1,5 +1,5 @@
+import { ArrowRight, Sparkles } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
-import { Sparkles, ArrowRight } from "lucide-react";
 
 interface LoginTeaserProps {
   preview?: string;

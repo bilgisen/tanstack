@@ -6,7 +6,7 @@ interface Shareholder {
 }
 
 interface OwnershipStructureProps {
-  shareholders?: Shareholder[] | null
+  shareholders?: Array<Shareholder> | null
   loading?: boolean
 }
 

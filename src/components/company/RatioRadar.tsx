@@ -7,7 +7,7 @@ interface RadarDataPoint {
 }
 
 interface RatioRadarProps {
-  data: RadarDataPoint[]
+  data: Array<RadarDataPoint>
   size?: number
 }
 

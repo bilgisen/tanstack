@@ -1,9 +1,9 @@
 // @ts-nocheck
 import { createFileRoute } from '@tanstack/react-router'
+import { desc, eq } from 'drizzle-orm'
 import { auth } from '../../../lib/auth'
 import { db } from '../../../lib/db'
 import { chatSessions } from '../../../lib/schema'
-import { eq, desc } from 'drizzle-orm'
 
 export const Route = createFileRoute('/api/chat/sessions')({
   server: {

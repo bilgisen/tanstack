@@ -1,9 +1,9 @@
-import { createFileRoute, Link, Outlet } from '@tanstack/react-router'
-import { Info, Activity, ArrowUp, ArrowDown, ChevronDown, ChevronUp, Clock } from 'lucide-react'
+import { Link, Outlet, createFileRoute } from '@tanstack/react-router'
+import { Activity, ArrowDown, ArrowUp, ChevronDown, ChevronUp, Clock, Info } from 'lucide-react'
 import { useMemo } from 'react'
 import { Skeleton } from '../components/ui/skeleton'
 import { getIndexName } from '../constants/bistIndices'
-import { useIndices, useIndexDetail } from '../lib/useMarketData'
+import { useIndexDetail, useIndices } from '../lib/useMarketData'
 
 export const Route = createFileRoute('/endeksler/$id')({
   component: EndeksLayout,

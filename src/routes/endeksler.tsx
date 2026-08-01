@@ -1,10 +1,10 @@
-import { createFileRoute, Outlet, useLocation } from '@tanstack/react-router'
+import { Outlet, createFileRoute, useLocation } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
+import { ArrowUp } from 'lucide-react'
 import { ChatPanel } from '../components/chat/ChatPanel'
 import { ChatSheet } from '../components/chat/ChatSheet'
 import { useUIStore } from '../store/ui'
 import { getIndexName } from '../constants/bistIndices'
-import { ArrowUp } from 'lucide-react'
 
 export const Route = createFileRoute('/endeksler')({
   component: EndekslerLayout,
@@ -33,9 +33,11 @@ function EndekslerLayout() {
   if (pathname.includes('/endeksler/')) {
     const parts = pathname.split('/endeksler/')
     if (parts[1]) {
-      const endeksId = parts[1]
-      context = `endeks:${endeksId}`
-      const indexName = getIndexName(endeksId.toUpperCase())
+      const segments = parts[1].split('/').filter(Boolean)
+      const endeksCode = segments[0] || ''
+      const subpage = segments[1] || 'genel-bakis'
+      context = `endeks:${endeksCode}:${subpage}`
+      const indexName = getIndexName(endeksCode.toUpperCase())
       placeholder = `${indexName} hakkında bir soru sorun...`
     }
   }

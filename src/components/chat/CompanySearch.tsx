@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowUpRight, Sparkles, Search } from "lucide-react";
+import { ArrowUpRight, Search, Sparkles } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 
 interface TickerMatch {
@@ -18,7 +18,7 @@ interface CompanySearchProps {
 const SEARCH_API = "https://hono.paraanaliz.workers.dev/api/ai/ticker-search";
 
 export function CompanySearch({ query, onSelect, onAskAI, onClose }: CompanySearchProps) {
-  const [results, setResults] = useState<TickerMatch[]>([]);
+  const [results, setResults] = useState<Array<TickerMatch>>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();

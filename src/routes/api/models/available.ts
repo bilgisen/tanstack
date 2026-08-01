@@ -1,9 +1,9 @@
 // @ts-nocheck
 import { createFileRoute } from '@tanstack/react-router'
+import { eq } from 'drizzle-orm'
 import { auth } from '../../../lib/auth'
 import { db } from '../../../lib/db'
 import { modelConfigs, userCredits } from '../../../lib/schema'
-import { eq } from 'drizzle-orm'
 
 export const Route = createFileRoute('/api/models/available')({
   server: {
@@ -19,7 +19,7 @@ export const Route = createFileRoute('/api/models/available')({
             .select()
             .from(userCredits)
             .where(eq(userCredits.userId, session.user.id))
-            .then((res: any[]) => res[0]);
+            .then((res: Array<any>) => res[0]);
           if (credits) {
             userTier = credits.tier;
           }

@@ -1,21 +1,20 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useAuth } from '../hooks/useAuth'
-import { TIER_CONFIG, type Tier } from '../lib/tiers'
-import { Badge } from '../components/ui/badge'
 import {
-  Mail,
+  BarChart3,
   Calendar,
-  Zap,
   Coins,
+  Mail,
+  RefreshCw,
   Shield,
   Sparkles,
-  RefreshCw,
-  Gift,
-  Clock,
-  BarChart3,
+  Zap,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { BarChart, Bar, XAxis, Cell, ResponsiveContainer } from 'recharts'
+import { Bar, BarChart, Cell, ResponsiveContainer, XAxis } from 'recharts'
+import { useAuth } from '../hooks/useAuth'
+import { TIER_CONFIG  } from '../lib/tiers'
+import { Badge } from '../components/ui/badge'
+import type {Tier} from '../lib/tiers';
 
 export const Route = createFileRoute('/profil/')({
   component: ProfilePage,
@@ -30,9 +29,8 @@ interface UserCredits {
   availableJT: number
   usagePercent: number
   resetAt: string | Date
+  dodoCustomerId: string | null
 }
-
-const TRIAL_DAYS = 30
 
 function ProfilePage() {
   const { user } = useAuth()
@@ -64,13 +62,18 @@ function ProfilePage() {
 
   const handleSubscribe = (tier: string) => {
     const config = TIER_CONFIG[tier as keyof typeof TIER_CONFIG]
-    if (!('polarProductId' in config) || !config.polarProductId) return
+    if (!('dodoProductId' in config) || !config.dodoProductId) return
     const params = new URLSearchParams()
-    params.set('products', config.polarProductId)
-    if (user?.id) params.set('customerExternalId', user.id)
-    if (user?.email) params.set('customerEmail', user.email)
-    if (user?.name) params.set('customerName', user.name)
-    window.location.href = `/api/checkout?${params}`
+    params.set('productId', config.dodoProductId)
+    if (user?.id) params.set('metadata_user_id', user.id)
+    if (user?.email) params.set('email', user.email)
+    if (user?.name) params.set('fullName', user.name)
+    window.location.href = `/api/checkout-dodo?${params}`
+  }
+
+  const handleManageSubscription = () => {
+    if (!credits?.dodoCustomerId) return
+    window.location.href = `/api/customer-portal?customer_id=${credits.dodoCustomerId}`
   }
 
   const rawTier = credits?.tier || user?.tier || 'free'
@@ -87,13 +90,6 @@ function ProfilePage() {
         return <Shield size={14} className="text-muted-foreground" />
     }
   }
-
-  const daysSinceSignup = user?.createdAt
-    ? Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24))
-    : 0
-  const trialDaysLeft = Math.max(0, TRIAL_DAYS - daysSinceSignup)
-
-  const isTrialActive = userTier === 'free' && trialDaysLeft > 0
 
   const barData = credits
     ? [
@@ -153,31 +149,6 @@ function ProfilePage() {
             </span>
           </div>
         </div>
-
-        {/* Welcome banner (only for free users still in trial window) */}
-        {mounted && isTrialActive && (
-          <div className="mx-6 mb-6 rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-5">
-            <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-lg bg-primary/15 text-primary flex items-center justify-center shrink-0 mt-0.5">
-                <Gift size={18} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="text-base font-bold text-foreground">
-                  Aramıza hoşgeldiniz {user?.name?.split(' ')[0] || 'yatırımcı'}
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                  JetBorsa topluluğuna hoş geldiniz. <strong className="text-foreground">JetAbone</strong> abonelik planını ücretsiz deneyebilirsiniz.
-                </p>
-                <div className="flex items-center gap-2 mt-3">
-                  <Badge variant="outline" className="gap-1.5 text-xs font-bold">
-                    <Clock size={12} />
-                    <span>Deneme süresi: <span className="text-primary">{trialDaysLeft}</span> gün</span>
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* 2. Credit Status */}
@@ -261,7 +232,7 @@ function ProfilePage() {
               </div>
             </div>
             <button
-              onClick={() => handleSubscribe('jetabone')}
+              onClick={() => userTier === 'jetabone' ? handleManageSubscription() : handleSubscribe('jetabone')}
               className="w-full py-2.5 rounded-xl text-sm font-bold bg-primary text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer"
             >
               {userTier === 'jetabone' ? 'Aboneliği Yönet' : 'Hemen Yükselt'}
@@ -298,7 +269,7 @@ function ProfilePage() {
               </div>
             </div>
             <button
-              onClick={() => handleSubscribe('proabone')}
+              onClick={() => userTier === 'proabone' ? handleManageSubscription() : handleSubscribe('proabone')}
               className="w-full py-2.5 rounded-xl text-sm font-bold bg-blue-600 text-white hover:bg-blue-500 hover:shadow-[0_0_10px_rgba(37,99,235,0.3)] transition-all cursor-pointer"
             >
               {userTier === 'proabone' ? 'Aboneliği Yönet' : 'Hemen Yükselt'}

@@ -1,8 +1,9 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { useCompRankings, useSectorGroups, type SectorGroupsResponse } from '../lib/useCompData'
-import { groupKeyToDisplayName } from '../constants/sectorGroups'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { TrendingUp, Shield, BarChart3, ChevronRight, Search, ArrowUpDown } from 'lucide-react'
+import { ArrowUpDown, BarChart3, ChevronRight, Search, Shield, TrendingUp } from 'lucide-react'
+import {  useCompRankings, useSectorGroups } from '../lib/useCompData'
+import { groupKeyToDisplayName } from '../constants/sectorGroups'
+import type {SectorGroupsResponse} from '../lib/useCompData';
 
 type RankingItem = {
   ticker: string
@@ -14,7 +15,7 @@ type RankingItem = {
 }
 
 type RankingsResponse = {
-  results: RankingItem[]
+  results: Array<RankingItem>
   total: number
   name: string
 }

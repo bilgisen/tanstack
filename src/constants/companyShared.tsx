@@ -1,5 +1,5 @@
 import companyNames from './companyNames.json'
-import { SECTOR_GROUPS, groupKeyToSlug, groupKeyToDisplayName } from './sectorGroups'
+import { SECTOR_GROUPS, groupKeyToDisplayName, groupKeyToSlug } from './sectorGroups'
 
 export function toSlug(name: string): string {
   return name
@@ -41,10 +41,10 @@ export type TaData = {
   beta: number
   market_breadth: { breadth: number; status: string }
   market_regime: { regime: string; trend_direction: string; volatility_regime: string; adx: number; recommended_strategy: string }
-  signals: string[]
+  signals: Array<string>
   divergences: { rsi: { bullish: boolean; bearish: boolean }; macd: { bullish: boolean; bearish: boolean } }
   score_components: { trend: number; momentum: number; volume: number }
-  candlestick_patterns: string[]
+  candlestick_patterns: Array<string>
 } | null
 
 export type FundamentalData = {

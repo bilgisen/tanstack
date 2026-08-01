@@ -19,7 +19,7 @@ export type RatioDef = {
   suffix?: string
 }
 
-export const RATIO_DEFS: RatioDef[] = [
+export const RATIO_DEFS: Array<RatioDef> = [
   // ── Değerleme ──
   { code: 'pe', label: 'F/K', category: 'degerleme', higherIsBetter: false, format: 'decimal' },
   { code: 'pb', label: 'PD/DD', category: 'degerleme', higherIsBetter: false, format: 'decimal' },

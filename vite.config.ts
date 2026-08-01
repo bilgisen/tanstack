@@ -13,7 +13,7 @@ const config = defineConfig({
       preset: "cloudflare-module",
       compatibilityDate: "2024-11-01",
       routeRules: {
-        "/**": { headers: { "Cache-Control": "public, max-age=60, s-maxage=60" } },
+        "/**": { headers: { "Cache-Control": "no-cache" } },
         "/api/market/**": { proxy: "https://hono.jetborsa.com/api/market/**" },
       },
       cloudflare: {
@@ -23,7 +23,8 @@ const config = defineConfig({
             "BETTER_AUTH_URL": "https://jetborsa.com",
             "VITE_HONO_API_URL": "https://hono.jetborsa.com",
             "VITE_FINVERI_API_URL": "https://tekapi.jetborsa.com",
-            "POLAR_SERVER": "production"
+            "DODO_PAYMENTS_RETURN_URL": "https://jetborsa.com/profil",
+            "DODO_PAYMENTS_ENVIRONMENT": "live_mode"
           },
           d1_databases: [
             {

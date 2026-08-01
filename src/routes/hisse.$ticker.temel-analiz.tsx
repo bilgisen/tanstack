@@ -1,11 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from 'recharts'
+import { BarChart3, Building2, Shield, Sparkles, TrendingUp } from 'lucide-react'
 import { useCompFundamentals } from '../lib/useCompData'
-import { AiReport } from '../components/company/AiReport'
 import { ScoreGauge } from '../constants/companyShared'
 import { getRatioDef } from '../constants/ratios'
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, LineChart, Line, CartesianGrid, Legend } from 'recharts'
 import { SafeTooltip } from '../components/ui/typed-tooltip'
-import { TrendingUp, Shield, Building2, BarChart3, Sparkles } from 'lucide-react'
 
 export const Route = createFileRoute('/hisse/$ticker/temel-analiz')({
   component: FundamentalAnalysisPage,
@@ -79,8 +78,8 @@ function FundamentalAnalysisPage() {
   })
 
   const trendData = data.trends?.trends ? Object.entries(data.trends.trends).slice(0, 4) : []
-  const trendPeriods: string[] = []
-  const trendSeries: { name: string; data: Record<string, number | null>; color: string }[] = []
+  const trendPeriods: Array<string> = []
+  const trendSeries: Array<{ name: string; data: Record<string, number | null>; color: string }> = []
   trendData.forEach(([code, t], idx: number) => {
     if (!t.values) return
     const series: Record<string, number | null> = {}
@@ -122,6 +121,12 @@ function FundamentalAnalysisPage() {
                   </div>
                 )}
                 <div className="flex items-center gap-4 pt-1">
+                  {data.percentile != null && (
+                    <div className="text-xs text-muted-foreground">
+                      <span className="text-[10px] font-medium uppercase tracking-wider">Piyasa </span>
+                      <span className="text-sm font-bold text-foreground">%{fmt(data.percentile, 0)}</span>
+                    </div>
+                  )}
                   {data.ranks?.sector && (
                     <div className="text-xs text-muted-foreground">
                       <span className="text-[10px] font-medium uppercase tracking-wider">Sektör </span>
@@ -275,14 +280,7 @@ function FundamentalAnalysisPage() {
         </div>
       )}
 
-      {/* ═══ AI FA REPORT ═══ */}
-      <div className="space-y-4 pt-2">
-        <div className="flex items-center gap-2 pb-2 border-b border-border/20">
-          <Sparkles size={14} className="text-violet-500" />
-          <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">AI Temel Analiz Raporu</h3>
-        </div>
-        <AiReport ticker={ticker} />
-      </div>
+      
     </div>
   )
 }

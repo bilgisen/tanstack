@@ -1,18 +1,18 @@
 import { useEffect, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import {
-  X,
+  ChevronRight,
+  LogOut,
+  Monitor,
+  Moon,
   Sparkles,
   Star,
-  LogOut,
   Sun,
-  Moon,
-  Monitor,
-  ChevronRight,
+  X,
 } from "lucide-react";
-import { navigationItems } from "@/lib/navigationItems";
 import { useUIStore } from "../../store/ui";
 import type { Theme } from "../../store/ui";
+import { navigationItems } from "@/lib/navigationItems";
 
 interface MobileDrawerProps {
   isOpen: boolean;
@@ -45,7 +45,7 @@ export function MobileDrawer({
 
   if (!isOpen) return null;
 
-  const themeOptions: { value: Theme; icon: typeof Sun; label: string }[] = [
+  const themeOptions: Array<{ value: Theme; icon: typeof Sun; label: string }> = [
     { value: "light", icon: Sun, label: "Açık" },
     { value: "dark", icon: Moon, label: "Koyu" },
     { value: "system", icon: Monitor, label: "Sistem" },

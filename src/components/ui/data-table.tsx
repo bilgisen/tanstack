@@ -1,14 +1,16 @@
-import { cn } from "@/lib/utils"
-import { type ReactNode, useMemo, useState } from "react"
+import {  useMemo, useState } from "react"
 import {
-  useReactTable,
+  
+  createColumnHelper,
+  flexRender,
   getCoreRowModel,
   getSortedRowModel,
-  flexRender,
-  createColumnHelper,
-  type SortingState,
+  useReactTable
 } from "@tanstack/react-table"
-import { ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react"
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react"
+import type {SortingState} from "@tanstack/react-table";
+import type {ReactNode} from "react";
+import { cn } from "@/lib/utils"
 
 export interface Column<T> {
   key: string
@@ -20,8 +22,8 @@ export interface Column<T> {
 }
 
 interface DataTableProps<T> {
-  columns: Column<T>[]
-  data: T[]
+  columns: Array<Column<T>>
+  data: Array<T>
   onRowClick?: (item: T) => void
   className?: string
   hideHeader?: boolean
@@ -43,7 +45,7 @@ export function DataTable<T extends Record<string, any>>({
         id: col.key,
         enableSorting: col.sortable ?? false,
         header: () => col.header,
-        cell: (info) => col.render(info.row.original) as ReactNode,
+        cell: (info) => col.render(info.row.original),
         meta: { className: col.className },
       })
     )

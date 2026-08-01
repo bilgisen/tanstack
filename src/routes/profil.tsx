@@ -1,11 +1,11 @@
-import { createFileRoute, Outlet, useNavigate, useLocation } from '@tanstack/react-router'
-import { useAuth } from '../hooks/useAuth'
+import { Outlet, createFileRoute, useLocation, useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
+import { ArrowUp } from 'lucide-react'
+import { useAuth } from '../hooks/useAuth'
 import { Logo } from '../components/layout/Logo'
 import { ChatPanel } from '../components/chat/ChatPanel'
 import { ChatSheet } from '../components/chat/ChatSheet'
 import { useUIStore } from '../store/ui'
-import { ArrowUp } from 'lucide-react'
 
 export const Route = createFileRoute('/profil')({
   component: ProtectedProfileLayout,

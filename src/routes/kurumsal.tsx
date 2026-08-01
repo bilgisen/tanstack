@@ -1,14 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { 
+  ArrowRight, 
+  BarChart3, 
   Building2, 
-  Users, 
-  Zap, 
-  Shield, 
   Check, 
-  ArrowRight,
-  Headphones,
-  BarChart3,
-  Sparkles
+  Headphones, 
+  Shield,
+  Sparkles,
+  Users,
+  Zap
 } from 'lucide-react'
 
 export const Route = createFileRoute('/kurumsal')({

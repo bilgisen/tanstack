@@ -24,12 +24,12 @@ export interface TAMemberSummary {
   weekly_trend: string;
   regime: MarketRegime;
   volume_profile: VolumeProfile;
-  liquidity_voids: LiquidityVoid[];
+  liquidity_voids: Array<LiquidityVoid>;
   sr_zones: SupportResistance;
   score: number;
   confidence: string;
   score_components: { trend: number; momentum: number; volume: number };
-  signals: string[];
+  signals: Array<string>;
   divergences: DivergenceAnalysis;
   golden_cross: GoldenCrossInfo;
   mtf_alignment: MTFAlignment;
@@ -93,8 +93,8 @@ export interface LiquidityVoid {
 export interface SRLevel { price: number; type: string; strength: number; }
 export interface SupportResistance {
   current_price: number;
-  resistance_zones: SRLevel[];
-  support_zones: SRLevel[];
+  resistance_zones: Array<SRLevel>;
+  support_zones: Array<SRLevel>;
   nearest_resistance: SRLevel | null;
   nearest_support: SRLevel | null;
 }
@@ -135,19 +135,19 @@ export interface TAFullAnalysis {
   volume_metrics: VolumeMetrics;
   regime: MarketRegime;
   volume_profile: VolumeProfile;
-  liquidity_voids: LiquidityVoid[];
+  liquidity_voids: Array<LiquidityVoid>;
   sr_zones: SupportResistance;
   patterns: PatternAnalysis;
   divergences: DivergenceAnalysis;
-  scenarios: Scenario[];
+  scenarios: Array<Scenario>;
   risk_metrics: RiskMetrics;
   score: CompositeScore;
-  signals: ActiveSignal[];
+  signals: Array<ActiveSignal>;
   llm_summary_prompt: string;
 }
 
 export interface VolumeMetrics { obv_trend: string; relative_volume: number | null; volume_confirmation: string; }
-export interface PatternAnalysis { candlestick_patterns: CandlestickPattern[]; chart_patterns: ChartPattern[]; total_active: number; }
+export interface PatternAnalysis { candlestick_patterns: Array<CandlestickPattern>; chart_patterns: Array<ChartPattern>; total_active: number; }
 export interface CandlestickPattern { name: string; direction: string; reliability: number; bars_ago: number; confirmation_volume: boolean; }
 export interface ChartPattern { name: string; direction: string; entry_price: number | null; target_price: number | null; confidence: number; }
 export interface Scenario { name: string; direction: string; trigger_price: number | null; target_price: number | null; invalidation_price: number | null; supporting_signal_count: number; description: string; }

@@ -16,7 +16,7 @@ export type Message = {
   role: "user" | "assistant";
   text: string;
   context?: string;
-  suggestions?: string[];
+  suggestions?: Array<string>;
   widget?: {
     type: 'comparison' | 'ratio_chart' | 'calculator';
     title: string;
@@ -29,15 +29,15 @@ export interface ChatSession {
   ticker: string;
   code: string;
   date: string;
-  messages: Message[];
+  messages: Array<Message>;
   context: string;
 }
 
 interface ChatState {
-  messages: Message[];
+  messages: Array<Message>;
   isLoading: boolean;
   streamingText: string | null;
-  sessions: ChatSession[];
+  sessions: Array<ChatSession>;
   activeSessionId: string | null;
   selectedModelId: string;
   initialized: boolean;
@@ -68,7 +68,7 @@ const getTodayDate = (): string => {
   return `${year}-${month}-${day}`;
 };
 
-const loadSessionsFromStorage = (): ChatSession[] => {
+const loadSessionsFromStorage = (): Array<ChatSession> => {
   if (typeof window === 'undefined') return [];
   try {
     const data = localStorage.getItem('hissepro_chat_sessions');
@@ -79,7 +79,7 @@ const loadSessionsFromStorage = (): ChatSession[] => {
   }
 };
 
-const saveSessionsToStorage = (sessions: ChatSession[]) => {
+const saveSessionsToStorage = (sessions: Array<ChatSession>) => {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem('hissepro_chat_sessions', JSON.stringify(sessions));
@@ -88,11 +88,41 @@ const saveSessionsToStorage = (sessions: ChatSession[]) => {
   }
 };
 
-function mapTierToAuth(tier: string): string | null {
-  if (tier === 'proabone') return 'proabone';
-  if (tier === 'jetabone') return 'jetabone';
-  if (tier === 'free') return 'member';
-  return null;
+let cachedSessionToken: string | null = null;
+
+async function getSessionToken(): Promise<string | null> {
+  if (cachedSessionToken !== null) return cachedSessionToken;
+  try {
+    const res = await fetch('/api/ai/session-token');
+    if (!res.ok) return null;
+    const data = await res.json();
+    cachedSessionToken = data.token || null;
+    return cachedSessionToken;
+  } catch {
+    return null;
+  }
+}
+
+const ANON_QUOTA_KEY = 'jb_anon_questions'
+export const ANON_QUOTA_DAILY = 3
+
+export function getAnonQuota(): number {
+  if (typeof window === 'undefined') return 0
+  try {
+    const raw = localStorage.getItem(ANON_QUOTA_KEY)
+    if (!raw) return 0
+    const parsed = JSON.parse(raw)
+    if (parsed?.date !== getTodayDate()) return 0
+    return typeof parsed.count === 'number' ? parsed.count : 0
+  } catch {
+    return 0
+  }
+}
+
+function incrementAnonQuota(): void {
+  try {
+    localStorage.setItem(ANON_QUOTA_KEY, JSON.stringify({ date: getTodayDate(), count: getAnonQuota() + 1 }))
+  } catch {}
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
@@ -123,7 +153,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       const res = await fetch('/api/chat/sessions?limit=50')
       if (res.ok) {
         const data = await res.json()
-        const remoteSessions: ChatSession[] = (data.sessions || []).map((s: { id: string; ticker?: string; createdAt: string; context?: string }) => ({
+        const remoteSessions: Array<ChatSession> = (data.sessions || []).map((s: { id: string; ticker?: string; createdAt: string; context?: string }) => ({
           id: s.id,
           ticker: s.ticker || 'GLOBAL',
           code: s.id.slice(0, 3).toUpperCase(),
@@ -154,7 +184,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       const res = await fetch(`/api/chat/sessions/${id}`)
       if (res.ok) {
         const data = await res.json()
-        const serverMessages: Message[] = (data.session?.messages || []).map((m: { role: 'user' | 'assistant'; text: string; context?: string; suggestions?: string[]; widget?: Record<string, unknown> }) => ({
+        const serverMessages: Array<Message> = (data.session?.messages || []).map((m: { role: 'user' | 'assistant'; text: string; context?: string; suggestions?: Array<string>; widget?: Record<string, unknown> }) => ({
           role: m.role,
           text: m.text,
           context: m.context || undefined,
@@ -234,8 +264,32 @@ export const useChatStore = create<ChatState>((set, get) => ({
     });
     saveSessionsToStorage(currentSessions);
 
+    // Anonymous quota: limited free questions per day, then require login
+    if (!(await getSessionToken())) {
+      if (getAnonQuota() >= ANON_QUOTA_DAILY) {
+        const quotaAssistantMessage: Message = {
+          role: "assistant",
+          text: "Ücretsiz soru hakkınız doldu. Devam etmek için lütfen giriş yapın.",
+          context,
+        };
+
+        currentSession.messages = [...currentSession.messages, quotaAssistantMessage];
+        set({
+          activeSessionId: currentSessionId,
+          sessions: currentSessions.map(s => s.id === currentSessionId ? { ...s, messages: currentSession.messages } : s),
+          messages: [...get().messages, quotaAssistantMessage],
+          isLoading: false
+        });
+        saveSessionsToStorage(currentSessions);
+        return;
+      }
+      incrementAnonQuota()
+    }
+
     // Monetization: Pre-Check balance and tier access
     const selectedModelId = get().selectedModelId || 'gemini-2.5-flash-lite';
+    let reservedCost = 0;
+    const requestId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2);
     try {
       const preCheckRes = await fetch("/api/ai/pre-check", {
         method: "POST",
@@ -249,6 +303,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
       if (preCheckRes.ok) {
         const preCheckData = await preCheckRes.json();
+        if (preCheckData.ok) {
+          reservedCost = preCheckData.estimatedCost || 0;
+        }
         if (!preCheckData.ok) {
           let errorMsg = "";
           if (preCheckData.error === 'MODEL_NOT_ALLOWED') {
@@ -286,21 +343,23 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     // Fetch latest prices for all stocks and indices to enrich context dynamically
     // Client-side cache: only re-fetch if stale (>60s old)
+    // NOTE: runs in the background — the stream request is NOT blocked on this,
+    // so watchlist prices may be absent for the first message after cache expiry.
     let marketItemsMap: Record<string, { price: number; change: number }> = {};
-    
+
     const cachedPrices = window.__chat_market_prices_cache;
     const cacheAge = cachedPrices ? Date.now() - cachedPrices.ts : Infinity;
-    
+
     if (cachedPrices && cacheAge < 60000) {
       marketItemsMap = cachedPrices.data;
     } else {
       const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com";
-      try {
+      const pricesPromise = (async () => {
         const [stocksRes, summaryRes] = await Promise.allSettled([
           fetch(`${apiUrl}/api/market/stocks`),
           fetch(`${apiUrl}/api/market/summary`)
         ]);
-        
+
         if (stocksRes.status === 'fulfilled' && stocksRes.value.ok) {
           const json = await stocksRes.value.json();
           if (json.data && Array.isArray(json.data)) {
@@ -324,12 +383,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
           }
         }
         window.__chat_market_prices_cache = { data: marketItemsMap, ts: Date.now() };
-      } catch (e) {
+      })();
+      pricesPromise.catch((e) => {
         if (cachedPrices) {
           marketItemsMap = cachedPrices.data; // fallback to stale cache
         }
         console.error("Failed to fetch current market prices for chatbot context:", e);
-      }
+      });
     }
 
     // Build watchlist data as a structured object for the AI
@@ -357,24 +417,26 @@ export const useChatStore = create<ChatState>((set, get) => ({
       .map(m => ({ role: m.role, text: m.text }))
 
     try {
-      set({ streamingText: "" });
+      // Don't set streamingText here — let it stay null until first token arrives
       const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com";
 
-      // Enrich request with user tier for tier-gated prompt
-      const authBackend = mapTierToAuth(get().userTier);
-      const authorization = authBackend ? `Bearer ${authBackend}_token` : '';
+      // Send real Better Auth session token as Authorization header
+      const sessionToken = await getSessionToken();
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (sessionToken) {
+        headers["Authorization"] = `Bearer ${sessionToken}`;
+      }
 
       const response = await fetch(`${apiUrl}/api/ai/chat/stream`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify({
           message: trimmedText,
           context,
           watchlist: watchlistPayload,
           history: historyMessages,
-          authorization,
         }),
       });
 
@@ -382,7 +444,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
       // Consume SSE stream
       let replyText = "";
-      let dataSuggestions: string[] = [];
+      let dataSuggestions: Array<string> = [];
       let dataWidget: { type: 'comparison' | 'ratio_chart' | 'calculator'; title: string; data: Record<string, unknown> } | null = null;
       let usage: { inputTokens?: number; outputTokens?: number } = {};
 
@@ -405,6 +467,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
               const event = JSON.parse(jsonStr);
               if (event.type === 'token') {
                 replyText += event.text;
+                if (get().streamingText === null) {
+                  set({ streamingText: '' });
+                }
                 set({ streamingText: replyText });
               } else if (event.type === 'done') {
                 replyText = event.reply || replyText;
@@ -421,9 +486,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
           }
         }
       }
-      set({ streamingText: null });
-
-      // Monetization: Charge HT
+      // Monetization: Charge HT (streamingText stays until message is appended)
       try {
         await fetch("/api/ai/charge", {
           method: "POST",
@@ -432,6 +495,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
             modelId: selectedModelId,
             inputTokens: usage?.inputTokens || (Math.ceil(trimmedText.length / 4) + 1000),
             outputTokens: usage?.outputTokens || (replyText ? Math.ceil(replyText.length / 4) : 250),
+            reservedCost,
+            requestId,
             sessionId: currentSessionId,
             featureType: "chat"
           })
@@ -445,15 +510,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
         console.error("Monetization charge failed:", e);
       }
 
-      // Strip potential navigate matches
-      const navigateMatch = replyText.match(/\[NAVIGATE:(.*?)\]/);
-      if (navigateMatch) {
-        replyText = replyText.replace(navigateMatch[0], "").trim();
-        // Dispatch custom navigation event for smooth frontend routing
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(new CustomEvent('app-navigate', { detail: { path: navigateMatch[1] } }));
-        }
-      }
+      // Strip [NAVIGATE:...] tags from text — NO automatic navigation (user-initiated only)
+      replyText = replyText.replace(/\[NAVIGATE:[^\]]*\]/gi, '').trim();
 
       // Parse and execute potential WATCHLIST_ADD action
       const addMatch = replyText.match(/\[WATCHLIST_ADD:(.*?):(.*?)\]/);
@@ -494,6 +552,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       });
 
       set({
+        streamingText: null,
         sessions: updatedSessions,
         messages: [...get().messages, newAssistantMessage]
       });

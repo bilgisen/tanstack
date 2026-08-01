@@ -10,7 +10,7 @@ export interface ToastMessage {
 }
 
 interface ToastState {
-  toasts: ToastMessage[];
+  toasts: Array<ToastMessage>;
   addToast: (type: ToastType, message: string, duration?: number) => void;
   removeToast: (id: string) => void;
 }

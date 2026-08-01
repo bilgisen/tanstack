@@ -9,12 +9,12 @@ export interface WatchlistItem {
 export interface Watchlist {
   id: string;
   name: string;
-  items: WatchlistItem[];
+  items: Array<WatchlistItem>;
   isDefault: boolean;
 }
 
 interface WatchlistState {
-  watchlists: Watchlist[];
+  watchlists: Array<Watchlist>;
   activeWatchlistId: string | null;
   addWatchlist: (name: string) => string;
   deleteWatchlist: (id: string) => void;
@@ -23,7 +23,7 @@ interface WatchlistState {
   removeItem: (watchlistId: string, symbol: string) => void;
 }
 
-const getDefaultWatchlists = (): Watchlist[] => [
+const getDefaultWatchlists = (): Array<Watchlist> => [
   {
     id: "default-list",
     name: "Takip Listem",
@@ -37,7 +37,7 @@ const getDefaultWatchlists = (): Watchlist[] => [
   }
 ];
 
-const loadWatchlistsFromStorage = (): Watchlist[] => {
+const loadWatchlistsFromStorage = (): Array<Watchlist> => {
   if (typeof window === 'undefined') return getDefaultWatchlists();
   try {
     const data = localStorage.getItem('hissepro_watchlists');
@@ -48,7 +48,7 @@ const loadWatchlistsFromStorage = (): Watchlist[] => {
   }
 };
 
-const saveWatchlistsToStorage = (watchlists: Watchlist[]) => {
+const saveWatchlistsToStorage = (watchlists: Array<Watchlist>) => {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem('hissepro_watchlists', JSON.stringify(watchlists));

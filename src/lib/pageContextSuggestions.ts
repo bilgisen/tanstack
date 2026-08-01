@@ -1,6 +1,6 @@
 export interface CapabilityAction {
   id: string
-  icon: 'watchlist' | 'deep_search' | 'compare' | 'scan'
+  icon: 'watchlist' | 'compare' | 'scan'
   label: string
   prompt: string
 }
@@ -8,8 +8,8 @@ export interface CapabilityAction {
 export interface PageSuggestions {
   title: string
   description: string
-  suggestions: string[]
-  capabilities?: CapabilityAction[]
+  suggestions: Array<string>
+  capabilities?: Array<CapabilityAction>
 }
 
 const companyNames: Record<string, string> = {
@@ -45,18 +45,12 @@ export function getPageSuggestions(context: string): PageSuggestions {
 
     const baseTitle = `${companyName} (${ticker})`
 
-    const defaultCompanyCapabilities: CapabilityAction[] = [
+    const defaultCompanyCapabilities: Array<CapabilityAction> = [
       {
         id: 'watchlist',
         icon: 'watchlist',
         label: 'Takip Listeme Ekle',
         prompt: `${ticker} hissesini takip listeme ekle`
-      },
-      {
-        id: 'deep_search',
-        icon: 'deep_search',
-        label: 'Deep Search (Derin Analiz)',
-        prompt: `${ticker} için Derinlemesine Nedensellik Analizi (Deep Search) başlat`
       },
       {
         id: 'compare',
@@ -135,41 +129,52 @@ export function getPageSuggestions(context: string): PageSuggestions {
   }
 
   if (context.startsWith("endeks:")) {
-    const endeksCode = context.split(":")[1]?.toUpperCase() || ""
+    const parts = context.split(":")
+    const endeksCode = parts[1]?.toUpperCase() || ""
+    const subpage = parts[2] || "genel-bakis"
     const endeksName = endeksCode === "XU100" ? "BIST 100" :
       endeksCode === "XU030" ? "BIST 30" :
       endeksCode === "XUSIN" ? "BIST Sınai" :
       endeksCode === "XBANK" ? "BIST Banka" :
       endeksCode === "XUTEK" ? "BIST Teknoloji" : endeksCode
 
+    const sharedCapabilities: Array<CapabilityAction> = [
+      {
+        id: 'watchlist',
+        icon: 'watchlist',
+        label: 'Endeksi Takip Listeme Ekle',
+        prompt: `${endeksCode} endeksini takip listeme ekle`
+      },
+      {
+        id: 'scan',
+        icon: 'scan',
+        label: 'Takip Listemi Analiz Et',
+        prompt: 'Takip listemdeki hisselerin genel durumunu analiz et'
+      }
+    ]
+
+    if (subpage === "teknik-analiz") {
+      return {
+        title: endeksName,
+        description: `${endeksName} teknik göstergelerini, trend ve momentum analizini inceleyin.`,
+        suggestions: [
+          `${endeksCode} için RSI, MACD ve hareketli ortalamalar ne gösteriyor?`,
+          `${endeksCode} günlük ve haftalık trend yönü nedir?`,
+          `${endeksCode} için ana destek ve direnç seviyeleri hangileri?`
+        ],
+        capabilities: sharedCapabilities
+      }
+    }
+
     return {
       title: endeksName,
-      description: `${endeksName} endeksinin teknik görünümünü, sektörel dağılımını ve öncü göstergelerini analiz edin.`,
+      description: `${endeksName} endeksinin teknik görünümünü, bileşenlerini ve seviyelerini analiz edin.`,
       suggestions: [
-        `${endeksCode} günlük teknik görünümü ve direnç seviyeleri nelerdir?`,
-        `${endeksCode} endeksini en çok etkileyen ağırlıklı hisseler hangileri?`,
-        `${endeksCode} için RSI ve MACD göstergeleri neye işaret ediyor?`
+        `${endeksCode} için trend yönü ve momentum göstergeleri ne durumda?`,
+        `${endeksCode} için ana destek ve direnç seviyeleri neler?`,
+        `${endeksCode} endeksinde en yüksek ağırlığa sahip hisselerin durumu nedir?`
       ],
-      capabilities: [
-        {
-          id: 'watchlist',
-          icon: 'watchlist',
-          label: 'Endeksi Takip Listeme Ekle',
-          prompt: `${endeksCode} endeksini takip listeme ekle`
-        },
-        {
-          id: 'deep_search',
-          icon: 'deep_search',
-          label: 'Deep Search Trend Analizi',
-          prompt: `${endeksCode} endeksi için Derinlemesine Trend ve Makro Analiz (Deep Search) başlat`
-        },
-        {
-          id: 'scan',
-          icon: 'scan',
-          label: 'Takip Listemi Analiz Et',
-          prompt: 'Takip listemdeki hisselerin genel durumunu analiz et'
-        }
-      ]
+      capabilities: sharedCapabilities
     }
   }
 
@@ -178,22 +183,16 @@ export function getPageSuggestions(context: string): PageSuggestions {
       title: "BIST Endeksleri",
       description: "Tüm BIST endekslerini inceleyin, sektörel endekslerin performanslarını karşılaştırın.",
       suggestions: [
-        "BIST 100 teknik görünümü ve direnç seviyeleri nelerdir?",
-        "En iyi performans gösteren sektörel endeksler hangileri?",
-        "Banka endeksi (XBANK) teknik olarak ne durumda?"
+        "BIST 100 trend yönü ve direnç seviyeleri nelerdir?",
+        "Haftanın en iyi performans gösteren endeksleri hangileri?",
+        "Banka endeksi (XBANK) teknik göstergeleri ne durumda?"
       ],
       capabilities: [
         {
           id: 'scan',
           icon: 'scan',
-          label: 'Sektör Taraması Yap',
-          prompt: 'BIST sektörel endekslerinin son 1 haftalık performans sıralamasını getir'
-        },
-        {
-          id: 'deep_search',
-          icon: 'deep_search',
-          label: 'Piyasa Geneli Deep Search',
-          prompt: 'BIST 100 genel piyasa görünümü için Deep Search analizi başlat'
+          label: 'Endeks Performansı',
+          prompt: 'BIST endekslerinin son 1 haftalık performans sıralamasını getir'
         }
       ]
     }
@@ -242,9 +241,10 @@ export function getPageSuggestions(context: string): PageSuggestions {
     title: "Araştırmaya Başlayın",
     description: "Hisseler, rasyolar, bilançolar ve teknik formasyonlar hakkında sorularınızı sorun. BIST odaklı yapay zeka analiz etsin.",
     suggestions: [
-      "BIST 100 genel görünümü ve yön tahmini nedir?",
-      "En çok kazandıran ve hacimli hisseler hangileri oldu?",
-      "Yabancı takas oranı en yüksek BIST hisseleri hangileri?"
+      "Bugün en çok kazandıran hisseler hangileri?",
+      "BIST 100 teknik göstergeleri ne durumda?",
+      "BIST 30 endeksinde öne çıkan hisseler hangileri?",
+      "Takip listemdeki hisselerin genel durumunu analiz et"
     ],
     capabilities: [
       {
@@ -252,12 +252,6 @@ export function getPageSuggestions(context: string): PageSuggestions {
         icon: 'scan',
         label: 'Takip Listemi Analiz Et',
         prompt: 'Takip listemdeki hisselerin genel durumunu analiz et'
-      },
-      {
-        id: 'deep_search',
-        icon: 'deep_search',
-        label: 'Deep Search Piyasa Analizi',
-        prompt: 'BIST 100 için Derinlemesine Nedensellik Analizi (Deep Search) başlat'
       },
       {
         id: 'compare',

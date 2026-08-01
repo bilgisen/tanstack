@@ -1,9 +1,10 @@
-import { createFileRoute, Link, Outlet, useMatches } from '@tanstack/react-router'
-import { Loader2, ChevronRight, Factory } from 'lucide-react'
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
+import { Link, Outlet, createFileRoute, useMatches } from '@tanstack/react-router'
+import { ChevronRight, Factory, Loader2 } from 'lucide-react'
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
-import { useSectorGroups, type SectorGroupsResponse } from '../lib/useCompData'
-import { groupKeyToSlug, groupKeyToDisplayName, SECTOR_GROUPS } from '../constants/sectorGroups'
+import {  useSectorGroups } from '../lib/useCompData'
+import { SECTOR_GROUPS, groupKeyToDisplayName, groupKeyToSlug } from '../constants/sectorGroups'
+import type {SectorGroupsResponse} from '../lib/useCompData';
 
 type SectorGroupItem = SectorGroupsResponse['groups'][number]
 
@@ -22,7 +23,7 @@ function SektorlerPage() {
   const { data, isLoading: loading } = useSectorGroups()
   const hasChildRoute = matches.some(m => m.routeId === '/sektorler/$slug')
 
-  const groups: SectorGroupItem[] = (data?.groups || Object.entries(SECTOR_GROUPS).map(([key, name]) => ({
+  const groups: Array<SectorGroupItem> = (data?.groups || Object.entries(SECTOR_GROUPS).map(([key, name]) => ({
     key, name, count: 0
   }))).sort((a, b) => (b.count || 0) - (a.count || 0))
 

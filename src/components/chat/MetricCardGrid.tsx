@@ -6,7 +6,7 @@ interface MetricItem {
 }
 
 interface MetricCardGridProps {
-  items: MetricItem[]
+  items: Array<MetricItem>
   columns?: 2 | 3 | 4
   onCardClick?: (label: string, value: string) => void
 }

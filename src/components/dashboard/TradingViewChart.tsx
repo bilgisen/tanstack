@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from "react";
-import { memo } from "react";
-import { createChart, ColorType, CandlestickSeries, HistogramSeries } from "lightweight-charts";
-import type { IChartApi } from "lightweight-charts";
+import { memo, useEffect, useRef, useState  } from "react";
+import { CandlestickSeries, ColorType, HistogramSeries, createChart } from "lightweight-charts";
 import { Loader2 } from "lucide-react";
 import { useHistory } from "../../lib/useMarketData";
+import type { IChartApi } from "lightweight-charts";
 
 interface TradingViewChartProps {
   symbol: string;
@@ -19,7 +18,7 @@ interface HistoricalDataPoint {
   volume?: number;
 }
 
-export const TradingViewChart = memo(function TradingViewChart({
+export const TradingViewChart = memo(function TradingViewChartComponent({
   symbol,
   lastPrice = 100.0,
 }: TradingViewChartProps) {
@@ -29,8 +28,8 @@ export const TradingViewChart = memo(function TradingViewChart({
   const { data: historyApiData, isLoading: historyLoading } = useHistory(symbol, 150);
 
   // High fidelity random walk generator for realistic historical candles fallback
-  const generateMockHistory = (basePrice: number, days: number = 90): HistoricalDataPoint[] => {
-    const data: HistoricalDataPoint[] = [];
+  const generateMockHistory = (basePrice: number, days: number = 90): Array<HistoricalDataPoint> => {
+    const data: Array<HistoricalDataPoint> = [];
     let currentPrice = basePrice > 0 ? basePrice : 100.0;
     const now = new Date();
 
@@ -86,10 +85,10 @@ export const TradingViewChart = memo(function TradingViewChart({
     let isMounted = true;
     let chart: IChartApi | null = null;
 
-    async function initChart() {
+    function initChart() {
       setError(false);
 
-      let rawData: HistoricalDataPoint[] = [];
+      let rawData: Array<HistoricalDataPoint> = [];
       
       if (historyApiData && Array.isArray(historyApiData) && historyApiData.length > 0) {
         rawData = historyApiData.map((item: Record<string, unknown>) => {

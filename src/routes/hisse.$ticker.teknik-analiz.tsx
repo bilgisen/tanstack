@@ -1,14 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
+import {
+  Activity, AlertTriangle, BarChart3, Gauge,
+  Shield, TrendingUp
+} from 'lucide-react'
 import { TradingViewChart } from '../components/dashboard/TradingViewChart'
-import { CeoTaReport } from '../components/company/CeoTaReport'
-import { LockedSection } from '../components/company/LockedSection'
 import { ScoreGauge } from '../constants/companyShared'
 import { useCompanyData } from '../lib/useCompanyData'
-import { useTAPublicSummary, type TAPublicSummary } from '../lib/useTechnicalAnalysis'
-import {
-  Activity, TrendingUp, BarChart3, AlertTriangle,
-  Shield, Gauge, Sparkles
-} from 'lucide-react'
+import {  useTAPublicSummary } from '../lib/useTechnicalAnalysis'
 
 export const Route = createFileRoute('/hisse/$ticker/teknik-analiz')({
   component: TechnicalAnalysisPage,
@@ -45,9 +43,8 @@ function TechnicalAnalysisPage() {
   }
 
   // ── PUBLIC TIER ─────────────────────────────────────────────
-  const publicData = publicTa as TAPublicSummary | null | undefined
+  const publicData = publicTa
   const hasData = !!publicData && !publicData._blocked
-  const isBlocked = !!publicData?._blocked
 
   return (
     <div className="space-y-5">
@@ -131,18 +128,7 @@ function TechnicalAnalysisPage() {
         </div>
       )}
 
-      {/* ═══ AI Report (Subscriber-only, only when base TA data exists) ═══ */}
-      {(hasData || isBlocked) && (
-        <LockedSection variant="subscriber">
-          <div className="space-y-4 pt-2">
-            <div className="flex items-center gap-2 pb-2 border-b border-border/30">
-              <Sparkles size={14} className="text-violet-500" />
-              <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">AI Teknik Analiz</h3>
-            </div>
-            <CeoTaReport ticker={tickerUpper} />
-          </div>
-        </LockedSection>
-      )}
+      
     </div>
   )
 }

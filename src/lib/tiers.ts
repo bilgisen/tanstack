@@ -18,7 +18,7 @@ export const TIER_CONFIG = {
     historyDays: 90,
     price: 799,
     currency: 'TL',
-    polarProductId: '21cce3c0-6541-4e3d-81be-d8287e78eb0f',
+    dodoProductId: 'pdt_0NjpffB3aBE7RwdXJULbw',
   },
   proabone: {
     displayName: 'ProAbone',
@@ -28,13 +28,8 @@ export const TIER_CONFIG = {
     historyDays: null,
     price: 1499,
     currency: 'TL',
-    polarProductId: '575bb0d5-44c3-49d6-aaba-fa8a9b0cc08c',
+    dodoProductId: 'pdt_0NkGi2vCdyy51kPeIqNoS',
   },
 } as const;
 
 export type Tier = keyof typeof TIER_CONFIG;
-
-export const TIER_POLAR_MAP: Record<string, { price: number; monthlyJT: number; polarProductId: string }> = {
-  jetabone: { price: 799, monthlyJT: 100_000, polarProductId: '21cce3c0-6541-4e3d-81be-d8287e78eb0f' },
-  proabone: { price: 1499, monthlyJT: 500_000, polarProductId: '575bb0d5-44c3-49d6-aaba-fa8a9b0cc08c' },
-};

@@ -1,14 +1,14 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { 
-  ArrowUpRight, 
   ArrowDownRight, 
+  ArrowUpRight, 
+  FolderPlus, 
   Loader2, 
-  Trash2, 
-  FolderPlus,
-  Search, 
+  Search,
+  Sparkles, 
   Star,
-  Sparkles
+  Trash2
 } from 'lucide-react'
 import { useUIStore } from '../store/ui'
 import { useWatchlistStore } from '../store/watchlist'
@@ -89,7 +89,7 @@ function WatchlistPage() {
       last_price: 0,
       diff_percent: 0,
       type: item.type
-    } as MarketItem
+    }
   })
 
   // Filter global stocks/indices for search autocomplete

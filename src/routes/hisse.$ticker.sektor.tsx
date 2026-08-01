@@ -1,8 +1,9 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { Loader2, Factory, BarChart3, TrendingUp, ArrowUp, ArrowDown, Minus, ChevronRight } from 'lucide-react'
-import { useCompScore, useCompProfile } from '../lib/useCompData'
-import { groupKeyToSlug, groupKeyToDisplayName, sectorNameToGroupKey } from '../constants/sectorGroups'
-import { getRatioLabel, HIGHER_IS_BETTER, RATIO_DEFS, type RatioCategory } from '../constants/ratios'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { ArrowDown, ArrowUp, BarChart3, ChevronRight, Factory, Loader2, Minus, TrendingUp } from 'lucide-react'
+import { useCompProfile, useCompScore } from '../lib/useCompData'
+import { groupKeyToDisplayName, groupKeyToSlug, sectorNameToGroupKey } from '../constants/sectorGroups'
+import { HIGHER_IS_BETTER, RATIO_DEFS,  getRatioLabel } from '../constants/ratios'
+import type {RatioCategory} from '../constants/ratios';
 
 export const Route = createFileRoute('/hisse/$ticker/sektor')({
   component: CompanySektorPage,
@@ -156,7 +157,7 @@ function CompanySektorPage() {
             <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Sektör Karşılaştırması</h3>
             <span className="text-[10px] text-muted-foreground ml-auto">Şirket · Sektör Medyanı</span>
           </div>
-          {(['degerleme', 'karlilik', 'finansal_saglik', 'likidite', 'verimlilik', 'buyume', 'hisse_basi'] as RatioCategory[]).map(cat => {
+          {(['degerleme', 'karlilik', 'finansal_saglik', 'likidite', 'verimlilik', 'buyume', 'hisse_basi'] as Array<RatioCategory>).map(cat => {
             const catRatios = availableRatios.filter(rc => RATIO_DEFS.find(d => d.code === rc)?.category === cat)
             if (catRatios.length === 0) return null
             return (

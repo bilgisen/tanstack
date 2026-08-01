@@ -29,9 +29,6 @@ const CTA = ({ onLogin }: { onLogin?: () => void }) => {
             <Button className="mt-8" size="lg" onClick={onLogin}>
               Google'la bağlan <ArrowUpRight />
             </Button>
-            <p className="mt-2 text-xs text-muted-foreground/60">
-              30 gün ücretsiz kullanın. Kredi kartı gerekmez.
-            </p>
           </div>
         </div>
       </div>

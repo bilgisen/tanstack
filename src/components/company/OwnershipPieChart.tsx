@@ -4,7 +4,7 @@ interface Shareholder {
 }
 
 interface OwnershipPieChartProps {
-  shareholders?: Shareholder[] | null
+  shareholders?: Array<Shareholder> | null
 }
 
 const COLORS = [

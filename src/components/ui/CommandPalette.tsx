@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { useUIStore } from "../../store/ui";
-import { Search, X, Command, TrendingUp, Clock, FileText, ArrowRight } from "lucide-react";
+import { ArrowRight, Clock, Command, FileText, Search, TrendingUp, X } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
+import { useUIStore } from "../../store/ui";
 
 export function CommandPalette() {
   const { isCommandPaletteOpen, closeCommandPalette, setGlobalPrompt, openRightSidebar } = useUIStore();

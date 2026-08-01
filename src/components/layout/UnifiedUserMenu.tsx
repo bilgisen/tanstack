@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { User, LogOut, Sun, Moon, Monitor, Star, Sparkles } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { LogOut, Monitor, Moon, Sparkles, Star, Sun, User } from "lucide-react";
 import { ProfileAvatar } from "./ProfileAvatar";
 import type { Theme } from "../../store/ui";
 
@@ -38,7 +38,7 @@ export function UnifiedUserMenu({
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [activeIndex, setActiveIndex] = useState<number>(-1);
-  const menuItemsRef = useRef<(HTMLButtonElement | null)[]>([]);
+  const menuItemsRef = useRef<Array<HTMLButtonElement | null>>([]);
 
   const setMenuItemRef = useCallback((index: number) => (el: HTMLButtonElement | null) => {
     menuItemsRef.current[index] = el;

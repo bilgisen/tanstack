@@ -1,4 +1,4 @@
-import { Newspaper, ArrowUp, ArrowDown, Minus } from "lucide-react";
+import { ArrowDown, ArrowUp, Minus, Newspaper } from "lucide-react";
 
 const mockNews = [
   {

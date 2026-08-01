@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ResponsiveLogo } from "./ResponsiveLogo";
 import { Menu } from "lucide-react";
-import { MobileDrawer } from "./MobileDrawer";
-import { navigationItems } from "@/lib/navigationItems";
 import { useAuth } from "../../hooks/useAuth";
+import { ResponsiveLogo } from "./ResponsiveLogo";
+import { MobileDrawer } from "./MobileDrawer";
 import { ProfileAvatar } from "./ProfileAvatar";
+import { navigationItems } from "@/lib/navigationItems";
 
 export function Topbar() {
   const { user, login: handleLogin, logout } = useAuth();
@@ -36,6 +36,9 @@ export function Topbar() {
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2 select-none hover:opacity-95 transition-all">
             <ResponsiveLogo mobileSize={28} className="text-foreground shrink-0" />
+            <span className="-ml-1.5 self-center rounded-md bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary border border-primary/20 leading-none">
+              beta
+            </span>
           </Link>
           
           {/* Desktop Navigation */}

@@ -29,7 +29,7 @@ export function CompanyProfileCard({ profile, loading }: CompanyProfileCardProps
 
   if (!profile) return null
 
-  const rows: [string, string | undefined][] = [
+  const rows: Array<[string, string | undefined]> = [
     ['Ünvanı', profile.unvan],
     ['Kuruluş', profile.kurulus],
     ['Faal Alanı', profile.faaliyet],

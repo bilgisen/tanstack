@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real, index } from "drizzle-orm/sqlite-core";
+import { index, integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { user } from "./auth-schema";
 
 export * from "./auth-schema";
@@ -45,6 +45,10 @@ export const userCredits = sqliteTable("user_credits", {
   polarSubId: text("polar_sub_id"),
   polarSubStatus: text("polar_sub_status"),
   polarSubCurrentPeriodEnd: integer("polar_sub_current_period_end", { mode: "timestamp" }),
+  dodoCustomerId: text("dodo_customer_id"),
+  dodoSubId: text("dodo_sub_id"),
+  dodoSubStatus: text("dodo_sub_status"),
+  dodoSubCurrentPeriodEnd: integer("dodo_sub_current_period_end", { mode: "timestamp" }),
   resetAt: integer("reset_at", { mode: "timestamp" }).notNull(),
   createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(() => new Date()).$onUpdate(() => new Date()).notNull(),

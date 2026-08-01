@@ -4,9 +4,9 @@
  */
 
 import 'dotenv/config';
+import { eq } from 'drizzle-orm';
 import { db } from './src/lib/db';
 import { modelConfigs } from './src/lib/schema';
-import { eq } from 'drizzle-orm';
 
 const models = [
   {

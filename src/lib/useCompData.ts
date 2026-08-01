@@ -27,12 +27,14 @@ export interface CompScorePillar {
     ratio_code: string
     peer_median: number
     company_value: number
+    percentile?: number
     direction?: string
   }>
 }
 
 export interface CompScoreResponse {
   composite_score: number
+  percentile?: number
   company_name?: string
   sector?: string
   reliability?: string
@@ -68,7 +70,7 @@ export interface RatioEntry {
 }
 
 export interface CompRatiosResponse {
-  ratios: RatioEntry[]
+  ratios: Array<RatioEntry>
 }
 
 export interface CompTrendsResponse {
@@ -128,7 +130,7 @@ export interface CeoReportIndicators {
 export interface CeoReportScenario {
   name: string
   probability: string
-  conditions: string[]
+  conditions: Array<string>
   target?: string
   strategy?: string
   risk?: string
@@ -163,8 +165,8 @@ export interface CeoReportResponse {
   }
   patterns?: {
     active_count: number
-    candlestick?: CeoReportPattern[]
-    chart?: CeoReportPattern[]
+    candlestick?: Array<CeoReportPattern>
+    chart?: Array<CeoReportPattern>
   }
   volume_profile?: {
     poc: number
@@ -174,11 +176,11 @@ export interface CeoReportResponse {
   }
   izlenmesi_gerekenler?: {
     not: string
-    kritik_seviyeler?: string[]
-    izlenecek_konular?: string[]
+    kritik_seviyeler?: Array<string>
+    izlenecek_konular?: Array<string>
   }
   ai_analysis?: {
-    sonuc: string[]
+    sonuc: Array<string>
   }
   unit?: string
 }
@@ -332,18 +334,35 @@ export function useCompSectorDetail(name: string) {
   })
 }
 
-export function useCompCompare(tickers: string[]) {
+export interface CompCompareCompany {
+  ticker: string
+  company_name?: string
+  sector?: string
+  composite_score: number | null
+  percentile?: number | null
+  reliability?: string | null
+  pillars?: Record<string, CompScorePillar>
+  absolute?: { score: number | null; label: string | null } | null
+  key_ratios?: Record<string, number | null>
+  ratio_percentiles?: Record<string, number | null>
+}
+
+export interface CompCompareResponse {
+  tickers: Array<CompCompareCompany>
+}
+
+export function useCompCompare(tickers: Array<string>) {
   const joined = tickers.filter(Boolean).join(',')
-  return useQuery<Record<string, unknown> | null>({
+  return useQuery<CompCompareResponse | null>({
     queryKey: ['comp', 'compare', joined],
-    queryFn: () => fetchComp<Record<string, unknown>>(`/compare/${joined}`),
+    queryFn: () => fetchComp<CompCompareResponse>(`/compare/${joined}`),
     staleTime: 3_600_000,
     gcTime: 86_400_000,
     enabled: joined.length > 0 && tickers.length >= 2,
   })
 }
 
-export async function fetchCompCompareContext(tickers: string[]): Promise<Record<string, unknown> | null> {
+export async function fetchCompCompareContext(tickers: Array<string>): Promise<Record<string, unknown> | null> {
   const res = await fetch(`${HONO_API}/api/v1/comp/ai/compare-context`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -391,7 +410,7 @@ export interface RelationalSignal {
   pattern_id: string
   category: 'confirming' | 'conflicting' | 'warning' | 'opportunity'
   polarity: 'confirming' | 'conflicting'
-  ratios_involved: string[]
+  ratios_involved: Array<string>
   narrative_hint: string
   severity: number
   ratio_details: Record<string, { value: number | null; percentile: number | null; sector_median: number | null } | null>
@@ -402,6 +421,7 @@ export interface CompFundamentalsResponse {
   company_name: string
   sector: string | null
   composite_score: number | null
+  percentile?: number | null
   reliability: string | null
   pillars: Record<string, CompScorePillar> | null
   absolute: { score: number; label: string } | null
@@ -428,7 +448,7 @@ export interface CompFundamentalsResponse {
     locked?: boolean
   }>
   trends: {
-    periods: string[]
+    periods: Array<string>
     n_periods: number
     trends: Record<string, {
       values: Array<{ period: string; value: number }>
@@ -444,19 +464,19 @@ export interface CompFundamentalsResponse {
     sector_comparison: Record<string, { sector_median: number }> | null
   } | null
   key_insights: Array<{ insight: string; category: string; importance: number; data?: Record<string, unknown> }>
-  relational_signals: RelationalSignal[]
+  relational_signals: Array<RelationalSignal>
   risk_assessment: {
     composite_risk_score: number
     risk_level: string
     indicators: Record<string, { score: number; level: string; factors: Array<{ factor: string; value: number; threshold: number; status: string }> }>
     risk_trends: Record<string, string> | null
-    mitigation_factors: string[] | null
+    mitigation_factors: Array<string> | null
   } | null
   metadata: {
     period: string | null
     data_completeness: number | null
-    missing_ratios: string[]
-    available_sections?: string[]
+    missing_ratios: Array<string>
+    available_sections?: Array<string>
   }
 }
 
@@ -464,16 +484,16 @@ export interface FaNarrativeSection {
   id: string
   title: string
   content: string
-  signals_used: string[]
+  signals_used: Array<string>
   visual_hint: string
-  ratios_referenced: string[]
+  ratios_referenced: Array<string>
 }
 
 export interface FaNarrativeReport {
   ticker: string
   report_type: string
   generated_at: string
-  sections: FaNarrativeSection[]
+  sections: Array<FaNarrativeSection>
   has_ai_enhancement: boolean
 }
 

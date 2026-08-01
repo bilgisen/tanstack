@@ -1,15 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useAuth } from '../hooks/useAuth'
 import { 
-  Shield, 
+  AlertTriangle, 
   Brain, 
-  Database, 
-  Zap, 
   Check, 
-  X, 
-  Sparkles,
-  AlertTriangle
+  Database, 
+  Shield, 
+  Sparkles, 
+  X,
+  Zap
 } from 'lucide-react'
+import { useAuth } from '../hooks/useAuth'
 
 export const Route = createFileRoute('/neden-jetborsa')({
   component: NedenJetborsaPage,

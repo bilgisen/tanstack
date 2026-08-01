@@ -1,5 +1,5 @@
-import { useSession, signIn, signOut } from '../lib/auth-client';
 import { useEffect, useState } from 'react';
+import { signIn, signOut, useSession } from '../lib/auth-client';
 
 export interface UserProfile {
   id: string;
@@ -36,9 +36,9 @@ export function useAuth() {
       setCreditsLoading(true);
       fetch('/api/user/credits')
         .then(res => res.json() as Promise<Record<string, unknown>>)
-        .then(data => {
-          if (data && typeof data === 'object' && 'tier' in data) {
-            setCredits(data as unknown as UserCredits);
+        .then(payload => {
+          if (payload && typeof payload === 'object' && 'tier' in payload) {
+            setCredits(payload as unknown as UserCredits);
           }
         })
         .catch(err => {

@@ -54,7 +54,7 @@ function BorsaText({ className, style, ...props }: React.HTMLAttributes<HTMLSpan
   );
 }
 
-export function Logo({ size = 24, variant = "full", className, style }: LogoProps) {
+export function Logo({ size = 24, variant = "full", className, style, role, "aria-label": ariaLabel }: LogoProps) {
   if (variant === "icon") {
     return <JetIconBranded size={size} className={className} />;
   }
@@ -66,7 +66,7 @@ export function Logo({ size = 24, variant = "full", className, style }: LogoProp
   // full = icon + "jetborsa" text side by side
   const fontSize = size * 0.82;
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "4px", ...style }} className={className}>
+    <div role={role} aria-label={ariaLabel} style={{ display: "flex", alignItems: "center", gap: "4px", ...style }} className={className}>
       <JetIconBranded size={size} />
       <BorsaText style={{ fontSize, color: "currentColor", lineHeight: 1 }} />
     </div>

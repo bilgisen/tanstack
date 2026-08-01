@@ -1,10 +1,11 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, Factory, Loader2, BarChart3, TrendingUp } from 'lucide-react'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { ArrowLeft, BarChart3, Factory, Loader2, TrendingUp } from 'lucide-react'
+import { useMemo } from 'react'
 import { useCompSectorDetail } from '../lib/useCompData'
-import { DataTable, type Column } from '../components/ui/data-table'
+import {  DataTable } from '../components/ui/data-table'
 import { groupSlugToDisplayName, slugToSectorName } from '../constants/sectorGroups'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
-import { useMemo } from 'react'
+import type {Column} from '../components/ui/data-table';
 
 export const Route = createFileRoute('/sektorler/$slug/$sectorSlug')({
   component: SektorDetailPage,
@@ -50,6 +51,13 @@ function SektorDetailPage() {
 
   const chatContext = `sector:${sectorName}`
 
+  const starterQuestions = [
+    'Bu sektörde en düşük F/K oranına sahip iskontolu hisseler hangileri?',
+    'Sektörde en yüksek ROE\'ye sahip şirketler hangileri?',
+    'Sektörün medyan rasyoları (F/K, PD/DD, ROE) nasıl?',
+    'Sektörün genel değerleme görünümü nasıl?',
+  ]
+
   const benchEntries = Object.entries(benchmarks).map(([code, b]) => ({
     code, label: BENCHMARK_LABELS[code] || code, category: BENCHMARK_CATEGORIES[code] || 'Diğer',
     median: b.median_ew, p25: b.p25, p75: b.p75,
@@ -62,7 +70,7 @@ function SektorDetailPage() {
     leaderboard.map((r, i) => ({ ...r, _rank: i + 1 })),
   [leaderboard])
 
-  const leaderboardColumns: Column<Record<string, unknown>>[] = useMemo(() => [
+  const leaderboardColumns: Array<Column<Record<string, unknown>>> = useMemo(() => [
     {
       key: '_rank', header: '#', sortable: false,
       render: (r: Record<string, unknown>) => <span className="text-[10px]">{String(r._rank)}</span>,
@@ -119,7 +127,7 @@ function SektorDetailPage() {
 
   if (loading) {
     return (
-      <PublicPageLayout context={chatContext} placeholder={`${sectorName} sektörü hakkında bir soru sorun...`}>
+      <PublicPageLayout context={chatContext} placeholder={`${sectorName} sektörü hakkında bir soru sorun...`} starterQuestions={starterQuestions}>
         <div className="flex h-[360px] items-center justify-center text-muted-foreground font-medium text-xs gap-2 animate-pulse">
           <Loader2 className="animate-spin text-primary" size={16} />
           <span>Veriler yükleniyor, lütfen bekleyin...</span>
@@ -204,8 +212,8 @@ function SektorDetailPage() {
             </div>
             <DataTable
               columns={leaderboardColumns}
-              data={withRank as Record<string, unknown>[]}
-              onRowClick={(r) => navigate({ to: `/hisse/${(r.ticker as string).toLowerCase()}` })}
+              data={withRank}
+              onRowClick={(r) => navigate({ to: `/hisse/${(r.ticker).toLowerCase()}` })}
               className="text-base"
             />
           </div>

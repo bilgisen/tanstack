@@ -1,5 +1,5 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowRight, MessageSquare, BarChart3, TrendingUp, List, Check } from 'lucide-react'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { ArrowRight, BarChart3, Check, List, MessageSquare, TrendingUp } from 'lucide-react'
 import { Logo } from '../components/layout/Logo'
 
 export const Route = createFileRoute('/nasil-calisir')({
@@ -42,7 +42,7 @@ function NasilCalisirPage() {
             <div className="flex-1">
               <h2 className="text-xl font-bold mb-3">Ücretsiz Hesap Oluşturun</h2>
               <p className="text-white/60 leading-relaxed mb-4">
-                Google hesabınızla tek tıkla ücretsiz üye olun. Kredi kartı bilgisi gerekmez. Hemen 5 ücretsiz kredi ile başlarsınız.
+                Google hesabınızla tek tıkla ücretsiz üye olun. Kredi kartı bilgisi gerekmez. Aylık 5.000 Jet Token ile başlarsınız.
               </p>
               <div className="flex items-center gap-2 text-sm text-[#494fdf]">
                 <Check size={16} /> Kredi kartı gerektirmez

@@ -1,6 +1,11 @@
-import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
-import { useCompCompare, fetchCompCompareContext } from '../lib/useCompData'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
+import {
+  Bar, BarChart, Legend, PolarAngleAxis, PolarGrid, PolarRadiusAxis,
+  Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis
+} from 'recharts'
+import { ArrowUpDown, BarChart3, ChevronRight, Search, Shield, Sparkles, TrendingUp, X } from 'lucide-react'
+import { fetchCompCompareContext, useCompCompare } from '../lib/useCompData'
 import { ScoreGauge } from '../constants/companyShared'
 import { getRatioLabel } from '../constants/ratios'
 
@@ -9,15 +14,14 @@ type PillarEntry = { score: number }
 type CompareCompany = {
   ticker: string
   composite_score: number
+  percentile?: number | null
+  sector?: string
+  reliability?: string | null
   absolute: { label: string } | null
   pillars: Record<string, PillarEntry>
   key_ratios: Record<string, number | null>
+  ratio_percentiles?: Record<string, number | null>
 }
-import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend
-} from 'recharts'
-import { X, TrendingUp, Shield, BarChart3, Sparkles, Search, ChevronRight, ArrowUpDown } from 'lucide-react'
 
 export const Route = createFileRoute('/karsilastir')({
   component: ComparePage,
@@ -59,7 +63,7 @@ const KNOWN_TICKERS = [
 
 function CompanySearch({ onSelect }: { onSelect: (ticker: string) => void }) {
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState<string[]>([])
+  const [results, setResults] = useState<Array<string>>([])
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
@@ -100,20 +104,9 @@ function ComparePage() {
   const { t: tickerParam } = Route.useSearch()
   const tickers = tickerParam ? tickerParam.split(',').map(s => s.trim().toUpperCase()).filter(Boolean) : []
   const { data: compareData, isLoading, error } = useCompCompare(tickers)
-  const [aiContext, setAiContext] = useState<unknown>(null)
-  const [aiLoading, setAiLoading] = useState(false)
 
-  const result = compareData as { tickers: CompareCompany[] } | null
+  const result = compareData as { tickers: Array<CompareCompany> } | null
   const companies = result?.tickers || []
-
-  useEffect(() => {
-    if (companies.length >= 2) {
-      setAiLoading(true)
-      fetchCompCompareContext(tickers).then(ctx => { setAiContext(ctx); setAiLoading(false) }).catch(() => setAiLoading(false))
-    } else {
-      setAiContext(null)
-    }
-  }, [tickers.join(',')])
 
   function addTicker(newT: string) {
     if (!tickers.includes(newT)) {
@@ -153,6 +146,20 @@ function ComparePage() {
     })
     return entry
   })
+
+  const [aiContext, setAiContext] = useState<string | null>(null)
+  const [aiLoading, setAiLoading] = useState(false)
+  useEffect(() => {
+    let cancelled = false
+    setAiContext(null)
+    if (tickers.length < 2) return
+    setAiLoading(true)
+    fetchCompCompareContext(tickers)
+      .then(ctx => { if (!cancelled && ctx) setAiContext(JSON.stringify(ctx, null, 2)) })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setAiLoading(false) })
+    return () => { cancelled = true }
+  }, [tickers.join(',')])
 
   if (tickers.length === 0) {
     return (
@@ -226,8 +233,14 @@ function ComparePage() {
                       <span className="text-sm font-bold font-mono text-foreground">{c.ticker}</span>
                       {c.absolute && <AbsoluteBadge label={c.absolute.label} />}
                     </div>
+                    <div className="mt-1 flex items-center gap-2 text-[10px] text-muted-foreground">
+                      {c.percentile != null && (
+                        <span className="font-medium">Piyasa %{fmt(c.percentile, 0)}</span>
+                      )}
+                      {c.sector && <span className="truncate">{c.sector}</span>}
+                    </div>
                     <div className="mt-2 space-y-1">
-                      {c.pillars && Object.entries(c.pillars).map(([key, p]: [string, PillarEntry]) => (
+                      {Object.entries(c.pillars).map(([key, p]: [string, PillarEntry]) => (
                         <div key={key} className="flex items-center gap-2">
                           <div className="h-1.5 flex-1 bg-muted/20">
                             <div className="h-full transition-all duration-500" style={{ width: `${p.score}%`, backgroundColor: PILLAR_COLORS[Object.keys(c.pillars).indexOf(key) % PILLAR_COLORS.length] }} />
@@ -314,9 +327,13 @@ function ComparePage() {
                           {companies.map(c => {
                             const val = row[c.ticker]
                             const isBest = val != null && vals.length >= 2 && val === best
+                            const pct = c.ratio_percentiles?.[String(row.code)] ?? null
                             return (
                               <td key={c.ticker} className={`text-right py-2 px-3 font-mono transition-colors ${isBest ? 'text-emerald-400 font-bold' : 'text-muted-foreground'}`}>
                                 {fmt(val as number | null | undefined)}
+                                {pct != null && val != null && (
+                                  <span className="ml-1.5 text-[9px] text-muted-foreground/60">p{fmt(pct, 0)}</span>
+                                )}
                               </td>
                             )
                           })}

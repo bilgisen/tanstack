@@ -1,11 +1,11 @@
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { 
   ArrowRightLeft, 
-  TrendingUp, 
-  Coins, 
-  Calculator, 
   ArrowUpRight, 
-  Info
+  Calculator, 
+  Coins, 
+  Info, 
+  TrendingUp
 } from "lucide-react";
 
 interface ComparisonCompany {
@@ -28,10 +28,10 @@ export interface InteractiveWidgetProps {
     type: 'comparison' | 'ratio_chart' | 'calculator';
     title: string;
     data: {
-      companies?: ComparisonCompany[];
+      companies?: Array<ComparisonCompany>;
       company?: string;
       sector?: string;
-      ratios?: RatioData[];
+      ratios?: Array<RatioData>;
       principal?: number;
       rate?: number;
       years?: number;
@@ -45,7 +45,7 @@ export interface InteractiveWidgetProps {
 // Helper to format price values to use "₺" prefix instead of "TL" suffix
 const formatPrice = (priceStr?: string) => {
   if (!priceStr) return "—";
-  let clean = priceStr.replace(/\s*TL/gi, "").trim();
+  const clean = priceStr.replace(/\s*TL/gi, "").trim();
   if (!clean.startsWith("₺")) {
     return `₺${clean}`;
   }
@@ -99,7 +99,7 @@ export function InteractiveWidget({ widget, onWidgetAction }: InteractiveWidgetP
 /* ============================================================================
    1. COMPARISON WIDGET
    ============================================================================ */
-function ComparisonWidget({ companies, onWidgetAction }: { companies: ComparisonCompany[]; onWidgetAction?: (label: string, payload?: string) => void }) {
+function ComparisonWidget({ companies, onWidgetAction }: { companies: Array<ComparisonCompany>; onWidgetAction?: (label: string, payload?: string) => void }) {
   // Parse numeric values helper for highlighting better metrics
   const parseNum = (str?: string) => {
     if (!str) return NaN;
@@ -309,7 +309,7 @@ function ComparisonWidget({ companies, onWidgetAction }: { companies: Comparison
 /* ============================================================================
    2. RATIO CHART WIDGET
    ============================================================================ */
-function RatioChartWidget({ companyName, sectorName, ratios, onWidgetAction }: { companyName: string; sectorName: string; ratios: RatioData[]; onWidgetAction?: (label: string, payload?: string) => void }) {
+function RatioChartWidget({ companyName, sectorName, ratios, onWidgetAction }: { companyName: string; sectorName: string; ratios: Array<RatioData>; onWidgetAction?: (label: string, payload?: string) => void }) {
   return (
     <div className="space-y-4">
       {/* Legend */}

@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { AlertCircle, FileText } from 'lucide-react'
 import { useCompStatements } from '../lib/useCompData'
-import { DataTable, type Column } from '../components/ui/data-table'
-import { FileText, AlertCircle } from 'lucide-react'
+import {  DataTable } from '../components/ui/data-table'
+import type {Column} from '../components/ui/data-table';
 
 export const Route = createFileRoute('/hisse/$ticker/tablolar')({
   component: FinancialStatementsPage,
@@ -17,7 +18,7 @@ interface StatementItem {
 
 interface GroupSection {
   label: string
-  items: StatementItem[]
+  items: Array<StatementItem>
 }
 
 interface GroupedData {
@@ -43,7 +44,7 @@ function formatPeriod(pk: string): string {
   return pk
 }
 
-function pivotStatements(items: StatementItem[]): { rows: PivotRow[]; periods: string[] } {
+function pivotStatements(items: Array<StatementItem>): { rows: Array<PivotRow>; periods: Array<string> } {
   const periodSet = new Set<string>()
   const rowMap = new Map<string, PivotRow>()
 
@@ -71,15 +72,15 @@ function FinancialStatementsPage() {
   const rawRecord = raw as Record<string, unknown> | null
   const grouped = (rawRecord?.grouped || (rawRecord?.data as Record<string, unknown> | undefined)?.grouped) as GroupedData | null
 
-  const sections: [string, GroupSection][] = grouped
-    ? Object.entries(grouped as GroupedData)
+  const sections: Array<[string, GroupSection]> = grouped
+    ? Object.entries(grouped)
     : []
 
   const sectionOrder = ['balance_sheet', 'income_statement', 'cash_flow']
 
   const orderedSections = sectionOrder
     .map(key => sections.find(([k]) => k === key))
-    .filter(Boolean) as [string, GroupSection][]
+    .filter(Boolean) as Array<[string, GroupSection]>
 
   const remaining = sections.filter(([k]) => !sectionOrder.includes(k))
   const allSections = [...orderedSections, ...remaining]
@@ -109,7 +110,7 @@ function FinancialStatementsPage() {
         const { rows, periods } = pivotStatements(section.items)
         if (rows.length === 0 || periods.length === 0) return null
 
-        const columns: Column<PivotRow>[] = [
+        const columns: Array<Column<PivotRow>> = [
           {
             key: 'item_desc_tr',
             header: 'Kalem',
@@ -125,7 +126,7 @@ function FinancialStatementsPage() {
               <span className="font-mono text-sm tabular-nums">{fmt(row[p] as number | null)}</span>
             ),
             className: 'text-right min-w-[100px] md:min-w-[120px]',
-          } as Column<PivotRow>)),
+          })),
         ]
 
         return (

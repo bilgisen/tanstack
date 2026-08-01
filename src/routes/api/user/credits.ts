@@ -1,9 +1,9 @@
 // @ts-nocheck
 import { createFileRoute } from '@tanstack/react-router'
+import { eq } from 'drizzle-orm'
 import { auth } from '../../../lib/auth'
 import { db } from '../../../lib/db'
 import { userCredits } from '../../../lib/schema'
-import { eq } from 'drizzle-orm'
 import { TIER_CONFIG } from '../../../lib/tiers'
 
 export const Route = createFileRoute('/api/user/credits')({
@@ -30,7 +30,7 @@ export const Route = createFileRoute('/api/user/credits')({
             .select()
             .from(userCredits)
             .where(eq(userCredits.userId, userId))
-            .then((res: any[]) => res[0]);
+            .then((res: Array<any>) => res[0]);
 
           if (!credits) {
             try {
@@ -45,7 +45,7 @@ export const Route = createFileRoute('/api/user/credits')({
                   resetAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
                 })
                 .returning()
-                .then((res: any[]) => res[0]);
+                .then((res: Array<any>) => res[0]);
             } catch (err) {
               console.error("Auto-provision error in GET /api/user/credits:", err);
             }
@@ -69,6 +69,7 @@ export const Route = createFileRoute('/api/user/credits')({
           availableJT,
           usagePercent,
           resetAt: credits?.resetAt || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          dodoCustomerId: credits?.dodoCustomerId || null,
         }), {
           headers: { 'Content-Type': 'application/json' }
         });

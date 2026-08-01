@@ -1,5 +1,5 @@
-import { createFileRoute, Link, Outlet, useLocation } from '@tanstack/react-router'
-import { ArrowUp, ArrowDown, Activity, Info, Star, ChevronDown, ChevronUp, Clock, BarChart3, FileText, Factory } from 'lucide-react'
+import { Link, Outlet, createFileRoute, useLocation } from '@tanstack/react-router'
+import { Activity, ArrowDown, ArrowUp, BarChart3, ChevronDown, ChevronUp, Clock, Factory, FileText, Info, Star } from 'lucide-react'
 import companyNames from '../constants/companyNames.json'
 import companyLogos from '../constants/companyLogos.json'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
@@ -46,11 +46,49 @@ function CompanyLayout() {
 
   const basePath = `/hisse/${ticker.toLowerCase()}`
 
+  const starterQuestions = (() => {
+    switch (subpage) {
+      case 'teknik-analiz':
+        return [
+          'Teknik analiz raporu hazırla',
+          'Trend ve momentum analizi yap',
+          'Destek ve direnç seviyelerini listele',
+          'ATR bazlı stop-loss seviyesi hesapla',
+        ]
+      case 'temel-analiz':
+        return [
+          'Finansal rasyoları incele (F/K, PD/DD, ROE)',
+          'Kârlılık trendini analiz et',
+          'Borçluluk ve likiditeyi değerlendir',
+          'Sektör medyanına göre değerleme yap',
+        ]
+      case 'tablolar':
+        return [
+          'Bilançoyu yorumla',
+          'Gelir tablosunu analiz et',
+          'Nakit akışını yorumla',
+        ]
+      case 'sektor':
+        return [
+          'Sektördeki konumunu rakipleriyle kıyasla',
+          'Sektör medyan rasyolarıyla karşılaştır',
+          'Sektördeki liderler arasındaki yerini göster',
+        ]
+      default:
+        return [
+          'Teknik analiz raporu hazırla',
+          'Finansal rasyoları incele (F/K, PD/DD, ROE)',
+          'Sektördeki konumu nedir?',
+          'Rakipleriyle karşılaştır',
+        ]
+    }
+  })()
+
   const stats = quote ? { name: displayName, code: tickerUpper, price: quote.last_price || 0, diffPercent: quote.diff_percent || 0, high: 0, low: 0, open: 0, close: 0, volume: '-' } : null
 
   if (isError) {
     return (
-      <PublicPageLayout context={chatContext} placeholder={`${tickerUpper} hakkında bir soru sorun...`}>
+      <PublicPageLayout context={chatContext} placeholder={`${tickerUpper} hakkında bir soru sorun...`} starterQuestions={starterQuestions}>
         <div className="flex flex-col items-center justify-center min-h-[360px] text-center space-y-4">
           <div className="text-4xl font-bold text-muted-foreground/20">{tickerUpper}</div>
           <p className="text-sm text-muted-foreground">Bu hisse senedi için veri bulunamadı. Hisse kodu hatalı olabilir veya henüz işlem görmüyor olabilir.</p>
@@ -61,7 +99,7 @@ function CompanyLayout() {
 
   if (loading || !stats) {
     return (
-      <PublicPageLayout context={chatContext} placeholder={`${tickerUpper} hakkında bir soru sorun...`}>
+      <PublicPageLayout context={chatContext} placeholder={`${tickerUpper} hakkında bir soru sorun...`} starterQuestions={starterQuestions}>
         <div className="space-y-5 pb-8">
           <Skeleton className="h-5 w-32 rounded-lg" />
           <Skeleton className="h-24 w-full rounded-2xl" />
@@ -99,7 +137,7 @@ function CompanyLayout() {
   }
 
   return (
-    <PublicPageLayout context={chatContext} placeholder={`${tickerUpper} hakkında bir soru sorun...`}>
+    <PublicPageLayout context={chatContext} placeholder={`${tickerUpper} hakkında bir soru sorun...`} starterQuestions={starterQuestions}>
       <div className="space-y-4 pb-8 animate-in fade-in duration-400">
 
         {/* Ticker Header */}

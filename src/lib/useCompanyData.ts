@@ -29,7 +29,7 @@ export function useIndustries() {
     queryFn: async () => {
       const res = await fetch(`${HONO_API}/api/sectors/industries`)
       if (!res.ok) throw new Error('Failed to fetch industries')
-      return await res.json() as { success: boolean; data: Industry[]; total: number }
+      return await res.json() as { success: boolean; data: Array<Industry>; total: number }
     },
     staleTime: 3_600_000,
     gcTime: 86_400_000,
@@ -96,7 +96,7 @@ export function useCompanyProfile(ticker: string) {
         telefon?: string
         faks?: string
         adres?: string
-        shareholders?: { name: string; share_pct?: number }[]
+        shareholders?: Array<{ name: string; share_pct?: number }>
       }
     },
     staleTime: 86_400_000,

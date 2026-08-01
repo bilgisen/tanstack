@@ -2,14 +2,14 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { 
   History, 
-  PanelLeft,
   LogOut,
-  User,
-  Trash2,
-  Star,
-  SlidersHorizontal,
   MessageCirclePlus,
-  Settings
+  PanelLeft,
+  Settings,
+  SlidersHorizontal,
+  Star,
+  Trash2,
+  User
 } from "lucide-react";
 import { useUIStore } from "../../store/ui";
 import { useChatStore } from "../../store/chat";

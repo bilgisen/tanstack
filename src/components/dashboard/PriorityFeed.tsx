@@ -1,4 +1,4 @@
-import { AlertTriangle, TrendingUp, TrendingDown, Zap } from "lucide-react";
+import { AlertTriangle, TrendingDown, TrendingUp, Zap } from "lucide-react";
 
 type FeedItem = {
   id: string;
@@ -9,7 +9,7 @@ type FeedItem = {
   time: string;
 };
 
-const mockFeed: FeedItem[] = [
+const mockFeed: Array<FeedItem> = [
   {
     id: "1",
     ticker: "SASA",

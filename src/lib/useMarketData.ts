@@ -13,6 +13,10 @@ type StockItem = {
   last_price: number
   diff_percent: number
   volume: number
+  change_week_pct?: number | null
+  change_month_pct?: number | null
+  change_ytd_pct?: number | null
+  change_year_pct?: number | null
   name?: string
 }
 
@@ -44,8 +48,8 @@ type IndexDetailData = {
   monthClose?: number
   yearClose?: number
   updateDate?: string
-  components?: unknown[]
-  sector_distribution?: unknown[]
+  components?: Array<unknown>
+  sector_distribution?: Array<unknown>
   [key: string]: unknown
 }
 
@@ -60,21 +64,21 @@ type HistoryItem = Record<string, unknown>
 
 const API_BASE = '/api/market'
 
-async function fetchStocks(): Promise<StockItem[]> {
+async function fetchStocks(): Promise<Array<StockItem>> {
   const res = await fetch(`${API_BASE}/stocks`)
   if (!res.ok) throw new Error('Failed to fetch stocks')
   const json = await res.json()
   return json?.data || []
 }
 
-async function fetchSummary(): Promise<SummaryItem[]> {
+async function fetchSummary(): Promise<Array<SummaryItem>> {
   const res = await fetch(`${API_BASE}/summary`)
   if (!res.ok) throw new Error('Failed to fetch summary')
   const json = await res.json()
   return json?.data || []
 }
 
-async function fetchIndices(): Promise<IndexItem[]> {
+async function fetchIndices(): Promise<Array<IndexItem>> {
   const res = await fetch(`${API_BASE}/indices`)
   if (!res.ok) throw new Error('Failed to fetch indices')
   const json = await res.json()
@@ -94,14 +98,14 @@ async function fetchTASummary(code: string): Promise<Record<string, unknown>> {
   return await res.json()
 }
 
-async function fetchSektorDagilimi(code: string): Promise<SektorItem[]> {
+async function fetchSektorDagilimi(code: string): Promise<Array<SektorItem>> {
   const res = await fetch(`${API_BASE}/indices/${code}/sector`)
   if (!res.ok) return []
   const json = await res.json()
   return json?.data || []
 }
 
-async function fetchHistory(code: string, limit = 150): Promise<HistoryItem[]> {
+async function fetchHistory(code: string, limit = 150): Promise<Array<HistoryItem>> {
   const res = await fetch(`${API_BASE}/symbol/${code}/history?limit=${limit}`)
   if (!res.ok) throw new Error(`Failed to fetch history for ${code}`)
   const json = await res.json()

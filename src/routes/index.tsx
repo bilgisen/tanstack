@@ -1,71 +1,41 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
-import { useAuth } from '../hooks/useAuth'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useState } from 'react'
 import { 
-  Sparkles, 
+  ArrowDown, 
   ArrowUp,
-  ArrowDown,
-  Star,
-  Factory,
-  TrendingUp,
-  Settings2,
   Blocks,
   ChartPie,
+  Factory,
   MessageCircle,
+  Settings2,
+  Sparkles,
+  TrendingUp,
 } from 'lucide-react'
+import useEmblaCarousel from 'embla-carousel-react'
+import Autoplay from 'embla-carousel-autoplay'
+import { useAuth } from '../hooks/useAuth'
 import { useSectorGroups } from '../lib/useCompData'
-import { groupKeyToSlug, groupKeyToDisplayName } from '../constants/sectorGroups'
+import { groupKeyToDisplayName, groupKeyToSlug } from '../constants/sectorGroups'
 import { ChatPanel } from '../components/chat/ChatPanel'
 import { ChatSheet } from '../components/chat/ChatSheet'
 
 import { useUIStore } from '../store/ui'
-import companyLogos from '../constants/companyLogos.json'
-import companyNames from '../constants/companyNames.json'
-import { useMarketStocks, useIndices } from '../lib/useMarketData'
-import useEmblaCarousel from 'embla-carousel-react'
-import Autoplay from 'embla-carousel-autoplay'
+import { useIndices } from '../lib/useMarketData'
 import { getIndexSlug } from '../constants/bistIndices'
 
 export const Route = createFileRoute('/')({
   component: LandingPage,
 })
 
-type StockRow = {
-  ticker: string;
-  name: string;
-  price: number;
-  diffPercent: number;
-  volume?: number;
-}
-
 function LandingPage() {
   const { user, loading: sessionLoading, login: handleLogin } = useAuth()
   const { isChatMaximized } = useUIStore()
   const navigate = useNavigate()
   const [isChatSheetOpen, setIsChatSheetOpen] = useState(false)
-  
-  const { data: stocksData, isLoading: stocksLoading, isError: stocksError } = useMarketStocks()
+
   const { data: sectorGroupsData } = useSectorGroups()
   const { data: indicesData } = useIndices()
   const [emblaRef] = useEmblaCarousel({ loop: true, dragFree: true, align: 'start' }, [Autoplay({ delay: 3000, stopOnMouseEnter: true })])
-
-  const [topGainers, setTopGainers] = useState<StockRow[]>([])
-  
-  useEffect(() => {
-    if (stocksData) {
-      const allStocks: StockRow[] = stocksData
-        .filter(s => s.code && s.last_price !== undefined)
-        .map(s => ({
-          ticker: s.code.toUpperCase(),
-          name: (companyNames as Record<string, string>)[s.code.toUpperCase()] || s.code.toUpperCase(),
-          price: Number(s.last_price),
-          diffPercent: Number(s.diff_percent || 0),
-          volume: Number(s.volume || 0),
-        }))
-      const gainers = [...allStocks].sort((a, b) => b.diffPercent - a.diffPercent).slice(0, 10)
-      setTopGainers(gainers)
-    }
-  }, [stocksData])
 
   return (
     <div className="flex-1 flex flex-row min-w-0 h-full relative">
@@ -160,93 +130,36 @@ function LandingPage() {
             )}
           </section>
 
-          {/* Günün Yıldızları */}
-          <section className="px-4 md:px-6 py-4">
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center">
-                <Star size={14} />
-              </div>
-              <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Günün Yıldızları</h3>
-            </div>
-            <div className="divide-y divide-white/5">
-              {topGainers.map((stock) => {
-                const logoFile = companyLogos[stock.ticker as keyof typeof companyLogos]
-                return (
-                  <div
-                    key={stock.ticker}
-                    onClick={() => navigate({ to: `/hisse/${stock.ticker.toLowerCase()}` })}
-                    className="flex items-center justify-between py-3 px-1 hover:bg-muted/30 transition-colors cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      {logoFile ? (
-                        <div className="h-8 w-8 rounded-md bg-white overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
-                          <img src={`/logos/${logoFile}`} alt={stock.ticker} className="h-full w-full object-contain" />
-                        </div>
-                      ) : (
-                        <div className="h-8 w-8 rounded-md bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0 border border-primary/10">
-                          {stock.ticker.slice(0, 2)}
-                        </div>
-                      )}
-                      <div className="text-base font-semibold text-foreground truncate group-hover:text-primary transition-colors">
-                        {stock.ticker}
-                      </div>
+          {/* Hero2 - CTA */}
+          <section className="relative w-full py-16 px-6 flex flex-col items-center text-center overflow-hidden">
+            <div className="absolute top-[-20%] left-[-10%] w-[80vw] h-[80vw] rounded-full bg-primary/5 blur-[120px] pointer-events-none -z-10 animate-pulse" />
+            <div className="max-w-5xl mx-auto">
+              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+                Borsanın röntgenini çekin
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto mb-10 text-lg leading-relaxed">
+                Borsa İstanbul uzmanı tek yapay zekanın yeteneklerini ücretsiz keşfedin.
+              </p>
+
+              <div className="mx-auto mt-10 grid max-w-5xl gap-4 sm:grid-cols-2">
+                {[
+                  { icon: Settings2, title: 'Teknik Analiz', description: 'Grafikler, indikatörler ve işlem hacmi ile derinlemesine teknik inceleme.' },
+                  { icon: ChartPie, title: 'Temel Analiz', description: 'Finansal tablolar, rasyolar ve nakit akışı ile şirket değerleme.' },
+                  { icon: Blocks, title: 'Sektör İnceleme', description: 'Sektör bazında büyüme, karlılık ve piyasa karşılaştırmaları.' },
+                  { icon: MessageCircle, title: 'Şirket Karşılaştırma', description: 'Birden çok hisseyi yan yana getirerek performans ve rasyo analizi.' },
+                ].map((feature) => (
+                  <div key={feature.title} className="flex flex-col rounded-sm border p-6 text-left">
+                    <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                      <feature.icon className="size-5" />
                     </div>
-                    <div className="flex items-center gap-4 shrink-0">
-                      <span className="text-base font-bold font-mono text-emerald-500">
-                        +{stock.diffPercent.toFixed(2).replace('.', ',')}%
-                      </span>
-                      <span className="text-base font-semibold font-mono text-foreground">
-                        {stock.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                      </span>
-                    </div>
+                    <span className="font-medium text-lg">{feature.title}</span>
+                    <p className="mt-1 text-[15px] text-foreground/80">{feature.description}</p>
                   </div>
-                )
-              })}
-              {stocksError && (
-                <div className="py-8 text-center text-sm text-destructive/80">Veri alınamadı. Lütfen sayfayı yenileyin.</div>
-              )}
-              {stocksLoading && !stocksError && topGainers.length === 0 && (
-                <div className="py-8 text-center text-sm text-muted-foreground">Veriler yükleniyor...</div>
-              )}
-              {!stocksLoading && !stocksError && topGainers.length === 0 && (
-                <div className="py-8 text-center text-sm text-muted-foreground">Bugün için veri bulunamadı.</div>
-              )}
+                ))}
+              </div>
+
             </div>
           </section>
-
-          {/* Hero2 - CTA */}
-          {!user && (
-            <section className="relative w-full py-16 px-6 flex flex-col items-center text-center overflow-hidden">
-              <div className="absolute top-[-20%] left-[-10%] w-[80vw] h-[80vw] rounded-full bg-primary/5 blur-[120px] pointer-events-none -z-10 animate-pulse" />
-              <div className="max-w-5xl mx-auto">
-                <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
-                  Borsanın röntgenini çekin
-                </h2>
-                <p className="text-muted-foreground max-w-2xl mx-auto mb-10 text-lg leading-relaxed">
-                  Borsa İstanbul uzmanı tek yapay zekanın yeteneklerini ücretsiz keşfedin.
-                </p>
-
-                <div className="mx-auto mt-10 grid max-w-(--breakpoint-lg) gap-4 sm:grid-cols-2">
-                  {[
-                    { icon: Settings2, title: 'Teknik Analiz', description: 'Grafikler, indikatörler ve işlem hacmi ile derinlemesine teknik inceleme.' },
-                    { icon: ChartPie, title: 'Temel Analiz', description: 'Finansal tablolar, rasyolar ve nakit akışı ile şirket değerleme.' },
-                    { icon: Blocks, title: 'Sektör İnceleme', description: 'Sektör bazında büyüme, karlılık ve piyasa karşılaştırmaları.' },
-                    { icon: MessageCircle, title: 'Şirket Karşılaştırma', description: 'Birden çok hisseyi yan yana getirerek performans ve rasyo analizi.' },
-                  ].map((feature) => (
-                    <div key={feature.title} className="flex flex-col rounded-sm border p-6 text-left">
-                      <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                        <feature.icon className="size-5" />
-                      </div>
-                      <span className="font-medium text-lg">{feature.title}</span>
-                      <p className="mt-1 text-[15px] text-foreground/80">{feature.description}</p>
-                    </div>
-                  ))}
-                </div>
-
-
-              </div>
-            </section>
-          )}
 
           {/* Sektörler */}
           <section className="px-4 md:px-6 py-4">

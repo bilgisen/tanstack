@@ -1,10 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { Building2 } from 'lucide-react'
 import { TradingViewChart } from '../components/dashboard/TradingViewChart'
-import { useCompanyProfile } from '../lib/useCompanyData'
+import { useCompanyProfile, useCompanyQuote  } from '../lib/useCompanyData'
 import { CompanyProfileCard } from '../components/company/CompanyProfileCard'
 import { OwnershipStructure } from '../components/company/OwnershipStructure'
-import { useCompanyQuote } from '../lib/useCompanyData'
-import { Building2 } from 'lucide-react'
 
 export const Route = createFileRoute('/hisse/$ticker/')({
   component: CompanyOverviewPage,

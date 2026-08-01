@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Loader2, ArrowUp, ArrowDown } from 'lucide-react'
+import { ArrowDown, ArrowUp, Loader2 } from 'lucide-react'
 import { getIndexName, getIndexSlug } from '../constants/bistIndices'
 import { useIndices } from '../lib/useMarketData'
-import { DataTable, type Column } from '../components/ui/data-table'
+import {  DataTable } from '../components/ui/data-table'
+import type {Column} from '../components/ui/data-table';
 
 type ProcessedIndex = {
   code: string
@@ -36,7 +37,7 @@ function EndekslerPage() {
     )
   }
 
-  let indices: ProcessedIndex[] = []
+  let indices: Array<ProcessedIndex> = []
   try {
     indices = (indicesData || [])
       .map(item => ({
@@ -51,7 +52,7 @@ function EndekslerPage() {
     console.error('EndekslerPage: error processing indices data', e)
   }
 
-  const columns: Column<ProcessedIndex>[] = [
+  const columns: Array<Column<ProcessedIndex>> = [
     {
       key: 'code',
       header: 'Ticker',

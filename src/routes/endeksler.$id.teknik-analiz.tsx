@@ -1,9 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useMemo } from 'react'
-import { TrendingUp, Info, Sparkles, Gauge } from 'lucide-react'
+import { Gauge, Info, TrendingUp } from 'lucide-react'
 import { TradingViewChart } from '../components/dashboard/TradingViewChart'
-import { CeoTaReport } from '../components/company/CeoTaReport'
-import { LockedSection } from '../components/company/LockedSection'
 import { ScoreGauge } from '../constants/companyShared'
 import { getIndexName } from '../constants/bistIndices'
 import { useIndices } from '../lib/useMarketData'
@@ -34,7 +32,6 @@ function EndeksTechnicalAnalysisPage() {
 
 
   const hasData = !!publicTa && !publicTa._blocked
-  const isBlocked = !!publicTa?._blocked
 
   return (
     <div className="space-y-5">
@@ -87,18 +84,7 @@ function EndeksTechnicalAnalysisPage() {
         </div>
       )}
 
-      {/* Subscriber Tier: AI Report (only when base TA data exists) */}
-      {(hasData || isBlocked) && (
-        <LockedSection variant="subscriber">
-          <div className="space-y-5 pt-2">
-            <div className="flex items-center gap-2 pb-2 border-b border-border/30">
-              <Sparkles size={14} className="text-violet-500" />
-              <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Abonelere Özel AI Analiz Raporu</h3>
-            </div>
-            <CeoTaReport ticker={code} unit="puan" />
-          </div>
-        </LockedSection>
-      )}
+      
     </div>
   )
 }

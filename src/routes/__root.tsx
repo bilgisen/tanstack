@@ -1,11 +1,15 @@
-import { HeadContent, Scripts, createRootRoute, Outlet, useNavigate } from "@tanstack/react-router"
+import { HeadContent, Outlet, Scripts, createRootRoute, useNavigate } from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
 import { QueryClientProvider } from "@tanstack/react-query"
+import { useEffect } from "react"
 import { AppLayout } from "../components/layout/AppLayout"
 import { queryClient } from "../lib/queryClient"
 
 import appCss from "../styles.css?url"
+
+import { useUIStore } from "../store/ui"
+import { ToastContainer } from "../components/ui/ToastContainer"
 
 export const Route = createRootRoute({
   head: () => ({
@@ -55,10 +59,6 @@ export const Route = createRootRoute({
   ),
   component: RootDocument,
 })
-
-import { useEffect } from "react"
-import { useUIStore } from "../store/ui"
-import { ToastContainer } from "../components/ui/ToastContainer"
 
 function RootDocument() {
   const theme = useUIStore((s) => s.theme)

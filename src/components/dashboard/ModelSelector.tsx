@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef } from "react";
-import { useChatStore } from "../../store/chat";
-import { Cpu, ChevronDown, Lock, Check, Sparkles } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Check, ChevronDown, Cpu, Lock, Sparkles } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
+import { useChatStore } from "../../store/chat";
 
 interface ModelOption {
   id: string;
@@ -10,13 +10,13 @@ interface ModelOption {
   htPer1kInput: number;
   htPer1kOutput: number;
   accessible: boolean;
-  allowedTiers: string[];
+  allowedTiers: Array<string>;
   estimatedHtPerCall: number;
 }
 
 export function ModelSelector() {
   const { selectedModelId, setSelectedModelId } = useChatStore();
-  const [models, setModels] = useState<ModelOption[]>([]);
+  const [models, setModels] = useState<Array<ModelOption>>([]);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();

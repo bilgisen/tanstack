@@ -26,7 +26,8 @@ import { Route as SektorlerSlugRouteImport } from './routes/sektorler.$slug'
 import { Route as HisseTickerRouteImport } from './routes/hisse.$ticker'
 import { Route as EndekslerIdRouteImport } from './routes/endeksler.$id'
 import { Route as ApiTickersRouteImport } from './routes/api/tickers'
-import { Route as ApiCheckoutRouteImport } from './routes/api/checkout'
+import { Route as ApiCustomerPortalRouteImport } from './routes/api/customer-portal'
+import { Route as ApiCheckoutDodoRouteImport } from './routes/api/checkout-dodo'
 import { Route as HisseTickerIndexRouteImport } from './routes/hisse.$ticker.index'
 import { Route as EndekslerIdIndexRouteImport } from './routes/endeksler.$id.index'
 import { Route as SektorlerSlugSectorSlugRouteImport } from './routes/sektorler.$slug.$sectorSlug'
@@ -35,12 +36,13 @@ import { Route as HisseTickerTeknikAnalizRouteImport } from './routes/hisse.$tic
 import { Route as HisseTickerTablolarRouteImport } from './routes/hisse.$ticker.tablolar'
 import { Route as HisseTickerSektorRouteImport } from './routes/hisse.$ticker.sektor'
 import { Route as EndekslerIdTeknikAnalizRouteImport } from './routes/endeksler.$id.teknik-analiz'
-import { Route as ApiWebhooksPolarRouteImport } from './routes/api/webhooks/polar'
+import { Route as ApiWebhooksDodoRouteImport } from './routes/api/webhooks/dodo'
 import { Route as ApiUserCreditsRouteImport } from './routes/api/user/credits'
 import { Route as ApiModelsAvailableRouteImport } from './routes/api/models/available'
 import { Route as ApiChatSessionsRouteImport } from './routes/api/chat/sessions'
 import { Route as ApiChatSaveRouteImport } from './routes/api/chat/save'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiAiSessionTokenRouteImport } from './routes/api/ai/session-token'
 import { Route as ApiAiPreCheckRouteImport } from './routes/api/ai/pre-check'
 import { Route as ApiAiChargeRouteImport } from './routes/api/ai/charge'
 import { Route as ApiChatSessionsIdRouteImport } from './routes/api/chat/sessions.$id'
@@ -130,9 +132,14 @@ const ApiTickersRoute = ApiTickersRouteImport.update({
   path: '/api/tickers',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiCheckoutRoute = ApiCheckoutRouteImport.update({
-  id: '/api/checkout',
-  path: '/api/checkout',
+const ApiCustomerPortalRoute = ApiCustomerPortalRouteImport.update({
+  id: '/api/customer-portal',
+  path: '/api/customer-portal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCheckoutDodoRoute = ApiCheckoutDodoRouteImport.update({
+  id: '/api/checkout-dodo',
+  path: '/api/checkout-dodo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HisseTickerIndexRoute = HisseTickerIndexRouteImport.update({
@@ -175,9 +182,9 @@ const EndekslerIdTeknikAnalizRoute = EndekslerIdTeknikAnalizRouteImport.update({
   path: '/teknik-analiz',
   getParentRoute: () => EndekslerIdRoute,
 } as any)
-const ApiWebhooksPolarRoute = ApiWebhooksPolarRouteImport.update({
-  id: '/api/webhooks/polar',
-  path: '/api/webhooks/polar',
+const ApiWebhooksDodoRoute = ApiWebhooksDodoRouteImport.update({
+  id: '/api/webhooks/dodo',
+  path: '/api/webhooks/dodo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiUserCreditsRoute = ApiUserCreditsRouteImport.update({
@@ -203,6 +210,11 @@ const ApiChatSaveRoute = ApiChatSaveRouteImport.update({
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAiSessionTokenRoute = ApiAiSessionTokenRouteImport.update({
+  id: '/api/ai/session-token',
+  path: '/api/ai/session-token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAiPreCheckRoute = ApiAiPreCheckRouteImport.update({
@@ -233,7 +245,8 @@ export interface FileRoutesByFullPath {
   '/siralamalar': typeof SiralamalarRoute
   '/takip-listesi': typeof TakipListesiRoute
   '/tarama': typeof TaramaRoute
-  '/api/checkout': typeof ApiCheckoutRoute
+  '/api/checkout-dodo': typeof ApiCheckoutDodoRoute
+  '/api/customer-portal': typeof ApiCustomerPortalRoute
   '/api/tickers': typeof ApiTickersRoute
   '/endeksler/$id': typeof EndekslerIdRouteWithChildren
   '/hisse/$ticker': typeof HisseTickerRouteWithChildren
@@ -242,12 +255,13 @@ export interface FileRoutesByFullPath {
   '/profil/': typeof ProfilIndexRoute
   '/api/ai/charge': typeof ApiAiChargeRoute
   '/api/ai/pre-check': typeof ApiAiPreCheckRoute
+  '/api/ai/session-token': typeof ApiAiSessionTokenRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/chat/save': typeof ApiChatSaveRoute
   '/api/chat/sessions': typeof ApiChatSessionsRouteWithChildren
   '/api/models/available': typeof ApiModelsAvailableRoute
   '/api/user/credits': typeof ApiUserCreditsRoute
-  '/api/webhooks/polar': typeof ApiWebhooksPolarRoute
+  '/api/webhooks/dodo': typeof ApiWebhooksDodoRoute
   '/endeksler/$id/teknik-analiz': typeof EndekslerIdTeknikAnalizRoute
   '/hisse/$ticker/sektor': typeof HisseTickerSektorRoute
   '/hisse/$ticker/tablolar': typeof HisseTickerTablolarRoute
@@ -268,19 +282,21 @@ export interface FileRoutesByTo {
   '/siralamalar': typeof SiralamalarRoute
   '/takip-listesi': typeof TakipListesiRoute
   '/tarama': typeof TaramaRoute
-  '/api/checkout': typeof ApiCheckoutRoute
+  '/api/checkout-dodo': typeof ApiCheckoutDodoRoute
+  '/api/customer-portal': typeof ApiCustomerPortalRoute
   '/api/tickers': typeof ApiTickersRoute
   '/sektorler/$slug': typeof SektorlerSlugRouteWithChildren
   '/endeksler': typeof EndekslerIndexRoute
   '/profil': typeof ProfilIndexRoute
   '/api/ai/charge': typeof ApiAiChargeRoute
   '/api/ai/pre-check': typeof ApiAiPreCheckRoute
+  '/api/ai/session-token': typeof ApiAiSessionTokenRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/chat/save': typeof ApiChatSaveRoute
   '/api/chat/sessions': typeof ApiChatSessionsRouteWithChildren
   '/api/models/available': typeof ApiModelsAvailableRoute
   '/api/user/credits': typeof ApiUserCreditsRoute
-  '/api/webhooks/polar': typeof ApiWebhooksPolarRoute
+  '/api/webhooks/dodo': typeof ApiWebhooksDodoRoute
   '/endeksler/$id/teknik-analiz': typeof EndekslerIdTeknikAnalizRoute
   '/hisse/$ticker/sektor': typeof HisseTickerSektorRoute
   '/hisse/$ticker/tablolar': typeof HisseTickerTablolarRoute
@@ -304,7 +320,8 @@ export interface FileRoutesById {
   '/siralamalar': typeof SiralamalarRoute
   '/takip-listesi': typeof TakipListesiRoute
   '/tarama': typeof TaramaRoute
-  '/api/checkout': typeof ApiCheckoutRoute
+  '/api/checkout-dodo': typeof ApiCheckoutDodoRoute
+  '/api/customer-portal': typeof ApiCustomerPortalRoute
   '/api/tickers': typeof ApiTickersRoute
   '/endeksler/$id': typeof EndekslerIdRouteWithChildren
   '/hisse/$ticker': typeof HisseTickerRouteWithChildren
@@ -313,12 +330,13 @@ export interface FileRoutesById {
   '/profil/': typeof ProfilIndexRoute
   '/api/ai/charge': typeof ApiAiChargeRoute
   '/api/ai/pre-check': typeof ApiAiPreCheckRoute
+  '/api/ai/session-token': typeof ApiAiSessionTokenRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/chat/save': typeof ApiChatSaveRoute
   '/api/chat/sessions': typeof ApiChatSessionsRouteWithChildren
   '/api/models/available': typeof ApiModelsAvailableRoute
   '/api/user/credits': typeof ApiUserCreditsRoute
-  '/api/webhooks/polar': typeof ApiWebhooksPolarRoute
+  '/api/webhooks/dodo': typeof ApiWebhooksDodoRoute
   '/endeksler/$id/teknik-analiz': typeof EndekslerIdTeknikAnalizRoute
   '/hisse/$ticker/sektor': typeof HisseTickerSektorRoute
   '/hisse/$ticker/tablolar': typeof HisseTickerTablolarRoute
@@ -343,7 +361,8 @@ export interface FileRouteTypes {
     | '/siralamalar'
     | '/takip-listesi'
     | '/tarama'
-    | '/api/checkout'
+    | '/api/checkout-dodo'
+    | '/api/customer-portal'
     | '/api/tickers'
     | '/endeksler/$id'
     | '/hisse/$ticker'
@@ -352,12 +371,13 @@ export interface FileRouteTypes {
     | '/profil/'
     | '/api/ai/charge'
     | '/api/ai/pre-check'
+    | '/api/ai/session-token'
     | '/api/auth/$'
     | '/api/chat/save'
     | '/api/chat/sessions'
     | '/api/models/available'
     | '/api/user/credits'
-    | '/api/webhooks/polar'
+    | '/api/webhooks/dodo'
     | '/endeksler/$id/teknik-analiz'
     | '/hisse/$ticker/sektor'
     | '/hisse/$ticker/tablolar'
@@ -378,19 +398,21 @@ export interface FileRouteTypes {
     | '/siralamalar'
     | '/takip-listesi'
     | '/tarama'
-    | '/api/checkout'
+    | '/api/checkout-dodo'
+    | '/api/customer-portal'
     | '/api/tickers'
     | '/sektorler/$slug'
     | '/endeksler'
     | '/profil'
     | '/api/ai/charge'
     | '/api/ai/pre-check'
+    | '/api/ai/session-token'
     | '/api/auth/$'
     | '/api/chat/save'
     | '/api/chat/sessions'
     | '/api/models/available'
     | '/api/user/credits'
-    | '/api/webhooks/polar'
+    | '/api/webhooks/dodo'
     | '/endeksler/$id/teknik-analiz'
     | '/hisse/$ticker/sektor'
     | '/hisse/$ticker/tablolar'
@@ -413,7 +435,8 @@ export interface FileRouteTypes {
     | '/siralamalar'
     | '/takip-listesi'
     | '/tarama'
-    | '/api/checkout'
+    | '/api/checkout-dodo'
+    | '/api/customer-portal'
     | '/api/tickers'
     | '/endeksler/$id'
     | '/hisse/$ticker'
@@ -422,12 +445,13 @@ export interface FileRouteTypes {
     | '/profil/'
     | '/api/ai/charge'
     | '/api/ai/pre-check'
+    | '/api/ai/session-token'
     | '/api/auth/$'
     | '/api/chat/save'
     | '/api/chat/sessions'
     | '/api/models/available'
     | '/api/user/credits'
-    | '/api/webhooks/polar'
+    | '/api/webhooks/dodo'
     | '/endeksler/$id/teknik-analiz'
     | '/hisse/$ticker/sektor'
     | '/hisse/$ticker/tablolar'
@@ -451,17 +475,19 @@ export interface RootRouteChildren {
   SiralamalarRoute: typeof SiralamalarRoute
   TakipListesiRoute: typeof TakipListesiRoute
   TaramaRoute: typeof TaramaRoute
-  ApiCheckoutRoute: typeof ApiCheckoutRoute
+  ApiCheckoutDodoRoute: typeof ApiCheckoutDodoRoute
+  ApiCustomerPortalRoute: typeof ApiCustomerPortalRoute
   ApiTickersRoute: typeof ApiTickersRoute
   HisseTickerRoute: typeof HisseTickerRouteWithChildren
   ApiAiChargeRoute: typeof ApiAiChargeRoute
   ApiAiPreCheckRoute: typeof ApiAiPreCheckRoute
+  ApiAiSessionTokenRoute: typeof ApiAiSessionTokenRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiChatSaveRoute: typeof ApiChatSaveRoute
   ApiChatSessionsRoute: typeof ApiChatSessionsRouteWithChildren
   ApiModelsAvailableRoute: typeof ApiModelsAvailableRoute
   ApiUserCreditsRoute: typeof ApiUserCreditsRoute
-  ApiWebhooksPolarRoute: typeof ApiWebhooksPolarRoute
+  ApiWebhooksDodoRoute: typeof ApiWebhooksDodoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -585,11 +611,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTickersRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/checkout': {
-      id: '/api/checkout'
-      path: '/api/checkout'
-      fullPath: '/api/checkout'
-      preLoaderRoute: typeof ApiCheckoutRouteImport
+    '/api/customer-portal': {
+      id: '/api/customer-portal'
+      path: '/api/customer-portal'
+      fullPath: '/api/customer-portal'
+      preLoaderRoute: typeof ApiCustomerPortalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/checkout-dodo': {
+      id: '/api/checkout-dodo'
+      path: '/api/checkout-dodo'
+      fullPath: '/api/checkout-dodo'
+      preLoaderRoute: typeof ApiCheckoutDodoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hisse/$ticker/': {
@@ -648,11 +681,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EndekslerIdTeknikAnalizRouteImport
       parentRoute: typeof EndekslerIdRoute
     }
-    '/api/webhooks/polar': {
-      id: '/api/webhooks/polar'
-      path: '/api/webhooks/polar'
-      fullPath: '/api/webhooks/polar'
-      preLoaderRoute: typeof ApiWebhooksPolarRouteImport
+    '/api/webhooks/dodo': {
+      id: '/api/webhooks/dodo'
+      path: '/api/webhooks/dodo'
+      fullPath: '/api/webhooks/dodo'
+      preLoaderRoute: typeof ApiWebhooksDodoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/user/credits': {
@@ -688,6 +721,13 @@ declare module '@tanstack/react-router' {
       path: '/api/auth/$'
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ai/session-token': {
+      id: '/api/ai/session-token'
+      path: '/api/ai/session-token'
+      fullPath: '/api/ai/session-token'
+      preLoaderRoute: typeof ApiAiSessionTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/ai/pre-check': {
@@ -821,17 +861,19 @@ const rootRouteChildren: RootRouteChildren = {
   SiralamalarRoute: SiralamalarRoute,
   TakipListesiRoute: TakipListesiRoute,
   TaramaRoute: TaramaRoute,
-  ApiCheckoutRoute: ApiCheckoutRoute,
+  ApiCheckoutDodoRoute: ApiCheckoutDodoRoute,
+  ApiCustomerPortalRoute: ApiCustomerPortalRoute,
   ApiTickersRoute: ApiTickersRoute,
   HisseTickerRoute: HisseTickerRouteWithChildren,
   ApiAiChargeRoute: ApiAiChargeRoute,
   ApiAiPreCheckRoute: ApiAiPreCheckRoute,
+  ApiAiSessionTokenRoute: ApiAiSessionTokenRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiChatSaveRoute: ApiChatSaveRoute,
   ApiChatSessionsRoute: ApiChatSessionsRouteWithChildren,
   ApiModelsAvailableRoute: ApiModelsAvailableRoute,
   ApiUserCreditsRoute: ApiUserCreditsRoute,
-  ApiWebhooksPolarRoute: ApiWebhooksPolarRoute,
+  ApiWebhooksDodoRoute: ApiWebhooksDodoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

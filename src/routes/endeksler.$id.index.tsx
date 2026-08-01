@@ -1,10 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useMemo, useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { TradingViewChart } from '../components/dashboard/TradingViewChart'
 import { SektorPieChart } from '../components/ui/sektor-pie-chart'
 import { Skeleton } from '../components/ui/skeleton'
 import { getIndexName } from '../constants/bistIndices'
-import { useIndices, useIndexDetail, useSektorDagilimi } from '../lib/useMarketData'
+import { useIndexDetail, useIndices, useSektorDagilimi } from '../lib/useMarketData'
 
 export const Route = createFileRoute('/endeksler/$id/')({
   component: EndeksOverviewPage,

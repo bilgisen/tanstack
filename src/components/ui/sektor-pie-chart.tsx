@@ -1,4 +1,4 @@
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
+import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts'
 import { SafeTooltip } from './typed-tooltip'
 
 const COLORS = [
@@ -11,7 +11,7 @@ type SectorItem = {
   value: number
 }
 
-export function SektorPieChart({ data }: { data: SectorItem[] }) {
+export function SektorPieChart({ data }: { data: Array<SectorItem> }) {
   if (!data || data.length === 0) return null
 
   const total = data.reduce((s, d) => s + d.value, 0)
