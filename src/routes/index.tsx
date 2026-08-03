@@ -46,8 +46,29 @@ function LandingPage() {
           
           {/* Hero */}
           <section className="relative w-full pt-16 pb-10 md:pt-20 md:pb-12 px-6 flex flex-col items-center text-center overflow-hidden">
+            {/* Yumuşak renk geçişleri */}
+            <div className="absolute inset-0 -z-20 bg-gradient-to-b from-primary/8 via-background to-background pointer-events-none" />
+            <div className="absolute top-[-10%] right-[-10%] w-[45vw] h-[45vw] rounded-full bg-emerald-500/5 blur-[100px] pointer-events-none -z-10" />
+            <div className="absolute bottom-[-10%] left-[-10%] w-[45vw] h-[45vw] rounded-full bg-primary/5 blur-[100px] pointer-events-none -z-10" />
+
+            {/* Borsa şebeke (grid) deseni */}
+            <div
+              className="absolute inset-0 -z-10 opacity-[0.35] pointer-events-none [mask-image:radial-gradient(ellipse_at_center,black_10%,transparent_65%)]"
+              style={{
+                backgroundImage: 'linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--border)) 1px, transparent 1px)',
+                backgroundSize: '56px 56px',
+              }}
+            />
+
+            {/* Dekoratif değer çizgisi */}
+            <svg className="absolute inset-x-0 top-6 -z-10 w-full pointer-events-none opacity-40" height="40" viewBox="0 0 1200 40" fill="none" preserveAspectRatio="none">
+              <path d="M0 30 L100 20 L180 26 L260 12 L360 22 L460 10 L560 18 L680 8 L780 16 L880 6 L980 14 L1100 24 L1200 14" stroke="hsl(var(--primary) / 0.5)" strokeWidth="1.5" strokeLinecap="round" />
+              <path d="M0 34 L120 28 L220 34 L320 20 L430 30 L540 16 L640 24 L760 14 L860 24 L980 12 L1100 20 L1200 16" stroke="hsl(var(--primary) / 0.25)" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+
+            {/* Mevcut parıltı blobu */}
             <div className="absolute top-[-20%] left-[-10%] w-[80vw] h-[80vw] rounded-full bg-primary/5 blur-[120px] pointer-events-none -z-10 animate-pulse" />
-            
+
             <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-1000">
               <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[11px] font-bold uppercase tracking-widest mb-6">
                 <Sparkles size={12} />
