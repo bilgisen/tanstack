@@ -5,7 +5,6 @@ import {
   ArrowUp,
   Factory,
   Sparkles,
-  TrendingUp,
 } from 'lucide-react'
 import useEmblaCarousel from 'embla-carousel-react'
 import Autoplay from 'embla-carousel-autoplay'
@@ -15,12 +14,12 @@ import { ChatSheet } from '../components/chat/ChatSheet'
 
 import { useUIStore } from '../store/ui'
 import { useIndices, useMarketStocks } from '../lib/useMarketData'
+import { useSectorGroups } from '../lib/useCompData'
 import { getIndexSlug } from '../constants/bistIndices'
+import { groupKeyToDisplayName, groupKeyToSlug } from '../constants/sectorGroups'
 import { BIST30_CONSTITUENTS } from '../constants/bist30Constituents'
-import { Hero1A } from '../components/home/Hero1A'
 import { Hero2 } from '../components/home/Hero2'
 import { CTABlock } from '../components/home/CTABlock'
-import { SectorsHomepage } from '../components/home/SectorsHomepage'
 
 export const Route = createFileRoute('/')({
   component: LandingPage,
@@ -34,6 +33,7 @@ function LandingPage() {
 
   const { data: indicesData } = useIndices()
   const { data: stocksData } = useMarketStocks()
+  const { data: sectorGroupsData } = useSectorGroups()
   const [emblaRef] = useEmblaCarousel({ loop: true, dragFree: true, align: 'start' }, [Autoplay({ delay: 3000, stopOnMouseEnter: true })])
 
   return (
@@ -44,7 +44,7 @@ function LandingPage() {
         <div className="flex-1 overflow-y-auto custom-scrollbar min-w-0 relative z-10 pb-24 md:pb-4 scroll-smooth">
           
           {/* Hero */}
-          <section className="relative w-full pt-16 pb-10 md:pt-20 md:pb-12 px-6 flex flex-col items-center text-center overflow-hidden">
+          <section className="relative w-full aspect-square md:aspect-video px-6 flex flex-col items-center justify-center text-center overflow-hidden">
             {/* Video arka plan */}
             <video
               className="absolute inset-0 -z-30 h-full w-full object-cover pointer-events-none"
@@ -57,28 +57,6 @@ function LandingPage() {
               <source src="https://videos.pexels.com/video-files/5226462/5226462-hd_1920_1080_30fps.mp4" type="video/mp4" />
             </video>
             <div className="absolute inset-0 -z-20 bg-black/55 pointer-events-none" />
-
-            {/* Yumuşak renk geçişleri */}
-            <div className="absolute top-[-10%] right-[-10%] w-[45vw] h-[45vw] rounded-full bg-emerald-500/15 blur-[100px] pointer-events-none -z-10" />
-            <div className="absolute bottom-[-10%] left-[-10%] w-[45vw] h-[45vw] rounded-full bg-primary/15 blur-[100px] pointer-events-none -z-10" />
-
-            {/* Borsa şebeke (grid) deseni */}
-            <div
-              className="absolute inset-0 -z-10 opacity-[0.2] pointer-events-none [mask-image:radial-gradient(ellipse_at_center,black_10%,transparent_65%)]"
-              style={{
-                backgroundImage: 'linear-gradient(to right, rgb(255 255 255 / 0.15) 1px, transparent 1px), linear-gradient(to bottom, rgb(255 255 255 / 0.15) 1px, transparent 1px)',
-                backgroundSize: '56px 56px',
-              }}
-            />
-
-            {/* Dekoratif değer çizgisi */}
-            <svg className="absolute inset-x-0 top-6 -z-10 w-full pointer-events-none opacity-40" height="40" viewBox="0 0 1200 40" fill="none" preserveAspectRatio="none">
-              <path d="M0 30 L100 20 L180 26 L260 12 L360 22 L460 10 L560 18 L680 8 L780 16 L880 6 L980 14 L1100 24 L1200 14" stroke="rgb(255 255 255 / 0.5)" strokeWidth="1.5" strokeLinecap="round" />
-              <path d="M0 34 L120 28 L220 34 L320 20 L430 30 L540 16 L640 24 L760 14 L860 24 L980 12 L1100 20 L1200 16" stroke="rgb(255 255 255 / 0.25)" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-
-            {/* Mevcut parıltı blobu */}
-            <div className="absolute top-[-20%] left-[-10%] w-[80vw] h-[80vw] rounded-full bg-primary/10 blur-[120px] pointer-events-none -z-10 animate-pulse" />
 
             <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-1000">
               <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-white/10 border border-white/20 text-white text-[11px] font-bold uppercase tracking-widest mb-6">
@@ -113,17 +91,8 @@ function LandingPage() {
             </div>
           </section>
 
-          {/* Hero1A - Halüsinasyon Karşıtı Tanıtım */}
-          <Hero1A />
-
           {/* Hacim Liderleri Carousel */}
           <section className="px-4 md:px-6 py-4">
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-                <TrendingUp size={14} />
-              </div>
-              <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Hacim Liderleri</h3>
-            </div>
             {indicesData ? (
               <div className="overflow-hidden" ref={emblaRef}>
                 <div className="flex gap-3">
@@ -194,11 +163,11 @@ function LandingPage() {
             )}
           </section>
 
-          {/* Hero2 - Feature Kartları */}
-          <Hero2 />
-
           {/* CTABlock - CTA */}
           <CTABlock />
+
+          {/* Hero2 - Yatırımlarınıza Sezgiler Değil Veriler */}
+          <Hero2 />
 
           {/* Sektörler */}
           <section className="px-4 md:px-6 py-4">
@@ -208,7 +177,29 @@ function LandingPage() {
               </div>
               <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Sektörler</h3>
             </div>
-            <SectorsHomepage />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {(sectorGroupsData?.groups || []).sort((a, b) => (b.count || 0) - (a.count || 0)).map(group => {
+                const slug = groupKeyToSlug(group.key)
+                return (
+                  <Link
+                    key={group.key}
+                    to="/sektorler/$slug"
+                    params={{ slug }}
+                    className="flex items-center justify-between px-1 py-2.5 hover:bg-muted/20 transition-colors"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-7 h-7 bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                        <Factory size={13} />
+                      </div>
+                      <span className="text-sm font-semibold text-foreground truncate">
+                        {groupKeyToDisplayName(group.key) || group.name}
+                      </span>
+                    </div>
+                    <span className="text-xs text-muted-foreground shrink-0 ml-2">{group.count || '—'}</span>
+                  </Link>
+                )
+              })}
+            </div>
           </section>
 
           {/* Footer - Kurumsal */}
