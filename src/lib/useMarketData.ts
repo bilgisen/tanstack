@@ -32,6 +32,7 @@ type IndexItem = {
   code: string
   last_price: number
   diff_percent: number
+  volume?: number
   name?: string
 }
 
