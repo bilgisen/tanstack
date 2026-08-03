@@ -2,18 +2,15 @@ import { useState } from "react";
 import { ArrowUp } from "lucide-react";
 import { ChatPanel } from "../chat/ChatPanel";
 import { ChatSheet } from "../chat/ChatSheet";
-import { ChatStarter } from "../chat/ChatStarter";
 import { useUIStore } from "../../store/ui";
 
 interface PublicPageLayoutProps {
   context: string;
   placeholder?: string;
   children: React.ReactNode;
-  starterQuestions?: Array<string>;
-  starterTitle?: string;
 }
 
-export function PublicPageLayout({ context, placeholder, children, starterQuestions, starterTitle }: PublicPageLayoutProps) {
+export function PublicPageLayout({ context, placeholder, children }: PublicPageLayoutProps) {
   const { isChatMaximized } = useUIStore()
   const [isChatSheetOpen, setIsChatSheetOpen] = useState(false)
 
@@ -24,13 +21,6 @@ export function PublicPageLayout({ context, placeholder, children, starterQuesti
       <div className={`flex-1 flex flex-col min-w-0 h-full relative ${isChatMaximized ? 'hidden md:hidden' : ''}`}>
         <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 custom-scrollbar min-w-0 relative z-10 pb-24 md:pb-4 scroll-smooth">
           <div className="w-full max-w-5xl mx-auto">
-            {starterQuestions && starterQuestions.length > 0 && (
-              <ChatStarter
-                questions={starterQuestions}
-                title={starterTitle}
-                onOpenMobileChat={() => setIsChatSheetOpen(true)}
-              />
-            )}
             {children}
           </div>
         </div>

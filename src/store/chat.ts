@@ -169,6 +169,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
         ]
         set({ sessions: merged, initialized: true })
         saveSessionsToStorage(merged)
+      } else {
+        // Anonymous or unauthenticated: keep local-only sessions, mark init done
+        set({ initialized: true })
       }
     } catch {
       set({ initialized: true })

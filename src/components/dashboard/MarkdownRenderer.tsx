@@ -260,7 +260,11 @@ export function MarkdownRenderer({ text, isAssistant, context = "global", sugges
   };
 
   if (!isAssistant) {
-    return <div className="whitespace-pre-wrap text-base sm:text-[15px] leading-relaxed text-foreground">{text}</div>;
+    return (
+      <div className="whitespace-pre-wrap text-base sm:text-[15px] leading-relaxed text-primary-foreground">
+        {text}
+      </div>
+    );
   }
 
   return (

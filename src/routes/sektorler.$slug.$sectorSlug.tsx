@@ -51,13 +51,6 @@ function SektorDetailPage() {
 
   const chatContext = `sector:${sectorName}`
 
-  const starterQuestions = [
-    'Bu sektörde en düşük F/K oranına sahip iskontolu hisseler hangileri?',
-    'Sektörde en yüksek ROE\'ye sahip şirketler hangileri?',
-    'Sektörün medyan rasyoları (F/K, PD/DD, ROE) nasıl?',
-    'Sektörün genel değerleme görünümü nasıl?',
-  ]
-
   const benchEntries = Object.entries(benchmarks).map(([code, b]) => ({
     code, label: BENCHMARK_LABELS[code] || code, category: BENCHMARK_CATEGORIES[code] || 'Diğer',
     median: b.median_ew, p25: b.p25, p75: b.p75,
@@ -127,7 +120,7 @@ function SektorDetailPage() {
 
   if (loading) {
     return (
-      <PublicPageLayout context={chatContext} placeholder={`${sectorName} sektörü hakkında bir soru sorun...`} starterQuestions={starterQuestions}>
+      <PublicPageLayout context={chatContext} placeholder={`${sectorName} sektörü hakkında bir soru sorun...`}>
         <div className="flex h-[360px] items-center justify-center text-muted-foreground font-medium text-xs gap-2 animate-pulse">
           <Loader2 className="animate-spin text-primary" size={16} />
           <span>Veriler yükleniyor, lütfen bekleyin...</span>

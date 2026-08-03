@@ -21,8 +21,20 @@ import { Route as KarsilastirRouteImport } from './routes/karsilastir'
 import { Route as EndekslerRouteImport } from './routes/endeksler'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfilIndexRouteImport } from './routes/profil.index'
+import { Route as KurumsalIndexRouteImport } from './routes/kurumsal.index'
 import { Route as EndekslerIndexRouteImport } from './routes/endeksler.index'
 import { Route as SektorlerSlugRouteImport } from './routes/sektorler.$slug'
+import { Route as KurumsalYasalUyariRouteImport } from './routes/kurumsal.yasal-uyari'
+import { Route as KurumsalSssRouteImport } from './routes/kurumsal.sss'
+import { Route as KurumsalReklamIsbirligiRouteImport } from './routes/kurumsal.reklam-isbirligi'
+import { Route as KurumsalNasilKullanilirRouteImport } from './routes/kurumsal.nasil-kullanilir'
+import { Route as KurumsalKvkkRouteImport } from './routes/kurumsal.kvkk'
+import { Route as KurumsalInsanKaynaklariRouteImport } from './routes/kurumsal.insan-kaynaklari'
+import { Route as KurumsalIletisimRouteImport } from './routes/kurumsal.iletisim'
+import { Route as KurumsalHakkimizdaRouteImport } from './routes/kurumsal.hakkimizda'
+import { Route as KurumsalGeriBildirimRouteImport } from './routes/kurumsal.geri-bildirim'
+import { Route as KurumsalCerezPolitikasiRouteImport } from './routes/kurumsal.cerez-politikasi'
+import { Route as KurumsalBilgiToplumuHizmetleriRouteImport } from './routes/kurumsal.bilgi-toplumu-hizmetleri'
 import { Route as HisseTickerRouteImport } from './routes/hisse.$ticker'
 import { Route as EndekslerIdRouteImport } from './routes/endeksler.$id'
 import { Route as ApiTickersRouteImport } from './routes/api/tickers'
@@ -107,6 +119,11 @@ const ProfilIndexRoute = ProfilIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ProfilRoute,
 } as any)
+const KurumsalIndexRoute = KurumsalIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => KurumsalRoute,
+} as any)
 const EndekslerIndexRoute = EndekslerIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -117,6 +134,62 @@ const SektorlerSlugRoute = SektorlerSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => SektorlerRoute,
 } as any)
+const KurumsalYasalUyariRoute = KurumsalYasalUyariRouteImport.update({
+  id: '/yasal-uyari',
+  path: '/yasal-uyari',
+  getParentRoute: () => KurumsalRoute,
+} as any)
+const KurumsalSssRoute = KurumsalSssRouteImport.update({
+  id: '/sss',
+  path: '/sss',
+  getParentRoute: () => KurumsalRoute,
+} as any)
+const KurumsalReklamIsbirligiRoute = KurumsalReklamIsbirligiRouteImport.update({
+  id: '/reklam-isbirligi',
+  path: '/reklam-isbirligi',
+  getParentRoute: () => KurumsalRoute,
+} as any)
+const KurumsalNasilKullanilirRoute = KurumsalNasilKullanilirRouteImport.update({
+  id: '/nasil-kullanilir',
+  path: '/nasil-kullanilir',
+  getParentRoute: () => KurumsalRoute,
+} as any)
+const KurumsalKvkkRoute = KurumsalKvkkRouteImport.update({
+  id: '/kvkk',
+  path: '/kvkk',
+  getParentRoute: () => KurumsalRoute,
+} as any)
+const KurumsalInsanKaynaklariRoute = KurumsalInsanKaynaklariRouteImport.update({
+  id: '/insan-kaynaklari',
+  path: '/insan-kaynaklari',
+  getParentRoute: () => KurumsalRoute,
+} as any)
+const KurumsalIletisimRoute = KurumsalIletisimRouteImport.update({
+  id: '/iletisim',
+  path: '/iletisim',
+  getParentRoute: () => KurumsalRoute,
+} as any)
+const KurumsalHakkimizdaRoute = KurumsalHakkimizdaRouteImport.update({
+  id: '/hakkimizda',
+  path: '/hakkimizda',
+  getParentRoute: () => KurumsalRoute,
+} as any)
+const KurumsalGeriBildirimRoute = KurumsalGeriBildirimRouteImport.update({
+  id: '/geri-bildirim',
+  path: '/geri-bildirim',
+  getParentRoute: () => KurumsalRoute,
+} as any)
+const KurumsalCerezPolitikasiRoute = KurumsalCerezPolitikasiRouteImport.update({
+  id: '/cerez-politikasi',
+  path: '/cerez-politikasi',
+  getParentRoute: () => KurumsalRoute,
+} as any)
+const KurumsalBilgiToplumuHizmetleriRoute =
+  KurumsalBilgiToplumuHizmetleriRouteImport.update({
+    id: '/bilgi-toplumu-hizmetleri',
+    path: '/bilgi-toplumu-hizmetleri',
+    getParentRoute: () => KurumsalRoute,
+  } as any)
 const HisseTickerRoute = HisseTickerRouteImport.update({
   id: '/hisse/$ticker',
   path: '/hisse/$ticker',
@@ -237,7 +310,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/endeksler': typeof EndekslerRouteWithChildren
   '/karsilastir': typeof KarsilastirRoute
-  '/kurumsal': typeof KurumsalRoute
+  '/kurumsal': typeof KurumsalRouteWithChildren
   '/nasil-calisir': typeof NasilCalisirRoute
   '/neden-jetborsa': typeof NedenJetborsaRoute
   '/profil': typeof ProfilRouteWithChildren
@@ -250,8 +323,20 @@ export interface FileRoutesByFullPath {
   '/api/tickers': typeof ApiTickersRoute
   '/endeksler/$id': typeof EndekslerIdRouteWithChildren
   '/hisse/$ticker': typeof HisseTickerRouteWithChildren
+  '/kurumsal/bilgi-toplumu-hizmetleri': typeof KurumsalBilgiToplumuHizmetleriRoute
+  '/kurumsal/cerez-politikasi': typeof KurumsalCerezPolitikasiRoute
+  '/kurumsal/geri-bildirim': typeof KurumsalGeriBildirimRoute
+  '/kurumsal/hakkimizda': typeof KurumsalHakkimizdaRoute
+  '/kurumsal/iletisim': typeof KurumsalIletisimRoute
+  '/kurumsal/insan-kaynaklari': typeof KurumsalInsanKaynaklariRoute
+  '/kurumsal/kvkk': typeof KurumsalKvkkRoute
+  '/kurumsal/nasil-kullanilir': typeof KurumsalNasilKullanilirRoute
+  '/kurumsal/reklam-isbirligi': typeof KurumsalReklamIsbirligiRoute
+  '/kurumsal/sss': typeof KurumsalSssRoute
+  '/kurumsal/yasal-uyari': typeof KurumsalYasalUyariRoute
   '/sektorler/$slug': typeof SektorlerSlugRouteWithChildren
   '/endeksler/': typeof EndekslerIndexRoute
+  '/kurumsal/': typeof KurumsalIndexRoute
   '/profil/': typeof ProfilIndexRoute
   '/api/ai/charge': typeof ApiAiChargeRoute
   '/api/ai/pre-check': typeof ApiAiPreCheckRoute
@@ -275,7 +360,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/karsilastir': typeof KarsilastirRoute
-  '/kurumsal': typeof KurumsalRoute
   '/nasil-calisir': typeof NasilCalisirRoute
   '/neden-jetborsa': typeof NedenJetborsaRoute
   '/sektorler': typeof SektorlerRouteWithChildren
@@ -285,8 +369,20 @@ export interface FileRoutesByTo {
   '/api/checkout-dodo': typeof ApiCheckoutDodoRoute
   '/api/customer-portal': typeof ApiCustomerPortalRoute
   '/api/tickers': typeof ApiTickersRoute
+  '/kurumsal/bilgi-toplumu-hizmetleri': typeof KurumsalBilgiToplumuHizmetleriRoute
+  '/kurumsal/cerez-politikasi': typeof KurumsalCerezPolitikasiRoute
+  '/kurumsal/geri-bildirim': typeof KurumsalGeriBildirimRoute
+  '/kurumsal/hakkimizda': typeof KurumsalHakkimizdaRoute
+  '/kurumsal/iletisim': typeof KurumsalIletisimRoute
+  '/kurumsal/insan-kaynaklari': typeof KurumsalInsanKaynaklariRoute
+  '/kurumsal/kvkk': typeof KurumsalKvkkRoute
+  '/kurumsal/nasil-kullanilir': typeof KurumsalNasilKullanilirRoute
+  '/kurumsal/reklam-isbirligi': typeof KurumsalReklamIsbirligiRoute
+  '/kurumsal/sss': typeof KurumsalSssRoute
+  '/kurumsal/yasal-uyari': typeof KurumsalYasalUyariRoute
   '/sektorler/$slug': typeof SektorlerSlugRouteWithChildren
   '/endeksler': typeof EndekslerIndexRoute
+  '/kurumsal': typeof KurumsalIndexRoute
   '/profil': typeof ProfilIndexRoute
   '/api/ai/charge': typeof ApiAiChargeRoute
   '/api/ai/pre-check': typeof ApiAiPreCheckRoute
@@ -312,7 +408,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/endeksler': typeof EndekslerRouteWithChildren
   '/karsilastir': typeof KarsilastirRoute
-  '/kurumsal': typeof KurumsalRoute
+  '/kurumsal': typeof KurumsalRouteWithChildren
   '/nasil-calisir': typeof NasilCalisirRoute
   '/neden-jetborsa': typeof NedenJetborsaRoute
   '/profil': typeof ProfilRouteWithChildren
@@ -325,8 +421,20 @@ export interface FileRoutesById {
   '/api/tickers': typeof ApiTickersRoute
   '/endeksler/$id': typeof EndekslerIdRouteWithChildren
   '/hisse/$ticker': typeof HisseTickerRouteWithChildren
+  '/kurumsal/bilgi-toplumu-hizmetleri': typeof KurumsalBilgiToplumuHizmetleriRoute
+  '/kurumsal/cerez-politikasi': typeof KurumsalCerezPolitikasiRoute
+  '/kurumsal/geri-bildirim': typeof KurumsalGeriBildirimRoute
+  '/kurumsal/hakkimizda': typeof KurumsalHakkimizdaRoute
+  '/kurumsal/iletisim': typeof KurumsalIletisimRoute
+  '/kurumsal/insan-kaynaklari': typeof KurumsalInsanKaynaklariRoute
+  '/kurumsal/kvkk': typeof KurumsalKvkkRoute
+  '/kurumsal/nasil-kullanilir': typeof KurumsalNasilKullanilirRoute
+  '/kurumsal/reklam-isbirligi': typeof KurumsalReklamIsbirligiRoute
+  '/kurumsal/sss': typeof KurumsalSssRoute
+  '/kurumsal/yasal-uyari': typeof KurumsalYasalUyariRoute
   '/sektorler/$slug': typeof SektorlerSlugRouteWithChildren
   '/endeksler/': typeof EndekslerIndexRoute
+  '/kurumsal/': typeof KurumsalIndexRoute
   '/profil/': typeof ProfilIndexRoute
   '/api/ai/charge': typeof ApiAiChargeRoute
   '/api/ai/pre-check': typeof ApiAiPreCheckRoute
@@ -366,8 +474,20 @@ export interface FileRouteTypes {
     | '/api/tickers'
     | '/endeksler/$id'
     | '/hisse/$ticker'
+    | '/kurumsal/bilgi-toplumu-hizmetleri'
+    | '/kurumsal/cerez-politikasi'
+    | '/kurumsal/geri-bildirim'
+    | '/kurumsal/hakkimizda'
+    | '/kurumsal/iletisim'
+    | '/kurumsal/insan-kaynaklari'
+    | '/kurumsal/kvkk'
+    | '/kurumsal/nasil-kullanilir'
+    | '/kurumsal/reklam-isbirligi'
+    | '/kurumsal/sss'
+    | '/kurumsal/yasal-uyari'
     | '/sektorler/$slug'
     | '/endeksler/'
+    | '/kurumsal/'
     | '/profil/'
     | '/api/ai/charge'
     | '/api/ai/pre-check'
@@ -391,7 +511,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/karsilastir'
-    | '/kurumsal'
     | '/nasil-calisir'
     | '/neden-jetborsa'
     | '/sektorler'
@@ -401,8 +520,20 @@ export interface FileRouteTypes {
     | '/api/checkout-dodo'
     | '/api/customer-portal'
     | '/api/tickers'
+    | '/kurumsal/bilgi-toplumu-hizmetleri'
+    | '/kurumsal/cerez-politikasi'
+    | '/kurumsal/geri-bildirim'
+    | '/kurumsal/hakkimizda'
+    | '/kurumsal/iletisim'
+    | '/kurumsal/insan-kaynaklari'
+    | '/kurumsal/kvkk'
+    | '/kurumsal/nasil-kullanilir'
+    | '/kurumsal/reklam-isbirligi'
+    | '/kurumsal/sss'
+    | '/kurumsal/yasal-uyari'
     | '/sektorler/$slug'
     | '/endeksler'
+    | '/kurumsal'
     | '/profil'
     | '/api/ai/charge'
     | '/api/ai/pre-check'
@@ -440,8 +571,20 @@ export interface FileRouteTypes {
     | '/api/tickers'
     | '/endeksler/$id'
     | '/hisse/$ticker'
+    | '/kurumsal/bilgi-toplumu-hizmetleri'
+    | '/kurumsal/cerez-politikasi'
+    | '/kurumsal/geri-bildirim'
+    | '/kurumsal/hakkimizda'
+    | '/kurumsal/iletisim'
+    | '/kurumsal/insan-kaynaklari'
+    | '/kurumsal/kvkk'
+    | '/kurumsal/nasil-kullanilir'
+    | '/kurumsal/reklam-isbirligi'
+    | '/kurumsal/sss'
+    | '/kurumsal/yasal-uyari'
     | '/sektorler/$slug'
     | '/endeksler/'
+    | '/kurumsal/'
     | '/profil/'
     | '/api/ai/charge'
     | '/api/ai/pre-check'
@@ -467,7 +610,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   EndekslerRoute: typeof EndekslerRouteWithChildren
   KarsilastirRoute: typeof KarsilastirRoute
-  KurumsalRoute: typeof KurumsalRoute
+  KurumsalRoute: typeof KurumsalRouteWithChildren
   NasilCalisirRoute: typeof NasilCalisirRoute
   NedenJetborsaRoute: typeof NedenJetborsaRoute
   ProfilRoute: typeof ProfilRouteWithChildren
@@ -576,6 +719,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfilIndexRouteImport
       parentRoute: typeof ProfilRoute
     }
+    '/kurumsal/': {
+      id: '/kurumsal/'
+      path: '/'
+      fullPath: '/kurumsal/'
+      preLoaderRoute: typeof KurumsalIndexRouteImport
+      parentRoute: typeof KurumsalRoute
+    }
     '/endeksler/': {
       id: '/endeksler/'
       path: '/'
@@ -589,6 +739,83 @@ declare module '@tanstack/react-router' {
       fullPath: '/sektorler/$slug'
       preLoaderRoute: typeof SektorlerSlugRouteImport
       parentRoute: typeof SektorlerRoute
+    }
+    '/kurumsal/yasal-uyari': {
+      id: '/kurumsal/yasal-uyari'
+      path: '/yasal-uyari'
+      fullPath: '/kurumsal/yasal-uyari'
+      preLoaderRoute: typeof KurumsalYasalUyariRouteImport
+      parentRoute: typeof KurumsalRoute
+    }
+    '/kurumsal/sss': {
+      id: '/kurumsal/sss'
+      path: '/sss'
+      fullPath: '/kurumsal/sss'
+      preLoaderRoute: typeof KurumsalSssRouteImport
+      parentRoute: typeof KurumsalRoute
+    }
+    '/kurumsal/reklam-isbirligi': {
+      id: '/kurumsal/reklam-isbirligi'
+      path: '/reklam-isbirligi'
+      fullPath: '/kurumsal/reklam-isbirligi'
+      preLoaderRoute: typeof KurumsalReklamIsbirligiRouteImport
+      parentRoute: typeof KurumsalRoute
+    }
+    '/kurumsal/nasil-kullanilir': {
+      id: '/kurumsal/nasil-kullanilir'
+      path: '/nasil-kullanilir'
+      fullPath: '/kurumsal/nasil-kullanilir'
+      preLoaderRoute: typeof KurumsalNasilKullanilirRouteImport
+      parentRoute: typeof KurumsalRoute
+    }
+    '/kurumsal/kvkk': {
+      id: '/kurumsal/kvkk'
+      path: '/kvkk'
+      fullPath: '/kurumsal/kvkk'
+      preLoaderRoute: typeof KurumsalKvkkRouteImport
+      parentRoute: typeof KurumsalRoute
+    }
+    '/kurumsal/insan-kaynaklari': {
+      id: '/kurumsal/insan-kaynaklari'
+      path: '/insan-kaynaklari'
+      fullPath: '/kurumsal/insan-kaynaklari'
+      preLoaderRoute: typeof KurumsalInsanKaynaklariRouteImport
+      parentRoute: typeof KurumsalRoute
+    }
+    '/kurumsal/iletisim': {
+      id: '/kurumsal/iletisim'
+      path: '/iletisim'
+      fullPath: '/kurumsal/iletisim'
+      preLoaderRoute: typeof KurumsalIletisimRouteImport
+      parentRoute: typeof KurumsalRoute
+    }
+    '/kurumsal/hakkimizda': {
+      id: '/kurumsal/hakkimizda'
+      path: '/hakkimizda'
+      fullPath: '/kurumsal/hakkimizda'
+      preLoaderRoute: typeof KurumsalHakkimizdaRouteImport
+      parentRoute: typeof KurumsalRoute
+    }
+    '/kurumsal/geri-bildirim': {
+      id: '/kurumsal/geri-bildirim'
+      path: '/geri-bildirim'
+      fullPath: '/kurumsal/geri-bildirim'
+      preLoaderRoute: typeof KurumsalGeriBildirimRouteImport
+      parentRoute: typeof KurumsalRoute
+    }
+    '/kurumsal/cerez-politikasi': {
+      id: '/kurumsal/cerez-politikasi'
+      path: '/cerez-politikasi'
+      fullPath: '/kurumsal/cerez-politikasi'
+      preLoaderRoute: typeof KurumsalCerezPolitikasiRouteImport
+      parentRoute: typeof KurumsalRoute
+    }
+    '/kurumsal/bilgi-toplumu-hizmetleri': {
+      id: '/kurumsal/bilgi-toplumu-hizmetleri'
+      path: '/bilgi-toplumu-hizmetleri'
+      fullPath: '/kurumsal/bilgi-toplumu-hizmetleri'
+      preLoaderRoute: typeof KurumsalBilgiToplumuHizmetleriRouteImport
+      parentRoute: typeof KurumsalRoute
     }
     '/hisse/$ticker': {
       id: '/hisse/$ticker'
@@ -782,6 +1009,40 @@ const EndekslerRouteWithChildren = EndekslerRoute._addFileChildren(
   EndekslerRouteChildren,
 )
 
+interface KurumsalRouteChildren {
+  KurumsalBilgiToplumuHizmetleriRoute: typeof KurumsalBilgiToplumuHizmetleriRoute
+  KurumsalCerezPolitikasiRoute: typeof KurumsalCerezPolitikasiRoute
+  KurumsalGeriBildirimRoute: typeof KurumsalGeriBildirimRoute
+  KurumsalHakkimizdaRoute: typeof KurumsalHakkimizdaRoute
+  KurumsalIletisimRoute: typeof KurumsalIletisimRoute
+  KurumsalInsanKaynaklariRoute: typeof KurumsalInsanKaynaklariRoute
+  KurumsalKvkkRoute: typeof KurumsalKvkkRoute
+  KurumsalNasilKullanilirRoute: typeof KurumsalNasilKullanilirRoute
+  KurumsalReklamIsbirligiRoute: typeof KurumsalReklamIsbirligiRoute
+  KurumsalSssRoute: typeof KurumsalSssRoute
+  KurumsalYasalUyariRoute: typeof KurumsalYasalUyariRoute
+  KurumsalIndexRoute: typeof KurumsalIndexRoute
+}
+
+const KurumsalRouteChildren: KurumsalRouteChildren = {
+  KurumsalBilgiToplumuHizmetleriRoute: KurumsalBilgiToplumuHizmetleriRoute,
+  KurumsalCerezPolitikasiRoute: KurumsalCerezPolitikasiRoute,
+  KurumsalGeriBildirimRoute: KurumsalGeriBildirimRoute,
+  KurumsalHakkimizdaRoute: KurumsalHakkimizdaRoute,
+  KurumsalIletisimRoute: KurumsalIletisimRoute,
+  KurumsalInsanKaynaklariRoute: KurumsalInsanKaynaklariRoute,
+  KurumsalKvkkRoute: KurumsalKvkkRoute,
+  KurumsalNasilKullanilirRoute: KurumsalNasilKullanilirRoute,
+  KurumsalReklamIsbirligiRoute: KurumsalReklamIsbirligiRoute,
+  KurumsalSssRoute: KurumsalSssRoute,
+  KurumsalYasalUyariRoute: KurumsalYasalUyariRoute,
+  KurumsalIndexRoute: KurumsalIndexRoute,
+}
+
+const KurumsalRouteWithChildren = KurumsalRoute._addFileChildren(
+  KurumsalRouteChildren,
+)
+
 interface ProfilRouteChildren {
   ProfilIndexRoute: typeof ProfilIndexRoute
 }
@@ -853,7 +1114,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   EndekslerRoute: EndekslerRouteWithChildren,
   KarsilastirRoute: KarsilastirRoute,
-  KurumsalRoute: KurumsalRoute,
+  KurumsalRoute: KurumsalRouteWithChildren,
   NasilCalisirRoute: NasilCalisirRoute,
   NedenJetborsaRoute: NedenJetborsaRoute,
   ProfilRoute: ProfilRouteWithChildren,

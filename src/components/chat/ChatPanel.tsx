@@ -42,6 +42,10 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading,
   const effectiveUser = user ?? authUser;
   const effectiveSessionLoading = sessionLoading ?? authLoading;
   const isAnon = !effectiveUser && !effectiveSessionLoading;
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const pageCtx = useMemo(() => getPageSuggestions(context), [context]);
 
@@ -244,14 +248,14 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading,
                 <MessageScrollerItem className={`flex items-start ${isMobile ? "min-h-[200px] pt-1" : "min-h-[300px] pt-2"}`}>
                   <div className="flex flex-col items-start text-left select-none w-full">
                     <div className="space-y-1">
-                      <h6 className={`font-semibold text-foreground ${isMobile ? "text-xs" : "text-sm"}`}>
+                      <h6 className={`font-semibold text-foreground ${isMobile ? "text-sm" : "text-sm"}`}>
                         {pageCtx.title}
                       </h6>
-                      <p className={`text-muted-foreground leading-relaxed ${isMobile ? "text-[10px]" : "text-xs sm:text-sm"}`}>
+                      <p className={`text-muted-foreground leading-relaxed ${isMobile ? "text-sm" : "text-xs sm:text-sm"}`}>
                         {pageCtx.description}
                       </p>
                     </div>
-                    {!isAnon && (
+                    {!isAnon && isMounted && (
                       <div className="w-full space-y-2 mt-4">
                         <SuggestionChips
                           suggestions={pageCtx.suggestions}
@@ -309,7 +313,7 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading,
                     </div>
                     <Bubble variant="secondary" align="start">
                       <BubbleContent className={`${isMobile ? "px-2.5 py-2" : "px-3.5 py-2.5"} rounded-2xl rounded-tl-sm border border-border/30`}>
-                        <div className={`whitespace-pre-wrap break-words leading-relaxed ${isMobile ? "text-xs" : "text-sm"} [&_*]:text-sm`}>
+                        <div className={`whitespace-pre-wrap break-words leading-relaxed text-sm [&_*]:text-sm`}>
                           {streamingText}
                           <span className="inline-flex w-[2px] h-[1em] bg-primary ml-0.5 animate-pulse rounded-sm" />
                         </div>
@@ -328,7 +332,7 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading,
                     <Bubble variant="muted" align="start">
                       <BubbleContent className={`${isMobile ? "px-2.5 py-2" : "px-3.5 py-2.5"} rounded-2xl rounded-tl-sm border border-border/30 flex items-center gap-2`}>
                         <Loader2 size={isMobile ? 11 : 13} className="animate-spin text-primary" />
-                        <span className={`text-muted-foreground ${isMobile ? "text-[11px]" : "text-sm"}`}>
+                        <span className="text-muted-foreground text-sm">
                           Analiz raporu hazırlıyor...
                         </span>
                       </BubbleContent>
@@ -338,7 +342,7 @@ export function ChatPanel({ context, placeholder, onClose, user, sessionLoading,
               )}
 
               {/* Anonymous user login CTA after daily quota reached (seamless, no card) */}
-              {isAnon && !isLoading && streamingText === null && getAnonQuota() >= ANON_QUOTA_DAILY && (
+              {isMounted && isAnon && !isLoading && streamingText === null && getAnonQuota() >= ANON_QUOTA_DAILY && (
                 <MessageScrollerItem scrollAnchor>
                   <div className="flex flex-col items-start gap-1.5 my-1.5 select-none">
                     <p className="text-xs text-muted-foreground">
