@@ -3,25 +3,24 @@ import { useState } from 'react'
 import { 
   ArrowDown, 
   ArrowUp,
-  Blocks,
-  ChartPie,
   Factory,
-  MessageCircle,
-  Settings2,
   Sparkles,
   TrendingUp,
 } from 'lucide-react'
 import useEmblaCarousel from 'embla-carousel-react'
 import Autoplay from 'embla-carousel-autoplay'
 import { useAuth } from '../hooks/useAuth'
-import { useSectorGroups } from '../lib/useCompData'
-import { groupKeyToDisplayName, groupKeyToSlug } from '../constants/sectorGroups'
 import { ChatPanel } from '../components/chat/ChatPanel'
 import { ChatSheet } from '../components/chat/ChatSheet'
 
 import { useUIStore } from '../store/ui'
 import { useIndices } from '../lib/useMarketData'
 import { getIndexSlug } from '../constants/bistIndices'
+import { Hero1A } from '../components/home/Hero1A'
+import { Hero2 } from '../components/home/Hero2'
+import { CTABlock } from '../components/home/CTABlock'
+import { ExternalCTA } from '../components/shadcn-space/blocks/cta-02/cta'
+import { SectorsHomepage } from '../components/home/SectorsHomepage'
 
 export const Route = createFileRoute('/')({
   component: LandingPage,
@@ -33,7 +32,6 @@ function LandingPage() {
   const navigate = useNavigate()
   const [isChatSheetOpen, setIsChatSheetOpen] = useState(false)
 
-  const { data: sectorGroupsData } = useSectorGroups()
   const { data: indicesData } = useIndices()
   const [emblaRef] = useEmblaCarousel({ loop: true, dragFree: true, align: 'start' }, [Autoplay({ delay: 3000, stopOnMouseEnter: true })])
 
@@ -102,7 +100,8 @@ function LandingPage() {
             </div>
           </section>
 
-
+          {/* Hero1A - Halüsinasyon Karşıtı Tanıtım */}
+          <Hero1A />
 
           {/* Endeksler Carousel */}
           <section className="px-4 md:px-6 py-4">
@@ -151,36 +150,14 @@ function LandingPage() {
             )}
           </section>
 
-          {/* Hero2 - CTA */}
-          <section className="relative w-full py-16 px-6 flex flex-col items-center text-center overflow-hidden">
-            <div className="absolute top-[-20%] left-[-10%] w-[80vw] h-[80vw] rounded-full bg-primary/5 blur-[120px] pointer-events-none -z-10 animate-pulse" />
-            <div className="max-w-5xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
-                Borsanın röntgenini çekin
-              </h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto mb-10 text-lg leading-relaxed">
-                Borsa İstanbul uzmanı tek yapay zekanın yeteneklerini ücretsiz keşfedin.
-              </p>
+          {/* Hero2 - Feature Kartları */}
+          <Hero2 />
 
-              <div className="mx-auto mt-10 grid max-w-5xl gap-4 sm:grid-cols-2">
-                {[
-                  { icon: Settings2, title: 'Teknik Analiz', description: 'Grafikler, indikatörler ve işlem hacmi ile derinlemesine teknik inceleme.' },
-                  { icon: ChartPie, title: 'Temel Analiz', description: 'Finansal tablolar, rasyolar ve nakit akışı ile şirket değerleme.' },
-                  { icon: Blocks, title: 'Sektör İnceleme', description: 'Sektör bazında büyüme, karlılık ve piyasa karşılaştırmaları.' },
-                  { icon: MessageCircle, title: 'Şirket Karşılaştırma', description: 'Birden çok hisseyi yan yana getirerek performans ve rasyo analizi.' },
-                ].map((feature) => (
-                  <div key={feature.title} className="flex flex-col rounded-sm border p-6 text-left">
-                    <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                      <feature.icon className="size-5" />
-                    </div>
-                    <span className="font-medium text-lg">{feature.title}</span>
-                    <p className="mt-1 text-[15px] text-foreground/80">{feature.description}</p>
-                  </div>
-                ))}
-              </div>
+          {/* CTABlock - CTA */}
+          <CTABlock />
 
-            </div>
-          </section>
+          {/* ExternalCTA - Video + Marquee */}
+          <ExternalCTA />
 
           {/* Sektörler */}
           <section className="px-4 md:px-6 py-4">
@@ -190,29 +167,7 @@ function LandingPage() {
               </div>
               <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Sektörler</h3>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {(sectorGroupsData?.groups || []).sort((a, b) => (b.count || 0) - (a.count || 0)).map(group => {
-                const slug = groupKeyToSlug(group.key)
-                return (
-                  <Link
-                    key={group.key}
-                    to="/sektorler/$slug"
-                    params={{ slug }}
-                    className="flex items-center justify-between px-1 py-2.5 hover:bg-muted/20 transition-colors"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-7 h-7 bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                        <Factory size={13} />
-                      </div>
-                      <span className="text-sm font-semibold text-foreground truncate">
-                        {groupKeyToDisplayName(group.key) || group.name}
-                      </span>
-                    </div>
-                    <span className="text-xs text-muted-foreground shrink-0 ml-2">{group.count || '—'}</span>
-                  </Link>
-                )
-              })}
-            </div>
+            <SectorsHomepage />
           </section>
 
           {/* Footer - Kurumsal */}
