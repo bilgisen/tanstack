@@ -215,6 +215,67 @@ function LandingPage() {
             </div>
           </section>
 
+          {/* Footer - Kurumsal */}
+          <footer className="px-4 md:px-6 py-10 mt-8 border-t border-border/50">
+            <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-start justify-between gap-8">
+              <div className="max-w-xs">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-sm font-bold text-foreground">JetBorsa</span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  BIST uzmanı yapay zekâ destekli finansal analiz platformu.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-x-12 gap-y-2">
+                <Link to="/kurumsal/hakkimizda" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  Hakkımızda
+                </Link>
+                <Link to="/kurumsal/iletisim" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  İletişim
+                </Link>
+                <Link to="/nasil-calisir" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  Nasıl Çalışır
+                </Link>
+                <Link to="/kurumsal/insan-kaynaklari" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  Kariyer
+                </Link>
+                <Link to="/kurumsal/sss" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  SSS
+                </Link>
+                <Link to="/kurumsal/kvkk" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  KVKK
+                </Link>
+                <Link to="/kurumsal/cerez-politikasi" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  Çerez Politikası
+                </Link>
+                <Link to="/kurumsal/yasal-uyari" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  Yasal Uyarı
+                </Link>
+                <Link to="/kurumsal/geri-bildirim" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  Geri Bildirim
+                </Link>
+                <Link to="/kurumsal/bilgi-toplumu-hizmetleri" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  Bilgi Toplumu Hizmetleri
+                </Link>
+                <Link to="/kurumsal/reklam-isbirligi" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  Reklam İşbirliği
+                </Link>
+                <Link to="/kurumsal/nasil-kullanilir" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  Nasıl Kullanılır
+                </Link>
+              </div>
+            </div>
+            <div className="max-w-5xl mx-auto mt-8 pt-4 border-t border-border/30 flex items-center justify-between">
+              <span className="text-[11px] text-muted-foreground/60">
+                © 2026 JetBorsa. Tüm hakları saklıdır.
+              </span>
+              <Link to="/kurumsal" className="text-[11px] text-muted-foreground/60 hover:text-foreground transition-colors">
+                Kurumsal
+              </Link>
+            </div>
+          </footer>
+
         </div>
       </div>
 
