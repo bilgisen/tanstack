@@ -150,7 +150,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   init: async () => {
     if (get().initialized) return
     try {
-      const res = await fetch('/api/chat/sessions?limit=50')
+      const res = await fetch('/api/chat/sessions?limit=50', { credentials: 'include' })
       if (res.ok) {
         const data = await res.json()
         const remoteSessions: Array<ChatSession> = (data.sessions || []).map((s: { id: string; ticker?: string; createdAt: string; context?: string }) => ({
@@ -184,7 +184,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     // Try to get messages from server first
     try {
-      const res = await fetch(`/api/chat/sessions/${id}`)
+      const res = await fetch(`/api/chat/sessions/${id}`, { credentials: 'include' })
       if (res.ok) {
         const data = await res.json()
         const serverMessages: Array<Message> = (data.session?.messages || []).map((m: { role: 'user' | 'assistant'; text: string; context?: string; suggestions?: Array<string>; widget?: Record<string, unknown> }) => ({
@@ -210,7 +210,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   deleteSession: async (id: string) => {
     try {
-      await fetch(`/api/chat/sessions/${id}`, { method: 'DELETE' })
+      await fetch(`/api/chat/sessions/${id}`, { method: 'DELETE', credentials: 'include' })
     } catch {}
     const updatedSessions = get().sessions.filter(s => s.id !== id)
     set({ sessions: updatedSessions })

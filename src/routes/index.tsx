@@ -20,6 +20,7 @@ import { groupKeyToDisplayName, groupKeyToSlug } from '../constants/sectorGroups
 import { BIST30_CONSTITUENTS } from '../constants/bist30Constituents'
 import { Hero2 } from '../components/home/Hero2'
 import { CTABlock } from '../components/home/CTABlock'
+import { ClientOnly } from '../components/ClientOnly'
 import { Separator } from '../components/ui/separator'
 
 export const Route = createFileRoute('/')({
@@ -157,7 +158,9 @@ function LandingPage() {
           </section>
 
           {/* CTABlock - CTA */}
-          <CTABlock />
+          <ClientOnly>
+            <CTABlock />
+          </ClientOnly>
 
           {/* Hero2 - Yatırımlarınıza Sezgiler Değil Veriler */}
           <Hero2 />
