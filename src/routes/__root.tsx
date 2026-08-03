@@ -4,6 +4,7 @@ import { TanStackDevtools } from "@tanstack/react-devtools"
 import { QueryClientProvider } from "@tanstack/react-query"
 import { useEffect } from "react"
 import { AppLayout } from "../components/layout/AppLayout"
+import { ErrorBoundary } from "../components/ErrorBoundary"
 import { queryClient } from "../lib/queryClient"
 
 import appCss from "../styles.css?url"
@@ -138,7 +139,9 @@ function RootDocument() {
       <body suppressHydrationWarning>
       <QueryClientProvider client={queryClient}>
         <AppLayout>
-          <Outlet />
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
         </AppLayout>
       </QueryClientProvider>
         <ToastContainer />

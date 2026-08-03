@@ -48,6 +48,7 @@ function getAuth() {
           sameSite: "lax",
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
+          domain: process.env.NODE_ENV === 'production' ? ".jetborsa.com" : undefined,
         },
       },
       plugins: [

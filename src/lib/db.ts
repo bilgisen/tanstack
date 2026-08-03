@@ -5,11 +5,15 @@ import type {DrizzleD1Database} from "drizzle-orm/d1";
 
 let _db: DrizzleD1Database<typeof schema> | null = null;
 
-function getDb(): DrizzleD1Database<typeof schema> {
+function getDb(): DrizzleD1Database<typeof schema> | null {
   if (!_db) {
     const cfEnv = getCloudflareEnv();
     if (!cfEnv?.DB) {
-      throw new Error("D1 binding 'DB' is missing from Cloudflare env!");
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error("D1 binding 'DB' is missing from Cloudflare env!");
+      }
+      console.warn("[db] D1 binding 'DB' is missing in dev environment — DB-backed features disabled");
+      return null;
     }
     _db = drizzle(cfEnv.DB, { schema });
   }
@@ -18,7 +22,8 @@ function getDb(): DrizzleD1Database<typeof schema> {
 
 export const db = new Proxy({} as DrizzleD1Database<typeof schema>, {
   get(_target, prop) {
-    return Reflect.get(getDb(), prop);
+    const instance = getDb();
+    if (!instance) return undefined;
+    return Reflect.get(instance, prop);
   }
 });
-

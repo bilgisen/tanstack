@@ -358,9 +358,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
     } else {
       const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com";
       const pricesPromise = (async () => {
+        const token = await getSessionToken();
+        const headers: Record<string, string> = {};
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
         const [stocksRes, summaryRes] = await Promise.allSettled([
-          fetch(`${apiUrl}/api/market/stocks`),
-          fetch(`${apiUrl}/api/market/summary`)
+          fetch(`${apiUrl}/api/market/stocks`, { headers, credentials: 'include' }),
+          fetch(`${apiUrl}/api/market/summary`, { headers, credentials: 'include' })
         ]);
 
         if (stocksRes.status === 'fulfilled' && stocksRes.value.ok) {
@@ -435,6 +440,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       const response = await fetch(`${apiUrl}/api/ai/chat/stream`, {
         method: "POST",
         headers,
+        credentials: 'include',
         body: JSON.stringify({
           message: trimmedText,
           context,
