@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Building2 } from 'lucide-react'
-import { TradingViewChart } from '../components/dashboard/TradingViewChart'
+import { LazyTradingViewChart } from '../components/charts/LazyTradingViewChart'
 import { useCompanyProfile, useCompanyQuote  } from '../lib/useCompanyData'
 import { CompanyProfileCard } from '../components/company/CompanyProfileCard'
 import { OwnershipStructure } from '../components/company/OwnershipStructure'
@@ -29,7 +29,7 @@ function CompanyOverviewPage() {
 
   return (
     <div className="space-y-6">
-      <TradingViewChart symbol={tickerUpper} lastPrice={quote?.last_price || 0} />
+      <LazyTradingViewChart symbol={tickerUpper} lastPrice={quote?.last_price || 0} />
       <CompanyProfileCard profile={profile} loading={isLoading} />
       <OwnershipStructure shareholders={profile?.shareholders} loading={isLoading} />
     </div>

@@ -3,7 +3,7 @@ import {
   Activity, AlertTriangle, BarChart3, Gauge,
   Shield, TrendingUp
 } from 'lucide-react'
-import { TradingViewChart } from '../components/dashboard/TradingViewChart'
+import { LazyTradingViewChart } from '../components/charts/LazyTradingViewChart'
 import { ScoreGauge } from '../constants/companyShared'
 import { useCompanyData } from '../lib/useCompanyData'
 import {  useTAPublicSummary } from '../lib/useTechnicalAnalysis'
@@ -48,7 +48,7 @@ function TechnicalAnalysisPage() {
 
   return (
     <div className="space-y-5">
-      <TradingViewChart symbol={tickerUpper} lastPrice={stats?.price || 0} />
+      <LazyTradingViewChart symbol={tickerUpper} lastPrice={stats?.price || 0} />
 
       {fundamentalDetail && stats && (
         <div className="text-base text-muted-foreground">

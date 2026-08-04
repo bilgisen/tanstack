@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useMemo, useState } from 'react'
-import { TradingViewChart } from '../components/dashboard/TradingViewChart'
+import { LazyTradingViewChart } from '../components/charts/LazyTradingViewChart'
 import { SektorPieChart } from '../components/ui/sektor-pie-chart'
 import { Skeleton } from '../components/ui/skeleton'
 import { getIndexName } from '../constants/bistIndices'
@@ -45,7 +45,7 @@ function EndeksOverviewPage() {
 
   return (
     <div className="space-y-5">
-      {chartReady && <TradingViewChart symbol={code} lastPrice={priceDetails.price} />}
+      {chartReady && <LazyTradingViewChart symbol={code} lastPrice={priceDetails.price} />}
 
       {indexDetail && (() => {
         const last = indexDetail.last ?? 0

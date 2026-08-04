@@ -277,3 +277,5 @@ export const TradingViewChart = memo(function TradingViewChartComponent({
     </div>
   );
 });
+
+export default TradingViewChart;

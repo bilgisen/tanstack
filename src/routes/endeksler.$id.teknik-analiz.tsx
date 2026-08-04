@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useMemo } from 'react'
 import { Activity, ArrowDown, ArrowUp, CandlestickChart, Gauge } from 'lucide-react'
-import { TradingViewChart } from '../components/dashboard/TradingViewChart'
+import { LazyTradingViewChart } from '../components/charts/LazyTradingViewChart'
 import { getIndexName } from '../constants/bistIndices'
 import { useIndexDetail, useIndices } from '../lib/useMarketData'
 
@@ -42,7 +42,7 @@ function EndeksTechnicalAnalysisPage() {
 
   return (
     <div className="space-y-5">
-      <TradingViewChart symbol={code} lastPrice={priceDetails.price} />
+      <LazyTradingViewChart symbol={code} lastPrice={priceDetails.price} />
 
       {/* Son fiyat özeti */}
       <div className="flex items-center justify-between rounded-xl border border-border/50 bg-card/40 p-4">
