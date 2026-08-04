@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { API } from '../lib/apiConfig';
 import { useWatchlistStore } from './watchlist';
 
 interface MarketCache {
@@ -356,7 +357,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     if (cachedPrices && cacheAge < 60000) {
       marketItemsMap = cachedPrices.data;
     } else {
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com";
+      const apiUrl = API.hono;
       const pricesPromise = (async () => {
         const token = await getSessionToken();
         const headers: Record<string, string> = {};
@@ -426,7 +427,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     try {
       // Don't set streamingText here — let it stay null until first token arrives
-      const apiUrl = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com";
+      const apiUrl = API.hono;
 
       // Send real Better Auth session token as Authorization header
       const sessionToken = await getSessionToken();

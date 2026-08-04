@@ -1,3 +1,4 @@
+import { API } from '../lib/apiConfig'
 import companyNames from './companyNames.json'
 import { SECTOR_GROUPS, groupKeyToDisplayName, groupKeyToSlug } from './sectorGroups'
 
@@ -218,7 +219,7 @@ export async function fetchCompanyData(tickerUpper: string, slug: string) {
     }
   } catch (e) { console.error('ta/summary fetch failed', e) }
 
-  const finveriUrl = import.meta.env.VITE_FINVERI_API_URL || "https://tekapi.jetborsa.com"
+  const finveriUrl = API.finveri
   let fundamental: FundamentalData = { fk: '-', roe: '-', currentRatio: '-', debtToEquity: '-', sector: sectorName }
   let fundamentalDetail: FundamentalDetail | null = null
   

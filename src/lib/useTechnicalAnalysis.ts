@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
+import { API } from './apiConfig'
 
-const HONO_API = import.meta.env.VITE_HONO_API_URL || 'https://hono.jetborsa.com'
+const HONO_API = API.hono
 
 export type TAPublicSummary = {
   score?: number

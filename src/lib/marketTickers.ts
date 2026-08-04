@@ -1,4 +1,6 @@
-const API_URL = import.meta.env.VITE_HONO_API_URL || "https://hono.jetborsa.com";
+import { API } from './apiConfig'
+
+const API_URL = API.hono
 
 /** Known BIST index codes (İş Yatırım endeks listesi — 54 kod, KAP kataloğuyla eşit) */
 export const INDEX_CODES = new Set([

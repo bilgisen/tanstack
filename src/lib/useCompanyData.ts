@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
+import { API } from './apiConfig'
 
-const HONO_API = import.meta.env.VITE_HONO_API_URL || 'https://hono.jetborsa.com'
-const MARKET_API = '/api/market'
+const HONO_API = API.hono
+const MARKET_API = API.market
 
 function isMarketOpen(): boolean {
   const now = new Date().toLocaleString('en-US', { timeZone: 'Europe/Istanbul', hour12: false })

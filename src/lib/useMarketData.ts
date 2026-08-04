@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { API } from './apiConfig'
 
 function isMarketOpen(): boolean {
   const now = new Date().toLocaleString('en-US', { timeZone: 'Europe/Istanbul', hour12: false })
@@ -63,7 +64,7 @@ type SektorItem = {
 
 type HistoryItem = Record<string, unknown>
 
-const API_BASE = '/api/market'
+const API_BASE = API.market
 
 async function fetchStocks(): Promise<Array<StockItem>> {
   const res = await fetch(`${API_BASE}/stocks`)
@@ -125,7 +126,7 @@ export function useMarketStocks() {
   return useQuery({
     queryKey: ['market', 'stocks'],
     queryFn: fetchStocks,
-    staleTime: marketStaleTime(10_000, 3_600_000),
+    staleTime: marketStaleTime(120_000, 3_600_000),
     gcTime: 86_400_000,
     refetchInterval: marketRefetchInterval(120_000, false),
     placeholderData: (prev) => prev,
@@ -162,7 +163,7 @@ export function useMarketSummary() {
   return useQuery({
     queryKey: ['market', 'summary'],
     queryFn: fetchSummary,
-    staleTime: marketStaleTime(10_000, 3_600_000),
+    staleTime: marketStaleTime(120_000, 3_600_000),
     gcTime: 86_400_000,
     refetchInterval: marketRefetchInterval(120_000, false),
     placeholderData: (prev) => prev,
@@ -174,7 +175,7 @@ export function useTASummary(code: string) {
   return useQuery({
     queryKey: ['ta', 'summary', code],
     queryFn: () => fetchTASummary(code),
-    staleTime: marketStaleTime(60_000, 3_600_000),
+    staleTime: marketStaleTime(300_000, 3_600_000),
     gcTime: 3_600_000,
     enabled: !!code,
     refetchOnReconnect: false,

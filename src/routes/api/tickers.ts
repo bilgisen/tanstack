@@ -1,7 +1,8 @@
 // @ts-nocheck
 import { createFileRoute } from '@tanstack/react-router'
+import { API } from '../../lib/apiConfig'
 
-const HONO_URL = process.env.VITE_HONO_API_URL || 'https://hono.jetborsa.com'
+const HONO_URL = API.hono
 
 function getCloudflareEnv(): any {
   try {
