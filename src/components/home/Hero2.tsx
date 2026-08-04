@@ -27,7 +27,7 @@ export function Hero2() {
   return (
     <section className="w-full px-4 py-16 md:px-6 md:py-20">
       <div className="mx-auto max-w-4xl">
-        <h2 className="mb-12 text-center text-3xl font-medium md:text-5xl">
+        <h2 className="mb-12 text-center text-4xl font-medium md:text-5xl">
           Yatırımlarınıza sezgiler değil veriler yön versin.
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

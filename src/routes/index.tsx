@@ -93,6 +93,9 @@ function LandingPage() {
             </div>
           </section>
 
+          {/* Hero2 - Yatırımlarınıza Sezgiler Değil Veriler */}
+          <Hero2 />
+
           {/* Hacim Liderleri Carousel */}
           <section className="px-4 md:px-6 py-4">
             {indicesData ? (
@@ -161,9 +164,6 @@ function LandingPage() {
           <ClientOnly>
             <CTABlock />
           </ClientOnly>
-
-          {/* Hero2 - Yatırımlarınıza Sezgiler Değil Veriler */}
-          <Hero2 />
 
           {/* Sektörler */}
           <section className="px-4 md:px-6 py-4">
@@ -307,22 +307,22 @@ function LandingPage() {
 function Stats() {
   return (
     <div className="mx-auto max-w-5xl px-6 py-12">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-        <div className="rounded-xl border px-8 py-10">
-          <span className="font-medium text-5xl">+600</span>
-          <p className="mt-4 text-foreground/80 text-xl">
+      <div className="grid grid-cols-3 gap-3 sm:gap-4">
+        <div className="rounded-xl border px-4 py-6 sm:px-8 sm:py-10">
+          <span className="font-medium text-2xl sm:text-5xl">+600</span>
+          <p className="mt-2 sm:mt-4 text-foreground/80 text-sm sm:text-xl">
             Şirket
           </p>
         </div>
-        <div className="rounded-xl border px-8 py-10">
-          <span className="font-medium text-5xl">+50</span>
-          <p className="mt-4 text-foreground/80 text-xl">
+        <div className="rounded-xl border px-4 py-6 sm:px-8 sm:py-10">
+          <span className="font-medium text-2xl sm:text-5xl">+50</span>
+          <p className="mt-2 sm:mt-4 text-foreground/80 text-sm sm:text-xl">
             Sektör
           </p>
         </div>
-        <div className="rounded-xl border px-8 py-10">
-          <span className="font-medium text-5xl">+15</span>
-          <p className="mt-4 text-foreground/80 text-xl">
+        <div className="rounded-xl border px-4 py-6 sm:px-8 sm:py-10">
+          <span className="font-medium text-2xl sm:text-5xl">+15</span>
+          <p className="mt-2 sm:mt-4 text-foreground/80 text-sm sm:text-xl">
             Endeks
           </p>
         </div>
