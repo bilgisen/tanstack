@@ -19,8 +19,9 @@ export function CTABlock({
                 </h2>
                 <p className="mx-auto max-w-2xl text-lg">
                   BIST verileri güçlü algoritmalarla işlenir ve zengin bir veri
-                  seti hazırlanır. AI doğrulanmış verileri analiz eder.{" "}
-                  <span className="font-semibold text-primary">Halüsinasyon görmez.</span>
+                  seti hazırlanır. AI doğrulanmış verileri analiz eder.
+                  <br />
+                  <span className="font-semibold">Halüsinasyon görmez.</span>
                 </p>
               </div>
               <Button

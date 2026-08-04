@@ -93,9 +93,6 @@ function LandingPage() {
             </div>
           </section>
 
-          {/* Hero2 - Yatırımlarınıza Sezgiler Değil Veriler */}
-          <Hero2 />
-
           {/* Hacim Liderleri Carousel */}
           <section className="px-4 md:px-6 py-4">
             {indicesData ? (
@@ -159,6 +156,9 @@ function LandingPage() {
               </div>
             )}
           </section>
+
+          {/* Hero2 - Yatırımlarınıza Sezgiler Değil Veriler */}
+          <Hero2 />
 
           {/* CTABlock - CTA */}
           <ClientOnly>
