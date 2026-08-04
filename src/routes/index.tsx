@@ -70,7 +70,7 @@ function LandingPage() {
                 Akıllı Borsacı
               </h1>
 
-              <p className="text-white/80 max-w-2xl mx-auto mb-8 text-lg sm:text-xl leading-relaxed">
+              <p className="text-white/80 max-w-2xl mx-auto mb-8 text-xl sm:text-2xl leading-relaxed">
                 Borsayı derinlemesine ve jet hızında analiz edin.
               </p>
 
