@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import {
+  ArrowUpRight,
   Bot,
-  ChevronRight,
   Download,
   FileText,
   Gauge,
@@ -90,18 +90,26 @@ function SectionHeading({ icon, title }: { icon: React.ReactNode; title: string 
       <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10 text-primary">
         {icon}
       </span>
-      <div className="text-sm font-semibold text-foreground">{title}</div>
+      <div className="text-base font-semibold text-foreground">{title}</div>
     </div>
   );
 }
 
-function Row({ label, value, mono = true, tone, title }: { label: string; value: string; mono?: boolean; tone?: "up" | "down" | "muted"; title?: string }) {
+function Row({ label, value, mono = true, tone, title, stacked }: { label: string; value: string; mono?: boolean; tone?: "up" | "down" | "muted"; title?: string; stacked?: boolean }) {
   const toneCls =
     tone === "up" ? "text-emerald-500" : tone === "down" ? "text-destructive" : tone === "muted" ? "text-muted-foreground" : "text-foreground";
+  if (stacked) {
+    return (
+      <div className="py-2" title={title}>
+        <span className="text-sm text-muted-foreground">{label}</span>
+        <div className={`${mono ? "font-mono" : ""} text-base font-semibold ${toneCls}`}>{value}</div>
+      </div>
+    );
+  }
   return (
     <div className="flex items-center justify-between py-2" title={title}>
-      <span className="text-[13px] text-muted-foreground">{label}</span>
-      <span className={`${mono ? "font-mono" : ""} text-sm font-semibold ${toneCls}`}>{value}</span>
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <span className={`${mono ? "font-mono" : ""} text-base font-semibold ${toneCls}`}>{value}</span>
     </div>
   );
 }
@@ -110,7 +118,7 @@ function MetricCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-border/20 bg-card px-3 py-2">
       <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
-      <div className="text-sm font-semibold text-foreground break-words">{value}</div>
+      <div className="text-base font-semibold text-foreground break-words">{value}</div>
     </div>
   );
 }
@@ -169,7 +177,7 @@ function OverviewSection({ data }: { data: AiReportOverview }) {
       <SectionHeading icon={<FileText size={13} />} title="Genel Görünüm" />
 
       {data.executive_summary && (
-        <div className="rounded-xl border border-border/20 bg-muted/10 px-4 py-3 text-sm leading-relaxed text-foreground/85">
+        <div className="rounded-xl border border-border/20 bg-muted/10 px-4 py-3 text-base leading-relaxed text-foreground/85">
           {data.executive_summary}
         </div>
       )}
@@ -195,7 +203,7 @@ function OverviewSection({ data }: { data: AiReportOverview }) {
               tone={cf != null ? (cfUp ? "up" : "down") : undefined}
               title="Göstergelerin ortak uyumu. 0 = güçlü ayı ağırlığı, 100 = güçlü boğa ağırlığı."
             />
-            <Row label="Önerilen Strateji" value={overview.recommended_strategy || "—"} mono={false} />
+            <Row label="Önerilen Strateji" value={overview.recommended_strategy || "—"} mono={false} stacked />
           </div>
         </div>
       )}
@@ -455,7 +463,7 @@ function PatternsSection({ data }: { data: AiReportPatterns }) {
           {candles.map((p, i) => (
             <div key={i} className="rounded-xl border border-border/20 bg-muted/30 px-3 py-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-foreground">{p.name || "Formasyon"}</span>
+                <span className="text-base font-semibold text-foreground">{p.name || "Formasyon"}</span>
                 <span className={`text-[11px] font-semibold ${toneClass(p.direction) === "up" ? "text-emerald-500" : toneClass(p.direction) === "down" ? "text-destructive" : "text-muted-foreground"}`}>
                   {toneClass(p.direction) === "up" ? "▲ Yükseliş" : toneClass(p.direction) === "down" ? "▼ Düşüş" : p.direction || "Nötr"}
                 </span>
@@ -471,7 +479,7 @@ function PatternsSection({ data }: { data: AiReportPatterns }) {
           {charts.map((p, i) => (
             <div key={`c${i}`} className="rounded-xl border border-border/20 bg-primary/5 px-3 py-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-foreground">{p.name || "Chart Formasyonu"}</span>
+                <span className="text-base font-semibold text-foreground">{p.name || "Chart Formasyonu"}</span>
                 <span className={`text-[11px] font-semibold ${toneClass(p.direction) === "up" ? "text-emerald-500" : toneClass(p.direction) === "down" ? "text-destructive" : "text-muted-foreground"}`}>
                   {toneClass(p.direction) === "up" ? "▲" : toneClass(p.direction) === "down" ? "▼" : "•"}
                 </span>
@@ -562,16 +570,16 @@ function ScenariosSection({ data }: { data: AiReportScenarios }) {
           {cards.map((c, i) => (
             <div key={i} className={`rounded-xl border px-3 py-3 ${c.toneClass}`}>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-foreground">{c.title}</span>
+                <span className="text-base font-semibold text-foreground">{c.title}</span>
                 <span
-                  className={`text-lg font-bold font-mono ${
+                  className={`text-xl font-bold font-mono ${
                     c.tone === "up" ? "text-emerald-500" : c.tone === "down" ? "text-destructive" : "text-foreground"
                   }`}
                 >
                   {c.prob}
                 </span>
               </div>
-              {c.body && <div className="mt-1 text-[11px] leading-relaxed text-muted-foreground/80">{c.body}</div>}
+              {c.body && <div className="mt-1 text-sm leading-relaxed text-muted-foreground/80">{c.body}</div>}
               {c.invalidation && (
                 <div className="mt-1.5 rounded bg-amber-500/10 px-2 py-1 text-[10px] font-semibold text-amber-700 dark:text-amber-400">
                   {c.invalidation}
@@ -854,7 +862,7 @@ export function AiTechnicalReport({ ticker, context: _context, onRequireAuth }: 
                     </span>
                   )}
                 </div>
-                <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{ai.narrative}</div>
+                <div className="whitespace-pre-wrap text-base leading-relaxed text-foreground/90">{ai.narrative}</div>
               </div>
             )}
 
@@ -887,7 +895,7 @@ export function AiTechnicalReport({ ticker, context: _context, onRequireAuth }: 
                   Öne Çıkanlar (Aksiyonlar)
                 </div>
                 {ai.sonuc.slice(0, 6).map((a, i) => (
-                  <div key={i} className="flex items-start gap-2 rounded-lg border border-primary/15 bg-primary/5 px-3 py-2 text-sm">
+                  <div key={i} className="flex items-start gap-2 rounded-lg border border-primary/15 bg-primary/5 px-3 py-2 text-base">
                     <span className="mt-0.5 shrink-0 text-primary">•</span>
                     <span className="text-foreground/85">{a}</span>
                   </div>
@@ -913,10 +921,10 @@ export function AiTechnicalReport({ ticker, context: _context, onRequireAuth }: 
                     type="button"
                     key={i}
                     onClick={() => ask(q)}
-                    className="flex w-full items-center gap-2 rounded-lg border border-primary/15 bg-primary/5 px-3 py-2 text-left text-sm text-foreground/85 transition-colors hover:bg-primary/10 cursor-pointer"
+                    className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-foreground/85 transition-colors hover:text-primary cursor-pointer"
                   >
-                    <ChevronRight size={14} className="shrink-0 text-primary" />
-                    <span>{q}</span>
+                    <span className="flex-1">{q}</span>
+                    <ArrowUpRight size={14} className="shrink-0 text-muted-foreground/50" />
                   </button>
                 ))}
               </div>

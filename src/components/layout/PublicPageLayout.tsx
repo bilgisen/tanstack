@@ -20,7 +20,7 @@ export function PublicPageLayout({ context, placeholder, children }: PublicPageL
       {/* Left: Page Content */}
       <div className={`flex-1 flex flex-col min-w-0 h-full relative ${isChatMaximized ? 'hidden md:hidden' : ''}`}>
         <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 custom-scrollbar min-w-0 relative z-10 pb-24 md:pb-4 scroll-smooth">
-          <div className="w-full max-w-5xl mx-auto">
+          <div className="w-full max-w-7xl mx-auto">
             {children}
           </div>
         </div>
