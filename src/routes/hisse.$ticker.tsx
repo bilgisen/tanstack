@@ -7,8 +7,9 @@ import companyLogos from '../constants/companyLogos.json'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
 import { Skeleton } from '../components/ui/skeleton'
 import { useWatchlistStore } from '../store/watchlist'
-import { useCompanyQuote } from '../lib/useCompanyData'
 import { API } from '../lib/apiConfig'
+import { PriceChangePills } from '../components/PriceChangePills'
+import { useCompanyData, useCompanyQuote } from '../lib/useCompanyData'
 
 export const Route = createFileRoute('/hisse/$ticker')({
   component: CompanyLayout,
@@ -34,6 +35,21 @@ function CompanyLayout() {
   const chatContext = `sirket:${tickerUpper}:${subpage}`
 
   const { data: quote, isLoading: loading, isError } = useCompanyQuote(tickerUpper)
+  const { data: companyData } = useCompanyData(tickerUpper)
+
+  const fundamentalDetail = companyData?.fundamentalDetail as {
+    weekClose?: number
+    monthClose?: number
+    yearClose?: number
+  } | null | undefined
+
+  const currentPrice = quote?.last_price || 0
+  const weekChange = fundamentalDetail?.weekClose && currentPrice > 0
+    ? ((currentPrice - fundamentalDetail.weekClose) / fundamentalDetail.weekClose) * 100 : null
+  const monthChange = fundamentalDetail?.monthClose && currentPrice > 0
+    ? ((currentPrice - fundamentalDetail.monthClose) / fundamentalDetail.monthClose) * 100 : null
+  const yearChange = fundamentalDetail?.yearClose && currentPrice > 0
+    ? ((currentPrice - fundamentalDetail.yearClose) / fundamentalDetail.yearClose) * 100 : null
 
   // Prefetch child page data to avoid sequential waterfalls
   useEffect(() => {
@@ -188,6 +204,11 @@ function CompanyLayout() {
               {formatTime(quote?.record_date)}
             </span>
           )}
+        </div>
+
+        {/* Hafta / Ay / Yıl */}
+        <div className="px-1">
+          <PriceChangePills week={weekChange} month={monthChange} year={yearChange} />
         </div>
 
         {/* Tab Nav */}

@@ -393,3 +393,22 @@
 .dark .chat-response-bubble {
   @apply bg-[#16181a] text-white border border-white/5;
 }
+
+/* PDF export: force light palette while rasterizing the AI report */
+[data-pdf-light] {
+  --background: #ffffff !important;
+  --foreground: #191c1f !important;
+  --card: #ffffff !important;
+  --card-foreground: #191c1f !important;
+  --popover: #ffffff !important;
+  --popover-foreground: #191c1f !important;
+  --muted: #f4f4f4 !important;
+  --muted-foreground: #505a63 !important;
+  --border: #e2e2e7 !important;
+  --ring: #494fdf !important;
+  background-color: #ffffff !important;
+  color: #191c1f !important;
+}
+[data-pdf-light] * {
+  border-color: #e2e2e7 !important;
+}

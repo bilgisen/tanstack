@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import { Skeleton } from '../components/ui/skeleton'
 import { getIndexName } from '../constants/bistIndices'
 import { useIndexDetail, useIndices } from '../lib/useMarketData'
+import { PriceChangePills } from '../components/PriceChangePills'
 
 export const Route = createFileRoute('/endeksler/$id')({
   component: EndeksLayout,
@@ -43,6 +44,14 @@ function EndeksLayout() {
   const isUp = priceDetails.diffPercent >= 0
   const basePath = `/endeksler/${id.toLowerCase()}`
   const loading = indicesLoading || detailLoading
+
+  const last = indexDetail?.last ?? priceDetails.price
+  const weekChange = indexDetail?.weekClose && last
+    ? ((last - indexDetail.weekClose) / indexDetail.weekClose) * 100 : null
+  const monthChange = indexDetail?.monthClose && last
+    ? ((last - indexDetail.monthClose) / indexDetail.monthClose) * 100 : null
+  const yearChange = indexDetail?.yearClose && last
+    ? ((last - indexDetail.yearClose) / indexDetail.yearClose) * 100 : null
 
   if (loading || !priceDetails) {
     return (
@@ -115,6 +124,11 @@ function EndeksLayout() {
             )}
           </div>
         )}
+
+        {/* Hafta / Ay / Yıl */}
+        <div className="px-1 pt-2">
+          <PriceChangePills week={weekChange} month={monthChange} year={yearChange} />
+        </div>
       </div>
 
       {/* Tabs */}

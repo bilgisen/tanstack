@@ -21,7 +21,6 @@ import { API } from "../../lib/apiConfig";
 import { getSessionToken, useChatStore } from "../../store/chat";
 import { useUIStore } from "../../store/ui";
 import { Button } from "../ui/button";
-import { Card, CardContent, CardHeader } from "../ui/card";
 import type {
   AiReportData,
   AiReportIndicators,
@@ -52,12 +51,12 @@ const fmtPct = (v: number | undefined | null) => {
 };
 
 const fmtRatio = (v: number | string | undefined | null) => {
-  if (v == null) return "—";
-  if (typeof v === "string") {
-    const parsed = parseFloat(v.replace(",", "."));
-    return !isNaN(parsed) ? parsed.toFixed(2) : v;
-  }
-  return v.toFixed(2);
+  if (v == null || v === "") return "—";
+  if (typeof v === "number") return `1:${v.toFixed(2)}`;
+  const s = String(v).trim();
+  if (s.includes(":")) return s;
+  const parsed = parseFloat(s.replace(",", "."));
+  return !isNaN(parsed) ? `1:${parsed.toFixed(2)}` : s;
 };
 
 const fmtNum = (v: number | string | undefined | null) => {
@@ -78,6 +77,11 @@ function toneClass(dir?: string): "up" | "down" | undefined {
   if (d.includes("bull")) return "up";
   if (d.includes("bear")) return "down";
   return undefined;
+}
+
+function isFailedNarrative(n?: string): boolean {
+  if (!n) return false;
+  return /oluşturulamadı|oluşturulamıyor|kullanılamıyor/.test(n);
 }
 
 function SectionHeading({ icon, title }: { icon: React.ReactNode; title: string }) {
@@ -156,6 +160,10 @@ function OverviewSection({ data }: { data: AiReportOverview }) {
   const risks = (data.risk_assessment?.technical_risks || []).filter(Boolean);
   const opps = (data.risk_assessment?.technical_opportunities || []).filter(Boolean);
 
+  const cf = overview?.confluence_score ?? null;
+  const cfDirection = overview?.confluence_direction || "";
+  const cfUp = (cf ?? 0) >= 0 && !String(cfDirection).toLowerCase().includes("düş") && !String(cfDirection).toLowerCase().includes("bear");
+
   return (
     <div className="space-y-4">
       <SectionHeading icon={<FileText size={13} />} title="Genel Görünüm" />
@@ -176,21 +184,33 @@ function OverviewSection({ data }: { data: AiReportOverview }) {
           </div>
           <div className="grid w-full grid-cols-1 gap-x-6 gap-y-0.5 sm:grid-cols-2">
             <Row label="Güven" value={overview.confidence || "—"} mono={false} />
+            {overview.timeframe && <Row label="Zaman Dilimi" value={overview.timeframe} mono={false} />}
             <Row label="Piyasa Rejimi" value={overview.market_regime || "—"} mono={false} />
             <Row label="Trend Yönü" value={overview.trend_direction || "—"} mono={false} />
             <Row label="Fiyat Karakteri" value={overview.price_character || "—"} mono={false} />
-            <Row label="Konfluans" value={`${overview.confluence_score ?? "—"} /100`} />
+            <Row
+              label="Konfluans"
+              value={cf != null ? `${Math.abs(cf)}/100 ${cfDirection ? `· ${cfDirection}` : ""}` : "—"}
+              mono={false}
+              tone={cf != null ? (cfUp ? "up" : "down") : undefined}
+            />
             <Row label="Önerilen Strateji" value={overview.recommended_strategy || "—"} mono={false} />
           </div>
         </div>
       )}
 
+      {overview?.confidence_reason && (
+        <div className="rounded-lg border border-border/20 bg-muted/5 px-3 py-2 text-xs text-muted-foreground">
+          Güven gerekçesi: {overview.confidence_reason}
+        </div>
+      )}
+
       {components.length > 0 && (
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {components.map((c) => (
-            <div key={c.label} className="flex items-center gap-1.5 rounded-lg border border-border/20 bg-muted/5 px-3 py-1.5">
-              <span className="text-[11px] text-muted-foreground">{c.label}</span>
-              <span className="text-xs font-bold font-mono text-foreground">{c.value}</span>
+            <div key={c.label} className="flex flex-col rounded-lg border border-border/20 bg-muted/5 px-3 py-2">
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{c.label}</span>
+              <span className="text-sm font-bold font-mono text-foreground">{c.value}</span>
             </div>
           ))}
         </div>
@@ -255,7 +275,6 @@ function OverviewSection({ data }: { data: AiReportOverview }) {
 /* ── Indicators ────────────────────────────────────────────── */
 function IndicatorsSection({ data }: { data: AiReportIndicators }) {
   const ind = data.indicators;
-  const comps = data.score_components || {};
 
   const rows: Array<{ label: string; value: string; mono?: boolean; tone?: "up" | "down" | "muted" }> = [];
 
@@ -315,24 +334,10 @@ function IndicatorsSection({ data }: { data: AiReportIndicators }) {
   }
   if (ind?.vwap != null) rows.push({ label: "VWAP", value: fmtPrice(ind.vwap) });
 
-  const components = [
-    { label: "Trend", value: comps.trend ?? 0 },
-    { label: "Momentum", value: comps.momentum ?? 0 },
-    { label: "Hacim", value: comps.volume ?? 0 },
-    { label: "Formasyon", value: comps.pattern ?? 0 },
-  ].filter((c) => c.value > 0);
-
   return (
     <div className="space-y-4">
       <SectionHeading icon={<Gauge size={13} />} title="Göstergeler" />
       {rows.length > 0 && <div className="divide-y divide-border/15">{rows.map((r) => <Row key={r.label} {...r} />)}</div>}
-      {components.length > 0 && (
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          {components.map((c) => (
-            <MetricCard key={c.label} label={c.label} value={String(c.value)} />
-          ))}
-        </div>
-      )}
       {data.divergences && (data.divergences.divergence_count != null || data.divergences.summary) && (
         <div className="rounded-xl border border-border/20 bg-muted/10 px-3 py-2.5">
           <div className="flex items-center justify-between">
@@ -345,13 +350,34 @@ function IndicatorsSection({ data }: { data: AiReportIndicators }) {
         </div>
       )}
       {data.volume_profile?.poc != null && (
-        <div className="text-xs text-muted-foreground">
-          POC: <span className="font-mono font-semibold text-foreground">{fmtPrice(data.volume_profile.poc)}</span>
-          {data.volume_profile.value_area_low != null && data.volume_profile.value_area_high != null && (
-            <span className="ml-2">
-              Değer Aralığı: {fmtPrice(data.volume_profile.value_area_low)} – {fmtPrice(data.volume_profile.value_area_high)}
-            </span>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Hacim Profili</span>
+            <span className="font-mono text-sm font-semibold text-foreground">POC {fmtPrice(data.volume_profile.poc)}</span>
+          </div>
+          {data.volume_profile.value_area_high != null && data.volume_profile.value_area_low != null && data.volume_profile.poc != null && (
+            <div className="relative h-8 w-full overflow-hidden rounded-lg border border-border/20 bg-muted/20">
+              {(() => {
+                const lo = data.volume_profile.value_area_low;
+                const hi = data.volume_profile.value_area_high;
+                const poc = data.volume_profile.poc;
+                const span = Math.max(hi - lo, 0.0001);
+                const pocPct = Math.max(0, Math.min(100, ((poc - lo) / span) * 100));
+                return (
+                  <>
+                    <div className="absolute inset-y-0 left-0" style={{ left: `${0}%`, width: `${100}%`, background: "linear-gradient(90deg, rgba(34,197,94,0.12), rgba(234,179,8,0.18))" }} />
+                    <div className="absolute inset-y-0 border-l-2 border-primary/50" style={{ left: `${pocPct}%` }} />
+                    <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 rounded bg-primary/10 px-1.5 py-0.5 text-[9px] font-semibold text-primary" style={{ left: `${pocPct}%` }}>
+                      POC
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
           )}
+          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+            <span>Değer Aralığı: {fmtPrice(data.volume_profile.value_area_low)} – {fmtPrice(data.volume_profile.value_area_high)}</span>
+          </div>
         </div>
       )}
     </div>
@@ -491,6 +517,7 @@ function ScenariosSection({ data }: { data: AiReportScenarios }) {
     title: string;
     prob: string;
     body: string;
+    invalidation?: string;
     tone: "up" | "down" | "neutral";
     toneClass: string;
   }> = [];
@@ -500,6 +527,7 @@ function ScenariosSection({ data }: { data: AiReportScenarios }) {
       title: s.positive.name || "Olumlu",
       prob: probText(s.positive.probability),
       body: s.positive.target != null ? fmtNum(s.positive.target) : (s.positive.conditions || []).join(" · ") || "",
+      invalidation: s.positive.invalidation != null ? `Geçersiz kılma: ${fmtNum(s.positive.invalidation)}` : undefined,
       tone: "up",
       toneClass: "border-emerald-500/20 bg-emerald-500/5",
     });
@@ -509,6 +537,7 @@ function ScenariosSection({ data }: { data: AiReportScenarios }) {
       title: s.neutral.name || "Nötr",
       prob: probText(s.neutral.probability),
       body: s.neutral.strategy || (s.neutral.conditions || []).join(" · ") || "",
+      invalidation: s.neutral.invalidation != null ? `Geçersiz kılma: ${fmtNum(s.neutral.invalidation)}` : undefined,
       tone: "neutral",
       toneClass: "border-border/20 bg-muted/10",
     });
@@ -518,6 +547,7 @@ function ScenariosSection({ data }: { data: AiReportScenarios }) {
       title: s.negative.name || "Olumsuz",
       prob: probText(s.negative.probability),
       body: s.negative.risk != null ? fmtNum(s.negative.risk) : (s.negative.conditions || []).join(" · ") || "",
+      invalidation: s.negative.invalidation != null ? `Geçersiz kılma: ${fmtNum(s.negative.invalidation)}` : undefined,
       tone: "down",
       toneClass: "border-destructive/20 bg-destructive/5",
     });
@@ -541,6 +571,11 @@ function ScenariosSection({ data }: { data: AiReportScenarios }) {
                 </span>
               </div>
               {c.body && <div className="mt-1 text-[11px] leading-relaxed text-muted-foreground/80">{c.body}</div>}
+              {c.invalidation && (
+                <div className="mt-1.5 rounded bg-amber-500/10 px-2 py-1 text-[10px] font-semibold text-amber-700 dark:text-amber-400">
+                  {c.invalidation}
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -557,17 +592,29 @@ function ScenariosSection({ data }: { data: AiReportScenarios }) {
 }
 
 /* ── PDF Export ───────────────────────────────────────────── */
+// html-to-image reads *computed* styles from the live DOM, so the robust
+// approach is a short-lived light-theme attribute on the report container
+// plus a dedicated CSS rule (see styles.css). Rendered text/borders then use
+// light-palette values regardless of the active dark/light theme.
 async function exportPdf(root: HTMLElement, fileName: string) {
-  const dataUrl = await toPng(root, {
-    backgroundColor: "#ffffff",
-    pixelRatio: 2,
-    style: { colorScheme: "light" },
+  root.setAttribute("data-pdf-light", "true");
+  // Let the attribute-driven CSS apply before rasterizing.
+  await new Promise<void>((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
   });
-  const imgWidth = 1600;
-  const imgHeight = Math.round((dataUrl ? root.offsetHeight : root.offsetHeight) * (imgWidth / Math.max(root.offsetWidth, 1)));
-  const pdf = new jsPDF({ orientation: "portrait", unit: "px", format: [imgWidth, imgHeight] });
-  pdf.addImage(dataUrl, "PNG", 0, 0, imgWidth, imgHeight);
-  pdf.save(`${fileName}.pdf`);
+  try {
+    const dataUrl = await toPng(root, {
+      backgroundColor: "#ffffff",
+      pixelRatio: 2,
+    });
+    const imgWidth = 1600;
+    const imgHeight = Math.round((dataUrl ? root.offsetHeight : root.offsetHeight) * (imgWidth / Math.max(root.offsetWidth, 1)));
+    const pdf = new jsPDF({ orientation: "portrait", unit: "px", format: [imgWidth, imgHeight] });
+    pdf.addImage(dataUrl, "PNG", 0, 0, imgWidth, imgHeight);
+    pdf.save(`${fileName}.pdf`);
+  } finally {
+    root.removeAttribute("data-pdf-light");
+  }
 }
 
 /* ── Main Component ───────────────────────────────────────── */
@@ -706,8 +753,8 @@ export function AiTechnicalReport({ ticker, context: _context, onRequireAuth }: 
   if (secs?.scenarios) sectionOrder.push({ key: "scenarios", render: () => <ScenariosSection data={secs.scenarios as AiReportScenarios} /> });
 
   return (
-    <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-transparent to-transparent">
-      <CardHeader className="flex flex-row items-center justify-between gap-3 px-4 pb-2 pt-4">
+    <section className="space-y-3">
+      <div className="flex flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/15 text-primary">
             <Sparkles size={16} />
@@ -732,9 +779,11 @@ export function AiTechnicalReport({ ticker, context: _context, onRequireAuth }: 
             </Button>
           )}
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent className="px-4 pb-4 pt-1">
+      <div className="h-px w-full bg-border/60" />
+
+      <div>
         {loading && (
           <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
             <Loader2 size={30} className="animate-spin text-primary" />
@@ -789,12 +838,35 @@ export function AiTechnicalReport({ ticker, context: _context, onRequireAuth }: 
               </button>
             </div>
 
-            {ai?.narrative && (
+            {ai?.narrative && !isFailedNarrative(ai.narrative) && (
               <div className="rounded-2xl border border-primary/15 bg-primary/5 px-4 py-3">
                 <div className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-primary">
                   <Sparkles size={12} /> AI Yorumu
                 </div>
                 <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{ai.narrative}</div>
+              </div>
+            )}
+
+            {ai && isFailedNarrative(ai.narrative || "") && (
+              <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
+                <div className="mb-1.5 flex items-center justify-between gap-2">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                    AI Yorumu hazırlanamadı
+                  </div>
+                  {ai.retryable !== false && (
+                    <button
+                      type="button"
+                      onClick={generate}
+                      className="flex cursor-pointer items-center gap-1 text-xs font-medium text-primary hover:underline"
+                    >
+                      <RefreshCw size={12} /> Tekrar dene
+                    </button>
+                  )}
+                </div>
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  Teknik veriler yukarıda eksiksiz sunuluyor; AI yorumu geçici bir hata nedeniyle üretilemedi. Birkaç saniye
+                  sonra tekrar deneyebilirsiniz.
+                </p>
               </div>
             )}
 
@@ -840,7 +912,7 @@ export function AiTechnicalReport({ ticker, context: _context, onRequireAuth }: 
             )}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }

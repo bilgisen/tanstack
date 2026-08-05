@@ -7,10 +7,13 @@ export interface AiReportOverview {
   overview?: {
     technical_score?: number
     confidence?: string
+    confidence_reason?: string
     price_character?: string
     market_regime?: string
     trend_direction?: string
+    timeframe?: string
     confluence_score?: number
+    confluence_direction?: string
     confluence_label?: string
     score_components?: {
       trend?: number
@@ -117,9 +120,9 @@ export interface AiReportPatterns {
 
 export interface AiReportScenarios {
   scenarios?: {
-    positive?: { name?: string; conditions?: Array<string>; target?: number | string; probability?: number }
-    neutral?: { name?: string; conditions?: Array<string>; strategy?: string; probability?: number }
-    negative?: { name?: string; conditions?: Array<string>; risk?: number | string; probability?: number }
+    positive?: { name?: string; conditions?: Array<string>; target?: number | string; probability?: number | string; invalidation?: number | string }
+    neutral?: { name?: string; conditions?: Array<string>; strategy?: string; probability?: number | string; invalidation?: number | string }
+    negative?: { name?: string; conditions?: Array<string>; risk?: number | string; probability?: number | string; invalidation?: number | string }
   }
   key_levels?: {
     stop_loss?: number
@@ -132,6 +135,8 @@ export interface AiAnalysis {
   narrative?: string
   sonuc?: Array<string>
   questions?: Array<string>
+  retryable?: boolean
+  reason?: string
 }
 
 export interface AiReportSections {
