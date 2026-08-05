@@ -95,11 +95,11 @@ function SectionHeading({ icon, title }: { icon: React.ReactNode; title: string 
   );
 }
 
-function Row({ label, value, mono = true, tone }: { label: string; value: string; mono?: boolean; tone?: "up" | "down" | "muted" }) {
+function Row({ label, value, mono = true, tone, title }: { label: string; value: string; mono?: boolean; tone?: "up" | "down" | "muted"; title?: string }) {
   const toneCls =
     tone === "up" ? "text-emerald-500" : tone === "down" ? "text-destructive" : tone === "muted" ? "text-muted-foreground" : "text-foreground";
   return (
-    <div className="flex items-center justify-between py-2">
+    <div className="flex items-center justify-between py-2" title={title}>
       <span className="text-[13px] text-muted-foreground">{label}</span>
       <span className={`${mono ? "font-mono" : ""} text-sm font-semibold ${toneCls}`}>{value}</span>
     </div>
@@ -193,6 +193,7 @@ function OverviewSection({ data }: { data: AiReportOverview }) {
               value={cf != null ? `${Math.abs(cf)}/100 ${cfDirection ? `· ${cfDirection}` : ""}` : "—"}
               mono={false}
               tone={cf != null ? (cfUp ? "up" : "down") : undefined}
+              title="Göstergelerin ortak uyumu. 0 = güçlü ayı ağırlığı, 100 = güçlü boğa ağırlığı."
             />
             <Row label="Önerilen Strateji" value={overview.recommended_strategy || "—"} mono={false} />
           </div>
@@ -840,8 +841,18 @@ export function AiTechnicalReport({ ticker, context: _context, onRequireAuth }: 
 
             {ai?.narrative && !isFailedNarrative(ai.narrative) && (
               <div className="rounded-2xl border border-primary/15 bg-primary/5 px-4 py-3">
-                <div className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-primary">
-                  <Sparkles size={12} /> AI Yorumu
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-primary">
+                    <Sparkles size={12} /> AI Yorumu
+                  </div>
+                  {ai.deterministic && (
+                    <span
+                      className="cursor-help rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] text-primary"
+                      title="Yapay zeka şu an geçici olarak kullanılamadığı için bu özet teknik verilerden otomatik oluşturuldu."
+                    >
+                      Sistem özeti
+                    </span>
+                  )}
                 </div>
                 <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{ai.narrative}</div>
               </div>

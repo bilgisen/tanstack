@@ -23,6 +23,7 @@ export type Message = {
     title: string;
     data: Record<string, unknown>;
   } | null;
+  _errorDetails?: string;
 };
 
 export interface ChatSession {
@@ -593,13 +594,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
       }
 
     } catch (error) {
-      console.error(error);
+      const errDetails = (error && typeof error === 'object' && 'message' in error) ? String((error as Error).message) : String(error || '');
+      console.error(errDetails);
       set({ streamingText: null });
       const errorAssistantMessage: Message = {
         role: "assistant",
-        text: "Özür dilerim, şu an yanıt üretemiyorum. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.",
+        text: "Yanıt üretilirken geçici bir sorun oluştu. Lütfen birkaç saniye sonra yeniden deneyin.",
         context
       };
+      errorAssistantMessage._errorDetails = errDetails.length > 200 ? errDetails.slice(0, 200) : errDetails;
 
       const updatedSessions = get().sessions.map(s => {
         if (s.id === currentSessionId) {

@@ -137,6 +137,8 @@ export interface AiAnalysis {
   questions?: Array<string>
   retryable?: boolean
   reason?: string
+  detail?: string
+  deterministic?: boolean
 }
 
 export interface AiReportSections {
