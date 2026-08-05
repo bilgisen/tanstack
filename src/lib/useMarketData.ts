@@ -56,10 +56,27 @@ type IndexDetailData = {
 }
 
 type SektorItem = {
-  sector_name?: string
-  ratio?: number
-  code?: string
+  nameTr?: string
+  nameEng?: string
+  value?: number
   [key: string]: unknown
+}
+
+export type IndexComponentItem = {
+  code: string
+  last_price: number | null
+  diff_percent: number | null
+  change_week_pct: number | null
+  change_month_pct: number | null
+  change_ytd_pct: number | null
+  change_year_pct: number | null
+  volume: number | null
+}
+
+type IndexComponentsResponse = {
+  success: boolean
+  total: number
+  data: Array<IndexComponentItem>
 }
 
 type HistoryItem = Record<string, unknown>
@@ -200,5 +217,38 @@ export function useHistory(code: string, limit = 150) {
     gcTime: 86_400_000,
     enabled: !!code,
     refetchOnReconnect: false,
+  })
+}
+
+async function fetchIndexComponents(code: string, limit: number, offset: number): Promise<IndexComponentsResponse> {
+  const res = await fetch(`${API_BASE}/indices/${code}/components?limit=${limit}&offset=${offset}`)
+  if (!res.ok) return { success: false, total: 0, data: [] }
+  return await res.json()
+}
+
+type HistoryCacheStatus = { cached: boolean; source: 'mem' | 'kv' | 'none' }
+
+export function useHistoryCacheStatus(code: string) {
+  return useQuery({
+    queryKey: ['history-status', code],
+    queryFn: async (): Promise<HistoryCacheStatus> => {
+      const res = await fetch(`${API_BASE}/symbol/${code}/history/status`)
+      if (!res.ok) return { cached: false, source: 'none' }
+      return res.json()
+    },
+    staleTime: 5 * 60_000,
+    gcTime: 30 * 60_000,
+    enabled: !!code,
+    refetchOnReconnect: false,
+  })
+}
+
+export function useIndexComponents(code: string, limit = 50, offset = 0) {
+  return useQuery({
+    queryKey: ['index-components', code, limit, offset],
+    queryFn: () => fetchIndexComponents(code, limit, offset),
+    staleTime: 120_000,
+    gcTime: 300_000,
+    enabled: !!code,
   })
 }

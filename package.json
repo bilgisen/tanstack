@@ -39,6 +39,8 @@
     "embla-carousel-autoplay": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
     "h3": "latest",
+    "html-to-image": "^1.11.13",
+    "jspdf": "^4.2.1",
     "klinecharts": "9.8.12",
     "lightweight-charts": "^5.2.0",
     "lru-cache": "^11.5.1",

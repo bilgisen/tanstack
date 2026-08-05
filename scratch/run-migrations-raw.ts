@@ -169,11 +169,11 @@ async function main() {
         (provider, model_id, display_name, input_cost_per_1k, output_cost_per_1k, 
          ht_per_1k_input, ht_per_1k_output, markup_factor, allowed_tiers)
       VALUES
-        ('google',    'gemini-2.5-flash',   'Gemini 2.5 Flash',   0.000300, 0.002500,  3.0,  25.0, 10.0, ARRAY['free','standard','pro','ultimate']),
-        ('google',    'gemini-2.5-pro',     'Gemini 2.5 Pro',     0.001250, 0.010000, 12.5, 100.0, 10.0, ARRAY['standard','pro','ultimate']),
-        ('anthropic', 'claude-haiku-4-5',   'Claude Haiku 4.5',   0.001000, 0.005000, 10.0,  50.0, 10.0, ARRAY['pro','ultimate']),
-        ('anthropic', 'claude-sonnet-4-6',  'Claude Sonnet 4.6',  0.003000, 0.015000, 30.0, 150.0, 10.0, ARRAY['pro','ultimate']),
-        ('deepseek',  'deepseek-v3',        'DeepSeek V3',        0.000140, 0.000280,  1.4,   2.8, 10.0, ARRAY['standard','pro','ultimate'])
+        ('google',    'gemini-2.5-flash',   'Gemini 2.5 Flash',   0.000300, 0.002500,  3.0,  25.0, 10.0, ARRAY['free','jetabone','proabone']),
+        ('google',    'gemini-2.5-pro',     'Gemini 2.5 Pro',     0.001250, 0.010000, 12.5, 100.0, 10.0, ARRAY['jetabone','proabone']),
+        ('anthropic', 'claude-haiku-4-5',   'Claude Haiku 4.5',   0.001000, 0.005000, 10.0,  50.0, 10.0, ARRAY['proabone']),
+        ('anthropic', 'claude-sonnet-4-6',  'Claude Sonnet 4.6',  0.003000, 0.015000, 30.0, 150.0, 10.0, ARRAY['proabone']),
+        ('deepseek',  'deepseek-v3',        'DeepSeek V3',        0.000140, 0.000280,  1.4,   2.8, 10.0, ARRAY['jetabone','proabone'])
       ON CONFLICT (model_id) DO UPDATE SET
         provider = EXCLUDED.provider,
         display_name = EXCLUDED.display_name,

@@ -30,7 +30,7 @@ const models = [
     htPer1kInput: 0.5,
     htPer1kOutput: 1.0,
     markupFactor: 10.0,
-    allowedTiers: ['jetabone', 'proabone'],
+    allowedTiers: ['free', 'jetabone', 'proabone'],
     isActive: true,
   },
 ];

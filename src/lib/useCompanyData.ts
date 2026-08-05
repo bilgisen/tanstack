@@ -61,10 +61,11 @@ export function useCompanyData(ticker: string) {
       if (!res.ok) throw new Error(`Failed to fetch company data for ${ticker}`)
       return await res.json()
     },
-    staleTime: marketStaleTime(10_000, 3_600_000),
+    staleTime: marketStaleTime(30_000, 3_600_000),
     gcTime: 86_400_000,
     enabled: !!ticker,
     refetchOnReconnect: false,
+    placeholderData: (prev) => prev,
   })
 }
 
@@ -119,5 +120,6 @@ export function useCompanyQuote(ticker: string) {
     gcTime: 86_400_000,
     enabled: !!ticker,
     refetchOnReconnect: false,
+    placeholderData: (prev) => prev,
   })
 }

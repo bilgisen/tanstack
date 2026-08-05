@@ -1,14 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useMemo } from 'react'
-import { Activity, ArrowDown, ArrowUp, CandlestickChart, Gauge } from 'lucide-react'
+import { Activity, Gauge } from 'lucide-react'
 import { LazyTradingViewChart } from '../components/charts/LazyTradingViewChart'
+import { AiTechnicalReport } from '../components/chat/AiTechnicalReport'
 import { getIndexName } from '../constants/bistIndices'
 import { useIndexDetail, useIndices } from '../lib/useMarketData'
 
 export const Route = createFileRoute('/endeksler/$id/teknik-analiz')({
   component: EndeksTechnicalAnalysisPage,
 })
-
 
 function EndeksTechnicalAnalysisPage() {
   const { id } = Route.useParams()
@@ -29,6 +29,15 @@ function EndeksTechnicalAnalysisPage() {
     }
   }, [indicesData, indexDetail, code])
 
+  const last = indexDetail?.last ?? priceDetails.price
+  const weekChange = indexDetail?.weekClose && last
+    ? ((last - indexDetail.weekClose) / indexDetail.weekClose) * 100 : null
+  const monthChange = indexDetail?.monthClose && last
+    ? ((last - indexDetail.monthClose) / indexDetail.monthClose) * 100 : null
+  const yearChange = indexDetail?.yearClose && last
+    ? ((last - indexDetail.yearClose) / indexDetail.yearClose) * 100 : null
+  const fmtPct = (v: number | null) => v != null ? `${v >= 0 ? '+' : ''}${v.toFixed(1)}%` : '-'
+
   const isUp = priceDetails.diffPercent >= 0
   const trend = isUp ? 'Yükseliş' : 'Düşüş'
   const trendTag = Math.abs(priceDetails.diffPercent) >= 1 ? 'Güçlü' : 'Hafif'
@@ -44,24 +53,16 @@ function EndeksTechnicalAnalysisPage() {
     <div className="space-y-5">
       <LazyTradingViewChart symbol={code} lastPrice={priceDetails.price} />
 
-      {/* Son fiyat özeti */}
-      <div className="flex items-center justify-between rounded-xl border border-border/50 bg-card/40 p-4">
-        <div>
-          <div className="text-sm text-muted-foreground">{priceDetails.name}</div>
-          <div className="text-2xl font-bold text-foreground tabular-nums">
-            {priceDetails.price > 0 ? priceDetails.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}
-          </div>
-          <div className={`text-base font-semibold inline-flex items-center gap-1 ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
-            {isUp ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
-            {isUp ? '+' : ''}{priceDetails.diffPercent.toFixed(2)}%
-          </div>
-        </div>
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-          <CandlestickChart size={28} />
-        </div>
+      {/* Hafta / Ay / Yıl Değişim */}
+      <div className="text-base text-muted-foreground">
+        Hafta: <span className={`font-semibold ${(weekChange ?? 0) >= 0 ? 'text-emerald-500' : 'text-destructive'}`}>{fmtPct(weekChange)}</span>
+        {' · '}Ay: <span className={`font-semibold ${(monthChange ?? 0) >= 0 ? 'text-emerald-500' : 'text-destructive'}`}>{fmtPct(monthChange)}</span>
+        {' · '}Yıl: <span className={`font-semibold ${(yearChange ?? 0) >= 0 ? 'text-emerald-500' : 'text-destructive'}`}>{fmtPct(yearChange)}</span>
       </div>
 
-      <div className="space-y-4">
+      <AiTechnicalReport ticker={code} context={`endeks:${code}:teknik-analiz`} />
+
+      <div className="space-y-5">
         <div className="flex items-center justify-between">
           <h3 className="text-base font-semibold text-foreground">
             <span className="inline-flex items-center gap-1.5">

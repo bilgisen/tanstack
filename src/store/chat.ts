@@ -91,7 +91,7 @@ const saveSessionsToStorage = (sessions: Array<ChatSession>) => {
 
 let cachedSessionToken: string | null = null;
 
-async function getSessionToken(): Promise<string | null> {
+export async function getSessionToken(): Promise<string | null> {
   if (cachedSessionToken !== null) return cachedSessionToken;
   try {
     const res = await fetch('/api/ai/session-token');
@@ -314,9 +314,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
           let errorMsg = "";
           if (preCheckData.error === 'MODEL_NOT_ALLOWED') {
             errorMsg = `Seçtiğiniz model olan **${selectedModelId.toUpperCase()}** bu abonelik paketinde kullanılamamaktadır. Lütfen [Profil ve Abonelik Paneli](/profil) sayfasından paketinizi yükseltin.`;
-          } else if (preCheckData.error === 'INSUFFICIENT_HT') {
-            const availableHT = preCheckData.availableHT || 0;
-            errorMsg = `Yetersiz Jet Token bakiyesi! Mevcut bakiyeniz: **${availableHT.toLocaleString()} Jet Token**. Chatbot'u kullanmaya devam edebilmek için lütfen [Profil ve Abonelik Paneli](/profil) sayfasından paketinizi yükseltin veya ek kredi satın alın.`;
+          } else if (preCheckData.error === 'INSUFFICIENT_JT') {
+            const availableJT = preCheckData.availableJT || 0;
+            errorMsg = `Yetersiz Jet Token bakiyesi! Mevcut bakiyeniz: **${availableJT.toLocaleString()} Jet Token**. Chatbot'u kullanmaya devam edebilmek için lütfen [Profil ve Abonelik Paneli](/profil) sayfasından paketinizi yükseltin veya ek kredi satın alın.`;
           } else if (preCheckData.error === 'DAILY_LIMIT') {
             errorMsg = "Günlük kullanım limitinize ulaştınız. Sınırsız kullanım için lütfen [Profil ve Abonelik Paneli](/profil) sayfasından paketinizi yükseltin.";
           } else if (preCheckData.error === 'USER_NOT_FOUND') {

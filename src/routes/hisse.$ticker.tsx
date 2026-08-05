@@ -1,11 +1,14 @@
 import { Link, Outlet, createFileRoute, useLocation } from '@tanstack/react-router'
 import { Activity, ArrowDown, ArrowUp, BarChart3, ChevronDown, ChevronUp, Clock, Factory, FileText, Info, Star } from 'lucide-react'
+import { useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import companyNames from '../constants/companyNames.json'
 import companyLogos from '../constants/companyLogos.json'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
 import { Skeleton } from '../components/ui/skeleton'
 import { useWatchlistStore } from '../store/watchlist'
 import { useCompanyQuote } from '../lib/useCompanyData'
+import { API } from '../lib/apiConfig'
 
 export const Route = createFileRoute('/hisse/$ticker')({
   component: CompanyLayout,
@@ -24,12 +27,39 @@ function CompanyLayout() {
   const tickerUpper = ticker.toUpperCase()
   const displayName = (companyNames as Record<string, string>)[tickerUpper] || tickerUpper
   const logoFile = companyLogos[tickerUpper as keyof typeof companyLogos]
+  const queryClient = useQueryClient()
 
   const location = useLocation()
   const subpage = location.pathname.replace(`/hisse/${ticker.toLowerCase()}`, '').replace('/', '') || 'genel-bakis'
   const chatContext = `sirket:${tickerUpper}:${subpage}`
 
   const { data: quote, isLoading: loading, isError } = useCompanyQuote(tickerUpper)
+
+  // Prefetch child page data to avoid sequential waterfalls
+  useEffect(() => {
+    if (!tickerUpper) return
+    // Prefetch company-data (used by teknik-analiz, temel-analiz, etc.)
+    queryClient.prefetchQuery({
+      queryKey: ['company', 'data', tickerUpper],
+      queryFn: async () => {
+        const res = await fetch(`${API.market}/symbol/${tickerUpper}/company-data`)
+        if (!res.ok) throw new Error('Failed to fetch company data')
+        return await res.json()
+      },
+      staleTime: 30_000,
+    })
+    // Prefetch chart history data
+    queryClient.prefetchQuery({
+      queryKey: ['history', tickerUpper, 150],
+      queryFn: async () => {
+        const res = await fetch(`${API.market}/symbol/${tickerUpper}/history?limit=150`)
+        if (!res.ok) throw new Error('Failed to fetch history')
+        const json = await res.json()
+        return json?.data || json?.history || (Array.isArray(json) ? json : [])
+      },
+      staleTime: 21_600_000,
+    })
+  }, [tickerUpper, queryClient])
 
   const { watchlists, addItem, removeItem } = useWatchlistStore()
   const defaultWatchlist = watchlists.find(w => w.isDefault) || watchlists[0]

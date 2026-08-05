@@ -48,6 +48,7 @@ import { Route as HisseTickerTeknikAnalizRouteImport } from './routes/hisse.$tic
 import { Route as HisseTickerTablolarRouteImport } from './routes/hisse.$ticker.tablolar'
 import { Route as HisseTickerSektorRouteImport } from './routes/hisse.$ticker.sektor'
 import { Route as EndekslerIdTeknikAnalizRouteImport } from './routes/endeksler.$id.teknik-analiz'
+import { Route as EndekslerIdBilesenlerRouteImport } from './routes/endeksler.$id.bilesenler'
 import { Route as ApiWebhooksDodoRouteImport } from './routes/api/webhooks/dodo'
 import { Route as ApiUserCreditsRouteImport } from './routes/api/user/credits'
 import { Route as ApiModelsAvailableRouteImport } from './routes/api/models/available'
@@ -255,6 +256,11 @@ const EndekslerIdTeknikAnalizRoute = EndekslerIdTeknikAnalizRouteImport.update({
   path: '/teknik-analiz',
   getParentRoute: () => EndekslerIdRoute,
 } as any)
+const EndekslerIdBilesenlerRoute = EndekslerIdBilesenlerRouteImport.update({
+  id: '/bilesenler',
+  path: '/bilesenler',
+  getParentRoute: () => EndekslerIdRoute,
+} as any)
 const ApiWebhooksDodoRoute = ApiWebhooksDodoRouteImport.update({
   id: '/api/webhooks/dodo',
   path: '/api/webhooks/dodo',
@@ -347,6 +353,7 @@ export interface FileRoutesByFullPath {
   '/api/models/available': typeof ApiModelsAvailableRoute
   '/api/user/credits': typeof ApiUserCreditsRoute
   '/api/webhooks/dodo': typeof ApiWebhooksDodoRoute
+  '/endeksler/$id/bilesenler': typeof EndekslerIdBilesenlerRoute
   '/endeksler/$id/teknik-analiz': typeof EndekslerIdTeknikAnalizRoute
   '/hisse/$ticker/sektor': typeof HisseTickerSektorRoute
   '/hisse/$ticker/tablolar': typeof HisseTickerTablolarRoute
@@ -393,6 +400,7 @@ export interface FileRoutesByTo {
   '/api/models/available': typeof ApiModelsAvailableRoute
   '/api/user/credits': typeof ApiUserCreditsRoute
   '/api/webhooks/dodo': typeof ApiWebhooksDodoRoute
+  '/endeksler/$id/bilesenler': typeof EndekslerIdBilesenlerRoute
   '/endeksler/$id/teknik-analiz': typeof EndekslerIdTeknikAnalizRoute
   '/hisse/$ticker/sektor': typeof HisseTickerSektorRoute
   '/hisse/$ticker/tablolar': typeof HisseTickerTablolarRoute
@@ -445,6 +453,7 @@ export interface FileRoutesById {
   '/api/models/available': typeof ApiModelsAvailableRoute
   '/api/user/credits': typeof ApiUserCreditsRoute
   '/api/webhooks/dodo': typeof ApiWebhooksDodoRoute
+  '/endeksler/$id/bilesenler': typeof EndekslerIdBilesenlerRoute
   '/endeksler/$id/teknik-analiz': typeof EndekslerIdTeknikAnalizRoute
   '/hisse/$ticker/sektor': typeof HisseTickerSektorRoute
   '/hisse/$ticker/tablolar': typeof HisseTickerTablolarRoute
@@ -498,6 +507,7 @@ export interface FileRouteTypes {
     | '/api/models/available'
     | '/api/user/credits'
     | '/api/webhooks/dodo'
+    | '/endeksler/$id/bilesenler'
     | '/endeksler/$id/teknik-analiz'
     | '/hisse/$ticker/sektor'
     | '/hisse/$ticker/tablolar'
@@ -544,6 +554,7 @@ export interface FileRouteTypes {
     | '/api/models/available'
     | '/api/user/credits'
     | '/api/webhooks/dodo'
+    | '/endeksler/$id/bilesenler'
     | '/endeksler/$id/teknik-analiz'
     | '/hisse/$ticker/sektor'
     | '/hisse/$ticker/tablolar'
@@ -595,6 +606,7 @@ export interface FileRouteTypes {
     | '/api/models/available'
     | '/api/user/credits'
     | '/api/webhooks/dodo'
+    | '/endeksler/$id/bilesenler'
     | '/endeksler/$id/teknik-analiz'
     | '/hisse/$ticker/sektor'
     | '/hisse/$ticker/tablolar'
@@ -908,6 +920,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EndekslerIdTeknikAnalizRouteImport
       parentRoute: typeof EndekslerIdRoute
     }
+    '/endeksler/$id/bilesenler': {
+      id: '/endeksler/$id/bilesenler'
+      path: '/bilesenler'
+      fullPath: '/endeksler/$id/bilesenler'
+      preLoaderRoute: typeof EndekslerIdBilesenlerRouteImport
+      parentRoute: typeof EndekslerIdRoute
+    }
     '/api/webhooks/dodo': {
       id: '/api/webhooks/dodo'
       path: '/api/webhooks/dodo'
@@ -982,11 +1001,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface EndekslerIdRouteChildren {
+  EndekslerIdBilesenlerRoute: typeof EndekslerIdBilesenlerRoute
   EndekslerIdTeknikAnalizRoute: typeof EndekslerIdTeknikAnalizRoute
   EndekslerIdIndexRoute: typeof EndekslerIdIndexRoute
 }
 
 const EndekslerIdRouteChildren: EndekslerIdRouteChildren = {
+  EndekslerIdBilesenlerRoute: EndekslerIdBilesenlerRoute,
   EndekslerIdTeknikAnalizRoute: EndekslerIdTeknikAnalizRoute,
   EndekslerIdIndexRoute: EndekslerIdIndexRoute,
 }

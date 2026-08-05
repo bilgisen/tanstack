@@ -1,6 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useMemo, useState } from 'react'
-import { LazyTradingViewChart } from '../components/charts/LazyTradingViewChart'
+import { useMemo } from 'react'
 import { SektorPieChart } from '../components/ui/sektor-pie-chart'
 import { Skeleton } from '../components/ui/skeleton'
 import { getIndexName } from '../constants/bistIndices'
@@ -17,12 +16,6 @@ function EndeksOverviewPage() {
   const { data: indicesData } = useIndices()
   const { data: indexDetail } = useIndexDetail(code)
   const { data: sektorData } = useSektorDagilimi(code)
-
-  const [chartReady, setChartReady] = useState(false)
-  useEffect(() => {
-    const raf = requestAnimationFrame(() => setChartReady(true))
-    return () => cancelAnimationFrame(raf)
-  }, [])
 
   const priceDetails = useMemo(() => {
     const liveIndex = indicesData?.find(item => item.code?.toUpperCase() === code)
@@ -45,8 +38,6 @@ function EndeksOverviewPage() {
 
   return (
     <div className="space-y-5">
-      {chartReady && <LazyTradingViewChart symbol={code} lastPrice={priceDetails.price} />}
-
       {indexDetail && (() => {
         const last = indexDetail.last ?? 0
         return (
@@ -71,7 +62,7 @@ function EndeksOverviewPage() {
         <div className="space-y-3">
           <h3 className="text-sm md:text-base font-bold text-foreground uppercase tracking-wider">Sektör Dağılımı</h3>
           <div className="p-4 md:p-6 rounded-xl border border-border/30">
-            <SektorPieChart data={sektorData.map(s => ({ nameTr: s.sector_name ?? '', value: s.ratio ?? 0 }))} />
+            <SektorPieChart data={sektorData.map(s => ({ nameTr: s.nameTr ?? '', value: s.value ?? 0 }))} />
           </div>
         </div>
       )}
