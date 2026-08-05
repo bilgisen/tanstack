@@ -10,6 +10,9 @@ interface UIState {
   toggleRightSidebarExpanded: () => void;
   isLeftSidebarExpanded: boolean;
   toggleLeftSidebarExpanded: () => void;
+  isChatSheetOpen: boolean;
+  openChatSheet: () => void;
+  closeChatSheet: () => void;
   isCommandPaletteOpen: boolean;
   openCommandPalette: () => void;
   closeCommandPalette: () => void;
@@ -84,6 +87,9 @@ export const useUIStore = create<UIState>((set) => ({
     }
     return { isLeftSidebarExpanded: newVal };
   }),
+  isChatSheetOpen: false,
+  openChatSheet: () => set({ isChatSheetOpen: true }),
+  closeChatSheet: () => set({ isChatSheetOpen: false }),
   isCommandPaletteOpen: false,
   openCommandPalette: () => set({ isCommandPaletteOpen: true }),
   closeCommandPalette: () => set({ isCommandPaletteOpen: false }),

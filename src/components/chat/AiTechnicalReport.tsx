@@ -634,7 +634,7 @@ export function AiTechnicalReport({ ticker, context: _context, onRequireAuth }: 
   const [estimatedCost, setEstimatedCost] = useState<number | null>(null);
   const [exporting, setExporting] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
-  const { setGlobalPrompt, openRightSidebar } = useUIStore();
+  const { setGlobalPrompt, openRightSidebar, openChatSheet } = useUIStore();
   const { init } = useChatStore();
 
   const generate = useCallback(async () => {
@@ -732,9 +732,14 @@ export function AiTechnicalReport({ ticker, context: _context, onRequireAuth }: 
         // ignore
       }
       setGlobalPrompt(question);
-      openRightSidebar();
+      const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+      if (isMobile) {
+        openChatSheet();
+      } else {
+        openRightSidebar();
+      }
     },
-    [setGlobalPrompt, openRightSidebar, init]
+    [setGlobalPrompt, openRightSidebar, openChatSheet, init]
   );
 
   const handleExport = useCallback(async () => {

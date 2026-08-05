@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { ArrowUp } from "lucide-react";
 import { ChatPanel } from "../chat/ChatPanel";
 import { ChatSheet } from "../chat/ChatSheet";
@@ -11,8 +10,7 @@ interface PublicPageLayoutProps {
 }
 
 export function PublicPageLayout({ context, placeholder, children }: PublicPageLayoutProps) {
-  const { isChatMaximized } = useUIStore()
-  const [isChatSheetOpen, setIsChatSheetOpen] = useState(false)
+  const { isChatMaximized, isChatSheetOpen, openChatSheet, closeChatSheet } = useUIStore()
 
   return (
     <div className="flex-1 flex flex-row min-w-0 h-full relative">
@@ -39,7 +37,7 @@ export function PublicPageLayout({ context, placeholder, children }: PublicPageL
         }}
       >
         <div
-          onClick={() => setIsChatSheetOpen(true)}
+          onClick={() => openChatSheet()}
           className="w-full max-w-3xl bg-background/80 backdrop-blur-2xl border border-border/50 rounded-full shadow-2xl pointer-events-auto overflow-hidden animate-in slide-in-from-bottom-6 duration-500 cursor-pointer flex items-center px-6 py-2.5 justify-between"
         >
           <span className="text-muted-foreground/60 text-sm truncate pr-4">{placeholder}</span>
@@ -52,7 +50,7 @@ export function PublicPageLayout({ context, placeholder, children }: PublicPageL
       {/* Mobile: Chat Sheet */}
       <ChatSheet
         isOpen={isChatSheetOpen}
-        onClose={() => setIsChatSheetOpen(false)}
+        onClose={closeChatSheet}
         context={context}
         placeholder={placeholder}
       />
