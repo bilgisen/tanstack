@@ -1,4 +1,4 @@
-import { and, count, eq, gte, sql } from "drizzle-orm";
+import { and, count, eq, gte, lt, sql } from "drizzle-orm";
 import { db } from "./db";
 import { modelConfigs, usageLogs, userCredits } from "./schema";
 import { TIER_CONFIG } from "./tiers";
@@ -126,7 +126,7 @@ export async function checkAndReserveJT(
           and(
             eq(usageLogs.userId, userId),
             gte(usageLogs.createdAt, today),
-            sql`${usageLogs.createdAt} < ${tomorrow}`,
+            lt(usageLogs.createdAt, tomorrow),
           )
         )
         .then((r) => r[0]?.cnt || 0)

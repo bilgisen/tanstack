@@ -420,6 +420,7 @@ export interface RelationalSignal {
 export interface CompFundamentalsResponse {
   ticker: string
   company_name: string
+  error?: string
   sector: string | null
   composite_score: number | null
   percentile?: number | null
