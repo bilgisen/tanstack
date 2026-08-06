@@ -615,6 +615,18 @@ async function exportPdf(root: HTMLElement, fileName: string) {
     const dataUrl = await toPng(root, {
       backgroundColor: "#ffffff",
       pixelRatio: 2,
+      // Google Fonts / any cross-origin stylesheet throws SecurityError when
+      // html-to-image tries to read cssRules for embedding. We rely on the
+      // bundled fonts already loaded in the document, so skip remote CSS
+      // entirely instead of crashing the rasterization.
+      skipFonts: true,
+      filter: (node) => {
+        // Drop remote <link rel="stylesheet"> tags (fonts.googleapis.com, etc.)
+        if (node instanceof HTMLLinkElement && node.rel === "stylesheet" && node.href?.startsWith("http")) {
+          return false;
+        }
+        return true;
+      },
     });
     const imgWidth = 1600;
     const imgHeight = Math.round((dataUrl ? root.offsetHeight : root.offsetHeight) * (imgWidth / Math.max(root.offsetWidth, 1)));
