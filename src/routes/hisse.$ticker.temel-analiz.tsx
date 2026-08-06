@@ -253,7 +253,7 @@ function FundamentalAnalysisPage() {
       )}
 
       {/* ═══ KEY INSIGHTS (Öne Çıkanlar) ═══ */}
-      {data.key_insights.length > 0 && (
+      {data.key_insights?.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center gap-2 pb-2 border-b border-border/20">
             <Sparkles size={14} className="text-amber-500" />
