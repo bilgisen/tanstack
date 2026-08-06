@@ -508,10 +508,10 @@ export function useCompFaReport(ticker: string) {
   })
 }
 
-export function useCompFundamentals(ticker: string, scope: 'public' | 'member' | 'abone' = 'member') {
+export function useCompFundamentals(ticker: string) {
   return useQuery<CompFundamentalsResponse | null>({
-    queryKey: ['comp', 'fundamentals', ticker, scope],
-    queryFn: () => fetchComp<CompFundamentalsResponse>(`/fundamentals/${ticker}?scope=${scope}`),
+    queryKey: ['comp', 'fundamentals', ticker],
+    queryFn: () => fetchComp<CompFundamentalsResponse>(`/fundamentals/${ticker}`),
     staleTime: 3_600_000,
     gcTime: 86_400_000,
     enabled: !!ticker,

@@ -35,7 +35,7 @@ const TREND_COLORS = ['var(--primary)', '#22c55e', '#f59e0b', '#f43f5e', '#06b6d
 function FundamentalAnalysisPage() {
   const { ticker } = Route.useParams()
   const tickerUpper = ticker.toUpperCase()
-  const { data, isLoading } = useCompFundamentals(tickerUpper, 'abone')
+  const { data, isLoading } = useCompFundamentals(tickerUpper)
 
   if (isLoading) {
     return (
