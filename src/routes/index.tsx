@@ -19,7 +19,6 @@ import { CTABlock } from '../components/home/CTABlock'
 import { SectorsHomepage } from '../components/home/SectorsHomepage'
 import { HomeFooter } from '../components/home/HomeFooter'
 import { ClientOnly } from '../components/ClientOnly'
-import { Separator } from '../components/ui/separator'
 
 export const Route = createFileRoute('/')({
   component: LandingPage,
@@ -161,9 +160,6 @@ function LandingPage() {
 
           {/* Sektörler */}
           <SectorsHomepage />
-
-          {/* Separator */}
-          <Separator className="max-w-5xl mx-auto mt-10" />
 
           {/* Footer - Kurumsal */}
           <HomeFooter />

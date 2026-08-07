@@ -7,7 +7,6 @@ import { ChatSheet } from '../components/chat/ChatSheet'
 import { useUIStore } from '../store/ui'
 import { Hero2 } from '../components/home/Hero2'
 import { HomeFooter } from '../components/home/HomeFooter'
-import { Separator } from '../components/ui/separator'
 
 export const Route = createFileRoute('/sistemimiz')({
   component: SistemimizPage,
@@ -75,9 +74,6 @@ function SistemimizPage() {
 
           {/* Hero2 - Yatırımlarınıza Sezgiler Değil Veriler */}
           <Hero2 />
-
-          {/* Separator */}
-          <Separator className="max-w-5xl mx-auto mt-10" />
 
           {/* Footer - Kurumsal */}
           <HomeFooter />
