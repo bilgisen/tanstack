@@ -271,7 +271,7 @@ export function MarkdownRenderer({ text, isAssistant, context = "global", sugges
     <div className="space-y-4 w-full animate-in fade-in duration-300">
       {/* 1. Main Chat Text Rendered as Rich HTML */}
       <div 
-        className="chatbot-response text-[15px] sm:text-base text-foreground/95 leading-relaxed space-y-3"
+        className="typeset typeset-notes max-w-[37em]"
         dangerouslySetInnerHTML={{ __html: htmlContent }}
       />
 

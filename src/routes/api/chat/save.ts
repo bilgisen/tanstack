@@ -25,8 +25,15 @@ export const Route = createFileRoute('/api/chat/save')({
           let sid = sessionId
           const now = new Date()
 
-          if (!sid) {
-            sid = crypto.randomUUID()
+          // The client always generates a UUID for new sessions, so we can't
+          // rely on `!sid` to detect a new session. Ensure the session row
+          // exists (create it if the ID isn't in the DB yet).
+          const existing = sid
+            ? await db.select({ id: chatSessions.id }).from(chatSessions).where(eq(chatSessions.id, sid)).get()
+            : null
+
+          if (!sid || !existing) {
+            sid = sid || crypto.randomUUID()
             await db.insert(chatSessions).values({
               id: sid,
               userId: session.user.id,

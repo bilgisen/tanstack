@@ -2,8 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, render } from "@testing-library/react";
 import { ResponsiveLogo } from "./ResponsiveLogo";
 
-const ICON_VIEWBOX = "0 0 1163 1520";
-const ICON_RATIO = 1163 / 1520;
+const ICON_VIEWBOX = "0 0 1372 1400";
+const ICON_RATIO = 1372 / 1400;
 const BRAND_TEXT = "JetBorsa";
 const ARIA_LABEL = "Jetborsa logo";
 
@@ -11,17 +11,12 @@ function mockWindowWidth(width: number) {
   vi.spyOn(window, "innerWidth", "get").mockReturnValue(width);
 }
 
-// The JetIcon is rendered at 55% of the logo box size, rounded to 2 decimals
-const iconHeight = (size: number) => Math.round(size * 0.55 * 100) / 100;
+// The JetIcon is rendered at 90% of the logo size, rounded to 2 decimals
+const iconHeight = (size: number) => Math.round(size * 0.9 * 100) / 100;
 const iconWidth = (size: number) => Math.round(iconHeight(size) * ICON_RATIO * 100) / 100;
 
 function getIconSvg() {
   return document.querySelector(`svg[viewBox="${ICON_VIEWBOX}"]`);
-}
-
-function getBrandWrapper() {
-  const svg = getIconSvg();
-  return svg ? svg.parentElement : null;
 }
 
 function renderAt(width: number, props?: { size?: number; mobileSize?: number; desktopSize?: number; className?: string }) {
@@ -57,14 +52,14 @@ describe("ResponsiveLogo", () => {
     renderAt(375, { size: 24, mobileSize: 12 });
 
     expect(getIconSvg()).toHaveAttribute("height", iconHeight(12).toString());
-    expect(getBrandWrapper()).toHaveStyle({ height: "12px" });
+    expect(getIconSvg()).toHaveAttribute("width", iconWidth(12).toString());
   });
 
   it("desktopSize prop takes precedence over size on desktop", () => {
     renderAt(1024, { size: 14, desktopSize: 32 });
 
     expect(getIconSvg()).toHaveAttribute("height", iconHeight(32).toString());
-    expect(getBrandWrapper()).toHaveStyle({ height: "32px" });
+    expect(getIconSvg()).toHaveAttribute("width", iconWidth(32).toString());
   });
 
   it("size prop is the fallback when specific size props are not provided", () => {

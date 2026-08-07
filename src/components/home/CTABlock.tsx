@@ -9,7 +9,7 @@ export function CTABlock({
 }) {
   return (
     <section>
-      <div className="py-8 sm:py-20">
+      <div className="py-4 sm:py-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-16">
           <div className="relative flex min-h-96 items-center justify-center overflow-hidden rounded-3xl border border-border px-6 before:absolute before:top-24 before:-z-10 before:h-4/5 before:w-full before:rounded-full before:bg-linear-to-r before:from-sky-100 before:from-15% before:via-white before:via-55% before:to-amber-100 before:to-90% before:blur-3xl dark:before:from-sky-400/10 dark:before:from-40% dark:before:via-black dark:before:via-55% dark:before:to-amber-300/10 dark:before:to-60%">
             <div className="mx-auto flex flex-col items-center gap-6 animate-in fade-in duration-700">

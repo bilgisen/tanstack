@@ -1,3 +1,38 @@
+export const GROUP_COLORS: Record<string, string> = {
+  Bankacilik_Finans: '#494fdf',
+  Sigortacilik: '#22c55e',
+  GYO: '#f59e0b',
+  Enerji_Altyapi: '#8b5cf6',
+  Sanayi_Metal_Kimya: '#06b6d4',
+  Insaat_Yapi: '#f43f5e',
+  Otomotiv_Savunma_Makine: '#0ea5e9',
+  Saglik_Ilac: '#f97316',
+  Teknoloji_Iletisim: '#14b8a6',
+  Gida_Icecek_Tarim: '#64748b',
+  Tuketim_Perakende_Tekstil: '#e11d48',
+  Ulastirma_Lojistik: '#6366f1',
+  Turizm_Medya_Eglence: '#d946ef',
+  Holdingler: '#84cc16',
+}
+
+export const SECTOR_COLORS = [
+  '#494fdf', '#22c55e', '#f59e0b', '#8b5cf6', '#06b6d4',
+  '#f43f5e', '#0ea5e9', '#f97316', '#14b8a6', '#64748b',
+  '#e11d48', '#6366f1', '#d946ef', '#84cc16', '#78716c',
+]
+
+export function getGroupColor(key: string): string {
+  return GROUP_COLORS[key] || SECTOR_COLORS[hashCode(key) % SECTOR_COLORS.length]
+}
+
+function hashCode(str: string): number {
+  let h = 0
+  for (let i = 0; i < str.length; i++) {
+    h = (h * 31 + str.charCodeAt(i)) | 0
+  }
+  return Math.abs(h)
+}
+
 export const SECTOR_GROUPS: Record<string, string> = {
   Bankacilik_Finans: 'Bankacılık & Finans',
   Sigortacilik: 'Sigortacılık',

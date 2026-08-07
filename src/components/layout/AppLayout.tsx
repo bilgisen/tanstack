@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
-  const isLanding = location.pathname === "/";
+  const isLanding = location.pathname === "/" || location.pathname === "/sistemimiz";
   const isProfile = location.pathname.startsWith("/profil");
   const isPublicChat = location.pathname.startsWith("/sektorler") || location.pathname.startsWith("/endeksler") || location.pathname.startsWith("/takip-listesi");
 

@@ -1,9 +1,8 @@
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { 
   ArrowDown, 
   ArrowUp,
-  Factory,
   Sparkles,
 } from 'lucide-react'
 import useEmblaCarousel from 'embla-carousel-react'
@@ -14,12 +13,11 @@ import { ChatSheet } from '../components/chat/ChatSheet'
 
 import { useUIStore } from '../store/ui'
 import { useIndices, useMarketStocks } from '../lib/useMarketData'
-import { useSectorGroups } from '../lib/useCompData'
 import { getIndexSlug } from '../constants/bistIndices'
-import { groupKeyToDisplayName, groupKeyToSlug } from '../constants/sectorGroups'
 import { BIST30_CONSTITUENTS } from '../constants/bist30Constituents'
-import { Hero2 } from '../components/home/Hero2'
 import { CTABlock } from '../components/home/CTABlock'
+import { SectorsHomepage } from '../components/home/SectorsHomepage'
+import { HomeFooter } from '../components/home/HomeFooter'
 import { ClientOnly } from '../components/ClientOnly'
 import { Separator } from '../components/ui/separator'
 
@@ -35,7 +33,6 @@ function LandingPage() {
 
   const { data: indicesData } = useIndices()
   const { data: stocksData } = useMarketStocks()
-  const { data: sectorGroupsData } = useSectorGroups()
   const [emblaRef] = useEmblaCarousel({ loop: true, dragFree: true, align: 'start' }, [Autoplay({ delay: 3000, stopOnMouseEnter: true })])
 
   return (
@@ -109,11 +106,11 @@ function LandingPage() {
                         className="min-w-0 flex-[0_0_auto] w-fit shrink-0 rounded-2xl border border-border/20 p-4 cursor-pointer hover:bg-muted/30 transition-colors"
                       >
                         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">{idx.code}</div>
-                        <div className="text-lg font-bold font-mono tabular-nums text-foreground">
+                        <div className="text-xl font-bold font-mono tabular-nums text-foreground">
                           {Number(idx.last_price || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                         </div>
-                        <div className={`flex items-center gap-1 mt-1 font-bold text-sm ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
-                          {isUp ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+                        <div className={`flex items-center gap-1 mt-1 font-bold text-base ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
+                          {isUp ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
                           {isUp ? '+' : ''}{Number(idx.diff_percent || 0).toFixed(2)}%
                         </div>
                       </div>
@@ -132,11 +129,11 @@ function LandingPage() {
                           className="min-w-0 flex-[0_0_auto] w-fit shrink-0 rounded-2xl border border-border/20 p-4 cursor-pointer hover:bg-muted/30 transition-colors"
                         >
                           <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">{s.code}</div>
-                          <div className="text-lg font-bold font-mono tabular-nums text-foreground">
+                          <div className="text-xl font-bold font-mono tabular-nums text-foreground">
                             {Number(s.last_price || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                           </div>
-                          <div className={`flex items-center gap-1 mt-1 font-bold text-sm ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
-                            {isUp ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+                          <div className={`flex items-center gap-1 mt-1 font-bold text-base ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
+                            {isUp ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
                             {isUp ? '+' : ''}{Number(s.diff_percent || 0).toFixed(2)}%
                           </div>
                         </div>
@@ -157,113 +154,19 @@ function LandingPage() {
             )}
           </section>
 
-          {/* Hero2 - Yatırımlarınıza Sezgiler Değil Veriler */}
-          <Hero2 />
-
-          {/* CTABlock - CTA */}
+          {/* CTABlock - Embla'nın hemen altında */}
           <ClientOnly>
-            <CTABlock />
+            <CTABlock onStart={() => navigate({ to: '/sistemimiz' })} />
           </ClientOnly>
 
           {/* Sektörler */}
-          <section className="px-4 md:px-6 py-4">
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-                <Factory size={14} />
-              </div>
-              <h3 className="text-base font-bold text-foreground uppercase tracking-wider">Sektörler</h3>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {(sectorGroupsData?.groups || []).sort((a, b) => (b.count || 0) - (a.count || 0)).map(group => {
-                const slug = groupKeyToSlug(group.key)
-                return (
-                  <Link
-                    key={group.key}
-                    to="/sektorler/$slug"
-                    params={{ slug }}
-                    className="flex items-center justify-between px-1 py-2.5 hover:bg-muted/20 transition-colors"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-7 h-7 bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                        <Factory size={13} />
-                      </div>
-                      <span className="text-sm font-semibold text-foreground truncate">
-                        {groupKeyToDisplayName(group.key) || group.name}
-                      </span>
-                    </div>
-                    <span className="text-xs text-muted-foreground shrink-0 ml-2">{group.count || '—'}</span>
-                  </Link>
-                )
-              })}
-            </div>
-          </section>
-
-          {/* Stats */}
-          <Stats />
+          <SectorsHomepage />
 
           {/* Separator */}
           <Separator className="max-w-5xl mx-auto mt-10" />
 
           {/* Footer - Kurumsal */}
-          <footer className="px-4 md:px-6 py-10 mt-8">
-            <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-start justify-between gap-8">
-              <div className="max-w-xs">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-sm font-bold text-foreground">JetBorsa</span>
-                </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  BIST uzmanı yapay zekâ destekli finansal analiz platformu.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-x-12 gap-y-2">
-                <Link to="/kurumsal/hakkimizda" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-                  Hakkımızda
-                </Link>
-                <Link to="/kurumsal/iletisim" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-                  İletişim
-                </Link>
-                <Link to="/nasil-calisir" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-                  Nasıl Çalışır
-                </Link>
-                <Link to="/kurumsal/insan-kaynaklari" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-                  Kariyer
-                </Link>
-                <Link to="/kurumsal/sss" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-                  SSS
-                </Link>
-                <Link to="/kurumsal/kvkk" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-                  KVKK
-                </Link>
-                <Link to="/kurumsal/cerez-politikasi" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-                  Çerez Politikası
-                </Link>
-                <Link to="/kurumsal/yasal-uyari" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-                  Yasal Uyarı
-                </Link>
-                <Link to="/kurumsal/geri-bildirim" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-                  Geri Bildirim
-                </Link>
-                <Link to="/kurumsal/bilgi-toplumu-hizmetleri" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-                  Bilgi Toplumu Hizmetleri
-                </Link>
-                <Link to="/kurumsal/reklam-isbirligi" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-                  Reklam İşbirliği
-                </Link>
-                <Link to="/kurumsal/nasil-kullanilir" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-                  Nasıl Kullanılır
-                </Link>
-              </div>
-            </div>
-            <div className="max-w-5xl mx-auto mt-8 pt-4 border-t border-border/30 flex items-center justify-between">
-              <span className="text-[11px] text-muted-foreground/60">
-                © 2026 JetBorsa. Tüm hakları saklıdır.
-              </span>
-              <Link to="/kurumsal" className="text-[11px] text-muted-foreground/60 hover:text-foreground transition-colors">
-                Kurumsal
-              </Link>
-            </div>
-          </footer>
+          <HomeFooter />
 
         </div>
       </div>
@@ -300,33 +203,6 @@ function LandingPage() {
         user={user}
         sessionLoading={sessionLoading}
       />
-    </div>
-  )
-}
-
-function Stats() {
-  return (
-    <div className="mx-auto max-w-5xl px-6 py-12">
-      <div className="grid grid-cols-3 gap-3 sm:gap-4">
-        <div className="rounded-xl border px-4 py-6 sm:px-8 sm:py-10">
-          <span className="font-medium text-2xl sm:text-5xl">+600</span>
-          <p className="mt-2 sm:mt-4 text-foreground/80 text-sm sm:text-xl">
-            Şirket
-          </p>
-        </div>
-        <div className="rounded-xl border px-4 py-6 sm:px-8 sm:py-10">
-          <span className="font-medium text-2xl sm:text-5xl">+50</span>
-          <p className="mt-2 sm:mt-4 text-foreground/80 text-sm sm:text-xl">
-            Sektör
-          </p>
-        </div>
-        <div className="rounded-xl border px-4 py-6 sm:px-8 sm:py-10">
-          <span className="font-medium text-2xl sm:text-5xl">+15</span>
-          <p className="mt-2 sm:mt-4 text-foreground/80 text-sm sm:text-xl">
-            Endeks
-          </p>
-        </div>
-      </div>
     </div>
   )
 }

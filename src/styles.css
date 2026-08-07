@@ -1,7 +1,20 @@
 @import "tailwindcss";
+@import "./typeset.css";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+
+/* Typeset — notes preset */
+.typeset-notes {
+  --typeset-font-body: var(--font-geist);
+  --typeset-font-heading: var(--font-geist);
+  --typeset-font-mono: var(--font-geist-mono);
+  --typeset-size: 15px;
+  --typeset-leading: 1.75;
+  --typeset-flow: 1.25em;
+}
 
 @custom-variant dark (&:is(.dark *));
 
@@ -45,6 +58,8 @@
   /* Typography */
   --font-sans: Inter, sans-serif;
   --font-display: Inter, sans-serif; /* Substitute for Aeonik Pro */
+  --font-geist: 'Geist Variable', sans-serif;
+  --font-geist-mono: 'Geist Mono Variable', monospace;
   
   /* Radius */
   --radius-none: 0px;
@@ -337,49 +352,6 @@
   }
 }
 
-/* Premium Chatbot Response Styles - Revolut Style */
-.chatbot-response {
-  word-break: break-word;
-  @apply font-sans;
-}
-.chatbot-response p {
-  @apply mb-4 leading-[1.6] text-[15px];
-}
-.chatbot-response p:last-child {
-  @apply mb-0;
-}
-.chatbot-response strong {
-  @apply font-semibold text-foreground;
-}
-.chatbot-response ul, .chatbot-response ol {
-  @apply mt-2 mb-4 pl-5;
-}
-.chatbot-response ul {
-  @apply list-disc;
-}
-.chatbot-response ol {
-  @apply list-decimal;
-}
-.chatbot-response li {
-  @apply mb-1.5 leading-[1.5];
-}
-.chatbot-response table {
-  @apply w-full border-collapse border-spacing-0 mt-4 mb-4 border border-border rounded-lg overflow-hidden;
-}
-.chatbot-response th {
-  @apply bg-muted text-muted-foreground font-semibold text-[11px] uppercase tracking-wider p-3 text-left border-b border-border;
-}
-.chatbot-response td {
-  @apply p-3 text-[14px] border-b border-border text-foreground;
-}
-.chatbot-response tr:last-child td {
-  @apply border-b-0;
-}
-.chatbot-response tr:hover td {
-  @apply bg-muted/50;
-}
-
-/* Premium Chatbot Question Bubble Styles - Revolut Cobalt */
 .chat-question-bubble {
   @apply bg-primary text-white shadow-sm;
 }

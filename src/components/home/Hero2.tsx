@@ -1,4 +1,4 @@
-import { BarChart3, Globe, TrendingUp, Users } from "lucide-react"
+import { BarChart3, Globe, MessageSquare, Star, TrendingUp, Users } from "lucide-react"
 
 const features = [
   {
@@ -21,6 +21,16 @@ const features = [
     title: "Şirket Karşılaştırma",
     description: "F/K ve PD/DD gibi rasyoları karşılaştırın.",
   },
+  {
+    icon: MessageSquare,
+    title: "AI Sohbet",
+    description: "BIST uzmanı yapay zekâya anında soru sorun.",
+  },
+  {
+    icon: Star,
+    title: "Takip Listesi",
+    description: "Favori hisse ve endekslerinizi tek ekranda izleyin.",
+  },
 ]
 
 export function Hero2() {
@@ -34,14 +44,14 @@ export function Hero2() {
           {features.map((feature) => (
             <div
               key={feature.title}
-              className="flex items-start gap-4 rounded-2xl border border-border/20 bg-card/50 p-6 transition-colors hover:bg-muted/30 lg:flex-col lg:items-start"
+              className="flex items-start gap-4 rounded-2xl border border-border/20 bg-card/50 p-6 transition-colors hover:bg-muted/30"
             >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted lg:mb-5">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted">
                 <feature.icon className="size-5" />
               </div>
               <div>
-                <span className="text-lg font-medium">{feature.title}</span>
-                <p className="mt-1 text-[15px] text-foreground/80">
+                <span className="text-xl font-medium sm:text-lg">{feature.title}</span>
+                <p className="mt-1 text-base text-foreground/80 sm:text-[15px]">
                   {feature.description}
                 </p>
               </div>

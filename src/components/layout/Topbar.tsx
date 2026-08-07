@@ -35,7 +35,7 @@ export function Topbar() {
         {/* Left: Branding & Navigation */}
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2 select-none hover:opacity-95 transition-all">
-            <ResponsiveLogo mobileSize={28} className="text-foreground shrink-0" />
+            <ResponsiveLogo mobileSize={28} className="text-foreground shrink-0" textClassName="uppercase" textStyle={{ fontWeight: 400 }} />
             <span className="-ml-1.5 self-center rounded-md bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary border border-primary/20 leading-none">
               beta
             </span>

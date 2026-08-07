@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Logo } from "./Logo";
+import type { CSSProperties } from "react";
 
 interface ResponsiveLogoProps {
   size?: number;
@@ -7,6 +8,8 @@ interface ResponsiveLogoProps {
   desktopSize?: number;
   className?: string;
   forceFull?: boolean;
+  textClassName?: string;
+  textStyle?: CSSProperties;
 }
 
 function ResponsiveLogo({ 
@@ -15,6 +18,8 @@ function ResponsiveLogo({
   desktopSize,
   className, 
   forceFull = false,
+  textClassName,
+  textStyle,
 }: ResponsiveLogoProps) {
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const debounceTimerRef = useRef<number | null>(null);
@@ -55,6 +60,8 @@ function ResponsiveLogo({
         className={className}
         role="img"
         aria-label="Jetborsa logo"
+        textClassName={textClassName}
+        textStyle={textStyle}
       />
     );
   }
@@ -67,6 +74,8 @@ function ResponsiveLogo({
       className={className}
       role="img"
       aria-label="Jetborsa logo"
+      textClassName={textClassName}
+      textStyle={textStyle}
     />
   );
 }

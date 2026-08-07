@@ -1,9 +1,1 @@
-<svg width="375" height="400" viewBox="0 0 375 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#34c759" />
-      <stop offset="100%" stop-color="#1d9bf0" />
-    </linearGradient>
-  </defs>
-  <path d="M46 273c25.405 0 46-20.595 46-46s-20.595-46-46-46-46 20.595-46 46 20.595 46 46 46m169-148a45 45 0 1 0-90 0v150a45 45 0 1 0 90 0v-40a35 35 0 1 1 70 0v120a45 45 0 1 0 90 0V45a45 45 0 1 0-90 0v120a35.003 35.003 0 0 1-35 35 35 35 0 0 1-35-35z" fill="url(#logo-gradient)"/>
-</svg>
+<svg viewBox="0 0 1372 1400" xmlns="http://www.w3.org/2000/svg"><path d="M1372 0H686v349.912h343v424.685c-19.06 97.171-114.333 291.513-343 291.513S351.167 832.9 326.667 716.294H0c81.667 716.296 490 683.386 718.667 683.386 375.663 0 604.333-265.03 653.333-654.29z" fill="currentColor"/><rect x="334.576" y="366.57" width="332.534" height="348.19" fill="#34c759"/></svg>

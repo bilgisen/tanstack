@@ -7,42 +7,32 @@ interface LogoProps {
   style?: React.CSSProperties;
   role?: string;
   "aria-label"?: string;
+  textClassName?: string;
+  textStyle?: React.CSSProperties;
 }
 
 function JetIcon({ className, ...props }: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 1163 1520" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} {...props}>
-      <path d="M108.347 1520c-57.631 0-86.447-26.54-86.447-79.61v-426.7q0-79.612 86.447-79.611h242.052q100.278 0 100.278-79.61v-89.162H86.447Q0 765.307 0 685.699l6.916-606.09Q6.916.001 93.363 0h983.187c57.63 0 86.45 26.537 86.45 79.61v765.306q.001 340.73-172.894 506.314C872.538 1463.74 715.781 1520 519.835 1520z" fill="currentColor" />
+    <svg viewBox="0 0 1372 1400" xmlns="http://www.w3.org/2000/svg" className={className} {...props}>
+      <path d="M1372 0H686v349.912h343v424.685c-19.06 97.171-114.333 291.513-343 291.513S351.167 832.9 326.667 716.294H0c81.667 716.296 490 683.386 718.667 683.386 375.663 0 604.333-265.03 653.333-654.29z" fill="currentColor" />
+      <rect x="334.576" y="366.57" width="332.534" height="348.19" fill="#34c759" />
     </svg>
   );
 }
 
-function JetIconBranded({ size, className }: { size: number; className?: string }) {
+function JetIconBranded({ size, className, style }: { size: number; className?: string; style?: React.CSSProperties }) {
   // Round to avoid hydration mismatch from floating-point precision
-  const iconSize = Math.round(size * 0.55 * 100) / 100;
-  const iconWidth = Math.round(iconSize * (1163 / 1520) * 100) / 100;
-  
+  const iconSize = Math.round(size * 0.9 * 100) / 100;
+  const iconWidth = Math.round(iconSize * (1372 / 1400) * 100) / 100;
+
   return (
-    <div
+    <JetIcon
+      width={iconWidth}
+      height={iconSize}
       className={className}
-      style={{
-        width: size,
-        height: size,
-        borderRadius: Math.round(size * 0.22 * 100) / 100,
-        backgroundColor: "var(--primary)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexShrink: 0,
-      }}
-    >
-      <JetIcon 
-        width={iconWidth} 
-        height={iconSize} 
-        style={{ color: "#fff" }} 
-        suppressHydrationWarning 
-      />
-    </div>
+      style={{ color: "var(--primary)", flexShrink: 0, ...style }}
+      suppressHydrationWarning
+    />
   );
 }
 
@@ -54,13 +44,13 @@ function BorsaText({ className, style, ...props }: React.HTMLAttributes<HTMLSpan
   );
 }
 
-export function Logo({ size = 24, variant = "full", className, style, role, "aria-label": ariaLabel }: LogoProps) {
+export function Logo({ size = 24, variant = "full", className, style, role, "aria-label": ariaLabel, textClassName, textStyle }: LogoProps) {
   if (variant === "icon") {
     return <JetIconBranded size={size} className={className} />;
   }
 
   if (variant === "text") {
-    return <BorsaText style={{ fontSize: size, color: "currentColor", ...style }} className={className} />;
+    return <BorsaText style={{ fontSize: size, color: "currentColor", ...textStyle }} className={textClassName ?? className} />;
   }
 
   // full = icon + "jetborsa" text side by side
@@ -68,7 +58,7 @@ export function Logo({ size = 24, variant = "full", className, style, role, "ari
   return (
     <div role={role} aria-label={ariaLabel} style={{ display: "flex", alignItems: "center", gap: "4px", ...style }} className={className}>
       <JetIconBranded size={size} />
-      <BorsaText style={{ fontSize, color: "currentColor", lineHeight: 1 }} />
+      <BorsaText style={{ fontSize, color: "currentColor", lineHeight: 1, ...textStyle }} className={textClassName} />
     </div>
   );
 }
