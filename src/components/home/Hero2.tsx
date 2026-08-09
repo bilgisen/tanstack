@@ -38,7 +38,7 @@ export function Hero2() {
     <section className="w-full px-4 py-16 md:px-6 md:py-20">
       <div className="mx-auto max-w-4xl">
         <h2 className="mb-12 text-center text-2xl font-medium md:text-4xl">
-          Yatırımlarınıza sezgiler değil veriler yön versin.
+          Neler Yapabilirsiniz?
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {features.map((feature) => (

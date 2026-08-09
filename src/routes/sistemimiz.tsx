@@ -5,7 +5,6 @@ import { useAuth } from '../hooks/useAuth'
 import { ChatPanel } from '../components/chat/ChatPanel'
 import { ChatSheet } from '../components/chat/ChatSheet'
 import { useUIStore } from '../store/ui'
-import { Hero2 } from '../components/home/Hero2'
 import { HomeFooter } from '../components/home/HomeFooter'
 
 export const Route = createFileRoute('/sistemimiz')({
@@ -71,9 +70,6 @@ function SistemimizPage() {
               )}
             </div>
           </section>
-
-          {/* Hero2 - Yatırımlarınıza Sezgiler Değil Veriler */}
-          <Hero2 />
 
           {/* Footer - Kurumsal */}
           <HomeFooter />

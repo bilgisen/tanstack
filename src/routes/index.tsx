@@ -18,6 +18,7 @@ import { BIST30_CONSTITUENTS } from '../constants/bist30Constituents'
 import { CTABlock } from '../components/home/CTABlock'
 import { SectorsHomepage } from '../components/home/SectorsHomepage'
 import { HomeFooter } from '../components/home/HomeFooter'
+import { Hero2 } from '../components/home/Hero2'
 import { ClientOnly } from '../components/ClientOnly'
 
 export const Route = createFileRoute('/')({
@@ -42,7 +43,7 @@ function LandingPage() {
         <div className="flex-1 overflow-y-auto custom-scrollbar min-w-0 relative z-10 pb-24 md:pb-4 scroll-smooth">
           
           {/* Hero */}
-          <section className="relative w-full aspect-square md:aspect-video px-6 flex flex-col items-center justify-center text-center overflow-hidden">
+          <section className="relative w-full aspect-[3/4] md:aspect-[4/3] px-6 flex flex-col items-center justify-center text-center overflow-hidden">
             {/* Video arka plan */}
             <video
               className="absolute inset-0 -z-30 h-full w-full object-cover pointer-events-none"
@@ -160,6 +161,9 @@ function LandingPage() {
 
           {/* Sektörler */}
           <SectorsHomepage />
+
+          {/* Hero2 - Neler Yapabilirsiniz */}
+          <Hero2 />
 
           {/* Footer - Kurumsal */}
           <HomeFooter />
