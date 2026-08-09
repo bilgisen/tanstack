@@ -1,4 +1,4 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { Link, Outlet, createFileRoute, useMatches } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
 import { AlertCircle, ArrowUpRight, Bell, CalendarClock, FileText, Loader2, Search, Sparkles } from 'lucide-react'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
@@ -121,6 +121,10 @@ function FeedSkeleton({ count }: { count: number }) {
 }
 
 function BildirimlerPage() {
+  const matches = useMatches()
+  const hasChildRoute = matches.some(m => m.routeId === '/bildirimler/$disclosureId')
+  if (hasChildRoute) return <Outlet />
+
   const [bist100Only, setBist100Only] = useState(false)
   const [category, setCategory] = useState('Tümü')
   const [importance, setImportance] = useState('')
