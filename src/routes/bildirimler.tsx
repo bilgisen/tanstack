@@ -123,7 +123,6 @@ function FeedSkeleton({ count }: { count: number }) {
 function BildirimlerPage() {
   const matches = useMatches()
   const hasChildRoute = matches.some(m => m.routeId === '/bildirimler/$disclosureId')
-  if (hasChildRoute) return <Outlet />
 
   const [bist100Only, setBist100Only] = useState(false)
   const [category, setCategory] = useState('Tümü')
@@ -139,6 +138,7 @@ function BildirimlerPage() {
     stock: stock.trim() || undefined,
     page,
     limit: 25,
+    enabled: !hasChildRoute,
   })
 
   const notifications = data?.notifications ?? []
@@ -148,6 +148,8 @@ function BildirimlerPage() {
   )
 
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / 25))
+
+  if (hasChildRoute) return <Outlet />
 
   return (
     <PublicPageLayout context="bildirimler" placeholder="KAP bildirimleri hakkında bir soru sorun...">

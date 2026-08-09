@@ -82,6 +82,7 @@ export type KAPFilter = {
   bist100?: boolean
   page?: number
   limit?: number
+  enabled?: boolean
 }
 
 const KAP_BASE = API.hono
@@ -157,6 +158,7 @@ export function useKAPFeed(filters: KAPFilter) {
     gcTime: 3_600_000,
     placeholderData: (prev) => prev,
     refetchOnReconnect: false,
+    enabled: filters.enabled !== false,
   })
 }
 
