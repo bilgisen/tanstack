@@ -17,12 +17,14 @@ import { Route as SektorlerRouteImport } from './routes/sektorler'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as KarsilastirRouteImport } from './routes/karsilastir'
 import { Route as EndekslerRouteImport } from './routes/endeksler'
+import { Route as BildirimlerRouteImport } from './routes/bildirimler'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfilIndexRouteImport } from './routes/profil.index'
 import { Route as EndekslerIndexRouteImport } from './routes/endeksler.index'
 import { Route as SektorlerSlugRouteImport } from './routes/sektorler.$slug'
 import { Route as HisseTickerRouteImport } from './routes/hisse.$ticker'
 import { Route as EndekslerIdRouteImport } from './routes/endeksler.$id'
+import { Route as BildirimlerDisclosureIdRouteImport } from './routes/bildirimler.$disclosureId'
 import { Route as ApiTickersRouteImport } from './routes/api/tickers'
 import { Route as ApiCustomerPortalRouteImport } from './routes/api/customer-portal'
 import { Route as ApiCheckoutDodoRouteImport } from './routes/api/checkout-dodo'
@@ -33,6 +35,7 @@ import { Route as HisseTickerTemelAnalizRouteImport } from './routes/hisse.$tick
 import { Route as HisseTickerTeknikAnalizRouteImport } from './routes/hisse.$ticker.teknik-analiz'
 import { Route as HisseTickerTablolarRouteImport } from './routes/hisse.$ticker.tablolar'
 import { Route as HisseTickerSektorRouteImport } from './routes/hisse.$ticker.sektor'
+import { Route as HisseTickerBildirimlerRouteImport } from './routes/hisse.$ticker.bildirimler'
 import { Route as EndekslerIdTeknikAnalizRouteImport } from './routes/endeksler.$id.teknik-analiz'
 import { Route as EndekslerIdBilesenlerRouteImport } from './routes/endeksler.$id.bilesenler'
 import { Route as ApiWebhooksDodoRouteImport } from './routes/api/webhooks/dodo'
@@ -86,6 +89,11 @@ const EndekslerRoute = EndekslerRouteImport.update({
   path: '/endeksler',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BildirimlerRoute = BildirimlerRouteImport.update({
+  id: '/bildirimler',
+  path: '/bildirimler',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -115,6 +123,11 @@ const EndekslerIdRoute = EndekslerIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => EndekslerRoute,
+} as any)
+const BildirimlerDisclosureIdRoute = BildirimlerDisclosureIdRouteImport.update({
+  id: '/$disclosureId',
+  path: '/$disclosureId',
+  getParentRoute: () => BildirimlerRoute,
 } as any)
 const ApiTickersRoute = ApiTickersRouteImport.update({
   id: '/api/tickers',
@@ -164,6 +177,11 @@ const HisseTickerTablolarRoute = HisseTickerTablolarRouteImport.update({
 const HisseTickerSektorRoute = HisseTickerSektorRouteImport.update({
   id: '/sektor',
   path: '/sektor',
+  getParentRoute: () => HisseTickerRoute,
+} as any)
+const HisseTickerBildirimlerRoute = HisseTickerBildirimlerRouteImport.update({
+  id: '/bildirimler',
+  path: '/bildirimler',
   getParentRoute: () => HisseTickerRoute,
 } as any)
 const EndekslerIdTeknikAnalizRoute = EndekslerIdTeknikAnalizRouteImport.update({
@@ -229,6 +247,7 @@ const ApiChatSessionsIdRoute = ApiChatSessionsIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/bildirimler': typeof BildirimlerRouteWithChildren
   '/endeksler': typeof EndekslerRouteWithChildren
   '/karsilastir': typeof KarsilastirRoute
   '/profil': typeof ProfilRouteWithChildren
@@ -240,6 +259,7 @@ export interface FileRoutesByFullPath {
   '/api/checkout-dodo': typeof ApiCheckoutDodoRoute
   '/api/customer-portal': typeof ApiCustomerPortalRoute
   '/api/tickers': typeof ApiTickersRoute
+  '/bildirimler/$disclosureId': typeof BildirimlerDisclosureIdRoute
   '/endeksler/$id': typeof EndekslerIdRouteWithChildren
   '/hisse/$ticker': typeof HisseTickerRouteWithChildren
   '/sektorler/$slug': typeof SektorlerSlugRouteWithChildren
@@ -256,6 +276,7 @@ export interface FileRoutesByFullPath {
   '/api/webhooks/dodo': typeof ApiWebhooksDodoRoute
   '/endeksler/$id/bilesenler': typeof EndekslerIdBilesenlerRoute
   '/endeksler/$id/teknik-analiz': typeof EndekslerIdTeknikAnalizRoute
+  '/hisse/$ticker/bildirimler': typeof HisseTickerBildirimlerRoute
   '/hisse/$ticker/sektor': typeof HisseTickerSektorRoute
   '/hisse/$ticker/tablolar': typeof HisseTickerTablolarRoute
   '/hisse/$ticker/teknik-analiz': typeof HisseTickerTeknikAnalizRoute
@@ -267,6 +288,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/bildirimler': typeof BildirimlerRouteWithChildren
   '/karsilastir': typeof KarsilastirRoute
   '/sektorler': typeof SektorlerRouteWithChildren
   '/siralamalar': typeof SiralamalarRoute
@@ -276,6 +298,7 @@ export interface FileRoutesByTo {
   '/api/checkout-dodo': typeof ApiCheckoutDodoRoute
   '/api/customer-portal': typeof ApiCustomerPortalRoute
   '/api/tickers': typeof ApiTickersRoute
+  '/bildirimler/$disclosureId': typeof BildirimlerDisclosureIdRoute
   '/sektorler/$slug': typeof SektorlerSlugRouteWithChildren
   '/endeksler': typeof EndekslerIndexRoute
   '/profil': typeof ProfilIndexRoute
@@ -290,6 +313,7 @@ export interface FileRoutesByTo {
   '/api/webhooks/dodo': typeof ApiWebhooksDodoRoute
   '/endeksler/$id/bilesenler': typeof EndekslerIdBilesenlerRoute
   '/endeksler/$id/teknik-analiz': typeof EndekslerIdTeknikAnalizRoute
+  '/hisse/$ticker/bildirimler': typeof HisseTickerBildirimlerRoute
   '/hisse/$ticker/sektor': typeof HisseTickerSektorRoute
   '/hisse/$ticker/tablolar': typeof HisseTickerTablolarRoute
   '/hisse/$ticker/teknik-analiz': typeof HisseTickerTeknikAnalizRoute
@@ -302,6 +326,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/bildirimler': typeof BildirimlerRouteWithChildren
   '/endeksler': typeof EndekslerRouteWithChildren
   '/karsilastir': typeof KarsilastirRoute
   '/profil': typeof ProfilRouteWithChildren
@@ -313,6 +338,7 @@ export interface FileRoutesById {
   '/api/checkout-dodo': typeof ApiCheckoutDodoRoute
   '/api/customer-portal': typeof ApiCustomerPortalRoute
   '/api/tickers': typeof ApiTickersRoute
+  '/bildirimler/$disclosureId': typeof BildirimlerDisclosureIdRoute
   '/endeksler/$id': typeof EndekslerIdRouteWithChildren
   '/hisse/$ticker': typeof HisseTickerRouteWithChildren
   '/sektorler/$slug': typeof SektorlerSlugRouteWithChildren
@@ -329,6 +355,7 @@ export interface FileRoutesById {
   '/api/webhooks/dodo': typeof ApiWebhooksDodoRoute
   '/endeksler/$id/bilesenler': typeof EndekslerIdBilesenlerRoute
   '/endeksler/$id/teknik-analiz': typeof EndekslerIdTeknikAnalizRoute
+  '/hisse/$ticker/bildirimler': typeof HisseTickerBildirimlerRoute
   '/hisse/$ticker/sektor': typeof HisseTickerSektorRoute
   '/hisse/$ticker/tablolar': typeof HisseTickerTablolarRoute
   '/hisse/$ticker/teknik-analiz': typeof HisseTickerTeknikAnalizRoute
@@ -342,6 +369,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/bildirimler'
     | '/endeksler'
     | '/karsilastir'
     | '/profil'
@@ -353,6 +381,7 @@ export interface FileRouteTypes {
     | '/api/checkout-dodo'
     | '/api/customer-portal'
     | '/api/tickers'
+    | '/bildirimler/$disclosureId'
     | '/endeksler/$id'
     | '/hisse/$ticker'
     | '/sektorler/$slug'
@@ -369,6 +398,7 @@ export interface FileRouteTypes {
     | '/api/webhooks/dodo'
     | '/endeksler/$id/bilesenler'
     | '/endeksler/$id/teknik-analiz'
+    | '/hisse/$ticker/bildirimler'
     | '/hisse/$ticker/sektor'
     | '/hisse/$ticker/tablolar'
     | '/hisse/$ticker/teknik-analiz'
@@ -380,6 +410,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/bildirimler'
     | '/karsilastir'
     | '/sektorler'
     | '/siralamalar'
@@ -389,6 +420,7 @@ export interface FileRouteTypes {
     | '/api/checkout-dodo'
     | '/api/customer-portal'
     | '/api/tickers'
+    | '/bildirimler/$disclosureId'
     | '/sektorler/$slug'
     | '/endeksler'
     | '/profil'
@@ -403,6 +435,7 @@ export interface FileRouteTypes {
     | '/api/webhooks/dodo'
     | '/endeksler/$id/bilesenler'
     | '/endeksler/$id/teknik-analiz'
+    | '/hisse/$ticker/bildirimler'
     | '/hisse/$ticker/sektor'
     | '/hisse/$ticker/tablolar'
     | '/hisse/$ticker/teknik-analiz'
@@ -414,6 +447,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/bildirimler'
     | '/endeksler'
     | '/karsilastir'
     | '/profil'
@@ -425,6 +459,7 @@ export interface FileRouteTypes {
     | '/api/checkout-dodo'
     | '/api/customer-portal'
     | '/api/tickers'
+    | '/bildirimler/$disclosureId'
     | '/endeksler/$id'
     | '/hisse/$ticker'
     | '/sektorler/$slug'
@@ -441,6 +476,7 @@ export interface FileRouteTypes {
     | '/api/webhooks/dodo'
     | '/endeksler/$id/bilesenler'
     | '/endeksler/$id/teknik-analiz'
+    | '/hisse/$ticker/bildirimler'
     | '/hisse/$ticker/sektor'
     | '/hisse/$ticker/tablolar'
     | '/hisse/$ticker/teknik-analiz'
@@ -453,6 +489,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BildirimlerRoute: typeof BildirimlerRouteWithChildren
   EndekslerRoute: typeof EndekslerRouteWithChildren
   KarsilastirRoute: typeof KarsilastirRoute
   ProfilRoute: typeof ProfilRouteWithChildren
@@ -534,6 +571,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EndekslerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/bildirimler': {
+      id: '/bildirimler'
+      path: '/bildirimler'
+      fullPath: '/bildirimler'
+      preLoaderRoute: typeof BildirimlerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -575,6 +619,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/endeksler/$id'
       preLoaderRoute: typeof EndekslerIdRouteImport
       parentRoute: typeof EndekslerRoute
+    }
+    '/bildirimler/$disclosureId': {
+      id: '/bildirimler/$disclosureId'
+      path: '/$disclosureId'
+      fullPath: '/bildirimler/$disclosureId'
+      preLoaderRoute: typeof BildirimlerDisclosureIdRouteImport
+      parentRoute: typeof BildirimlerRoute
     }
     '/api/tickers': {
       id: '/api/tickers'
@@ -644,6 +695,13 @@ declare module '@tanstack/react-router' {
       path: '/sektor'
       fullPath: '/hisse/$ticker/sektor'
       preLoaderRoute: typeof HisseTickerSektorRouteImport
+      parentRoute: typeof HisseTickerRoute
+    }
+    '/hisse/$ticker/bildirimler': {
+      id: '/hisse/$ticker/bildirimler'
+      path: '/bildirimler'
+      fullPath: '/hisse/$ticker/bildirimler'
+      preLoaderRoute: typeof HisseTickerBildirimlerRouteImport
       parentRoute: typeof HisseTickerRoute
     }
     '/endeksler/$id/teknik-analiz': {
@@ -733,6 +791,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface BildirimlerRouteChildren {
+  BildirimlerDisclosureIdRoute: typeof BildirimlerDisclosureIdRoute
+}
+
+const BildirimlerRouteChildren: BildirimlerRouteChildren = {
+  BildirimlerDisclosureIdRoute: BildirimlerDisclosureIdRoute,
+}
+
+const BildirimlerRouteWithChildren = BildirimlerRoute._addFileChildren(
+  BildirimlerRouteChildren,
+)
+
 interface EndekslerIdRouteChildren {
   EndekslerIdBilesenlerRoute: typeof EndekslerIdBilesenlerRoute
   EndekslerIdTeknikAnalizRoute: typeof EndekslerIdTeknikAnalizRoute
@@ -799,6 +869,7 @@ const SektorlerRouteWithChildren = SektorlerRoute._addFileChildren(
 )
 
 interface HisseTickerRouteChildren {
+  HisseTickerBildirimlerRoute: typeof HisseTickerBildirimlerRoute
   HisseTickerSektorRoute: typeof HisseTickerSektorRoute
   HisseTickerTablolarRoute: typeof HisseTickerTablolarRoute
   HisseTickerTeknikAnalizRoute: typeof HisseTickerTeknikAnalizRoute
@@ -807,6 +878,7 @@ interface HisseTickerRouteChildren {
 }
 
 const HisseTickerRouteChildren: HisseTickerRouteChildren = {
+  HisseTickerBildirimlerRoute: HisseTickerBildirimlerRoute,
   HisseTickerSektorRoute: HisseTickerSektorRoute,
   HisseTickerTablolarRoute: HisseTickerTablolarRoute,
   HisseTickerTeknikAnalizRoute: HisseTickerTeknikAnalizRoute,
@@ -832,6 +904,7 @@ const ApiChatSessionsRouteWithChildren = ApiChatSessionsRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BildirimlerRoute: BildirimlerRouteWithChildren,
   EndekslerRoute: EndekslerRouteWithChildren,
   KarsilastirRoute: KarsilastirRoute,
   ProfilRoute: ProfilRouteWithChildren,

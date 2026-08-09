@@ -1,5 +1,5 @@
 import { Link, Outlet, createFileRoute, useLocation } from '@tanstack/react-router'
-import { Activity, ArrowDown, ArrowUp, BarChart3, ChevronDown, ChevronUp, Clock, Factory, FileText, Info, Star } from 'lucide-react'
+import { Activity, ArrowDown, ArrowUp, BarChart3, BellRing, ChevronDown, ChevronUp, Clock, Factory, FileText, Info, Star } from 'lucide-react'
 import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import companyNames from '../constants/companyNames.json'
@@ -21,6 +21,7 @@ const TABS = [
   { suffix: '/temel-analiz', label: 'Temel Analiz', icon: BarChart3 },
   { suffix: '/tablolar', label: 'Tablolar', icon: FileText },
   { suffix: '/sektor', label: 'Sektör', icon: Factory },
+  { suffix: '/bildirimler', label: 'Bildirimler', icon: BellRing },
 ]
 
 function CompanyLayout() {
