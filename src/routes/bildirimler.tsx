@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react'
 import { AlertCircle, ArrowUpRight, Bell, FileText, Search, Sparkles } from 'lucide-react'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
 import { KAPFeedSkeleton, NotificationCard, scoreVariant } from '../components/kap/NotificationCard'
-import { useKAPFeed, useTrackedSymbols } from '../lib/useKAPData'
+import { logKAPClick, useKAPFeed, useTrackedSymbols } from '../lib/useKAPData'
 
 export const Route = createFileRoute('/bildirimler')({
   component: BildirimlerPage,
@@ -182,6 +182,7 @@ function BildirimlerPage() {
                   n={n}
                   isImportant={(n.importance_score ?? 0) >= 7}
                   isTracked={(n.tickers ?? []).some(t => tracked.has(t.toUpperCase()))}
+                  onClickCard={() => logKAPClick(n.disclosure_index, 'feed_card')}
                 />
               ))}
             </div>

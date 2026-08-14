@@ -23,7 +23,7 @@ export function scoreVariant(score: number | null | undefined) {
   return { label: String(score), cls: 'bg-muted text-muted-foreground' }
 }
 
-export function NotificationCard({ n, isImportant, isTracked }: { n: KAPNotification; isImportant?: boolean; isTracked?: boolean }) {
+export function NotificationCard({ n, isImportant, isTracked, onClickCard }: { n: KAPNotification; isImportant?: boolean; isTracked?: boolean; onClickCard?: () => void }) {
   const analyze = useKAPAnalyze(n.disclosure_index)
   const { importance_score, summary_tr, subject, title, is_bist100, disclosure_class, publish_date } = n
   const { label, cls } = scoreVariant(importance_score)
@@ -33,6 +33,7 @@ export function NotificationCard({ n, isImportant, isTracked }: { n: KAPNotifica
     <Link
       to="/bildirimler/$disclosureId"
       params={{ disclosureId: n.disclosure_index }}
+      onClick={onClickCard}
       className={`group flex flex-col gap-3 rounded-2xl border bg-card p-4 transition-all duration-200 animate-in fade-in hover:shadow-md ${isTracked ? 'border-primary/40 hover:border-primary/70' : 'border-border/60 hover:border-primary/40'}`}
     >
       <div className="flex items-start justify-between gap-3">

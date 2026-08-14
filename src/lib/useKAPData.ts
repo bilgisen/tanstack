@@ -202,6 +202,33 @@ export function useTrackedSymbols(): Set<string> {
   }, [watchlists])
 }
 
+/** S13-3: anonim ziyaretçi kimliği (localStorage'da kalıcı, kripto rastgele). */
+export function getAnonId(): string {
+  try {
+    const KEY = 'hissepro_anon_id'
+    const existing = localStorage.getItem(KEY)
+    if (existing) return existing
+    const id = crypto.randomUUID()
+    localStorage.setItem(KEY, id)
+    return id
+  } catch {
+    return ''
+  }
+}
+
+/** S13-3: KAP tıklama/okunma logu — fire-and-forget, hatalar sessiz. */
+export function logKAPClick(disclosureIndex: string, source: 'feed_card' | 'detail' | 'daily_view' | 'daily_item') {
+  try {
+    void fetch(`${KAP_BASE}/api/clicks`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ disclosure_index: disclosureIndex, source, anon_id: getAnonId() }),
+    }).catch(() => {})
+  } catch {
+    /* log kaydı kritik değil */
+  }
+}
+
 export function useKAPCompany(ticker: string, days = 90) {
   return useQuery({
     queryKey: ['kap', 'company', ticker.toUpperCase(), days],

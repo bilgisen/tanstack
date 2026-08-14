@@ -1,8 +1,8 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AlertCircle, ArrowUpRight, CalendarDays, Newspaper, Sparkles, TrendingDown, TrendingUp } from 'lucide-react'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
-import {  trTodayISO, useDailySynthesis } from '../lib/useKAPData'
+import { logKAPClick, trTodayISO, useDailySynthesis } from '../lib/useKAPData'
 import type {DailySynthesisItem} from '../lib/useKAPData';
 
 export const Route = createFileRoute('/gunsonu')({
@@ -17,6 +17,10 @@ const YON_META: Record<DailySynthesisItem['yon'], { label: string; cls: string; 
 
 function GunSonuPage() {
   const [date, setDate] = useState(trTodayISO())
+
+  useEffect(() => {
+    logKAPClick('', 'daily_view')
+  }, [])
 
   const { data, isLoading, isError, refetch, isFetching } = useDailySynthesis(date)
   const formatted = date.split('-').reverse().join('.')
