@@ -35,7 +35,11 @@ function WatchlistPage() {
     addWatchlist, 
     deleteWatchlist, 
     addItem, 
-    removeItem 
+    removeItem,
+    serverMode,
+    serverLimits,
+    lastError,
+    clearError
   } = useWatchlistStore()
 
   const { setGlobalPrompt, openRightSidebar } = useUIStore()
@@ -139,6 +143,15 @@ function WatchlistPage() {
             <Star className="text-yellow-500 fill-yellow-500/10" size={24} /> Takip Listeleri
           </h1>
           <p className="text-sm text-muted-foreground">Kendi özel takip listelerinizi oluşturun, borsa ve endeks hareketlerini anlık izleyin.</p>
+          {serverMode && serverLimits && (
+            <p className="text-[11px] text-muted-foreground mt-1">
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider border border-primary/20">
+                Üyelik senkronu
+              </span>{" "}
+              {watchlists.length}/{serverLimits.maxLists} liste ·{" "}
+              {watchlists.reduce((n, w) => n + w.items.length, 0)}/{serverLimits.maxItems} varlık
+            </p>
+          )}
         </div>
 
         {/* AI Analyze Watchlist Button */}
@@ -152,6 +165,19 @@ function WatchlistPage() {
           </button>
         )}
       </div>
+
+      {/* Sync Error Banner */}
+      {lastError && (
+        <div className="flex items-center justify-between gap-3 bg-destructive/10 border border-destructive/30 text-destructive rounded-xl px-4 py-2.5 shrink-0 animate-in slide-in-from-top-4 duration-200">
+          <span className="text-xs font-semibold">{lastError}</span>
+          <button
+            onClick={clearError}
+            className="text-xs font-bold hover:underline cursor-pointer shrink-0"
+          >
+            Kapat
+          </button>
+        </div>
+      )}
 
       {/* Tabs and Navigation Row */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border/80 gap-3 pb-px shrink-0">

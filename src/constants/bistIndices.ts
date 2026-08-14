@@ -57,6 +57,34 @@ const bistIndices: Record<string, string> = {
 
 export default bistIndices
 
+export type IndexCategory = 'sektor' | 'gosterge' | 'bolgesel'
+
+export const INDEX_CATEGORIES: Record<IndexCategory, { label: string; codes: Array<string> }> = {
+  sektor: {
+    label: 'Sektör',
+    codes: [
+      'XBANK', 'XSGRT', 'XFINK', 'XGMYO', 'XHOLD', 'XGIDA', 'XKMYA', 'XMANA',
+      'XMESY', 'XTAST', 'XMADN', 'XELKT', 'XINSA', 'XTEKS', 'XKAGT', 'XTRZM',
+      'XULAS', 'XILTM', 'XUTEK', 'XBLSM', 'XSPOR', 'XTCRT', 'XYORT',
+    ],
+  },
+  gosterge: {
+    label: 'Gösterge',
+    codes: [
+      'XU100', 'XU030', 'XU050', 'XUTUM', 'XTUMY', 'XUSIN', 'XUMAL', 'XUHIZ',
+      'X100S', 'X030S', 'XYUZO', 'XYLDZ', 'XUSRD', 'XTMTU', 'XTM25', 'XKURY',
+      'XHARZ', 'XKOBI',
+    ],
+  },
+  bolgesel: {
+    label: 'Bölgesel',
+    codes: [
+      'XSADA', 'XBANA', 'XSANK', 'XSANT', 'XSBAL', 'XSBUR', 'XSDNZ', 'XSIST',
+      'XSIZM', 'XSKAY', 'XSKOC', 'XSKON', 'XSTKR',
+    ],
+  },
+}
+
 export function getIndexSlug(code: string): string {
   return code.toLowerCase()
 }

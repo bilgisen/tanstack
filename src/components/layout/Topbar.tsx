@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
+import { useWatchlistSync } from "../../hooks/useWatchlistSync";
 import { ResponsiveLogo } from "./ResponsiveLogo";
 import { MobileDrawer } from "./MobileDrawer";
 import { ProfileAvatar } from "./ProfileAvatar";
@@ -9,6 +10,7 @@ import { navigationItems } from "@/lib/navigationItems";
 
 export function Topbar() {
   const { user, login: handleLogin, logout } = useAuth();
+  useWatchlistSync();
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mounted, setMounted] = useState(false);

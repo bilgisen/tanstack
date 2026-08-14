@@ -1,5 +1,5 @@
 import { Link, Outlet, createFileRoute } from '@tanstack/react-router'
-import { Activity, ArrowDown, ArrowUp, ChevronDown, ChevronUp, Clock, Info, Users } from 'lucide-react'
+import { Activity, ArrowDown, ArrowUp, Bell, ChevronDown, ChevronUp, Clock, Info, Users } from 'lucide-react'
 import { useMemo } from 'react'
 import { Skeleton } from '../components/ui/skeleton'
 import { getIndexName } from '../constants/bistIndices'
@@ -14,6 +14,7 @@ const TABS = [
   { suffix: '', label: 'Genel Bakış', icon: Info },
   { suffix: '/teknik-analiz', label: 'Teknik Analiz', icon: Activity },
   { suffix: '/bilesenler', label: 'Bileşenler', icon: Users },
+  { suffix: '/bildirimler', label: 'Bildirimler', icon: Bell },
 ]
 
 const indexMetadataFallbacks: Record<string, { name: string; price: number; diffPercent: number }> = {

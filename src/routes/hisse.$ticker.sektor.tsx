@@ -1,8 +1,10 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { ArrowDown, ArrowUp, BarChart3, ChevronRight, Factory, Loader2, Minus, TrendingUp } from 'lucide-react'
-import { useCompProfile, useCompScore } from '../lib/useCompData'
+import { useCompProfile, useCompScore, useIndexRelative } from '../lib/useCompData'
 import { groupKeyToDisplayName, groupKeyToSlug, sectorNameToGroupKey } from '../constants/sectorGroups'
 import { HIGHER_IS_BETTER, RATIO_DEFS,  getRatioLabel } from '../constants/ratios'
+import { getIndexName, getIndexSlug } from '../constants/bistIndices'
+import type { IndexRelativeEntry } from '../lib/useCompData'
 import type {RatioCategory} from '../constants/ratios';
 
 export const Route = createFileRoute('/hisse/$ticker/sektor')({
@@ -56,16 +58,72 @@ function ComparisonRow({ label, companyVal, peerMedian, higherIsBetter }: { labe
   )
 }
 
+const INDEX_PERIODS = ['1M', 'YTD', '1Y'] as const
+const INDEX_PERIOD_LABELS: Record<string, string> = { '1M': '1A', YTD: 'Yılbaşı', '1Y': '1Y' }
+
+function fmtPctVal(val: number | null | undefined): string {
+  if (val == null) return '—'
+  return `${val >= 0 ? '+' : ''}${val.toFixed(1)}%`
+}
+
+function IndexComparisonCard({ entry }: { entry: IndexRelativeEntry }) {
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-3 pb-2 border-b border-border/30">
+        <TrendingUp size={14} className="text-primary" />
+        <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Endeks Kıyası</h3>
+        <Link
+          to="/endeksler/$id"
+          params={{ id: getIndexSlug(entry.code) }}
+          className="ml-auto inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+        >
+          <span className="font-mono">{entry.code}</span>
+          <span className="text-muted-foreground font-normal">{getIndexName(entry.code) || entry.name}</span>
+        </Link>
+      </div>
+      <div className="grid grid-cols-4 gap-2 text-[10px] font-medium uppercase tracking-wider text-muted-foreground pb-1.5 px-1">
+        <span>Dönem</span>
+        <span className="text-right">Şirket</span>
+        <span className="text-right">Endeks</span>
+        <span className="text-right">Fark</span>
+      </div>
+      {INDEX_PERIODS.map(p => {
+        const r = entry.returns[p]
+        const rel = r?.relative ?? null
+        const relColor = rel == null ? 'text-muted-foreground' : rel >= 0 ? 'text-emerald-500' : 'text-red-500'
+        return (
+          <div key={p} className="flex items-center justify-between py-2 px-1 border-b border-border/10 last:border-0">
+            <span className="text-xs text-muted-foreground w-10">{INDEX_PERIOD_LABELS[p]}</span>
+            <div className="flex items-center gap-3 text-xs font-mono flex-1">
+              <span className="text-foreground text-right flex-1">{fmtPctVal(r?.company ?? null)}</span>
+              <span className="text-muted-foreground text-right flex-1">{fmtPctVal(r?.index ?? null)}</span>
+              <span className={`font-bold text-right flex-1 ${relColor}`}>{fmtPctVal(rel)}</span>
+            </div>
+          </div>
+        )
+      })}
+      {entry.returns_method === 'component_median' && (
+        <p className="text-[10px] text-muted-foreground mt-2">
+          Endeks getirisi, bileşen şirket getirilerinin medyanından yaklaşık olarak hesaplanır.
+        </p>
+      )}
+    </div>
+  )
+}
+
 function CompanySektorPage() {
   const { ticker } = Route.useParams()
   const tickerUpper = ticker.toUpperCase()
   const { data: scoreData, isLoading: scoreLoading } = useCompScore(tickerUpper)
   const { data: profileData, isLoading: profileLoading } = useCompProfile(tickerUpper)
+  const { data: indexRelative } = useIndexRelative(tickerUpper)
 
   const loading = scoreLoading || profileLoading
   const sectorName = scoreData?.sector || profileData?.sector || ''
   const groupKey = sectorNameToGroupKey(sectorName)
   const groupSlug = groupKey ? groupKeyToSlug(groupKey) : null
+
+  const indexEntries = indexRelative?.index_codes || []
 
   if (loading) {
     return (
@@ -145,8 +203,19 @@ function CompanySektorPage() {
             <div className="text-center">
               <div className="text-lg font-black text-foreground">{bench.n_peers != null ? String(bench.n_peers) : '—'}</div>
               <div className="text-[10px] text-muted-foreground font-medium uppercase">Emsal Şirket</div>
+              {bench.source !== 'sector' || ((bench.n_peers as number | undefined) ?? 0) < 5 ? (
+                <div className="mt-1 inline-flex rounded bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-amber-600">
+                  Sınırlı set
+                </div>
+              ) : null}
             </div>
           </div>
+        </div>
+      )}
+
+      {indexEntries.length > 0 && (
+        <div>
+          <IndexComparisonCard entry={indexEntries[0]} />
         </div>
       )}
 

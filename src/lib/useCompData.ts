@@ -186,7 +186,7 @@ export interface CeoReportResponse {
   unit?: string
 }
 
-async function fetchComp<T = unknown>(endpoint: string): Promise<T | null> {
+export async function fetchComp<T = unknown>(endpoint: string): Promise<T | null> {
   const res = await fetch(`${HONO_API}/api/v1/comp${endpoint}`)
   if (!res.ok) {
     if (res.status === 404) return null
@@ -386,6 +386,7 @@ export type SectorGroupDetail = {
   sector?: string
   group?: string
   company_count: number
+  index_codes?: Array<string>
   benchmarks: Record<string, { median_ew: number; p25: number; p75: number; n_peers: number; reliability: string }>
   sector_score: { equal_weight: number | null; market_cap_weighted: number | null }
   leaderboard: Array<{
@@ -403,7 +404,7 @@ export type SectorGroupDetail = {
 }
 
 export type SectorGroupsResponse = {
-  sectors: Array<{ sector_main: string; cnt: number; consolidated: string | null; consolidated_name: string | null }>
+  sectors: Array<{ sector_main: string; cnt: number; consolidated: string | null; consolidated_name: string | null; index_codes?: Array<string> }>
   groups: Array<{ key: string; name: string; count: number }>
 }
 
@@ -517,4 +518,49 @@ export function useCompFundamentals(ticker: string) {
     gcTime: 86_400_000,
     enabled: !!ticker,
   })
+}
+
+// ── Index Relative Returns (sektör endeksi getiri kıyası) ──
+
+export interface IndexRelativeReturn {
+  company: number | null
+  index: number | null
+  relative: number | null
+}
+
+export interface IndexRelativeEntry {
+  code: string
+  name: string
+  component_count: number
+  returns_method: 'bist' | 'history' | 'component_median' | null
+  returns: {
+    '1M': IndexRelativeReturn
+    YTD: IndexRelativeReturn
+    '1Y': IndexRelativeReturn
+  }
+}
+
+export interface IndexRelativeResponse {
+  ticker: string
+  sector: string | null
+  index_codes: Array<IndexRelativeEntry>
+  periods: Array<'1M' | 'YTD' | '1Y'>
+}
+
+export function useIndexRelative(ticker: string) {
+  return useQuery<IndexRelativeResponse | null>({
+    queryKey: ['comp', 'index-relative', ticker],
+    queryFn: () => fetchComp<IndexRelativeResponse>(`/companies/${ticker}/index-relative`),
+    staleTime: 3_600_000,
+    gcTime: 86_400_000,
+    enabled: !!ticker,
+  })
+}
+
+export interface IndexReturnsResponse {
+  code: string
+  name: string
+  component_count: number
+  returns: { '1M': number | null; YTD: number | null; '1Y': number | null } | null
+  returns_method: 'bist' | 'history' | 'component_median' | null
 }

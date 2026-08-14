@@ -101,9 +101,18 @@ export const SECTOR_CONSOLIDATION: Record<string, string | null> = {
   Medya: 'Turizm_Medya_Eglence',
   'Eğlence Hizmetleri': 'Turizm_Medya_Eglence',
   Holdingler: 'Holdingler',
-  Madencilik: 'Holdingler',
+  Madencilik: 'Sanayi_Metal_Kimya',
   Diğer: null,
   Spor: null,
+}
+
+// Yalnızca tek bir İY sektörü içeren gruplar. Bu gruplarda ara sayfa yerine
+// grup URL'i (örn. /sektorler/gyo) doğrudan sektör detayını gösterir.
+export const GROUP_TO_SINGLE_SECTOR: Record<string, string> = {
+  Sigortacilik: 'Sigorta',
+  GYO: 'GYO',
+  Saglik_Ilac: 'Sağlık ve İlaç',
+  Holdingler: 'Holdingler',
 }
 
 export function groupKeyToSlug(key: string): string {
@@ -128,6 +137,10 @@ export function sectorNameToSlug(name: string): string {
     .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
+}
+
+export function getSectorNameFromSlug(slug: string): string {
+  return slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ').replace(/\s+/g, ' ')
 }
 
 export function sectorNameToGroupKey(name: string): string | null {
@@ -155,4 +168,54 @@ for (const name of Object.keys(SECTOR_CONSOLIDATION)) {
 
 export function slugToSectorName(slug: string): string | undefined {
   return SLUG_TO_SECTOR_NAME[slug]
+}
+
+// ─── Endeks donut (BIST sektör dağılımı) → İY sektörü köprüsü ───────────────
+// BIST `graphic.php` sector_distribution nameTr kategorileri İY sektörleriyle
+// birebir örtüşmez; her BIST kategorisi en temsilci İY sektörüne eşlenir.
+// Tüm 54 endeks tarandı (2026-08): 33 benzersiz BIST adı. Eşlenmeyen adlar
+// ("diğer" dahil) tıklanınca /sektorler ana sayfasına yönlendirilir.
+const BIST_DONUT_TO_SECTOR: Record<string, string> = {
+  BANKALAR: 'Bankacılık',
+  'ARACI KURUMLAR': 'Aracı Kurumlar',
+  'HOLDINGLER VE YATIRIM SIRKETLERI': 'Holdingler',
+  'KIMYA ILAC PETROL LASTIK VE PLASTIK URUNLER': 'Kimyasal Ürün',
+  'METAL ESYA MAKINE ELEKTRIKLI CIHAZLAR VE ULASIM ARACLARI': 'Endüstriyel Makine -Teçhizat Üretim',
+  'PERAKENDE TICARET': 'Perakande - Ticaret',
+  'TOPTAN TICARET': 'Perakande - Ticaret',
+  SAVUNMA: 'Savunma',
+  'ULASTIRMA VE DEPOLAMA': 'Ulaştırma-Lojistik',
+  'ANA METAL SANAYI': 'Demir-Çelik Temel',
+  BILISIM: 'Teknoloji',
+  'GIDA ICECEK VE TUTUN': 'Gıda',
+  'YIYECEK VE ICECEK HIZMETLERI': 'Gıda',
+  'HAM PETROL VE DOGALGAZ CIKARTILMASI': 'Petrol',
+  'ELEKTRIK GAZ VE BUHAR': 'Elektrik Üretim',
+  'FINANSAL KIRALAMA VE FAKTORING SIRKETLERI': 'Fin.Kiralama ve Faktoring',
+  'GAYRI MENKUL FAALIYETLERI': 'GYO',
+  'GAYRIMENKUL YATIRIM ORTAKLIKLARI': 'GYO',
+  'INSAAT VE BAYINDIRLIK ISLERI': 'İnşaat- Taahhüt',
+  'KAGIT VE KAGIT URUNLERI BASIM': 'Kağıt Ürünleri',
+  'KOMUR VE LINYIT MADENCILIGI': 'Madencilik',
+  'METAL CEVHERI MADENCILIGI': 'Madencilik',
+  'MENKUL KIYMET YATIRIM ORTAKLIKLARI': 'Yatırım Ortaklıkları',
+  'ORMAN URUNLERI VE MOBILYA': 'Mobilya',
+  'SEYAHAT ACENTESI TUR OPERATORU VE DIGER REZERVASYON HIZMETLERI ILE ILGILI FAALIYETLER': 'Turizm',
+  KONAKLAMA: 'Turizm',
+  'SIGORTA SIRKETLERI': 'Sigorta',
+  'SPOR FAALIYETLERI EGLENCE VE OYUN FAALIYETLERI': 'Spor',
+  'TAS VE TOPRAGA DAYALI': 'Çimento',
+  'TEKSTIL GIYIM ESYASI VE DERI': 'Tekstil Entegre',
+  TELEKOMUNIKASYON: 'İletişim',
+}
+
+export function bistDonutToSectorName(name: string): string | undefined {
+  if (!name) return undefined
+  const norm = name.toLocaleUpperCase('tr-TR').trim()
+  return BIST_DONUT_TO_SECTOR[norm]
+}
+
+export function sectorNameToGroupSlug(name: string): string | undefined {
+  const key = sectorNameToGroupKey(name)
+  return key ? groupKeyToSlug(key) : undefined
 }

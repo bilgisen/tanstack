@@ -1,9 +1,11 @@
 import { Link, Outlet, createFileRoute, useMatches, useNavigate } from '@tanstack/react-router'
-import { Building2, ChevronRight, Loader2 } from 'lucide-react'
+import { Building2, ChevronRight, Loader2, TrendingUp } from 'lucide-react'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
 import { useSectorGroups } from '../lib/useCompData'
-import { groupKeyToDisplayName, sectorNameToSlug, slugToGroupKey } from '../constants/sectorGroups'
+import { GROUP_TO_SINGLE_SECTOR, groupKeyToDisplayName, sectorNameToSlug, slugToGroupKey } from '../constants/sectorGroups'
 import { SectorDonutChart } from '../components/sectors/SectorDonutChart'
+import { SektorDetailContent } from '../components/sectors/SektorDetailContent'
+import { SektorTabs } from '../components/sectors/SektorTabs'
 
 export const Route = createFileRoute('/sektorler/$slug')({
   component: SektorGroupLayout,
@@ -11,7 +13,7 @@ export const Route = createFileRoute('/sektorler/$slug')({
 
 function SektorGroupLayout() {
   const matches = useMatches()
-  const hasSectorChild = matches.some(m => m.routeId === '/sektorler/$slug/$sectorSlug')
+  const hasSectorChild = matches.some(m => m.routeId === '/sektorler/$slug/$sectorSlug' || m.routeId === '/sektorler/$slug/bildirimler')
   if (hasSectorChild) return <Outlet />
   return <SektorGroupPage />
 }
@@ -30,7 +32,9 @@ function SektorGroupPage() {
 
   const totalCompanies = sectorList.reduce((sum, s) => sum + (s.cnt || 0), 0)
 
-  const chatContext = `sector-group:${slug}`
+  const singleSectorName = GROUP_TO_SINGLE_SECTOR[groupKey]
+
+  const chatContext = singleSectorName ? `sector:${singleSectorName}` : `sector-group:${slug}`
 
   const handleItemClick = (item: { name: string }) => {
     const found = sectorList.find(s => s.sector_main === item.name)
@@ -45,6 +49,34 @@ function SektorGroupPage() {
         <div className="flex h-[360px] items-center justify-center text-muted-foreground font-medium text-xs gap-2 animate-pulse">
           <Loader2 className="animate-spin text-primary" size={16} />
           <span>Veriler yükleniyor, lütfen bekleyin...</span>
+        </div>
+      </PublicPageLayout>
+    )
+  }
+
+  if (singleSectorName) {
+    return (
+      <PublicPageLayout context={chatContext} placeholder={`${singleSectorName} sektörü hakkında bir soru sorun...`}>
+        <div className="space-y-4 pb-8 animate-in fade-in duration-400">
+          {/* Breadcrumb */}
+          <nav className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Link to="/" className="transition-colors hover:text-foreground">Ana Sayfa</Link>
+            <ChevronRight size={12} className="shrink-0 text-muted-foreground/50" />
+            <Link to="/sektorler" className="transition-colors hover:text-foreground">Sektörler</Link>
+            <ChevronRight size={12} className="shrink-0 text-muted-foreground/50" />
+            <span className="font-medium text-foreground">{displayName}</span>
+          </nav>
+
+          <div className="flex items-center gap-2">
+            <TrendingUp size={20} className="text-primary shrink-0" />
+            <h1 className="text-base md:text-2xl font-bold text-foreground tracking-tight leading-none">{displayName}</h1>
+          </div>
+
+          {/* Tabs */}
+          <SektorTabs basePath={`/sektorler/${slug}`} />
+
+          {/* Sektör detayı (tek sektörlü grup) */}
+          <SektorDetailContent sectorName={singleSectorName} />
         </div>
       </PublicPageLayout>
     )
