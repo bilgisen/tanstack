@@ -1,4 +1,6 @@
+import { useMemo } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useWatchlistStore } from '../store/watchlist'
 import { API } from './apiConfig'
 
 export type KAPAnalysis = {
@@ -42,6 +44,8 @@ export type KAPNotification = {
   analysis?: KAPAnalysis | null
   importance_score?: number | null
   summary_tr?: string | null
+  /** S12: feed yanıtıyla gelen ticker listesi (takip vurgusu için) */
+  tickers?: Array<string>
 }
 
 export type KAPFeedResponse = {
@@ -94,6 +98,7 @@ export type KAPFilter = {
   page?: number
   limit?: number
   enabled?: boolean
+  stocks?: Array<string>
 }
 
 const KAP_BASE = API.hono
@@ -117,6 +122,7 @@ async function fetchKAPFeed(filters: KAPFilter): Promise<KAPFeedResponse> {
       index: filters.index,
       sector: filters.sector,
       bist100: filters.bist100 ? '1' : undefined,
+      stocks: filters.stocks && filters.stocks.length > 0 ? filters.stocks.join(',') : undefined,
       page: filters.page || 1,
       limit: filters.limit || 25,
     })}`
@@ -170,8 +176,9 @@ function KAPStaleTime(): number {
 }
 
 export function useKAPFeed(filters: KAPFilter) {
+  const stocksKey = (filters.stocks ?? []).slice().sort().join(',')
   return useQuery({
-    queryKey: ['kap', 'feed', filters.importance, filters.category, filters.stock, filters.index || '', filters.sector || '', filters.bist100 ? 1 : 0, filters.page || 1, filters.limit || 25],
+    queryKey: ['kap', 'feed', filters.importance, filters.category, filters.stock, filters.index || '', filters.sector || '', filters.bist100 ? 1 : 0, stocksKey, filters.page || 1, filters.limit || 25],
     queryFn: () => fetchKAPFeed(filters),
     staleTime: KAPStaleTime(),
     gcTime: 3_600_000,
@@ -179,6 +186,20 @@ export function useKAPFeed(filters: KAPFilter) {
     refetchOnReconnect: false,
     enabled: filters.enabled !== false,
   })
+}
+
+/** S12-1: tüm takip listelerindeki hisse sembollerinin Set'i (endeksler hariç). */
+export function useTrackedSymbols(): Set<string> {
+  const watchlists = useWatchlistStore((s) => s.watchlists)
+  return useMemo(() => {
+    const set = new Set<string>()
+    for (const w of watchlists) {
+      for (const it of w.items) {
+        if (it.type === 'stock') set.add(it.symbol.toUpperCase())
+      }
+    }
+    return set
+  }, [watchlists])
 }
 
 export function useKAPCompany(ticker: string, days = 90) {

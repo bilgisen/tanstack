@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react'
 import { AlertCircle, ArrowUpRight, Bell, FileText, Search, Sparkles } from 'lucide-react'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
 import { KAPFeedSkeleton, NotificationCard, scoreVariant } from '../components/kap/NotificationCard'
-import { useKAPFeed } from '../lib/useKAPData'
+import { useKAPFeed, useTrackedSymbols } from '../lib/useKAPData'
 
 export const Route = createFileRoute('/bildirimler')({
   component: BildirimlerPage,
@@ -21,18 +21,22 @@ function BildirimlerPage() {
   const matches = useMatches()
   const hasChildRoute = matches.some(m => m.routeId === '/bildirimler/$disclosureId')
 
-  const [bist100Only, setBist100Only] = useState(false)
+  const [scope, setScope] = useState<'all' | 'bist100' | 'tracked'>('all')
   const [category, setCategory] = useState('Tümü')
   const [importance, setImportance] = useState('')
   const [page, setPage] = useState(1)
   const [stock, setStock] = useState('')
 
+  const tracked = useTrackedSymbols()
+  const trackedStocks = scope === 'tracked' && tracked.size > 0 ? [...tracked] : undefined
+
   const cat = category === 'Tümü' ? undefined : category
   const { data, isLoading, isError, isFetching } = useKAPFeed({
-    bist100: bist100Only || undefined,
+    bist100: scope === 'bist100' || undefined,
     category: cat,
     importance: importance || undefined,
     stock: stock.trim() || undefined,
+    stocks: trackedStocks,
     page,
     limit: 25,
     enabled: !hasChildRoute,
@@ -101,16 +105,24 @@ function BildirimlerPage() {
         <div className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card p-3">
           <div className="flex flex-wrap items-center gap-2">
             <button
-              onClick={() => { setBist100Only(false); setPage(1) }}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors ${!bist100Only ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:text-foreground'}`}
+              onClick={() => { setScope('all'); setPage(1) }}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors ${scope === 'all' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:text-foreground'}`}
             >
               Tümü
             </button>
             <button
-              onClick={() => { setBist100Only(true); setPage(1) }}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors ${bist100Only ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:text-foreground'}`}
+              onClick={() => { setScope('bist100'); setPage(1) }}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors ${scope === 'bist100' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:text-foreground'}`}
             >
               BIST100
+            </button>
+            <button
+              onClick={() => { setScope('tracked'); setPage(1) }}
+              disabled={tracked.size === 0}
+              title={tracked.size === 0 ? 'Takip listenizde hisse yok — takip listesi sayfasından ekleyin' : `${tracked.size} hisse takipte`}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${scope === 'tracked' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:text-foreground'}`}
+            >
+              Takipte {tracked.size > 0 && <span className="ml-1 opacity-70">({tracked.size})</span>}
             </button>
             <select
               value={importance}
@@ -165,7 +177,12 @@ function BildirimlerPage() {
           <>
             <div className="grid gap-3">
               {notifications.map(n => (
-                <NotificationCard key={n.disclosure_index} n={n} isImportant={(n.importance_score ?? 0) >= 7} />
+                <NotificationCard
+                  key={n.disclosure_index}
+                  n={n}
+                  isImportant={(n.importance_score ?? 0) >= 7}
+                  isTracked={(n.tickers ?? []).some(t => tracked.has(t.toUpperCase()))}
+                />
               ))}
             </div>
 
