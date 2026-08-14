@@ -73,6 +73,15 @@ export type KAPDetailResponse = KAPNotification & {
   pdf_link: string
   tickers: Array<string>
   chatbot_context?: string | null
+  audit?: Record<string, string | boolean> | null
+  attachments?: Array<{ obj_id: string; file_name: string | null; file_extension: string | null }>
+  has_body?: boolean
+}
+
+export type KAPDetailBodyResponse = {
+  disclosure_body?: string | null
+  audit?: Record<string, string | boolean> | null
+  attachments?: Array<{ obj_id: string; file_name: string | null; file_extension: string | null }>
 }
 
 export type KAPFilter = {
@@ -80,6 +89,8 @@ export type KAPFilter = {
   category?: string
   stock?: string
   bist100?: boolean
+  index?: string
+  sector?: string
   page?: number
   limit?: number
   enabled?: boolean
@@ -103,6 +114,8 @@ async function fetchKAPFeed(filters: KAPFilter): Promise<KAPFeedResponse> {
       importance: filters.importance,
       category: filters.category,
       stock: filters.stock,
+      index: filters.index,
+      sector: filters.sector,
       bist100: filters.bist100 ? '1' : undefined,
       page: filters.page || 1,
       limit: filters.limit || 25,
@@ -123,6 +136,12 @@ async function fetchKAPDetail(disclosureId: string): Promise<KAPDetailResponse> 
   const res = await fetch(`${KAP_BASE}/api/notifications/detail/${encodeURIComponent(disclosureId)}`)
   if (!res.ok) throw new Error(`KAP detay hatası: ${res.status}`)
   return (await res.json()) as KAPDetailResponse
+}
+
+async function fetchKAPDetailBody(disclosureId: string): Promise<KAPDetailBodyResponse> {
+  const res = await fetch(`${KAP_BASE}/api/notifications/detail/${encodeURIComponent(disclosureId)}/body`)
+  if (!res.ok) throw new Error(`KAP metin hatası: ${res.status}`)
+  return (await res.json()) as KAPDetailBodyResponse
 }
 
 async function requestKAPAnalysis(disclosureId: string): Promise<{ ok: boolean; message?: string }> {
@@ -152,7 +171,7 @@ function KAPStaleTime(): number {
 
 export function useKAPFeed(filters: KAPFilter) {
   return useQuery({
-    queryKey: ['kap', 'feed', filters.importance, filters.category, filters.stock, filters.bist100 ? 1 : 0, filters.page || 1, filters.limit || 25],
+    queryKey: ['kap', 'feed', filters.importance, filters.category, filters.stock, filters.index || '', filters.sector || '', filters.bist100 ? 1 : 0, filters.page || 1, filters.limit || 25],
     queryFn: () => fetchKAPFeed(filters),
     staleTime: KAPStaleTime(),
     gcTime: 3_600_000,
@@ -184,6 +203,18 @@ export function useKAPDetail(disclosureId: string) {
   })
 }
 
+/** Detay sayfasında on-demand: ağır bildirim metni + denetim + ekler (S5: görüntülenenler). */
+export function useKAPDetailBody(disclosureId: string | null) {
+  return useQuery({
+    queryKey: ['kap', 'detail', 'body', disclosureId],
+    queryFn: () => fetchKAPDetailBody(disclosureId as string),
+    staleTime: 3_600_000,
+    gcTime: 3_600_000,
+    enabled: !!disclosureId,
+    refetchOnReconnect: false,
+  })
+}
+
 export function useKAPAnalyze(disclosureId: string) {
   const queryClient = useQueryClient()
   return useMutation({
@@ -192,5 +223,51 @@ export function useKAPAnalyze(disclosureId: string) {
       queryClient.invalidateQueries({ queryKey: ['kap', 'detail', disclosureId] })
       queryClient.invalidateQueries({ queryKey: ['kap', 'feed'] })
     },
+  })
+}
+
+// ── Gün Sonu Sentez (S11-5) ──────────────────────────────────────────────
+
+export type DailySynthesisItem = {
+  ticker: string
+  neOldu: string
+  nedenOnemli: string
+  yon: 'olumlu' | 'olumsuz' | 'notr'
+}
+
+export type DailySynthesis = {
+  ok: boolean
+  date: string
+  headline: string
+  items: Array<DailySynthesisItem>
+  overlooked: Array<string>
+}
+
+/** TR günü (UTC+3) — "YYYY-MM-DD" */
+export function trTodayISO(): string {
+  return new Date(Date.now() + 3 * 3600 * 1000).toISOString().slice(0, 10)
+}
+
+async function fetchDailySynthesis(date: string): Promise<DailySynthesis> {
+  const res = await fetch(`${KAP_BASE}/api/daily?date=${encodeURIComponent(date)}`)
+  if (!res.ok) {
+    let message = `Gün sonu sentez hatası (${res.status})`
+    try {
+      const j = (await res.json()) as { error?: string }
+      if (j?.error) message = j.error
+    } catch { /* ignore */ }
+    throw new Error(message)
+  }
+  return (await res.json()) as DailySynthesis
+}
+
+export function useDailySynthesis(date: string) {
+  return useQuery({
+    queryKey: ['kap', 'daily', date],
+    queryFn: () => fetchDailySynthesis(date),
+    staleTime: 10 * 60_000,
+    gcTime: 24 * 3_600_000,
+    enabled: !!date,
+    refetchOnReconnect: false,
   })
 }
