@@ -1,4 +1,5 @@
 import { getSessionToken } from '../store/chat';
+import { API } from './apiConfig';
 
 export interface ServerWatchlistItem {
   symbol: string;
@@ -24,7 +25,7 @@ export interface WatchlistApiError extends Error {
   limits?: WatchlistLimits | null;
 }
 
-const API_BASE = '/api/watchlists';
+const API_BASE = `${API.hono}/api/watchlists`;
 
 async function call<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = await getSessionToken();

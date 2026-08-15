@@ -1,4 +1,5 @@
 import { getSessionToken } from '../store/chat';
+import { API } from './apiConfig';
 
 export interface UserNotification {
   id: number;
@@ -19,7 +20,7 @@ export interface NotificationsResponse {
   offset: number;
 }
 
-const API_BASE = '/api/user/notifications';
+const API_BASE = `${API.hono}/api/user/notifications`;
 
 async function call<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = await getSessionToken();
