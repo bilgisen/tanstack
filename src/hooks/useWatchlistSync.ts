@@ -21,6 +21,12 @@ export function useWatchlistSync() {
     if (lastUserId.current === userId) return;
     lastUserId.current = userId;
 
+    // Hydration: SSR/client ilk render'ı boş başladığı için localStorage'ı
+    // mount sonrası yükle (sunucu moduna geçmeden önce).
+    if (!userId) {
+      useWatchlistStore.getState().hydrateFromLocal();
+    }
+
     if (userId) {
       // Login: merge + pull
       (async () => {

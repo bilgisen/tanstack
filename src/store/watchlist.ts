@@ -26,6 +26,9 @@ interface WatchlistState {
   syncFromServer: (lists: Array<ServerWatchlist>, limits: WatchlistLimits) => void;
   refreshFromServer: () => Promise<void>;
   exitServerMode: () => void;
+  // Hydration: localStorage yüklemesi mount sonrası (SSR ile mismatch önlemi)
+  hydrated: boolean;
+  hydrateFromLocal: () => void;
   // CRUD
   addWatchlist: (name: string) => string;
   deleteWatchlist: (id: string) => void;
@@ -86,13 +89,26 @@ const toLocalWatchlists = (lists: Array<ServerWatchlist>): Array<Watchlist> =>
 const toItemType = (t: 'stock' | 'index'): 'stock' | 'index' => (t === 'index' ? 'index' : 'stock');
 
 export const useWatchlistStore = create<WatchlistState>((set, get) => ({
-  watchlists: loadWatchlistsFromStorage(),
+  // Hydration uyumu: SSR ve client ilk render'da aynı (boş) başlar;
+  // localStorage yüklemesi mount sonrası hydrateFromLocal ile yapılır.
+  watchlists: [],
   activeWatchlistId: "default-list",
   serverMode: false,
   serverLimits: null,
   lastError: null,
+  hydrated: false,
 
   clearError: () => set({ lastError: null }),
+
+  hydrateFromLocal: () => {
+    if (get().serverMode || get().hydrated || typeof window === 'undefined') return;
+    const local = loadWatchlistsFromStorage();
+    set({
+      watchlists: local,
+      activeWatchlistId: local.find(w => w.isDefault)?.id ?? local[0]?.id ?? null,
+      hydrated: true,
+    });
+  },
 
   syncFromServer: (lists, limits) => {
     const local = toLocalWatchlists(lists);
