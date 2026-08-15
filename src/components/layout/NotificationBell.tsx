@@ -71,13 +71,14 @@ export function NotificationBell() {
     }
   }, [user?.id, fetchAll, refreshUnread]);
 
-  // Poll (oturum açıkken)
+  // Poll (oturum açıkken) — user?.id bazlı: user objesi referansı değişse bile
+  // interval kurulumu tetiklenmesin (istek patlaması koruması)
   useEffect(() => {
-    if (!user) return;
+    if (!user?.id) return;
     void refreshUnread();
     const t = setInterval(() => void refreshUnread(), POLL_MS);
     return () => clearInterval(t);
-  }, [user, refreshUnread]);
+  }, [user?.id, refreshUnread]);
 
   // Dış tıklama ile kapat
   useEffect(() => {
@@ -91,8 +92,8 @@ export function NotificationBell() {
 
   // Dropdown açılınca listeyi tazele
   useEffect(() => {
-    if (open && user) void fetchAll();
-  }, [open, user, fetchAll]);
+    if (open && user?.id) void fetchAll();
+  }, [open, user?.id, fetchAll]);
 
   const unreadItems = items.filter(n => !n.read_at);
   const unreadIds = unreadItems.map(n => n.id);

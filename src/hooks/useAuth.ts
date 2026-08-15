@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { signIn, signOut, useSession } from '../lib/auth-client';
 
 export interface UserProfile {
@@ -77,8 +77,11 @@ export function useAuth() {
     }
   };
 
-  return {
-    user: data?.user ? {
+  // user objesi useMemo ile sabitlenir: her render'da yeni referans üretilirse
+  // [user, ...] bağımlı effect'ler her render'da tetiklenir (istek patlaması).
+  const user = useMemo(() => {
+    if (!data?.user) return null;
+    return {
       ...data.user,
       tier: credits?.tier || 'free',
       credits: credits,
@@ -86,7 +89,11 @@ export function useAuth() {
         avatar_url: data.user.image,
         full_name: data.user.name,
       }
-    } : null,
+    };
+  }, [data?.user, credits]);
+
+  return {
+    user,
     session: data?.session,
     loading: isPending || creditsLoading,
     login: handleLogin,

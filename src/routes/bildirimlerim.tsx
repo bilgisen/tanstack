@@ -64,8 +64,8 @@ function MyNotificationsPage() {
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
 
   useEffect(() => {
-    if (user) { void fetchAll(); void refreshUnread(); }
-  }, [user, fetchAll, refreshUnread]);
+    if (user?.id) { void fetchAll(); void refreshUnread(); }
+  }, [user?.id, fetchAll, refreshUnread]);
 
   const visible = filter === 'unread' ? items.filter(n => !n.read_at) : items;
 

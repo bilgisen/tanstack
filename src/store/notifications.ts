@@ -33,7 +33,8 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
   refreshUnread: async () => {
     try {
       const { unread } = await notificationsApi.unreadCount();
-      set({ unread });
+      // Aynı değerse set'i atla: zustand notify → re-render → effect döngüsü koruması
+      if (get().unread !== unread) set({ unread });
     } catch { /* sessiz — anonim/oturum yoksa yok say */ }
   },
 
