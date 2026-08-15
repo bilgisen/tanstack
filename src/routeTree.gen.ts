@@ -16,13 +16,16 @@ import { Route as SiralamalarRouteImport } from './routes/siralamalar'
 import { Route as SektorlerRouteImport } from './routes/sektorler'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as KarsilastirRouteImport } from './routes/karsilastir'
+import { Route as KapBildirimleriRouteImport } from './routes/kap-bildirimleri'
 import { Route as GunsonuRouteImport } from './routes/gunsonu'
 import { Route as EndekslerRouteImport } from './routes/endeksler'
+import { Route as BildirimlerimRouteImport } from './routes/bildirimlerim'
 import { Route as BildirimlerRouteImport } from './routes/bildirimler'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfilIndexRouteImport } from './routes/profil.index'
 import { Route as EndekslerIndexRouteImport } from './routes/endeksler.index'
 import { Route as SektorlerSlugRouteImport } from './routes/sektorler.$slug'
+import { Route as KapBildirimleriDisclosureIdRouteImport } from './routes/kap-bildirimleri.$disclosureId'
 import { Route as HisseTickerRouteImport } from './routes/hisse.$ticker'
 import { Route as EndekslerIdRouteImport } from './routes/endeksler.$id'
 import { Route as BildirimlerDisclosureIdRouteImport } from './routes/bildirimler.$disclosureId'
@@ -89,6 +92,11 @@ const KarsilastirRoute = KarsilastirRouteImport.update({
   path: '/karsilastir',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KapBildirimleriRoute = KapBildirimleriRouteImport.update({
+  id: '/kap-bildirimleri',
+  path: '/kap-bildirimleri',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GunsonuRoute = GunsonuRouteImport.update({
   id: '/gunsonu',
   path: '/gunsonu',
@@ -97,6 +105,11 @@ const GunsonuRoute = GunsonuRouteImport.update({
 const EndekslerRoute = EndekslerRouteImport.update({
   id: '/endeksler',
   path: '/endeksler',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BildirimlerimRoute = BildirimlerimRouteImport.update({
+  id: '/bildirimlerim',
+  path: '/bildirimlerim',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BildirimlerRoute = BildirimlerRouteImport.update({
@@ -124,6 +137,12 @@ const SektorlerSlugRoute = SektorlerSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => SektorlerRoute,
 } as any)
+const KapBildirimleriDisclosureIdRoute =
+  KapBildirimleriDisclosureIdRouteImport.update({
+    id: '/$disclosureId',
+    path: '/$disclosureId',
+    getParentRoute: () => KapBildirimleriRoute,
+  } as any)
 const HisseTickerRoute = HisseTickerRouteImport.update({
   id: '/hisse/$ticker',
   path: '/hisse/$ticker',
@@ -281,8 +300,10 @@ const ApiChatSessionsIdRoute = ApiChatSessionsIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/bildirimler': typeof BildirimlerRouteWithChildren
+  '/bildirimlerim': typeof BildirimlerimRoute
   '/endeksler': typeof EndekslerRouteWithChildren
   '/gunsonu': typeof GunsonuRoute
+  '/kap-bildirimleri': typeof KapBildirimleriRouteWithChildren
   '/karsilastir': typeof KarsilastirRoute
   '/profil': typeof ProfilRouteWithChildren
   '/sektorler': typeof SektorlerRouteWithChildren
@@ -296,6 +317,7 @@ export interface FileRoutesByFullPath {
   '/bildirimler/$disclosureId': typeof BildirimlerDisclosureIdRoute
   '/endeksler/$id': typeof EndekslerIdRouteWithChildren
   '/hisse/$ticker': typeof HisseTickerRouteWithChildren
+  '/kap-bildirimleri/$disclosureId': typeof KapBildirimleriDisclosureIdRoute
   '/sektorler/$slug': typeof SektorlerSlugRouteWithChildren
   '/endeksler/': typeof EndekslerIndexRoute
   '/profil/': typeof ProfilIndexRoute
@@ -327,7 +349,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/bildirimler': typeof BildirimlerRouteWithChildren
+  '/bildirimlerim': typeof BildirimlerimRoute
   '/gunsonu': typeof GunsonuRoute
+  '/kap-bildirimleri': typeof KapBildirimleriRouteWithChildren
   '/karsilastir': typeof KarsilastirRoute
   '/sektorler': typeof SektorlerRouteWithChildren
   '/siralamalar': typeof SiralamalarRoute
@@ -338,6 +362,7 @@ export interface FileRoutesByTo {
   '/api/customer-portal': typeof ApiCustomerPortalRoute
   '/api/tickers': typeof ApiTickersRoute
   '/bildirimler/$disclosureId': typeof BildirimlerDisclosureIdRoute
+  '/kap-bildirimleri/$disclosureId': typeof KapBildirimleriDisclosureIdRoute
   '/sektorler/$slug': typeof SektorlerSlugRouteWithChildren
   '/endeksler': typeof EndekslerIndexRoute
   '/profil': typeof ProfilIndexRoute
@@ -369,8 +394,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/bildirimler': typeof BildirimlerRouteWithChildren
+  '/bildirimlerim': typeof BildirimlerimRoute
   '/endeksler': typeof EndekslerRouteWithChildren
   '/gunsonu': typeof GunsonuRoute
+  '/kap-bildirimleri': typeof KapBildirimleriRouteWithChildren
   '/karsilastir': typeof KarsilastirRoute
   '/profil': typeof ProfilRouteWithChildren
   '/sektorler': typeof SektorlerRouteWithChildren
@@ -384,6 +411,7 @@ export interface FileRoutesById {
   '/bildirimler/$disclosureId': typeof BildirimlerDisclosureIdRoute
   '/endeksler/$id': typeof EndekslerIdRouteWithChildren
   '/hisse/$ticker': typeof HisseTickerRouteWithChildren
+  '/kap-bildirimleri/$disclosureId': typeof KapBildirimleriDisclosureIdRoute
   '/sektorler/$slug': typeof SektorlerSlugRouteWithChildren
   '/endeksler/': typeof EndekslerIndexRoute
   '/profil/': typeof ProfilIndexRoute
@@ -417,8 +445,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/bildirimler'
+    | '/bildirimlerim'
     | '/endeksler'
     | '/gunsonu'
+    | '/kap-bildirimleri'
     | '/karsilastir'
     | '/profil'
     | '/sektorler'
@@ -432,6 +462,7 @@ export interface FileRouteTypes {
     | '/bildirimler/$disclosureId'
     | '/endeksler/$id'
     | '/hisse/$ticker'
+    | '/kap-bildirimleri/$disclosureId'
     | '/sektorler/$slug'
     | '/endeksler/'
     | '/profil/'
@@ -463,7 +494,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/bildirimler'
+    | '/bildirimlerim'
     | '/gunsonu'
+    | '/kap-bildirimleri'
     | '/karsilastir'
     | '/sektorler'
     | '/siralamalar'
@@ -474,6 +507,7 @@ export interface FileRouteTypes {
     | '/api/customer-portal'
     | '/api/tickers'
     | '/bildirimler/$disclosureId'
+    | '/kap-bildirimleri/$disclosureId'
     | '/sektorler/$slug'
     | '/endeksler'
     | '/profil'
@@ -504,8 +538,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/bildirimler'
+    | '/bildirimlerim'
     | '/endeksler'
     | '/gunsonu'
+    | '/kap-bildirimleri'
     | '/karsilastir'
     | '/profil'
     | '/sektorler'
@@ -519,6 +555,7 @@ export interface FileRouteTypes {
     | '/bildirimler/$disclosureId'
     | '/endeksler/$id'
     | '/hisse/$ticker'
+    | '/kap-bildirimleri/$disclosureId'
     | '/sektorler/$slug'
     | '/endeksler/'
     | '/profil/'
@@ -551,8 +588,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BildirimlerRoute: typeof BildirimlerRouteWithChildren
+  BildirimlerimRoute: typeof BildirimlerimRoute
   EndekslerRoute: typeof EndekslerRouteWithChildren
   GunsonuRoute: typeof GunsonuRoute
+  KapBildirimleriRoute: typeof KapBildirimleriRouteWithChildren
   KarsilastirRoute: typeof KarsilastirRoute
   ProfilRoute: typeof ProfilRouteWithChildren
   SektorlerRoute: typeof SektorlerRouteWithChildren
@@ -626,6 +665,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KarsilastirRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/kap-bildirimleri': {
+      id: '/kap-bildirimleri'
+      path: '/kap-bildirimleri'
+      fullPath: '/kap-bildirimleri'
+      preLoaderRoute: typeof KapBildirimleriRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/gunsonu': {
       id: '/gunsonu'
       path: '/gunsonu'
@@ -638,6 +684,13 @@ declare module '@tanstack/react-router' {
       path: '/endeksler'
       fullPath: '/endeksler'
       preLoaderRoute: typeof EndekslerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bildirimlerim': {
+      id: '/bildirimlerim'
+      path: '/bildirimlerim'
+      fullPath: '/bildirimlerim'
+      preLoaderRoute: typeof BildirimlerimRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bildirimler': {
@@ -674,6 +727,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/sektorler/$slug'
       preLoaderRoute: typeof SektorlerSlugRouteImport
       parentRoute: typeof SektorlerRoute
+    }
+    '/kap-bildirimleri/$disclosureId': {
+      id: '/kap-bildirimleri/$disclosureId'
+      path: '/$disclosureId'
+      fullPath: '/kap-bildirimleri/$disclosureId'
+      preLoaderRoute: typeof KapBildirimleriDisclosureIdRouteImport
+      parentRoute: typeof KapBildirimleriRoute
     }
     '/hisse/$ticker': {
       id: '/hisse/$ticker'
@@ -932,6 +992,18 @@ const EndekslerRouteWithChildren = EndekslerRoute._addFileChildren(
   EndekslerRouteChildren,
 )
 
+interface KapBildirimleriRouteChildren {
+  KapBildirimleriDisclosureIdRoute: typeof KapBildirimleriDisclosureIdRoute
+}
+
+const KapBildirimleriRouteChildren: KapBildirimleriRouteChildren = {
+  KapBildirimleriDisclosureIdRoute: KapBildirimleriDisclosureIdRoute,
+}
+
+const KapBildirimleriRouteWithChildren = KapBildirimleriRoute._addFileChildren(
+  KapBildirimleriRouteChildren,
+)
+
 interface ProfilRouteChildren {
   ProfilIndexRoute: typeof ProfilIndexRoute
 }
@@ -1023,8 +1095,10 @@ const ApiChatSessionsRouteWithChildren = ApiChatSessionsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BildirimlerRoute: BildirimlerRouteWithChildren,
+  BildirimlerimRoute: BildirimlerimRoute,
   EndekslerRoute: EndekslerRouteWithChildren,
   GunsonuRoute: GunsonuRoute,
+  KapBildirimleriRoute: KapBildirimleriRouteWithChildren,
   KarsilastirRoute: KarsilastirRoute,
   ProfilRoute: ProfilRouteWithChildren,
   SektorlerRoute: SektorlerRouteWithChildren,

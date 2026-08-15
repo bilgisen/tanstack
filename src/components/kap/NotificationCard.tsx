@@ -31,7 +31,7 @@ export function NotificationCard({ n, isImportant, isTracked, onClickCard }: { n
   const firstTicker = n?.analysis?.tickers?.[0]
   return (
     <Link
-      to="/bildirimler/$disclosureId"
+      to="/kap-bildirimleri/$disclosureId"
       params={{ disclosureId: n.disclosure_index }}
       onClick={onClickCard}
       className={`group flex flex-col gap-3 rounded-2xl border bg-card p-4 transition-all duration-200 animate-in fade-in hover:shadow-md ${isTracked ? 'border-primary/40 hover:border-primary/70' : 'border-border/60 hover:border-primary/40'}`}

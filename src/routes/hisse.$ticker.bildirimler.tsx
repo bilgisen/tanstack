@@ -68,7 +68,7 @@ function CompanyNotificationsPage() {
       {/* Latest financial report spotlight */}
       {latestReport && (
         <Link
-          to="/bildirimler/$disclosureId"
+          to="/kap-bildirimleri/$disclosureId"
           params={{ disclosureId: latestReport.disclosure_index }}
           className="group flex items-center gap-3 rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/10 to-transparent p-4 hover:border-primary/50 hover:shadow-md transition-all"
         >
@@ -101,7 +101,7 @@ function CompanyNotificationsPage() {
           {data.notifications.map((n) => (
             <Link
               key={n.disclosure_index}
-              to="/bildirimler/$disclosureId"
+              to="/kap-bildirimleri/$disclosureId"
               params={{ disclosureId: n.disclosure_index }}
               className="group flex items-start gap-3 rounded-2xl border border-border/60 bg-card p-3.5 hover:border-primary/40 hover:shadow-md transition-all"
             >

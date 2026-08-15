@@ -3,6 +3,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useWatchlistSync } from "../../hooks/useWatchlistSync";
+import { NotificationBell } from "./NotificationBell";
 import { ResponsiveLogo } from "./ResponsiveLogo";
 import { MobileDrawer } from "./MobileDrawer";
 import { ProfileAvatar } from "./ProfileAvatar";
@@ -61,8 +62,11 @@ export function Topbar() {
 
           {/* Right: Actions */}
          <div className="flex items-center gap-2">
-           
-           {/* Avatar (logged in only, mounted check for hydration) */}
+            
+            {/* Bildirim Zili (N2) */}
+            <NotificationBell />
+
+            {/* Avatar (logged in only, mounted check for hydration) */}
            {mounted && user && (
              <button
                onClick={handleAvatarClick}
