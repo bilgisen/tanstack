@@ -5,7 +5,7 @@ import { tanstackConfig } from "@tanstack/eslint-config"
 
 export default [
   {
-    ignores: [".output/**", "scratch/**"],
+    ignores: [".output/**", "scratch/**", "public/**"],
   },
   ...tanstackConfig,
   {

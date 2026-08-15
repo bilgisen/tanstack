@@ -1,8 +1,9 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-import { Bell, CheckCheck, Loader2 } from 'lucide-react'
+import { Bell, BellRing, CheckCheck, Loader2 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useNotificationsStore } from '../store/notifications'
+import { usePushNotifications } from '../hooks/usePushNotifications'
 import type { UserNotification } from '../lib/notificationsApi'
 
 export const Route = createFileRoute('/bildirimlerim')({
@@ -61,13 +62,26 @@ function NotificationCard({ n }: { n: UserNotification }) {
 function MyNotificationsPage() {
   const { user } = useAuth();
   const { items, unread, loading, error, fetch: fetchAll, refreshUnread, markAllRead } = useNotificationsStore();
+  const { state: pushState, enable: enablePush, disable: disablePush } = usePushNotifications();
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
+  const [pushBusy, setPushBusy] = useState(false);
 
   useEffect(() => {
     if (user?.id) { void fetchAll(); void refreshUnread(); }
   }, [user?.id, fetchAll, refreshUnread]);
 
   const visible = filter === 'unread' ? items.filter(n => !n.read_at) : items;
+
+  const togglePush = async () => {
+    setPushBusy(true);
+    try {
+      if (pushState === 'active') await disablePush();
+      else await enablePush();
+      void fetchAll();
+    } finally {
+      setPushBusy(false);
+    }
+  };
 
   return (
     <div className="space-y-6 flex flex-col h-full animate-in fade-in duration-500">
@@ -103,6 +117,36 @@ function MyNotificationsPage() {
           </button>
         ))}
       </div>
+
+      {/* N3: Tarayıcı Push Tercihi */}
+      {user && pushState !== 'unsupported' && (
+        <div className="flex items-center justify-between gap-3 rounded-2xl border border-border/60 bg-card p-4 shrink-0">
+          <div className="flex items-start gap-3">
+            <BellRing className={`mt-0.5 shrink-0 ${pushState === 'active' ? 'text-primary' : 'text-muted-foreground/40'}`} size={18} />
+            <div>
+              <div className="text-sm font-semibold text-foreground">Tarayıcı Bildirimleri</div>
+              <div className="text-xs text-muted-foreground mt-0.5">
+                {pushState === 'active'
+                  ? 'Açık — önemli KAP bildirimleri tarayıcı kapalıyken bile gösterilir.'
+                  : pushState === 'denied'
+                    ? 'Tarayıcınız bildirim iznini engelledi — tarayıcı ayarlarından izin verebilirsiniz.'
+                    : 'Kapalı — açtığınızda önemli KAP bildirimleri tarayıcınıza gelir.'}
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => void togglePush()}
+            disabled={pushBusy || pushState === 'denied' || pushState === 'loading'}
+            className={`shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+              pushState === 'active'
+                ? 'bg-muted text-foreground hover:bg-muted/70'
+                : 'bg-primary text-primary-foreground hover:bg-primary/95'
+            }`}
+          >
+            {pushBusy ? 'İşleniyor...' : pushState === 'active' ? 'Kapat' : 'Aç'}
+          </button>
+        </div>
+      )}
 
       {!user ? (
         <div className="flex-1 flex items-center justify-center">
