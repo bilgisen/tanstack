@@ -12,12 +12,12 @@ export const Route = createFileRoute('/kap-bildirimleri/$disclosureId')({
 
 const CATEGORY_LABELS: Record<string, string> = {
   FINANCIAL_REPORT: 'Finansal Rapor',
-  MENTION: 'YÃ¶netim KararÄ±',
+  MENTION: 'Yönetim Kararı',
   OPERATIONAL: 'Operasyonel',
-  DIVIDEND: 'TemettÃ¼',
-  SPEcial_event: 'Ã–zel Durum',
-  BOARD_DECISION: 'YÃ¶netim KararÄ±',
-  OTHER: 'DiÄŸer',
+  DIVIDEND: 'Temettü',
+  SPEcial_event: 'Özel Durum',
+  BOARD_DECISION: 'Yönetim Kararı',
+  OTHER: 'Diğer',
 }
 
 function scoreColor(score: number | null | undefined) {
@@ -29,15 +29,15 @@ function scoreColor(score: number | null | undefined) {
 }
 
 function formatDateTime(dateStr: string | null | undefined): string {
-  if (!dateStr) return 'â€”'
+  if (!dateStr) return '—'
   try {
     const d = new Date(dateStr)
-    if (isNaN(d.getTime())) return 'â€”'
+    if (isNaN(d.getTime())) return '—'
     return d.toLocaleString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-  } catch { return 'â€”' }
+  } catch { return '—' }
 }
 
-/** HTML metni dÃ¼z metne Ã§evirir (denetim gÃ¶rÃ¼ÅŸÃ¼ gÃ¼venli gÃ¶sterim iÃ§in). */
+/** HTML metni düz metne çevirir (denetim görüşü güvenli gösterim için). */
 function htmlToText(raw: string | null | undefined): string {
   if (!raw) return ''
   const div = document.createElement('div')
@@ -47,15 +47,15 @@ function htmlToText(raw: string | null | undefined): string {
 
 const AUDIT_TYPE_LABELS: Record<string, string> = {
   FT: 'Tam Denetim',
-  LT: 'SÄ±nÄ±rlÄ± Denetim',
+  LT: 'Sınırlı Denetim',
   NO: 'Denetim Yok',
 }
 
 const OPINION_TYPE_LABELS: Record<string, string> = {
   OC: 'Olumlu',
-  CO: 'ÅartlÄ± Olumlu',
+  CO: 'Şartlı Olumlu',
   NC: 'Olumsuz',
-  OO: 'GÃ¶rÃ¼ÅŸ Bildirilemedi',
+  OO: 'Görüş Bildirilemedi',
 }
 
 const FT_NITELIK_LABELS: Record<string, string> = {
@@ -87,7 +87,7 @@ function BildirimDetayPage() {
 
   if (isLoading) {
     return (
-      <PublicPageLayout context={`bildirim:${disclosureId}`} placeholder="Bu bildirim hakkÄ±nda bir soru sorun...">
+      <PublicPageLayout context={`bildirim:${disclosureId}`} placeholder="Bu bildirim hakkında bir soru sorun...">
         <DetailSkeleton />
       </PublicPageLayout>
     )
@@ -95,12 +95,12 @@ function BildirimDetayPage() {
 
   if (isError || !d) {
     return (
-      <PublicPageLayout context={`bildirim:${disclosureId}`} placeholder="Bu bildirim hakkÄ±nda bir soru sorun...">
+      <PublicPageLayout context={`bildirim:${disclosureId}`} placeholder="Bu bildirim hakkında bir soru sorun...">
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 p-10 text-center">
           <AlertCircle className="text-destructive" size={28} />
-          <p className="text-sm text-muted-foreground">Bildirim bulunamadÄ± veya yÃ¼klenemedi.</p>
+          <p className="text-sm text-muted-foreground">Bildirim bulunamadı veya yüklenemedi.</p>
           <Link to="/kap-bildirimleri" className="rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground">
-            <ArrowLeft size={12} className="inline mr-1" />Bildirimlere DÃ¶n
+            <ArrowLeft size={12} className="inline mr-1" />Bildirimlere Dön
           </Link>
         </div>
       </PublicPageLayout>
@@ -112,13 +112,13 @@ function BildirimDetayPage() {
   const changed = d.is_changed === 1
 
   return (
-    <PublicPageLayout context={`bildirim:${disclosureId}`} placeholder="Bu bildirim hakkÄ±nda bir soru sorun...">
+    <PublicPageLayout context={`bildirim:${disclosureId}`} placeholder="Bu bildirim hakkında bir soru sorun...">
       <div className="space-y-4 pb-8 animate-in fade-in duration-400">
         <Link
           to="/kap-bildirimleri"
           className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
         >
-          <ArrowLeft size={14} /> Bildirimlere DÃ¶n
+          <ArrowLeft size={14} /> Bildirimlere Dön
         </Link>
 
         {/* Header */}
@@ -129,8 +129,8 @@ function BildirimDetayPage() {
             {CATEGORY_LABELS[d.analysis?.category || d.disclosure_category || ''] && (
               <Badge variant="outline">{CATEGORY_LABELS[d.analysis?.category || d.disclosure_category || '']}</Badge>
             )}
-            {issue && <Badge variant="destructive">GeÃ§ Bildirim</Badge>}
-            {changed && <Badge variant="secondary">DÃ¼zeltilmiÅŸ</Badge>}
+            {issue && <Badge variant="destructive">Geç Bildirim</Badge>}
+            {changed && <Badge variant="secondary">Düzeltilmiş</Badge>}
           </div>
 
           <h1 className="text-xl md:text-2xl font-bold tracking-tight leading-snug">{d.title}</h1>
@@ -172,7 +172,7 @@ function BildirimDetayPage() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3.5 py-2 text-xs font-semibold hover:border-primary/40 transition-colors"
               >
-                KAP'ta AÃ§ <ExternalLink size={11} className="opacity-60" />
+                KAP'ta Aç <ExternalLink size={11} className="opacity-60" />
               </a>
             )}
           </div>
@@ -199,7 +199,7 @@ function BildirimDetayPage() {
                 )}
                 {audit.opinionType && (
                   <Badge variant="outline">
-                    GÃ¶rÃ¼ÅŸ: {OPINION_TYPE_LABELS[String(audit.opinionType)] || String(audit.opinionType)}
+                    Görüş: {OPINION_TYPE_LABELS[String(audit.opinionType)] || String(audit.opinionType)}
                   </Badge>
                 )}
                 {audit.ftNiteligi && (
@@ -210,7 +210,7 @@ function BildirimDetayPage() {
               </div>
               {member && (
                 <p className="text-xs text-muted-foreground">
-                  Denetim KuruluÅŸu: <span className="font-semibold text-foreground/80">{member}</span>
+                  Denetim Kuruluşu: <span className="font-semibold text-foreground/80">{member}</span>
                 </p>
               )}
               {opinionText && (
@@ -218,7 +218,7 @@ function BildirimDetayPage() {
                   {opinionText.slice(0, 1200)}
                   {opinionText.length > 1200 && (
                     <a href={d.kap_link} target="_blank" rel="noopener noreferrer" className="ml-1 text-primary hover:underline">
-                      â€¦devamÄ± KAP'ta
+                      …devamı KAP'ta
                     </a>
                   )}
                 </p>
@@ -249,7 +249,7 @@ function BildirimDetayPage() {
                 <Skeleton className="h-4 w-2/3" />
               </div>
             ) : body.isError ? (
-              <p className="text-xs text-muted-foreground">Bildirim metni yÃ¼klenemedi.</p>
+              <p className="text-xs text-muted-foreground">Bildirim metni yüklenemedi.</p>
             ) : body.data?.disclosure_body ? (
               <div className="max-h-96 overflow-y-auto rounded-xl border border-border/40 bg-background/50 p-4 text-sm leading-relaxed whitespace-pre-wrap text-foreground/85">
                 {body.data.disclosure_body}
@@ -282,13 +282,13 @@ function BildirimDetayPage() {
                   AI Analizi
                 </div>
                 <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-bold ${scoreColor(d.importance_score)}`}>
-                  Ã–nem: {d.importance_score}
+                  Önem: {d.importance_score}
                 </span>
               </div>
 
               {d.summary_tr && (
                 <div>
-                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Ã–zet</h3>
+                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Özet</h3>
                   <p className="text-sm leading-relaxed text-foreground/90">{d.summary_tr}</p>
                 </div>
               )}
@@ -335,7 +335,7 @@ function BildirimDetayPage() {
                 )}
                 {d.confidence != null && (
                   <span>
-                    GÃ¼ven: <span className="font-semibold">%{Math.round(d.confidence * 100)}</span>
+                    Güven: <span className="font-semibold">%{Math.round(d.confidence * 100)}</span>
                   </span>
                 )}
                 {d.ai_model_used && (
@@ -348,21 +348,21 @@ function BildirimDetayPage() {
 
             <div className="rounded-2xl border border-border/60 bg-card p-4 text-xs text-muted-foreground/80 space-y-1">
               <div className="flex justify-between"><span>Bildirim No</span><span className="font-semibold text-foreground/80">{d.disclosure_index}</span></div>
-              {d.mkk_member_id && <div className="flex justify-between"><span>Ãœye</span><span className="font-semibold text-foreground/80">{d.mkk_member_id}</span></div>}
-              {d.analysis?.analyzed_at && <div className="flex justify-between"><span>Analiz ZamanÄ±</span><span className="font-semibold text-foreground/80">{formatDateTime(d.analysis.analyzed_at)}</span></div>}
+              {d.mkk_member_id && <div className="flex justify-between"><span>Üye</span><span className="font-semibold text-foreground/80">{d.mkk_member_id}</span></div>}
+              {d.analysis?.analyzed_at && <div className="flex justify-between"><span>Analiz Zamanı</span><span className="font-semibold text-foreground/80">{formatDateTime(d.analysis.analyzed_at)}</span></div>}
               {d.analysis?.source && <div className="flex justify-between"><span>Kaynak</span><span className="font-semibold text-foreground/80">{d.analysis.source}</span></div>}
             </div>
           </div>
         ) : (
-          /* No analysis yet â€” K11 trigger */
+          /* No analysis yet — K11 trigger */
           <div className="rounded-2xl border border-border/60 bg-card p-8 flex flex-col items-center gap-4 text-center">
             <div className="rounded-full bg-primary/10 p-4">
               <Sparkles size={24} className="text-primary" />
             </div>
             <div>
-              <h3 className="font-semibold text-foreground">Bu bildirim iÃ§in henÃ¼z AI analizi yok</h3>
+              <h3 className="font-semibold text-foreground">Bu bildirim için henüz AI analizi yok</h3>
               <p className="text-sm text-muted-foreground mt-1 max-w-md">
-                BirkaÃ§ saniyede Ã¶zet, etki analizi ve anahtar rakamlarÄ± Ã¼retelim.
+                Birkaç saniyede özet, etki analizi ve anahtar rakamları üretelim.
               </p>
             </div>
             <button
@@ -371,13 +371,13 @@ function BildirimDetayPage() {
               className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50 transition-opacity"
             >
               {analyze.isPending ? <Loader2 size={15} className="animate-spin" /> : <RefreshCw size={15} />}
-              {analyze.isPending ? 'Analiz oluÅŸturuluyor...' : 'AI Analiz OluÅŸtur'}
+              {analyze.isPending ? 'Analiz oluşturuluyor...' : 'AI Analiz Oluştur'}
             </button>
             {analyze.isError && (
-              <p className="text-xs text-destructive">{(analyze.error as Error | null)?.message || 'Analiz baÅŸarÄ±sÄ±z oldu.'}</p>
+              <p className="text-xs text-destructive">{(analyze.error as Error | null)?.message || 'Analiz başarısız oldu.'}</p>
             )}
             {analyze.isSuccess && (
-              <p className="text-xs text-emerald-600">Analiz hazÄ±r! Sayfa yenileniyor...</p>
+              <p className="text-xs text-emerald-600">Analiz hazır! Sayfa yenileniyor...</p>
             )}
           </div>
         )}

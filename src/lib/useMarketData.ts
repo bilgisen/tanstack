@@ -35,6 +35,10 @@ type IndexItem = {
   diff_percent: number
   volume?: number
   name?: string
+  change_week_pct?: number | null
+  change_month_pct?: number | null
+  change_ytd_pct?: number | null
+  change_year_pct?: number | null
 }
 
 type IndexDetailData = {

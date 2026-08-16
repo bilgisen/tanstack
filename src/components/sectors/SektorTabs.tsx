@@ -3,7 +3,7 @@ import { Bell, Info } from 'lucide-react'
 
 const TABS = [
   { suffix: '', label: 'Genel Bakış', icon: Info },
-  { suffix: '/bildirimler', label: 'Bildirimler', icon: Bell },
+  { suffix: '/bildirimler', label: 'KAP', icon: Bell },
 ]
 
 export function SektorTabs({ basePath }: { basePath: string }) {

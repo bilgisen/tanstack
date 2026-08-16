@@ -37,7 +37,7 @@ export const Route = createFileRoute('/api/tickers')({
       GET: async ({ request }) => {
         const env = getCloudflareEnv()
         const kv = env?.TANSTACK_KV_CACHE
-        const cacheKey = 'tickers:data'
+        const cacheKey = 'tanstack:tickers:data'
 
         let cached = null
         if (kv) {

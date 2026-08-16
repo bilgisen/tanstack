@@ -15,7 +15,7 @@ interface CompanySearchProps {
   onClose?: () => void;
 }
 
-const SEARCH_API = "https://hono.paraanaliz.workers.dev/api/ai/ticker-search";
+const SEARCH_API = "https://hono.jetborsa.workers.dev/api/ai/ticker-search";
 
 export function CompanySearch({ query, onSelect, onAskAI, onClose }: CompanySearchProps) {
   const [results, setResults] = useState<Array<TickerMatch>>([]);

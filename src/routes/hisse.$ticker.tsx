@@ -21,7 +21,7 @@ const TABS = [
   { suffix: '/temel-analiz', label: 'Temel Analiz', icon: BarChart3 },
   { suffix: '/tablolar', label: 'Tablolar', icon: FileText },
   { suffix: '/sektor', label: 'Sektör', icon: Factory },
-  { suffix: '/bildirimler', label: 'Bildirimler', icon: BellRing },
+  { suffix: '/bildirimler', label: 'KAP', icon: BellRing },
 ]
 
 function CompanyLayout() {

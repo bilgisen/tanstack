@@ -67,6 +67,16 @@ function EndeksBilesenlerPage() {
       ),
     },
     {
+      key: 'change_week_pct',
+      header: 'Hafta %',
+      sortable: true,
+      sortKey: 'change_week_pct',
+      className: 'text-right w-[110px]',
+      render: (item) => (
+        <ChangeBadge value={item.change_week_pct} />
+      ),
+    },
+    {
       key: 'change_month_pct',
       header: 'Ay %',
       sortable: true,

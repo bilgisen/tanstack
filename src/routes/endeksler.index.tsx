@@ -13,7 +13,9 @@ type ProcessedIndex = {
   last_price: number
   diff_percent: number
   volume: number | undefined
-  component_count: number | undefined
+  change_week_pct: number | null
+  change_month_pct: number | null
+  change_ytd_pct: number | null
 }
 
 export const Route = createFileRoute('/endeksler/')({
@@ -50,7 +52,9 @@ function EndekslerPage() {
         last_price: item.last_price ?? 0,
         diff_percent: item.diff_percent ?? 0,
         volume: (item as Record<string, unknown>).volume as number | undefined,
-        component_count: (item as Record<string, unknown>).component_count as number | undefined,
+        change_week_pct: (item as Record<string, unknown>).change_week_pct as number | null ?? null,
+        change_month_pct: (item as Record<string, unknown>).change_month_pct as number | null ?? null,
+        change_ytd_pct: (item as Record<string, unknown>).change_ytd_pct as number | null ?? null,
       }))
       .filter(i => i.code)
   } catch (e) {
@@ -108,17 +112,28 @@ function EndekslerPage() {
       },
     },
     {
-      key: 'component_count',
-      header: 'Bileşen',
+      key: 'change_week_pct',
+      header: 'Hafta %',
       sortable: true,
-      sortKey: 'component_count',
+      sortKey: 'change_week_pct',
+      className: 'text-right w-[120px]',
+      render: (item) => <ChangeBadge value={item.change_week_pct} />,
+    },
+    {
+      key: 'change_month_pct',
+      header: 'Ay %',
+      sortable: true,
+      sortKey: 'change_month_pct',
       className: 'text-right w-[110px]',
-      render: (item) =>
-        (item.component_count ?? 0) > 0 ? (
-          <span className="font-mono text-muted-foreground tabular-nums">{item.component_count}</span>
-        ) : (
-          <span className="text-muted-foreground">-</span>
-        ),
+      render: (item) => <ChangeBadge value={item.change_month_pct} />,
+    },
+    {
+      key: 'change_ytd_pct',
+      header: 'Yıl %',
+      sortable: true,
+      sortKey: 'change_ytd_pct',
+      className: 'text-right w-[110px]',
+      render: (item) => <ChangeBadge value={item.change_ytd_pct} />,
     },
     {
       key: 'volume',
@@ -168,5 +183,16 @@ function EndekslerPage() {
         />
       </div>
     </div>
+  )
+}
+
+function ChangeBadge({ value }: { value: number | null }) {
+  if (value == null) return <span className="text-muted-foreground">-</span>
+  const isUp = value >= 0
+  return (
+    <span className={`inline-flex items-center gap-0.5 font-bold ${isUp ? 'text-emerald-500' : 'text-destructive'}`}>
+      {isUp ? <ArrowUp size={11} /> : <ArrowDown size={11} />}
+      {isUp ? '+' : ''}{value.toFixed(2)}%
+    </span>
   )
 }

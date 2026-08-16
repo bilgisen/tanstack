@@ -14,7 +14,7 @@ const TABS = [
   { suffix: '', label: 'Genel Bakış', icon: Info },
   { suffix: '/teknik-analiz', label: 'Teknik Analiz', icon: Activity },
   { suffix: '/bilesenler', label: 'Bileşenler', icon: Users },
-  { suffix: '/bildirimler', label: 'Bildirimler', icon: Bell },
+  { suffix: '/bildirimler', label: 'KAP', icon: Bell },
 ]
 
 const indexMetadataFallbacks: Record<string, { name: string; price: number; diffPercent: number }> = {
