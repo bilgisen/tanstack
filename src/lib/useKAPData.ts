@@ -147,7 +147,9 @@ async function fetchKAPDetail(disclosureId: string): Promise<KAPDetailResponse> 
 async function fetchKAPDetailBody(disclosureId: string): Promise<KAPDetailBodyResponse> {
   const res = await fetch(`${KAP_BASE}/api/notifications/detail/${encodeURIComponent(disclosureId)}/body`)
   if (!res.ok) throw new Error(`KAP metin hatası: ${res.status}`)
-  return (await res.json()) as KAPDetailBodyResponse
+  // Fetch JSON with explicit UTF-8 handling
+  const text = await res.text()
+  return JSON.parse(text) as KAPDetailBodyResponse
 }
 
 async function requestKAPAnalysis(disclosureId: string): Promise<{ ok: boolean; message?: string }> {
