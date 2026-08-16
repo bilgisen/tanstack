@@ -149,6 +149,8 @@ async function fetchKAPDetailBody(disclosureId: string): Promise<KAPDetailBodyRe
   if (!res.ok) throw new Error(`KAP metin hatası: ${res.status}`)
   // Fetch JSON with explicit UTF-8 handling
   const text = await res.text()
+  // Normalize encoding: if response is JSON, parse it directly (res.json() handles UTF-8)
+  // But for safety, manually parse to ensure proper encoding
   return JSON.parse(text) as KAPDetailBodyResponse
 }
 
