@@ -30,13 +30,13 @@ const config = defineConfig({
             {
               binding: "DB",
               database_name: "jetmain",
-              database_id: "a0023a59-c72a-4406-b674-bd35d1123108"
+              database_id: "e1e08e3c-5ffb-4c61-b10f-5d6862515b30"
             }
           ],
           kv_namespaces: [
             {
               binding: "TANSTACK_KV_CACHE",
-              id: "43a104ed19384acf8f671dcb18ce92be"
+              id: "fba1675816d54b9eacab5bd52faaede1"
             }
           ]
         }

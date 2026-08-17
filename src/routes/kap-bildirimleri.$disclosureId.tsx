@@ -1,10 +1,11 @@
-﻿import { Link, createFileRoute } from '@tanstack/react-router'
-import { useEffect } from 'react'
-import { AlertCircle, ArrowLeft, Clock, ExternalLink, FileText, Loader2, RefreshCw, ShieldCheck, Sparkles } from 'lucide-react'
+﻿import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useEffect, useMemo } from 'react'
+import { AlertCircle, ArrowLeft, Clock, ExternalLink, FileText, Loader2, RefreshCw, ShieldCheck, Sparkles, TrendingUp } from 'lucide-react'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
 import { Skeleton } from '../components/ui/skeleton'
 import { Badge } from '../components/ui/badge'
 import { logKAPClick, useKAPAnalyze, useKAPDetail, useKAPDetailBody } from '../lib/useKAPData'
+import { useCompTrends } from '../lib/useCompData'
 
 export const Route = createFileRoute('/kap-bildirimleri/$disclosureId')({
   component: BildirimDetayPage,
@@ -75,6 +76,63 @@ function DetailSkeleton() {
   )
 }
 
+function FinancialTrends({ ticker }: { ticker: string }) {
+  const { data, isLoading } = useCompTrends(ticker)
+
+  if (isLoading) return <Skeleton className="h-28 w-full rounded-2xl" />
+  if (!data || !data.trends) return null
+
+  const tr = data.trends
+  const netMargin = tr.net_margin?.values || []
+  const ebitdaMargin = tr.ebitda_margin?.values || []
+  const roe = tr.roe?.values || []
+
+  // Get periods (last 4 quarters)
+  const periods = netMargin.map(v => v.period).slice(0, 4)
+  if (periods.length === 0) return null
+
+  const fmtPercent = (v: number | null | undefined) => {
+    if (v == null) return '—'
+    return `${(v * 100).toFixed(2)}%`
+  }
+
+  return (
+    <div className="rounded-2xl border border-border/60 bg-card p-5 space-y-3">
+      <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+        <TrendingUp size={15} className="text-primary" />
+        Geçmiş Çeyrek Finansal Trendleri
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr className="border-b border-border/40 text-muted-foreground font-medium">
+              <th className="py-2 pr-4">Çeyrek</th>
+              <th className="py-2 px-4 text-right">Net Kâr Marjı</th>
+              <th className="py-2 px-4 text-right">FAVÖK Marjı</th>
+              <th className="py-2 pl-4 text-right">Özkaynak Kârlılığı (ROE)</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border/20 font-mono">
+            {periods.map(p => {
+              const nm = netMargin.find(v => v.period === p)?.value
+              const em = ebitdaMargin.find(v => v.period === p)?.value
+              const r = roe.find(v => v.period === p)?.value
+              return (
+                <tr key={p} className="hover:bg-muted/30 transition-colors">
+                  <td className="py-2.5 pr-4 font-semibold text-foreground/80">{p}</td>
+                  <td className="py-2.5 px-4 text-right text-emerald-500 font-medium">{fmtPercent(nm)}</td>
+                  <td className="py-2.5 px-4 text-right text-primary font-medium">{fmtPercent(em)}</td>
+                  <td className="py-2.5 pl-4 text-right text-foreground/80">{fmtPercent(r)}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
 function BildirimDetayPage() {
   const { disclosureId } = Route.useParams()
   const { data: d, isLoading, isError } = useKAPDetail(disclosureId)
@@ -110,6 +168,7 @@ function BildirimDetayPage() {
   const hasAnalysis = d.importance_score != null
   const issue = d.is_late === 1
   const changed = d.is_changed === 1
+  const isFinancial = d.analysis?.category === 'FINANCIAL_REPORT' || d.disclosure_category === 'FR' || d.disclosure_category === 'FINANCIAL_REPORT'
 
   return (
     <PublicPageLayout context={`bildirim:${disclosureId}`} placeholder="Bu bildirim hakkında bir soru sorun...">
@@ -175,104 +234,22 @@ function BildirimDetayPage() {
                 KAP'ta Aç <ExternalLink size={11} className="opacity-60" />
               </a>
             )}
+            {/* Attachments directly downloadable from Header */}
+            {body.data?.attachments && body.data.attachments.map(att => (
+              <a
+                key={att.obj_id}
+                href={`https://www.kap.org.tr/tr/api/file/download/${att.obj_id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3.5 py-2 text-xs font-semibold hover:border-primary/40 transition-colors"
+              >
+                <FileText size={13} /> {att.file_name || `Ek: ${att.file_extension || ''}`} <ExternalLink size={11} className="opacity-60" />
+              </a>
+            ))}
           </div>
         </div>
 
-        {/* Denetim bilgisi */}
-        {(() => {
-          const audit = d.audit || body.data?.audit
-          if (!audit || typeof audit !== 'object') return null
-          const member = String(audit.opinionMemberTitle || '')
-          const opinion = String(audit.opinion || '')
-          const opinionText = htmlToText(opinion)
-          return (
-            <div className="rounded-2xl border border-border/60 bg-card p-5 space-y-3">
-              <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <ShieldCheck size={15} className="text-primary" />
-                Denetim
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {audit.auditType && (
-                  <Badge variant="outline">
-                    {AUDIT_TYPE_LABELS[String(audit.auditType)] || String(audit.auditType)}
-                  </Badge>
-                )}
-                {audit.opinionType && (
-                  <Badge variant="outline">
-                    Görüş: {OPINION_TYPE_LABELS[String(audit.opinionType)] || String(audit.opinionType)}
-                  </Badge>
-                )}
-                {audit.ftNiteligi && (
-                  <Badge variant="outline">
-                    {FT_NITELIK_LABELS[String(audit.ftNiteligi)] || String(audit.ftNiteligi)}
-                  </Badge>
-                )}
-              </div>
-              {member && (
-                <p className="text-xs text-muted-foreground">
-                  Denetim Kuruluşu: <span className="font-semibold text-foreground/80">{member}</span>
-                </p>
-              )}
-              {opinionText && (
-                <p className="text-sm leading-relaxed text-foreground/85 whitespace-pre-line">
-                  {opinionText.slice(0, 1200)}
-                  {opinionText.length > 1200 && (
-                    <a href={d.kap_link} target="_blank" rel="noopener noreferrer" className="ml-1 text-primary hover:underline">
-                      …devamı KAP'ta
-                    </a>
-                  )}
-                </p>
-              )}
-            </div>
-          )
-        })()}
-
-        {/* Bildirim Metni */}
-        {d.has_body && (
-          <div className="rounded-2xl border border-border/60 bg-card p-5 space-y-3">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <FileText size={15} className="text-primary" />
-                Bildirim Metni
-              </div>
-              {d.attachments && d.attachments.length > 0 && !body.isLoading && (
-                <span className="text-[11px] text-muted-foreground/70">
-                  {d.attachments.length} ek
-                </span>
-              )}
-            </div>
-
-            {body.isLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-5/6" />
-                <Skeleton className="h-4 w-2/3" />
-              </div>
-            ) : body.isError ? (
-              <p className="text-xs text-muted-foreground">Bildirim metni yüklenemedi.</p>
-            ) : body.data?.disclosure_body ? (
-              <div className="max-h-96 overflow-y-auto rounded-xl border border-border/40 bg-background/50 p-4 text-sm leading-relaxed whitespace-pre-wrap text-foreground/85">
-                {body.data.disclosure_body}
-              </div>
-            ) : (
-              <p className="text-xs text-muted-foreground">Bildirim metni bulunmuyor.</p>
-            )}
-
-            {body.data?.attachments && body.data.attachments.length > 0 && (
-              <ul className="space-y-1">
-                {body.data.attachments.map(att => (
-                  <li key={att.obj_id} className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <FileText size={12} className="shrink-0" />
-                    <span className="truncate">{att.file_name || `ek.${att.file_extension || ''}`}</span>
-                    {att.file_extension && <span className="shrink-0 text-[10px] uppercase opacity-60">{att.file_extension}</span>}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
-
-        {/* AI Analysis */}
+        {/* AI Analysis (Now at the very top!) */}
         {hasAnalysis ? (
           <div className="space-y-4">
             <div className="rounded-2xl border border-border/60 bg-card p-5 space-y-4">
@@ -346,6 +323,11 @@ function BildirimDetayPage() {
               </div>
             </div>
 
+            {/* Financial Trends Integration */}
+            {isFinancial && d.tickers?.[0] && (
+              <FinancialTrends ticker={d.tickers[0]} />
+            )}
+
             <div className="rounded-2xl border border-border/60 bg-card p-4 text-xs text-muted-foreground/80 space-y-1">
               <div className="flex justify-between"><span>Bildirim No</span><span className="font-semibold text-foreground/80">{d.disclosure_index}</span></div>
               {d.mkk_member_id && <div className="flex justify-between"><span>Üye</span><span className="font-semibold text-foreground/80">{d.mkk_member_id}</span></div>}
@@ -381,6 +363,55 @@ function BildirimDetayPage() {
             )}
           </div>
         )}
+
+        {/* Denetim bilgisi */}
+        {(() => {
+          const audit = d.audit || body.data?.audit
+          if (!audit || typeof audit !== 'object') return null
+          const member = String(audit.opinionMemberTitle || '')
+          const opinion = String(audit.opinion || '')
+          const opinionText = htmlToText(opinion)
+          return (
+            <div className="rounded-2xl border border-border/60 bg-card p-5 space-y-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                <ShieldCheck size={15} className="text-primary" />
+                Denetim
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {audit.auditType && (
+                  <Badge variant="outline">
+                    {AUDIT_TYPE_LABELS[String(audit.auditType)] || String(audit.auditType)}
+                  </Badge>
+                )}
+                {audit.opinionType && (
+                  <Badge variant="outline">
+                    Görüş: {OPINION_TYPE_LABELS[String(audit.opinionType)] || String(audit.opinionType)}
+                  </Badge>
+                )}
+                {audit.ftNiteligi && (
+                  <Badge variant="outline">
+                    {FT_NITELIK_LABELS[String(audit.ftNiteligi)] || String(audit.ftNiteligi)}
+                  </Badge>
+                )}
+              </div>
+              {member && (
+                <p className="text-xs text-muted-foreground">
+                  Denetim Kuruluşu: <span className="font-semibold text-foreground/80">{member}</span>
+                </p>
+              )}
+              {opinionText && (
+                <p className="text-sm leading-relaxed text-foreground/85 whitespace-pre-line">
+                  {opinionText.slice(0, 1200)}
+                  {opinionText.length > 1200 && (
+                    <a href={d.kap_link} target="_blank" rel="noopener noreferrer" className="ml-1 text-primary hover:underline">
+                      …devamı KAP'ta
+                    </a>
+                  )}
+                </p>
+              )}
+            </div>
+          )
+        })()}
       </div>
     </PublicPageLayout>
   )
