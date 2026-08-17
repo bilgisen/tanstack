@@ -75,7 +75,9 @@ export interface CompRatiosResponse {
 }
 
 export interface CompTrendsResponse {
-  trends: Record<string, Array<{ period: string; value: number }>>
+  trends: Record<string, { name?: string; values: Array<{ period: string; value: number }> }>
+  periods_analyzed?: number
+  total_periods?: number
 }
 
 export interface SwotResponse {

@@ -1,15 +1,23 @@
-﻿import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useEffect, useMemo } from 'react'
-import { AlertCircle, ArrowLeft, Clock, ExternalLink, FileText, Loader2, RefreshCw, ShieldCheck, Sparkles, TrendingUp } from 'lucide-react'
+﻿import { Link, createFileRoute } from '@tanstack/react-router'
+import { useCallback, useEffect, useState } from 'react'
+import { AlertCircle, ArrowLeft, Clock, ExternalLink, FileText, Gauge, Loader2, RefreshCw, ShieldCheck, Sparkles, TrendingUp } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
 import { PublicPageLayout } from '../components/layout/PublicPageLayout'
 import { Skeleton } from '../components/ui/skeleton'
 import { Badge } from '../components/ui/badge'
-import { logKAPClick, useKAPAnalyze, useKAPDetail, useKAPDetailBody } from '../lib/useKAPData'
+import { getSessionToken } from '../store/chat'
+import { API } from '../lib/apiConfig'
+import { logKAPClick, useKAPDetail, useKAPDetailBody } from '../lib/useKAPData'
 import { useCompTrends } from '../lib/useCompData'
 
 export const Route = createFileRoute('/kap-bildirimleri/$disclosureId')({
   component: BildirimDetayPage,
 })
+
+const KAP_BASE = API.hono
+const ANALYZE_MODEL_ID = 'gemini-2.5-flash'
+const EST_INPUT_TOKENS = 2000
+const EST_OUTPUT_TOKENS = 800
 
 const CATEGORY_LABELS: Record<string, string> = {
   FINANCIAL_REPORT: 'Finansal Rapor',
@@ -136,12 +144,119 @@ function FinancialTrends({ ticker }: { ticker: string }) {
 function BildirimDetayPage() {
   const { disclosureId } = Route.useParams()
   const { data: d, isLoading, isError } = useKAPDetail(disclosureId)
-  const analyze = useKAPAnalyze(disclosureId)
   const body = useKAPDetailBody(disclosureId)
+  const queryClient = useQueryClient()
+
+  const [liveResult, setLiveResult] = useState<{
+    summary_tr?: string | null
+    impact_analysis?: string | null
+    key_numbers?: Array<string | Record<string, unknown>> | null
+    sentiment?: string | null
+    confidence?: number | null
+    ai_model_used?: string | null
+  } | null>(null)
+  const [generating, setGenerating] = useState(false)
+  const [genError, setGenError] = useState<string | null>(null)
+  const [estimatedCost, setEstimatedCost] = useState<number | null>(null)
 
   useEffect(() => {
     logKAPClick(disclosureId, 'detail')
   }, [disclosureId])
+
+  const generate = useCallback(async () => {
+    if (generating) return
+    setGenerating(true)
+    setGenError(null)
+    const requestId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2)
+    try {
+      const sessionToken = await getSessionToken()
+      if (!sessionToken) {
+        setGenError('Analiz oluşturmak için giriş yapmalısınız.')
+        setGenerating(false)
+        return
+      }
+
+      // 1. Token reservation (pre-check)
+      const preCheckRes = await fetch('/api/ai/pre-check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ modelId: ANALYZE_MODEL_ID, estimatedInputTokens: EST_INPUT_TOKENS, estimatedOutputTokens: EST_OUTPUT_TOKENS }),
+      })
+      const preCheck = preCheckRes.ok ? await preCheckRes.json() : { ok: false, error: 'UNKNOWN' }
+      if (!preCheck.ok) {
+        let msg = 'Analiz oluşturulamadı. Lütfen tekrar deneyin.'
+        if (preCheck.error === 'MODEL_NOT_ALLOWED') {
+          msg = 'Bu özellik şu an kullanılamamaktadır. Abonelik paketinizi [Profil ve Abonelik Paneli](/profil) sayfasında inceleyebilirsiniz.'
+        } else if (preCheck.error === 'INSUFFICIENT_JT' || preCheck.error === 'INSUFFICIENT_HT') {
+          const available = preCheck.availableJT || preCheck.availableHT || 0
+          msg = `Yetersiz Jet Token bakiyesi! Mevcut bakiyeniz: ${available.toLocaleString()} Jet Token. [Profil ve Abonelik Paneli](/profil) üzerinden ek kredi alabilirsiniz.`
+        } else if (preCheck.error === 'DAILY_LIMIT') {
+          msg = 'Günlük kullanım limitinize ulaştınız. Sınırsız kullanım için [Profil ve Abonelik Paneli](/profil) sayfasından paketinizi yükseltin.'
+        } else if (preCheck.error === 'USER_NOT_FOUND') {
+          msg = 'Kullanıcı bilgileriniz bulunamadı. Sayfayı yenileyip tekrar deneyin.'
+        }
+        setGenError(msg)
+        setGenerating(false)
+        return
+      }
+      const reservedCost = preCheck.estimatedCost || 0
+      setEstimatedCost(reservedCost)
+
+      // 2. Generate analysis (hono orchestrator → kapi-ai)
+      const res = await fetch(`${KAP_BASE}/api/notifications/detail/${encodeURIComponent(disclosureId)}/analyze`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
+        body: '{}',
+      })
+      if (!res.ok) {
+        const j = await res.json().catch(() => null)
+        setGenError(j?.error || `Analiz isteği başarısız (${res.status})`)
+        setGenerating(false)
+        return
+      }
+      const data = (await res.json()) as {
+        ok?: boolean
+        model?: string
+        summary_tr?: string
+        impact_analysis?: string
+        key_numbers?: Array<string | Record<string, unknown>>
+        sentiment?: string
+        confidence?: number
+      }
+      setLiveResult({
+        summary_tr: data.summary_tr ?? null,
+        impact_analysis: data.impact_analysis ?? null,
+        key_numbers: data.key_numbers ?? null,
+        sentiment: data.sentiment ?? null,
+        confidence: data.confidence ?? null,
+        ai_model_used: data.model ?? null,
+      })
+
+      // 3. Charge tokens (fire-and-forget — idempotent by requestId)
+      const narrative = data.summary_tr || ''
+      fetch('/api/ai/charge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          modelId: ANALYZE_MODEL_ID,
+          inputTokens: EST_INPUT_TOKENS,
+          outputTokens: Math.max(500, Math.ceil(narrative.length / 4)),
+          reservedCost,
+          requestId,
+          featureType: 'kap_analysis',
+        }),
+      }).catch(() => {})
+      if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('ht-balance-updated'))
+
+      queryClient.invalidateQueries({ queryKey: ['kap', 'detail', disclosureId] })
+      queryClient.invalidateQueries({ queryKey: ['kap', 'feed'] })
+    } catch (e) {
+      console.error('KAP analysis generation failed:', e)
+      setGenError('Analiz oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.')
+    } finally {
+      setGenerating(false)
+    }
+  }, [disclosureId, generating, queryClient])
 
   if (isLoading) {
     return (
@@ -165,10 +280,22 @@ function BildirimDetayPage() {
     )
   }
 
-  const hasAnalysis = d.importance_score != null
+  const hasAnalysis = !!(d.summary_tr || liveResult?.summary_tr)
   const issue = d.is_late === 1
   const changed = d.is_changed === 1
   const isFinancial = d.analysis?.category === 'FINANCIAL_REPORT' || d.disclosure_category === 'FR' || d.disclosure_category === 'FINANCIAL_REPORT'
+
+  const display = liveResult
+    ? {
+        ...d,
+        summary_tr: liveResult.summary_tr ?? d.summary_tr,
+        impact_analysis: liveResult.impact_analysis ?? d.impact_analysis,
+        key_numbers: liveResult.key_numbers ?? d.key_numbers,
+        sentiment: liveResult.sentiment ?? d.sentiment,
+        confidence: liveResult.confidence ?? d.confidence,
+        ai_model_used: liveResult.ai_model_used ?? d.ai_model_used,
+      }
+    : d
 
   return (
     <PublicPageLayout context={`bildirim:${disclosureId}`} placeholder="Bu bildirim hakkında bir soru sorun...">
@@ -190,10 +317,21 @@ function BildirimDetayPage() {
             )}
             {issue && <Badge variant="destructive">Geç Bildirim</Badge>}
             {changed && <Badge variant="secondary">Düzeltilmiş</Badge>}
+            {d.importance_score != null && (
+              <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-bold ${scoreColor(d.importance_score)}`}>
+                Önem: {d.importance_score}
+              </span>
+            )}
           </div>
 
           <h1 className="text-xl md:text-2xl font-bold tracking-tight leading-snug">{d.title}</h1>
           {d.subject && <p className="text-sm text-muted-foreground">{d.subject}</p>}
+
+          {d.summary && (
+            <p className="rounded-xl border border-border/40 bg-muted/30 px-3.5 py-2.5 text-sm leading-relaxed text-foreground/85">
+              {d.summary}
+            </p>
+          )}
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground/80">
             <span className="inline-flex items-center gap-1"><Clock size={12} /> {formatDateTime(d.publish_date)}</span>
@@ -249,7 +387,7 @@ function BildirimDetayPage() {
           </div>
         </div>
 
-        {/* AI Analysis (Now at the very top!) */}
+        {/* AI Analysis */}
         {hasAnalysis ? (
           <div className="space-y-4">
             <div className="rounded-2xl border border-border/60 bg-card p-5 space-y-4">
@@ -258,38 +396,44 @@ function BildirimDetayPage() {
                   <Sparkles size={15} className="text-primary" />
                   AI Analizi
                 </div>
-                <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-bold ${scoreColor(d.importance_score)}`}>
-                  Önem: {d.importance_score}
+                <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-bold ${scoreColor(display.importance_score)}`}>
+                  Önem: {display.importance_score ?? '—'}
                 </span>
               </div>
 
-              {d.summary_tr && (
+              {display.summary_tr && (
                 <div>
                   <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Özet</h3>
-                  <p className="text-sm leading-relaxed text-foreground/90">{d.summary_tr}</p>
+                  <p className="text-sm leading-relaxed text-foreground/90">{display.summary_tr}</p>
                 </div>
               )}
 
-              {d.impact_analysis && (
+              {display.impact_analysis && (
                 <div>
                   <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Etki Analizi</h3>
-                  <p className="text-sm leading-relaxed text-foreground/90">{d.impact_analysis}</p>
+                  <p className="text-sm leading-relaxed text-foreground/90">{display.impact_analysis}</p>
                 </div>
               )}
 
-              {d.key_numbers && Array.isArray(d.key_numbers) && d.key_numbers.length > 0 && (
+              {display.key_numbers && Array.isArray(display.key_numbers) && display.key_numbers.length > 0 && (
                 <div>
                   <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Anahtar Rakamlar</h3>
                   <div className="grid gap-2 sm:grid-cols-2">
-                    {d.key_numbers.map((k, i) => {
-                      const entry = k
-                      const keys = Object.keys(entry)
+                    {display.key_numbers.map((k, i) => {
+                      if (typeof k === 'string') {
+                        return (
+                          <div key={i} className="rounded-xl border border-border/40 bg-background/50 px-3 py-2 text-xs font-semibold text-foreground/90">
+                            {k}
+                          </div>
+                        )
+                      }
+                      const keys = Object.keys(k)
                       return (
                         <div key={i} className="rounded-xl border border-border/40 bg-background/50 px-3 py-2">
                           {keys.map(kk => (
                             <div key={kk} className="flex items-center justify-between gap-2 text-xs">
                               <span className="text-muted-foreground">{kk}</span>
-                              <span className="font-semibold">{String(entry[kk] ?? '')}</span>
+                              <span className="font-semibold">{String(k[kk] ?? '')}</span>
                             </div>
                           ))}
                         </div>
@@ -300,9 +444,9 @@ function BildirimDetayPage() {
               )}
 
               <div className="flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground/70 pt-1 border-t border-border/40">
-                {d.sentiment && (
+                {display.sentiment && (
                   <span>
-                    Duygu: <span className="font-semibold capitalize">{d.sentiment}</span>
+                    Duygu: <span className="font-semibold capitalize">{display.sentiment}</span>
                   </span>
                 )}
                 {d.analysis?.time_horizon && (
@@ -310,14 +454,14 @@ function BildirimDetayPage() {
                     Vade: <span className="font-semibold">{d.analysis.time_horizon}</span>
                   </span>
                 )}
-                {d.confidence != null && (
+                {display.confidence != null && (
                   <span>
-                    Güven: <span className="font-semibold">%{Math.round(d.confidence * 100)}</span>
+                    Güven: <span className="font-semibold">%{Math.round(display.confidence * 100)}</span>
                   </span>
                 )}
-                {d.ai_model_used && (
+                {display.ai_model_used && (
                   <span>
-                    Model: <span className="font-semibold">{d.ai_model_used}</span>
+                    Model: <span className="font-semibold">{display.ai_model_used}</span>
                   </span>
                 )}
               </div>
@@ -336,31 +480,37 @@ function BildirimDetayPage() {
             </div>
           </div>
         ) : (
-          /* No analysis yet — K11 trigger */
-          <div className="rounded-2xl border border-border/60 bg-card p-8 flex flex-col items-center gap-4 text-center">
-            <div className="rounded-full bg-primary/10 p-4">
-              <Sparkles size={24} className="text-primary" />
+          /* No analysis yet — compact trigger (AiTechnicalReport-style) */
+          <div className="rounded-2xl border border-border/60 bg-card p-5 space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                <Sparkles size={15} className="text-primary" />
+                AI Analizi
+              </div>
+              {estimatedCost != null && !generating && (
+                <span className="inline-flex items-center gap-1 rounded-full border border-muted/20 bg-muted/10 px-2 py-1 text-[11px] text-foreground">
+                  <Gauge size={11} className="text-primary" /> ~{estimatedCost.toLocaleString()} JT
+                </span>
+              )}
             </div>
-            <div>
-              <h3 className="font-semibold text-foreground">Bu bildirim için henüz AI analizi yok</h3>
-              <p className="text-sm text-muted-foreground mt-1 max-w-md">
-                Birkaç saniyede özet, etki analizi ve anahtar rakamları üretelim.
-              </p>
-            </div>
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              Bu bildirim için otomatik AI analizi oluşturulmadı. Özet, etki analizi ve anahtar rakamları tek tıkla üretelim. Analiz oluşturmak belirli bir Jet Token tutarı harcar.
+            </p>
+
+            {genError && !generating && (
+              <div className="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                {genError}
+              </div>
+            )}
+
             <button
-              onClick={() => analyze.mutate()}
-              disabled={analyze.isPending}
+              onClick={generate}
+              disabled={generating}
               className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50 transition-opacity"
             >
-              {analyze.isPending ? <Loader2 size={15} className="animate-spin" /> : <RefreshCw size={15} />}
-              {analyze.isPending ? 'Analiz oluşturuluyor...' : 'AI Analiz Oluştur'}
+              {generating ? <Loader2 size={15} className="animate-spin" /> : <RefreshCw size={15} />}
+              {generating ? 'Analiz oluşturuluyor...' : 'AI Analiz Oluştur'}
             </button>
-            {analyze.isError && (
-              <p className="text-xs text-destructive">{(analyze.error as Error | null)?.message || 'Analiz başarısız oldu.'}</p>
-            )}
-            {analyze.isSuccess && (
-              <p className="text-xs text-emerald-600">Analiz hazır! Sayfa yenileniyor...</p>
-            )}
           </div>
         )}
 

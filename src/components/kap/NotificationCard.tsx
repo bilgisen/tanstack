@@ -1,7 +1,6 @@
 import { Link } from '@tanstack/react-router'
-import { CalendarClock, Loader2, Sparkles, Star } from 'lucide-react'
+import { CalendarClock, Sparkles, Star } from 'lucide-react'
 import { Badge } from '../ui/badge'
-import {  useKAPAnalyze } from '../../lib/useKAPData'
 import type {KAPNotification} from '../../lib/useKAPData';
 
 export function formatKAPTime(dateStr: string): string {
@@ -24,7 +23,6 @@ export function scoreVariant(score: number | null | undefined) {
 }
 
 export function NotificationCard({ n, isImportant, isTracked, onClickCard }: { n: KAPNotification; isImportant?: boolean; isTracked?: boolean; onClickCard?: () => void }) {
-  const analyze = useKAPAnalyze(n.disclosure_index)
   const { importance_score, summary_tr, subject, title, is_bist100, disclosure_class, publish_date } = n
   const { label, cls } = scoreVariant(importance_score)
 
@@ -80,16 +78,6 @@ export function NotificationCard({ n, isImportant, isTracked, onClickCard }: { n
           {formatKAPTime(publish_date)}
           {firstTicker && <span className="font-semibold">· {firstTicker}</span>}
         </div>
-        {importance_score == null && (
-          <button
-            onClick={(e) => { e.preventDefault(); analyze.mutate() }}
-            disabled={analyze.isPending}
-            className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:text-primary/80 disabled:opacity-50"
-          >
-            {analyze.isPending ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-            {analyze.isPending ? 'Analiz ediliyor...' : 'AI Analiz'}
-          </button>
-        )}
       </div>
     </Link>
   )
