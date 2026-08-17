@@ -1,9 +1,10 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { 
   ArrowDown, 
   ArrowUp,
   Sparkles,
+  ArrowUpRight,
 } from 'lucide-react'
 import useEmblaCarousel from 'embla-carousel-react'
 import Autoplay from 'embla-carousel-autoplay'
@@ -20,10 +21,51 @@ import { SectorsHomepage } from '../components/home/SectorsHomepage'
 import { HomeFooter } from '../components/home/HomeFooter'
 import { Hero2 } from '../components/home/Hero2'
 import { ClientOnly } from '../components/ClientOnly'
+import { useKAPFeed } from '../lib/useKAPData'
+import { scoreVariant } from '../components/kap/NotificationCard'
 
 export const Route = createFileRoute('/')({
   component: LandingPage,
 })
+
+function ImportantTodayKAP() {
+  const { data } = useKAPFeed({ page: 1, limit: 15 })
+  const navigate = useNavigate()
+
+  const notifications = data?.notifications ?? []
+  const importantToday = useMemo(
+    () => notifications.filter(n => (n.importance_score ?? 0) >= 7),
+    [notifications]
+  )
+
+  if (importantToday.length === 0) return null
+
+  return (
+    <section className="px-4 md:px-6 py-4">
+      <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-transparent p-4">
+        <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-semibold text-sm mb-3">
+          <Sparkles size={14} />
+          Bugünün önemli bildirimleri
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {importantToday.map(n => (
+            <div
+              key={n.disclosure_index}
+              onClick={() => navigate({ to: `/kap-bildirimleri/${n.disclosure_index}` })}
+              className="group inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-1 text-xs hover:border-primary/40 transition-colors cursor-pointer"
+            >
+              <span className="font-semibold text-foreground">{n.title.slice(0, 48)}{n.title.length > 48 ? '…' : ''}</span>
+              <span className={`inline-flex items-center rounded-full border px-1.5 text-[10px] font-bold ${scoreVariant(n.importance_score).cls}`}>
+                {n.importance_score}
+              </span>
+              <ArrowUpRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
 
 function LandingPage() {
   const { user, loading: sessionLoading, login: handleLogin } = useAuth()
@@ -161,6 +203,9 @@ function LandingPage() {
 
           {/* Sektörler */}
           <SectorsHomepage />
+
+          {/* Bugünün Önemli Bildirimleri */}
+          <ImportantTodayKAP />
 
           {/* Hero2 - Neler Yapabilirsiniz */}
           <Hero2 />
